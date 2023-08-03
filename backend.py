@@ -13,36 +13,22 @@ import json
 import random
 
 
-def generate_entities(entity_type, probability, entity_data, size=101, every=10):
-    # Check if the entity file already exists, if not, create it with an empty list of entities.
+def generate_entities(entity_type, probability, additional_entity_data=None, size=101, every=10):
     if not os.path.exists("environment/entities.json"):
+        # Initialize a new list of entities
+        entities = []
+
+        # Generate entities
+        for x_pos in range(1, size, every):  # Starting from 1 and assuming the environment has a width of 100 blocks
+            for y_pos in range(1, size, every):  # Starting from 1 and assuming the environment has a height of 100 blocks
+                if random.random() <= probability:
+                    # Add the new entity to the list
+                    new_entity = {"type": entity_type, "x_pos": x_pos, "y_pos": y_pos, **additional_entity_data}
+                    entities.append(new_entity)
+
+        # Write the new list of entities to a file
         with open("environment/entities.json", "w") as outfile:
-            json.dump({"construction": []}, outfile, indent=2)
-
-    # Load the existing entity file
-    with open("environment/entities.json", "r") as infile:
-        entity_data = json.load(infile)
-
-    # Create a set to keep track of grid fields where entities have already been generated
-    generated_positions = {(item["x_pos"], item["y_pos"]) for item in entity_data["construction"]}
-
-    # Generate and add new entities to the entity data
-    for x_pos in range(1, size, every):  # Starting from 1 and assuming the environment has a width of 100 blocks
-        for y_pos in range(1, size, every):  # Starting from 1 and assuming the environment has a height of 100 blocks
-            # Skip generating if entity already exists on this grid field
-            if (x_pos, y_pos) in generated_positions:
-                continue
-
-            if random.random() <= probability:
-                # Add the new entity to the entity data
-                new_entity = {"type": entity_type, "x_pos": x_pos, "y_pos": y_pos}
-                entity_data["construction"].append(new_entity)
-                # Add the position to the set of generated positions
-                generated_positions.add((x_pos, y_pos))
-
-    # Save the updated entities back to the file
-    with open("environment/entities.json", "w") as outfile:
-        json.dump(entity_data, outfile, indent=2)
+            json.dump({"construction": entities}, outfile, indent=2)
 
 
 def check_users_db():
@@ -64,7 +50,7 @@ def hashify(data):
 
 def on_tile(x, y):
     """in the future consider map index"""
-    on_tile = None
+    on_tile = []
 
     for folder in ["users", "environment"]:
         for file in os.listdir(folder):
@@ -72,8 +58,7 @@ def on_tile(x, y):
                 contents = json.load(infile)
                 for entry in contents["construction"]:
                     if entry["y_pos"] == y and entry["x_pos"] == x:
-                        on_tile = entry
-                        break
+                        on_tile.append(entry)
 
     return on_tile
 
@@ -116,6 +101,7 @@ def build(entity, name, user, file):
         "name": name,
         "hp": 100,
         "size": 1,
+        "actions":[],
         **entity_data.get(entity, {})
     }, what="construction")
 
@@ -161,15 +147,24 @@ def load_files():
     return all_files
 
 
-def update_user_file(user, values, updated_values):
+def update_user_file(user, updated_values):
     file_path = f"users/{hashify(user)}.json"
     with open(file_path, "r") as infile:
         file = json.load(infile)
 
-    file[values] = updated_values
+    # Update the resources
+    if "resources" in updated_values:
+        for key in updated_values["resources"]:
+            file["resources"][key] = updated_values["resources"][key]
+
+    # Update the action points
+    if "action_points" in updated_values:
+        file["action_points"] = updated_values["action_points"]
 
     with open(file_path, "w") as outfile:
         json.dump(file, outfile, indent=2)
+
+
 
 
 def append_user_file(user, append_values, what):

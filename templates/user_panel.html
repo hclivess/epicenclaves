@@ -189,7 +189,20 @@ hr {
             <div class="col-md-6">
                <h4>Current Tile</h4>
 
-               {{on_tile}}
+               {%for entity in on_tile%}
+               <div class="col">
+                <p>Type: {{entity["type"]}}</p>
+                <p><img src=/img/assets/{{entity["type"]}}.png alt="Item Icon" class="menu-icon"></p>
+                <p>Position: ({{entity["x_pos"]}}, {{entity["y_pos"]}})</p>
+
+                   {%for action in entity["actions"]%}
+                        <p>Actions: <a id="btnAct" class="btn btn-move btn-lg active" href="/{{action}}" role="button">{{action}}</a></p>
+                    {%end%}
+
+               </div>
+
+                  {%end%}
+
                <div class="col">
 
                </div>

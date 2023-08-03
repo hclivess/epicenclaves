@@ -148,10 +148,16 @@ class ChopHandler(BaseHandler):
 
         elif proper_tile:
             new_wood = file["resources"]["wood"] + 1
-            update_user_file(user, values="resources", updated_values={"wood": new_wood})
             new_ap = file["action_points"] - 1
-            update_user_file(user, values="action_points", updated_values=new_ap)
+
+            updated_values = {
+                "resources": {"wood": new_wood},
+                "action_points": new_ap
+            }
+
+            update_user_file(user, updated_values)
             message = "Chopping successful"
+
         else:
             message = "Not on a forest tile"
 
@@ -216,7 +222,9 @@ async def main():
     if not os.path.exists("environment"):
         os.mkdir("environment")
 
-    generate_entities(entity_type="forest", probability=0.25, entity_data={})
+    generate_entities(entity_type="forest",
+                      probability=0.25,
+                      additional_entity_data={"actions": ["chop"]})
 
     await asyncio.Event().wait()
 
