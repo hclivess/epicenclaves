@@ -29,15 +29,16 @@ class MainHandler(BaseHandler):
             message = f"Welcome back, {user}"
 
             file = load_user_file(user)
+            print("file", file)  # debug
             occupied = on_tile(file["x_pos"], file["y_pos"])
-            print(occupied)  # debug
+            print("occupied", occupied)  # debug
 
             if file["action_points"] < 1:
                 message = f"You have action points left for this turn"
 
             self.render("templates/user_panel.html",
                         user=user,
-                        file=load_user_file(user),
+                        file=file,
                         message=message,
                         on_tile=occupied)
 
@@ -81,7 +82,7 @@ class BuildHandler(BaseHandler):
 
         self.render("templates/user_panel.html",
                     user=user,
-                    file=load_user_file(user),
+                    file=file,
                     message=message,
                     on_tile=occupied)
 
@@ -136,7 +137,7 @@ class MoveHandler(BaseHandler):
 
             self.render("templates/user_panel.html",
                         user=user,
-                        file=load_user_file(user),
+                        file=file,
                         message=message,
                         on_tile=occupied)
 
@@ -175,7 +176,7 @@ class ChopHandler(BaseHandler):
 
         self.render("templates/user_panel.html",
                     user=user,
-                    file=load_user_file(user),
+                    file=file,
                     message=message,
                     on_tile=occupied)
 
@@ -198,7 +199,7 @@ class LoginHandler(BaseHandler):
 
             self.render("templates/user_panel.html",
                         user=user,
-                        file=load_user_file(user),
+                        file=file,
                         message=message,
                         on_tile=occupied)
         else:

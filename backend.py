@@ -44,7 +44,9 @@ def on_tile(x, y):
     entity_data_list = []
     for entity in entities:
         if "data" in entity:
-            entity_data_list.append({"x_pos": entity["x_pos"], "y_pos": entity["y_pos"], "data": entity["data"],
+            entity_data_list.append({"x_pos": entity["x_pos"],
+                                     "y_pos": entity["y_pos"],
+                                     "data": entity["data"],
                                      "control": entity["control"]})
 
     return entity_data_list
@@ -119,7 +121,8 @@ def create_user_file(user):
                         type TEXT,
                         age TEXT,
                         img TEXT,
-                        position TEXT,
+                        x_pos INTEGER,
+                        y_pos INTEGER,
                         exp INTEGER,
                         hp INTEGER,
                         armor INTEGER,
@@ -132,21 +135,19 @@ def create_user_file(user):
 
     # Convert the position tuple to a string representation
     x_pos, y_pos = 1, 1  # Replace these with the actual x_pos and y_pos values
-    position_str = f"{x_pos},{y_pos}"
 
     # Convert items dictionary to a JSON string
     items_data = [{"type": "axe", "desc": "A tool to cut wood with in the forest"}]
     items_str = json.dumps(items_data)
 
     # Insert the user data into the database
-    cursor.execute('''INSERT OR IGNORE INTO user_data (username, type, age, img, position, exp, hp, armor, action_points, wood, food, bismuth, items)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                   (user, "player", "0", "img/pp.png", position_str, 0, 100, 0, 5000, 0, 0, 0, items_str))
+    cursor.execute('''INSERT OR IGNORE INTO user_data (username, type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth, items)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                   (user, "player", "0", "img/pp.png", x_pos, y_pos, 0, 100, 0, 5000, 0, 0, 0, items_str))
 
     # Commit changes and close the connection
     conn.commit()
     conn.close()
-
 
 def load_user_file(user):
     # Connect to the database
@@ -161,7 +162,7 @@ def load_user_file(user):
     conn.close()
 
     if result:
-        username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth = result
+        username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth, items = result
 
         return {
             "username": username,
@@ -176,7 +177,9 @@ def load_user_file(user):
             "action_points": action_points,
             "wood": wood,
             "food": food,
-            "bismuth": bismuth
+            "bismuth": bismuth,
+            "items": items
+
         }
     else:
         return None
