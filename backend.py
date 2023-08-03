@@ -203,10 +203,13 @@ def load_files():
     results_user = cursor_user.fetchall()
 
     for result_user in results_user:
-        username, user_type, age, img, position_str, exp, hp, armor, action_points, wood, food, bismuth = result_user
+        username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth, items_str, construction_str = result_user
 
-        # Convert the position string back to a tuple
-        x_pos, y_pos = map(int, position_str.split(","))
+        # Convert the items string back to a list of dictionaries
+        items = json.loads(items_str)
+
+        # Convert the construction string back to a list
+        construction = json.loads(construction_str)
 
         user_data = {
             "username": username,
@@ -221,7 +224,9 @@ def load_files():
             "action_points": action_points,
             "wood": wood,
             "food": food,
-            "bismuth": bismuth
+            "bismuth": bismuth,
+            "items": items,
+            "construction": construction
         }
 
         all_files.append(user_data)
@@ -244,6 +249,7 @@ def load_files():
     conn_map.close()
 
     return all_files
+
 
 
 def update_user_file(user, updated_values):

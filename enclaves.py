@@ -7,6 +7,7 @@ import tornado.ioloop
 import tornado.web
 import webbrowser
 from sqlite import create_map_table
+import sqlite3
 
 max_size = 1000
 
@@ -87,19 +88,25 @@ class BuildHandler(BaseHandler):
                     on_tile=occupied)
 
 
+import tornado.escape
+
 class MoveHandler(BaseHandler):
     def get(self, data):
         target = self.get_argument("target", default="home")
         entry = self.get_argument("direction")
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        def update_user_file(user, key, updated_value):
-            file_path = f"users/{hashify(user)}.json"
-            with open(file_path, "r") as infile:
-                file = json.load(infile)
-            file[key] = updated_value
-            with open(file_path, "w") as outfile:
-                json.dump(file, outfile, indent=2)
+        def update_user_data(user, key, updated_value):
+            # Connect to the database
+            conn = sqlite3.connect("user_data.db")
+            cursor = conn.cursor()
+
+            # Update the specified key in the user_data table
+            cursor.execute(f"UPDATE user_data SET {key}=? WHERE username=?", (updated_value, user))
+
+            # Commit changes and close the connection
+            conn.commit()
+            conn.close()
 
         def move(user, direction, axis_key, axis_limit):
             file = load_user_file(user)
@@ -107,9 +114,9 @@ class MoveHandler(BaseHandler):
 
             # Check if the action points are more than 0 before allowing movement
             if file["action_points"] > 0 and 1 <= new_pos <= axis_limit:
-                update_user_file(user, axis_key, new_pos)
+                update_user_data(user, axis_key, new_pos)
                 new_ap = file["action_points"] - 1
-                update_user_file(user, "action_points", new_ap)
+                update_user_data(user, "action_points", new_ap)
                 return True
             return False
 
@@ -140,6 +147,7 @@ class MoveHandler(BaseHandler):
                         file=file,
                         message=message,
                         on_tile=occupied)
+
 
 
 class ChopHandler(BaseHandler):
