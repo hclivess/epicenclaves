@@ -101,7 +101,7 @@ def build(entity, name, user, file):
         "blacksmith": {"type": "blacksmith"}
     }
 
-    append_user_file(user, {
+    update_user_file(user, {
         "x_pos": file["x_pos"],
         "y_pos": file["y_pos"],
         "name": name,
@@ -111,7 +111,7 @@ def build(entity, name, user, file):
         "control": user,
 
         **entity_data.get(entity, {})
-    }, what="construction")
+    }, column="construction")
 
 
 def create_user_file(user):
@@ -275,50 +275,35 @@ def load_files():
 
     return all_files
 
-
-
-import sqlite3
 import json
 
-import sqlite3
-import json
-
-def update_user_file(username, updated_values):
+def update_user_file(user, updated_values, column):
     # Connect to the database
     conn = sqlite3.connect("user_data.db")
     cursor = conn.cursor()
 
-    # Build the SQL query
-    update_query = "UPDATE user_data SET "
-    values = []
-    for key, value in updated_values.items():
-        if key in ["items", "construction"]:
-            value = json.dumps(value)
-        update_query += f"{key}=?, "
-        values.append(value)
-    update_query = update_query.rstrip(", ") + " WHERE username=?"
+    # Retrieve the existing data for the user
+    cursor.execute(f"SELECT {column} FROM user_data WHERE username=?", (user,))
+    result = cursor.fetchone()
 
-    # Add the username to the values list
-    values.append(username)
+    # Convert the column string back to a list
+    column_str = result[0]
+    column_data = json.loads(column_str)
 
-    # Execute the SQL query
-    cursor.execute(update_query, tuple(values))
+    # Update the data with the new values
+    column_data.append(updated_values)
+
+    # Serialize the updated data list back to a string for storage
+    updated_column_str = json.dumps(column_data)
+
+    # Update the specified column with the new data
+    cursor.execute(f"UPDATE user_data SET {column}=? WHERE username=?", (updated_column_str, user))
 
     # Commit changes and close the connection
     conn.commit()
     conn.close()
 
 
-
-
-def append_user_file(user, append_values, what):
-    # Use the get_map_data function to retrieve existing user data and then append the new values
-    data = sqlite.get_map_data(position=user)
-    if data:
-        data["data"][what].append(append_values)
-        sqlite.save_map_data(position=user,
-                             data=data["data"],
-                             control=None)
 
 
 def add_user(user, password):
