@@ -247,6 +247,7 @@ async def main():
 if __name__ == "__main__":
     if not os.path.exists("map_data.db"):
         create_map_table()
+        print("Generating")
         generate_entities(entity_type="forest",
                           probability=0.25,
                           additional_entity_data={"actions": ["chop"]})

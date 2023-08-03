@@ -213,13 +213,7 @@ def load_user_file(user):
     else:
         return None
 
-
-import sqlite3
-
-
 def load_files():
-    # todo actually start using control column
-
     users_data = []  # Create an empty list to store user data
 
     # Load data from user_data.db
@@ -229,7 +223,8 @@ def load_files():
     results_user = cursor_user.fetchall()
 
     for result_user in results_user:
-        username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth, items_str, construction_str = result_user
+        (username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood,
+         food, bismuth, items_str, construction_str) = result_user
 
         # Convert the items string back to a list of dictionaries
         items = json.loads(items_str)
@@ -279,7 +274,9 @@ def load_files():
 
     conn_map.close()
 
-    return users_data  # Return the list of user data without the "user_data" key
+    # Combine users_data and map_data into a single list
+    total_data = users_data + [{"construction": map_data}] #todo efficiency
+    return total_data
 
 
 def update_user_file(user, updated_values, column):

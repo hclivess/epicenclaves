@@ -209,18 +209,9 @@ function createMap(data) {
         constructionElement.style.left = constructionX + "px";
         var textLabel = document.createElement("div");
         textLabel.className = "text-label";
-        textLabel.innerHTML = "name: " + construction.name + "<br>";
-        textLabel.innerHTML += "pos: " + construction.x_pos + ", " + construction.y_pos + "<br>";
-        textLabel.innerHTML += "owner: " + item.username + "<br>";
-        var typeDisplayed = false;
+        textLabel.innerHTML = "pos: " + construction.x_pos + ", " + construction.y_pos + "<br>";
         Object.entries(construction).forEach(function ([key, value]) {
           if (key !== "name" && key !== "x_pos" && key !== "y_pos") {
-            if (key === "type" && typeDisplayed) {
-              return;
-            }
-            if (key === "type") {
-              typeDisplayed = true;
-            }
             textLabel.innerHTML += key + ": " + value + "<br>";
           }
         });
@@ -237,7 +228,7 @@ function createMap(data) {
         maxY = playerY;
       }
     } else {
-      // Process and display construction for non-real user entities
+       // Process and display construction for non-real user entities
       if (item.construction) {
         item.construction.forEach(function (construction) {
           var constructionX = (construction.x_pos - 1) * gridSize;
@@ -249,7 +240,7 @@ function createMap(data) {
             maxY = constructionY;
           }
           var constructionElement = document.createElement("div");
-          constructionElement.className = "entity construction " + construction.type;
+          constructionElement.className = "entity construction " + construction.type; // Make sure class name includes construction.type
           constructionElement.style.top = constructionY + "px";
           constructionElement.style.left = constructionX + "px";
           var textLabel = document.createElement("div");
