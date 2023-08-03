@@ -2,7 +2,7 @@ import asyncio
 import json
 import os.path
 from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_file, \
-    occupied, load_files, build, update_user_file, hashify, occupied_by, has_item, generate_entities
+    on_tile, load_files, build, update_user_file, hashify, occupied_by, has_item, generate_entities
 import tornado.ioloop
 import tornado.web
 import webbrowser
@@ -28,13 +28,13 @@ class MainHandler(BaseHandler):
             message = f"Welcome back, {user}"
 
             file = load_user_file(user)
-            is_occupied = occupied(file["x_pos"], file["y_pos"])
+            occupied = on_tile(file["x_pos"], file["y_pos"])
 
             self.render("templates/user_panel.html",
                         user=user,
                         file=load_user_file(user),
                         message=message,
-                        is_occupied=is_occupied)
+                        on_tile=occupied)
 
 
 
@@ -60,9 +60,9 @@ class BuildHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
 
         file = load_user_file(user)
-        is_occupied = occupied(file["x_pos"], file["y_pos"])
+        occupied = on_tile(file["x_pos"], file["y_pos"])
 
-        if not is_occupied:
+        if not occupied:
             build(entity=entity,
                   name=name,
                   user=user,
@@ -73,13 +73,13 @@ class BuildHandler(BaseHandler):
             message = "Cannot build here"
 
         file = load_user_file(user)
-        is_occupied = occupied(file["x_pos"], file["y_pos"])
+        occupied = on_tile(file["x_pos"], file["y_pos"])
 
         self.render("templates/user_panel.html",
                     user=user,
                     file=load_user_file(user),
                     message=message,
-                    is_occupied=is_occupied)
+                    on_tile=occupied)
 
 
 class MoveHandler(BaseHandler):
@@ -127,13 +127,13 @@ class MoveHandler(BaseHandler):
                         message=message)
         else:
             file = load_user_file(user)
-            is_occupied = occupied(file["x_pos"], file["y_pos"])
+            occupied = on_tile(file["x_pos"], file["y_pos"])
 
             self.render("templates/user_panel.html",
                         user=user,
                         file=load_user_file(user),
                         message=message,
-                        is_occupied=is_occupied)
+                        on_tile=occupied)
 
 
 class ChopHandler(BaseHandler):
@@ -156,13 +156,13 @@ class ChopHandler(BaseHandler):
             message = "Not on a forest tile"
 
         file = load_user_file(user)
-        is_occupied = occupied(file["x_pos"], file["y_pos"])
+        occupied = on_tile(file["x_pos"], file["y_pos"])
 
         self.render("templates/user_panel.html",
                     user=user,
                     file=load_user_file(user),
                     message=message,
-                    is_occupied=is_occupied)
+                    on_tile=occupied)
 
 
 class LoginHandler(BaseHandler):
@@ -179,13 +179,13 @@ class LoginHandler(BaseHandler):
             message = f"Welcome, {user}!"
 
             file = load_user_file(user)
-            is_occupied = occupied(file["x_pos"], file["y_pos"])
+            occupied = on_tile(file["x_pos"], file["y_pos"])
 
             self.render("templates/user_panel.html",
                         user=user,
                         file=load_user_file(user),
                         message=message,
-                        is_occupied=is_occupied)
+                        on_tile=occupied)
         else:
             self.render("templates/notfound.html")
 

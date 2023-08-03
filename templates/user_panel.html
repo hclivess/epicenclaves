@@ -94,17 +94,22 @@ hr {
                      <img src="{{file['img']}}" alt="Profile Picture" width="100">
                   </div>
                   <div>
-                     <h1>Welcome, {{user}}</h1>
-                     <div class="compact-stats">
-                        <p>Age: {{file["age"]}}</p>
-                        <p>Experience: {{file["exp"]}}</p>
-                        <p>Health Points: {{file["hp"]}}</p>
-                        <p>Armor: {{file["armor"]}}</p>
-                        <p>Action points: {{file["action_points"]}}</p>
-                        <p>Position: ({{file["x_pos"]}}, {{file["y_pos"]}})</p>
+
+<div class="card mt-3">
+  <div class="card-header">
+    <h4 class="card-title">Welcome, {{user}}</h4>
+  </div>
+  <div class="card-body">
+    <p class="card-text">Age: {{file["age"]}}</p>
+    <p class="card-text">Experience: {{file["exp"]}}</p>
+    <p class="card-text">Health Points: {{file["hp"]}}</p>
+    <p class="card-text">Armor: {{file["armor"]}}</p>
+    <p class="card-text">Action points: {{file["action_points"]}}</p>
+    <p class="card-text">Position: ({{file["x_pos"]}}, {{file["y_pos"]}})</p>
+  </div>
+</div>
 
 
-                     </div>
                   </div>
                </div>
             </div>
@@ -118,9 +123,21 @@ hr {
                   <a id="btnRight" class="btn btn-move btn-lg active" href="/move?direction=right" role="button">Right ▶️</a>
                   <a class="btn btn-map btn-lg active" href="/map" role="button">Map 🗺️</a>
                   <a class="btn btn-quit btn-lg active" href="/logout" role="button">Logout 🌃</a>
-
-
                </div>
+
+                <div class="card mt-3">
+
+
+    <div class="card-header">
+      <h4 class="card-title">Available Resources</h4>
+    </div>
+    <div class="card-body">
+      <p class="card-text">Wood: {{file["resources"]["wood"]}}</p>
+      <p class="card-text">Food: {{file["resources"]["food"]}}</p>
+      <p class="card-text">Bismuth: {{file["resources"]["bismuth"]}}</p>
+    </div>
+  </div>
+
             </div>
          </div>
       </div>
@@ -131,7 +148,7 @@ hr {
          <div class="row mb-3 align-items-start">
             <!-- Construction menu column -->
             <div class="col-md-6">
-               <h1>Construction Menu</h1>
+               <h4>Construction Menu</h4>
                <div class="row mb-3">
                   <div class="col">
                      <a class="btn btn-light btn-lg btn-block" href="/build?entity=house&name=town1">
@@ -168,9 +185,20 @@ hr {
 
             </div>
 
+            <!-- tile column -->
+            <div class="col-md-6">
+               <h4>Current Tile</h4>
+
+               {{on_tile}}
+               <div class="col">
+
+               </div>
+            </div>
+
+
             <!-- items column -->
             <div class="col-md-6">
-               <h1>Inventory</h1>
+               <h4>Inventory</h4>
 
                   {%for item in file["items"]%}
                <div class="col">
@@ -186,7 +214,7 @@ hr {
 
             <!-- buildings column -->
             <div class="col-md-6">
-               <h1>Your Buildings</h1>
+               <h4>Your Buildings</h4>
 
                   {%for building in file["construction"]%}
                <div class="col">
@@ -199,34 +227,10 @@ hr {
 
                   {%end%}
 
-               <div class="col">
-                <p>Wood: {{file["resources"]["wood"]}}</p>
-                <p>Food: {{file["resources"]["food"]}}</p>
-                <p>Bismuth: {{file["resources"]["bismuth"]}}</p>
-                   </div>
             </div>
 
-            <!-- tile column -->
-            <div class="col-md-6">
-               <h1>Current Tile</h1>
 
-               {{is_occupied}}
-               <div class="col">
 
-               </div>
-            </div>
-
-            <!-- resource column -->
-            <div class="col-md-6">
-               <h1>Available Resources</h1>
-
-                <p>Wood: {{file["resources"]["wood"]}}</p>
-                <p>Food: {{file["resources"]["food"]}}</p>
-                <p>Bismuth: {{file["resources"]["bismuth"]}}</p>
-               <div class="col">
-
-               </div>
-            </div>
 
          </div>
 
