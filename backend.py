@@ -1,9 +1,10 @@
-import sqlite3
-from hashlib import blake2b
-import string
-import os
 import json
+import os
 import random
+import sqlite3
+import string
+from hashlib import blake2b
+
 import sqlite
 
 users_db = sqlite3.connect("users.db")
@@ -91,17 +92,31 @@ def occupied_by(x, y, what):
 
 
 
+def insert_map_data(db_file, data):
+    # Connect to the database
+    conn = sqlite3.connect(db_file)
+    cursor = conn.cursor()
+
+    # Prepare and execute the SQL query to insert data into the map_data table
+    cursor.execute(
+        "INSERT INTO map_data (position, data, control) VALUES (?, ?, ?)",
+        (f"{data['x_pos']},{data['y_pos']}",
+         f'{{"name": "{data["name"]}", "hp": {data["hp"]}, "size": {data["size"]}, "actions": {data["actions"]}, "control": "{data["control"]}", "type": "{data["type"]}"}}',
+         data["control"])
+    )
+
+    # Commit the changes and close the connection
+    conn.commit()
+    conn.close()
+
 def build(entity, name, user, file):
+    # Prepare the entity data based on the entity type
     entity_data = {
-        "house": {"type": "house"},
-        "mine": {"type": "mine"},
-        "farm": {"type": "farm"},
-        "barracks": {"type": "barracks"},
-        "sawmill": {"type": "sawmill"},
-        "blacksmith": {"type": "blacksmith"}
+        "type": entity,
     }
 
-    update_user_file(user, {
+    # Update user data
+    data = {
         "x_pos": file["x_pos"],
         "y_pos": file["y_pos"],
         "name": name,
@@ -109,9 +124,11 @@ def build(entity, name, user, file):
         "size": 1,
         "actions": [],
         "control": user,
+        **entity_data
+    }
 
-        **entity_data.get(entity, {})
-    }, column="construction")
+    update_user_file(user, data, column="construction")
+    insert_map_data("map_data.db", data)
 
 
 def create_user_file(user):
@@ -198,11 +215,7 @@ def load_user_file(user):
 
 
 import sqlite3
-import json
 
-
-import sqlite3
-import json
 
 def load_files():
     all_files = {}
@@ -274,8 +287,6 @@ def load_files():
     conn_map.close()
 
     return all_files
-
-import json
 
 def update_user_file(user, updated_values, column):
     # Connect to the database

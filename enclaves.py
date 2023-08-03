@@ -1,13 +1,15 @@
 import asyncio
 import json
 import os.path
-from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_file, \
-    on_tile, load_files, build, update_user_file, hashify, occupied_by, has_item, generate_entities, has_ap
+import sqlite3
+import webbrowser
+
 import tornado.ioloop
 import tornado.web
-import webbrowser
+
+from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_file, \
+    on_tile, load_files, build, update_user_file, occupied_by, has_item, generate_entities
 from sqlite import create_map_table
-import sqlite3
 
 max_size = 1000
 
@@ -244,7 +246,6 @@ async def main():
 
 if __name__ == "__main__":
     if not os.path.exists("map_data.db"):
-        print("heureka")
         create_map_table()
         generate_entities(entity_type="forest",
                           probability=0.25,
