@@ -218,9 +218,9 @@ import sqlite3
 
 
 def load_files():
-    #todo actually start using control column
+    # todo actually start using control column
 
-    all_files = {}
+    users_data = []  # Create an empty list to store user data
 
     # Load data from user_data.db
     conn_user = sqlite3.connect("user_data.db")
@@ -228,7 +228,6 @@ def load_files():
     cursor_user.execute("SELECT * FROM user_data")
     results_user = cursor_user.fetchall()
 
-    users_data = []
     for result_user in results_user:
         username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth, items_str, construction_str = result_user
 
@@ -256,7 +255,6 @@ def load_files():
 
         users_data.append(user_data)
 
-    all_files["user_data"] = users_data
     conn_user.close()
 
     # Load data from map_data.db
@@ -265,7 +263,6 @@ def load_files():
     cursor_map.execute("SELECT position, data FROM map_data")  # here
     results_map = cursor_map.fetchall()
 
-    map_data = []
     map_data = []
     for result_map in results_map:
         position_str, data_str = result_map
@@ -280,10 +277,10 @@ def load_files():
 
         map_data.append(map_info)
 
-    all_files["construction"] = map_data
     conn_map.close()
 
-    return all_files
+    return users_data  # Return the list of user data without the "user_data" key
+
 
 def update_user_file(user, updated_values, column):
     # Connect to the database

@@ -140,81 +140,106 @@ body {
 </style>
 </head>
 <body>
-  <div class="navigation-container">
-    <div class="btn-group">
-      <a id="btnUp" class="btn btn-move btn-lg active" href="/move?direction=up&target=map" role="button">🔼 Up</a>
-      <a id="btnDown" class="btn btn-move btn-lg active" href="/move?direction=down&target=map" role="button">🔽 Down</a>
-      <a id="btnLeft" class="btn btn-move btn-lg active" href="/move?direction=left&target=map" role="button">◀️ Left</a>
-      <a id="btnRight" class="btn btn-move btn-lg active" href="/move?direction=right&target=map" role="button">▶️ Right</a>
-      <a class="btn btn-map btn-lg active" href="/" role="button">👤 User Panel</a>
-      <a class="btn btn-quit btn-lg active" href="/logout" role="button">🌃 Logout</a>
-    </div>
-  </div>
 
-  <div class="map" id="map"></div>
+<div class="navigation-container">
+<div class="btn-group">
+  <a id="btnUp" class="btn btn-move btn-lg active" href="/move?direction=up&target=map" role="button">🔼 Up</a>
+  <a id="btnDown" class="btn btn-move btn-lg active" href="/move?direction=down&target=map" role="button">🔽 Down</a>
+  <a id="btnLeft" class="btn btn-move btn-lg active" href="/move?direction=left&target=map" role="button">◀️ Left</a>
+  <a id="btnRight" class="btn btn-move btn-lg active" href="/move?direction=right&target=map" role="button">▶️ Right</a>
+  <a class="btn btn-map btn-lg active" href="/" role="button">👤 User Panel</a>
+  <a class="btn btn-quit btn-lg active" href="/logout" role="button">🌃 Logout</a>
+</div>
+</div>
 
-  <script>
-    // Your JSON data (replace this with your actual JSON data)
-    const jsonData = {
-      "user_data": [{
-        "username": "Jan",
-        "type": "player",
-        "age": "0",
-        "img": "img/pp.png",
-        "x_pos": 1,
-        "y_pos": 1,
-        "exp": 0,
-        "hp": 100,
-        "armor": 0,
-        "action_points": 4738,
-        "resources": { "bismuth": 0, "wood": 0, "food": 0 },
-        "items": [{ "type": "axe", "desc": "A tool to cut wood with in the forest" }],
-        "construction": [
-          { "x_pos": 1, "y_pos": 1, "name": "town1", "hp": 100, "size": 1, "actions": [], "control": "Jan", "type": "house" },
-          { "x_pos": 2, "y_pos": 1, "name": "town1", "hp": 100, "size": 1, "actions": [], "control": "Jan", "type": "house" },
-          { "x_pos": 7, "y_pos": 1, "name": "town1", "hp": 100, "size": 1, "actions": [], "control": "Jan", "type": "mine" }
-        ]
-      }, {
-        "username": "dfdfg",
-        "type": "player",
-        "age": "0",
-        "img": "img/pp.png",
-        "x_pos": 1,
-        "y_pos": 1,
-        "exp": 0,
-        "hp": 100,
-        "armor": 0,
-        "action_points": 4970,
-        "resources": { "bismuth": 0, "wood": 0, "food": 0 },
-        "items": [{ "type": "axe", "desc": "A tool to cut wood with in the forest" }],
-        "construction": []
-      }],
-      "construction": [
-        { "x_pos": 1, "y_pos": 41, "type": "forest", "actions": ["chop"] },
-        { "x_pos": 11, "y_pos": 21, "type": "forest", "actions": ["chop"] },
-        { "x_pos": 21, "y_pos": 51, "type": "forest", "actions": ["chop"] },
-        // ... (and so on)
-      ]
-    };
 
-    // Function to create the map elements
-    function createMap(data) {
-      var mapContainer = document.getElementById("map");
-      var gridSize = 125; /* Default Grid size */
-      var maxX = 0;
-      var maxY = 0;
-      var entitySize = 125; /* Default entity size */
+<div class="map" id="map"></div>
+<script>
+// Your JSON data (you can replace this with any JSON data)
+const jsonData = {% raw data %};
 
-      data.user_data.forEach(function (player) {
-        if (player.type === "player") {
-          // Remaining code remains the same (create player elements and display information)
-          // ...
+// Function to create the map elements
+function createMap(data) {
+  var mapContainer = document.getElementById("map");
+  var gridSize = 125; /* Default Grid size */
+  var maxX = 0;
+  var maxY = 0;
+  var entitySize = 125; /* Default entity size */
+
+  data.forEach(function (item) {
+    if (item.type === "player") {
+      // Create player element and position it on the map
+      var playerElement = document.createElement("div");
+      playerElement.className = "entity player";
+      playerElement.style.backgroundColor = "purple";
+      var playerX = (item.x_pos - 1) * gridSize;
+      var playerY = (item.y_pos - 1) * gridSize;
+      playerElement.style.top = playerY + "px";
+      playerElement.style.left = playerX + "px";
+      mapContainer.appendChild(playerElement);
+
+      // Create player's image and set the source
+      var playerImg = document.createElement("img");
+      playerImg.src = item.img;
+      playerElement.appendChild(playerImg);
+
+      // Create player's label and display specific player information
+      var playerLabel = document.createElement("div");
+      playerLabel.className = "text-label";
+      playerLabel.innerHTML = "username: " + item.username + "<br>";
+      playerLabel.innerHTML += "pos: " + item.x_pos + ", " + item.y_pos + "<br>";
+      playerLabel.innerHTML += "exp: " + item.exp + "<br>";
+      playerLabel.innerHTML += "hp: " + item.hp + "<br>";
+      playerLabel.innerHTML += "armor: " + item.armor + "<br>";
+      playerElement.appendChild(playerLabel);
+
+      // Process and display construction for "type: real" players
+      item.construction.forEach(function (construction) {
+        var constructionX = (construction.x_pos - 1) * gridSize;
+        var constructionY = (construction.y_pos - 1) * gridSize;
+        if (constructionX > maxX) {
+          maxX = constructionX;
         }
+        if (constructionY > maxY) {
+          maxY = constructionY;
+        }
+        var constructionElement = document.createElement("div");
+        constructionElement.className = "entity construction " + construction.type;
+        constructionElement.style.top = constructionY + "px";
+        constructionElement.style.left = constructionX + "px";
+        var textLabel = document.createElement("div");
+        textLabel.className = "text-label";
+        textLabel.innerHTML = "name: " + construction.name + "<br>";
+        textLabel.innerHTML += "pos: " + construction.x_pos + ", " + construction.y_pos + "<br>";
+        textLabel.innerHTML += "owner: " + item.username + "<br>";
+        var typeDisplayed = false;
+        Object.entries(construction).forEach(function ([key, value]) {
+          if (key !== "name" && key !== "x_pos" && key !== "y_pos") {
+            if (key === "type" && typeDisplayed) {
+              return;
+            }
+            if (key === "type") {
+              typeDisplayed = true;
+            }
+            textLabel.innerHTML += key + ": " + value + "<br>";
+          }
+        });
+        constructionElement.appendChild(textLabel);
+        mapContainer.appendChild(constructionElement);
       });
 
-      // Process and display constructions (excluding "type: player")
-      data.construction.forEach(function (construction) {
-        if (construction.type !== "player") {
+      var playerX = (item.x_pos - 1) * gridSize;
+      var playerY = (item.y_pos - 1) * gridSize;
+      if (playerX > maxX) {
+        maxX = playerX;
+      }
+      if (playerY > maxY) {
+        maxY = playerY;
+      }
+    } else {
+      // Process and display construction for non-real user entities
+      if (item.construction) {
+        item.construction.forEach(function (construction) {
           var constructionX = (construction.x_pos - 1) * gridSize;
           var constructionY = (construction.y_pos - 1) * gridSize;
           if (constructionX > maxX) {
@@ -229,51 +254,105 @@ body {
           constructionElement.style.left = constructionX + "px";
           var textLabel = document.createElement("div");
           textLabel.className = "text-label";
-          textLabel.innerHTML = "type: " + construction.type + "<br>";
-          textLabel.innerHTML += "pos: " + construction.x_pos + ", " + construction.y_pos + "<br>";
-          textLabel.innerHTML += "control: " + (construction.control || "null") + "<br>";
-
-          // Display additional construction data
+          textLabel.innerHTML = "pos: " + construction.x_pos + ", " + construction.y_pos + "<br>";
           Object.entries(construction).forEach(function ([key, value]) {
-            if (key !== "type" && key !== "x_pos" && key !== "y_pos") {
+            if (key !== "name" && key !== "x_pos" && key !== "y_pos") {
               textLabel.innerHTML += key + ": " + value + "<br>";
             }
           });
           constructionElement.appendChild(textLabel);
           mapContainer.appendChild(constructionElement);
-        }
-      });
-
-      // Set the map's width and height based on the maximum X and Y positions of constructions and players
-      mapContainer.style.width = (maxX + gridSize) + "px";
-      mapContainer.style.height = (maxY + gridSize) + "px";
-
-      // Add grid lines
-      for (var x = 0; x <= maxX + gridSize; x += gridSize) {
-        var gridLine = document.createElement("div");
-        gridLine.className = "grid-line";
-        gridLine.style.width = "1px";
-        gridLine.style.height = maxY + gridSize + "px";
-        gridLine.style.left = x + "px";
-        gridLine.style.top = "0";
-        mapContainer.appendChild(gridLine);
-      }
-      for (var y = 0; y <= maxY + gridSize; y += gridSize) {
-        var gridLine = document.createElement("div");
-        gridLine.className = "grid-line";
-        gridLine.style.width = maxX + gridSize + "px";
-        gridLine.style.height = "1px";
-        gridLine.style.top = y + "px";
-        gridLine.style.left = "0";
-        mapContainer.appendChild(gridLine);
+        });
       }
     }
+  });
 
-    createMap(jsonData);
-  </script>
+  // Set the map's width and height based on the maximum X and Y positions of construction and players
+  mapContainer.style.width = (maxX + gridSize) + "px";
+  mapContainer.style.height = (maxY + gridSize) + "px";
 
-  <script>
-document.addEventListener("DOMContentLoaded", function (event) {
+  // Add grid lines
+  for (var x = 0; x <= maxX + gridSize; x += gridSize) {
+    var gridLine = document.createElement("div");
+    gridLine.className = "grid-line";
+    gridLine.style.width = "1px";
+    gridLine.style.height = maxY + gridSize + "px";
+    gridLine.style.left = x + "px";
+    gridLine.style.top = "0";
+    mapContainer.appendChild(gridLine);
+  }
+  for (var y = 0; y <= maxY + gridSize; y += gridSize) {
+    var gridLine = document.createElement("div");
+    gridLine.className = "grid-line";
+    gridLine.style.width = maxX + gridSize + "px";
+    gridLine.style.height = "1px";
+    gridLine.style.top = y + "px";
+    gridLine.style.left = "0";
+    mapContainer.appendChild(gridLine);
+  }
+
+  // Group entities on the same tile and adjust their size if there are multiple entities
+  var tileElements = mapContainer.querySelectorAll(".entity");
+  var entitiesOnTile = {};
+  tileElements.forEach(function (tileElement) {
+    var tileX = parseInt(tileElement.style.left);
+    var tileY = parseInt(tileElement.style.top);
+    var tileKey = tileX + "," + tileY;
+    if (!entitiesOnTile[tileKey]) {
+      entitiesOnTile[tileKey] = [];
+    }
+    entitiesOnTile[tileKey].push(tileElement);
+  });
+
+function showTooltip(entity, tooltip) {
+    var rect = entity.getBoundingClientRect();
+    var left = rect.right; // Move the tooltip to the right side of the entity
+    var top = rect.top; // Move the tooltip above the entity
+
+    tooltip.style.position = 'fixed'; // Set the position to fixed
+    tooltip.style.top = top + "px";
+    tooltip.style.left = left + "px";
+    tooltip.classList.add("visible");
+}
+
+
+
+  // Add event listeners for tooltip display
+  Object.values(entitiesOnTile).forEach(function (entityGroup) {
+    if (entityGroup.length > 1) {
+      // Display exclamation mark emoji on the tile
+      var exclamationMark = document.createElement("div");
+      exclamationMark.className = "exclamation-mark";
+      exclamationMark.innerHTML = "❗️";
+      entityGroup[0].appendChild(exclamationMark);
+
+      // Set a tooltip to display information about all entities on hover
+      var tooltip = document.createElement("div");
+      tooltip.className = "tooltip";
+      entityGroup.forEach(function (entity) {
+        var entityInfo = entity.querySelector(".text-label").innerHTML;
+        tooltip.innerHTML += entityInfo + "<br>";
+      });
+      mapContainer.appendChild(tooltip);
+
+      // Show tooltip on hover
+      entityGroup[0].addEventListener("mouseenter", function () {
+        showTooltip(entityGroup[0], tooltip);
+      });
+
+      // Hide tooltip and show other entities on mouse leave
+      entityGroup[0].addEventListener("mouseleave", function () {
+        tooltip.classList.remove("visible");
+      });
+    }
+  });
+}
+
+createMap(jsonData);
+</script>
+
+     <script>
+document.addEventListener("DOMContentLoaded", function(event) {
     // When the page is loaded, get the scroll position from localStorage
     var scrollX = localStorage.getItem('scrollX') || 0;
     var scrollY = localStorage.getItem('scrollY') || 0;
