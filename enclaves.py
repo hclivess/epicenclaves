@@ -32,9 +32,9 @@ class MainHandler(BaseHandler):
             message = f"Welcome back, {user}"
 
             file = load_user_file(user)
-            print("file", file)  # debug
+            #print("file", file)  # debug
             occupied = on_tile(file["x_pos"], file["y_pos"])
-            print("occupied", occupied)  # debug
+            #print("occupied", occupied)  # debug
 
             if file["action_points"] < 1:
                 message = f"You have action points left for this turn"
@@ -55,7 +55,7 @@ class LogoutHandler(BaseHandler):
 class MapHandler(BaseHandler):
     def get(self):
         data = json.dumps(load_files())
-        print("data", data) #debug
+        #print("data", data) #debug todo: selective map drawing around player
         self.render("templates/map.html",
                     data=data,
                     ensure_ascii=False)
