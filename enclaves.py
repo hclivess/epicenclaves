@@ -8,7 +8,7 @@ import tornado.ioloop
 import tornado.web
 
 from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_file, \
-    on_tile, load_files, build, update_user_file, occupied_by, has_item, generate_entities
+    on_tile, load_files, build, update_user_file, occupied_by, has_item, generate_entities, update_values
 from sqlite import create_map_table
 
 max_size = 1000
@@ -166,12 +166,7 @@ class ChopHandler(BaseHandler):
             new_wood = file["wood"] + 1
             new_ap = file["action_points"] - 1
 
-            updated_values = {
-                "wood": new_wood,
-                "action_points": new_ap
-            }
-
-            update_user_file(user, updated_values)
+            update_values(user=user, new_ap=new_ap, new_wood=new_wood)
 
             message = "Chopping successful"
 

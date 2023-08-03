@@ -279,6 +279,22 @@ def load_files():
     return total_data
 
 
+def update_values(user, new_wood, new_ap):
+    """TEMPORARY THIS NEEDS UPGRADE"""
+    # Connect to the database
+    conn = sqlite3.connect("user_data.db")
+    cursor = conn.cursor()
+
+    # Assuming 'user_id' is a unique identifier for each user in the database
+    # Update the values in the 'wood' and 'action_points' columns for the specified user
+    cursor.execute("UPDATE user_data SET wood=?, action_points=? WHERE username=?", (new_wood, new_ap, user))
+
+    # Commit the changes to the database
+    conn.commit()
+
+    # Close the database connection
+    conn.close()
+
 def update_user_file(user, updated_values, column):
     # Connect to the database
     conn = sqlite3.connect("user_data.db")
