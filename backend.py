@@ -83,8 +83,12 @@ def has_ap(player):
 
 def occupied_by(x, y, what):
     # Use the get_map_data function to check if the given position is occupied by the specified entity type
-    data = sqlite.get_map_data(position=(x, y))
-    return data and data["data"].get("type") == what
+    entities = sqlite.get_map_data(position=(x, y))
+    for entity in entities:
+        if entity["data"].get("type") == what:
+            return True
+    return False
+
 
 
 def build(entity, name, user, file):

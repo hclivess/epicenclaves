@@ -161,11 +161,11 @@ class ChopHandler(BaseHandler):
             message = f"You have no {item} at hand"
 
         elif proper_tile and file["action_points"] > 0:
-            new_wood = file["resources"]["wood"] + 1
+            new_wood = file["wood"] + 1
             new_ap = file["action_points"] - 1
 
             updated_values = {
-                "resources": {"wood": new_wood},
+                "wood": new_wood,
                 "action_points": new_ap
             }
 
