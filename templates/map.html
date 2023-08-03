@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏰</text></svg>">
+<title>Epic Enclaves</title>
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f0f8f0; /* Very light green background */
+}
+
+.map {
+  position: relative;
+}
+
+.grid-line {
+  position: absolute;
+  border: 1px solid #ccc;
+}
+
+.entity {
+  font-family: "Noto Color Emoji", "Segoe UI Emoji", sans-serif;
+  position: absolute;
+  font-size: 10px;
+  text-align: center;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.player {
+  background-color: purple;
+  color: white;
+  z-index: 2;
+}
+
+.player img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-bottom: 5px;
+}
+
+.construction {
+  font-size: 10px;
+  color: white;
+  z-index: 1;
+}
+
+.sawmill:before {
+  content: "\1FA93 ";
+  font-size: 20px;
+}
+
+.barracks:before {
+  content: "\2694 ";
+  font-size: 20px;
+}
+
+.house:before {
+  content: "\1F3E0 ";
+  font-size: 20px;
+}
+
+.farm:before {
+  content: "\1F33E ";
+  font-size: 20px;
+}
+
+.mine:before {
+  content: "\26CF ";
+  font-size: 20px;
+}
+
+.forest:before {
+  content: "\1F332 ";
+  font-size: 40px;
+}
+
+.forest {
+  background-color: darkgreen;
+  color: white;
+}
+
+.sawmill {
+  background-color: blue;
+}
+
+.farm {
+  background-color: green;
+}
+
+.barracks {
+  background-color: red;
+}
+
+.mine {
+  background-color: #B59410;
+}
+
+.house {
+  background-color: gray;
+}
+
+.non-real-user-entity {
+  background-color: white;
+  z-index: 0;
+}
+
+/* Additional styles for handling multiple entities on the same tile */
+.entity-group {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.entity-group .entity {
+  margin: 2px;
+}
+
+/* Styling for the exclamation mark emoji */
+.exclamation-mark {
+  position: absolute;
+  font-size: 30px;
+  color: red;
+  top: 5px;
+  left: 5px;
+}
+
+/* Styling for the tooltip */
+.tooltip {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 14px;
+  padding: 5px;
+  border-radius: 5px;
+  white-space: pre-line;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s, visibility 0.2s;
+  z-index: 10; /* Make sure the tooltip is above the entities */
+}
+
+.tooltip.visible {
+  visibility: visible;
+  opacity: 1;
+}
+</style>
+</head>
+<body>
+
+               <div class="btn-group">
+                  <a id="btnUp" class="btn btn-move btn-lg active" href="/move?direction=up&target=map" role="button">Up 🔼</a>
+                  <a id="btnDown" class="btn btn-move btn-lg active" href="/move?direction=down&target=map" role="button">Down 🔽</a>
+                  <a id="btnLeft" class="btn btn-move btn-lg active" href="/move?direction=left&target=map" role="button">Left ◀️</a>
+                  <a id="btnRight" class="btn btn-move btn-lg active" href="/move?direction=right&target=map" role="button">Right ▶️</a>
+                  <a class="btn btn-map btn-lg active" href="/" role="button">User Panel 👤</a>
+                  <a class="btn btn-quit btn-lg active" href="/logout" role="button">Logout 🌃</a>
+
+
+               </div>
+
+<div class="map" id="map"></div>
+<script>
+// Your JSON data (you can replace this with any JSON data)
+const jsonData = {% raw data %};
+
+// Function to create the map elements
+function createMap(data) {
+  var mapContainer = document.getElementById("map");
+  var gridSize = 100; /* Default Grid size */
+  var maxX = 0;
+  var maxY = 0;
+  var entitySize = 100; /* Default entity size */
+
+  data.forEach(function (item) {
+    if (item.type === "player") {
+      // Create player element and position it on the map
+      var playerElement = document.createElement("div");
+      playerElement.className = "entity player";
+      playerElement.style.backgroundColor = "purple";
+      var playerX = (item.x_pos - 1) * gridSize;
+      var playerY = (item.y_pos - 1) * gridSize;
+      playerElement.style.top = playerY + "px";
+      playerElement.style.left = playerX + "px";
+      mapContainer.appendChild(playerElement);
+
+      // Create player's image and set the source
+      var playerImg = document.createElement("img");
+      playerImg.src = item.img;
+      playerElement.appendChild(playerImg);
+
+      // Create player's label and display specific player information
+      var playerLabel = document.createElement("div");
+      playerLabel.className = "text-label";
+      playerLabel.innerHTML = "username: " + item.username + "<br>";
+      playerLabel.innerHTML += "pos: " + item.x_pos + ", " + item.y_pos + "<br>";
+      playerLabel.innerHTML += "exp: " + item.exp + "<br>";
+      playerLabel.innerHTML += "hp: " + item.hp + "<br>";
+      playerLabel.innerHTML += "armor: " + item.armor + "<br>";
+      playerElement.appendChild(playerLabel);
+
+      // Process and display construction for "type: real" players
+      item.construction.forEach(function (construction) {
+        var constructionX = (construction.x_pos - 1) * gridSize;
+        var constructionY = (construction.y_pos - 1) * gridSize;
+        if (constructionX > maxX) {
+          maxX = constructionX;
+        }
+        if (constructionY > maxY) {
+          maxY = constructionY;
+        }
+        var constructionElement = document.createElement("div");
+        constructionElement.className = "entity construction " + construction.type;
+        constructionElement.style.top = constructionY + "px";
+        constructionElement.style.left = constructionX + "px";
+        var textLabel = document.createElement("div");
+        textLabel.className = "text-label";
+        textLabel.innerHTML = "name: " + construction.name + "<br>";
+        textLabel.innerHTML += "pos: " + construction.x_pos + ", " + construction.y_pos + "<br>";
+        textLabel.innerHTML += "owner: " + item.username + "<br>";
+        var typeDisplayed = false;
+        Object.entries(construction).forEach(function ([key, value]) {
+          if (key !== "name" && key !== "x_pos" && key !== "y_pos") {
+            if (key === "type" && typeDisplayed) {
+              return;
+            }
+            if (key === "type") {
+              typeDisplayed = true;
+            }
+            textLabel.innerHTML += key + ": " + value + "<br>";
+          }
+        });
+        constructionElement.appendChild(textLabel);
+        mapContainer.appendChild(constructionElement);
+      });
+
+      var playerX = (item.x_pos - 1) * gridSize;
+      var playerY = (item.y_pos - 1) * gridSize;
+      if (playerX > maxX) {
+        maxX = playerX;
+      }
+      if (playerY > maxY) {
+        maxY = playerY;
+      }
+    } else {
+      // Process and display construction for non-real user entities
+      if (item.construction) {
+        item.construction.forEach(function (construction) {
+          var constructionX = (construction.x_pos - 1) * gridSize;
+          var constructionY = (construction.y_pos - 1) * gridSize;
+          if (constructionX > maxX) {
+            maxX = constructionX;
+          }
+          if (constructionY > maxY) {
+            maxY = constructionY;
+          }
+          var constructionElement = document.createElement("div");
+          constructionElement.className = "entity construction " + construction.type;
+          constructionElement.style.top = constructionY + "px";
+          constructionElement.style.left = constructionX + "px";
+          var textLabel = document.createElement("div");
+          textLabel.className = "text-label";
+          textLabel.innerHTML = "pos: " + construction.x_pos + ", " + construction.y_pos + "<br>";
+          Object.entries(construction).forEach(function ([key, value]) {
+            if (key !== "name" && key !== "x_pos" && key !== "y_pos") {
+              textLabel.innerHTML += key + ": " + value + "<br>";
+            }
+          });
+          constructionElement.appendChild(textLabel);
+          mapContainer.appendChild(constructionElement);
+        });
+      }
+    }
+  });
+
+  // Set the map's width and height based on the maximum X and Y positions of construction and players
+  mapContainer.style.width = (maxX + gridSize) + "px";
+  mapContainer.style.height = (maxY + gridSize) + "px";
+
+  // Add grid lines
+  for (var x = 0; x <= maxX + gridSize; x += gridSize) {
+    var gridLine = document.createElement("div");
+    gridLine.className = "grid-line";
+    gridLine.style.width = "1px";
+    gridLine.style.height = maxY + gridSize + "px";
+    gridLine.style.left = x + "px";
+    gridLine.style.top = "0";
+    mapContainer.appendChild(gridLine);
+  }
+  for (var y = 0; y <= maxY + gridSize; y += gridSize) {
+    var gridLine = document.createElement("div");
+    gridLine.className = "grid-line";
+    gridLine.style.width = maxX + gridSize + "px";
+    gridLine.style.height = "1px";
+    gridLine.style.top = y + "px";
+    gridLine.style.left = "0";
+    mapContainer.appendChild(gridLine);
+  }
+
+  // Group entities on the same tile and adjust their size if there are multiple entities
+  var tileElements = mapContainer.querySelectorAll(".entity");
+  var entitiesOnTile = {};
+  tileElements.forEach(function (tileElement) {
+    var tileX = parseInt(tileElement.style.left);
+    var tileY = parseInt(tileElement.style.top);
+    var tileKey = tileX + "," + tileY;
+    if (!entitiesOnTile[tileKey]) {
+      entitiesOnTile[tileKey] = [];
+    }
+    entitiesOnTile[tileKey].push(tileElement);
+  });
+
+  // Function to show the tooltip above the entity if it's close to the top of the grid
+  function showTooltip(entity, tooltip) {
+    var rect = entity.getBoundingClientRect();
+    var tooltipHeight = tooltip.offsetHeight;
+    var top = rect.top - tooltipHeight - 5; // Adjust the tooltip position above the entity
+    var left = rect.left + entity.offsetWidth / 2 - tooltip.offsetWidth / 2; // Center the tooltip horizontally
+
+    // Check if the tooltip is too close to the top of the grid, then reposition it below the entity
+    if (top < 10) {
+      tooltip.classList.add("above");
+      top = rect.bottom + 5; // Adjust the tooltip position below the entity
+    } else {
+      tooltip.classList.remove("above");
+    }
+
+    tooltip.style.top = top + "px";
+    tooltip.style.left = left + "px";
+    tooltip.classList.add("visible");
+  }
+
+  // Add event listeners for tooltip display
+  Object.values(entitiesOnTile).forEach(function (entityGroup) {
+    if (entityGroup.length > 1) {
+      // Display exclamation mark emoji on the tile
+      var exclamationMark = document.createElement("div");
+      exclamationMark.className = "exclamation-mark";
+      exclamationMark.innerHTML = "❗️";
+      entityGroup[0].appendChild(exclamationMark);
+
+      // Set a tooltip to display information about all entities on hover
+      var tooltip = document.createElement("div");
+      tooltip.className = "tooltip";
+      entityGroup.forEach(function (entity) {
+        var entityInfo = entity.querySelector(".text-label").innerHTML;
+        tooltip.innerHTML += entityInfo + "<br>";
+      });
+      mapContainer.appendChild(tooltip);
+
+      // Show tooltip on hover
+      entityGroup[0].addEventListener("mouseenter", function () {
+        showTooltip(entityGroup[0], tooltip);
+      });
+
+      // Hide tooltip and show other entities on mouse leave
+      entityGroup[0].addEventListener("mouseleave", function () {
+        tooltip.classList.remove("visible");
+      });
+    }
+  });
+}
+
+createMap(jsonData);
+</script>
+
+     <script>
+document.addEventListener("DOMContentLoaded", function(event) {
+    // When the page is loaded, get the scroll position from localStorage
+    var scrollX = localStorage.getItem('scrollX') || 0;
+    var scrollY = localStorage.getItem('scrollY') || 0;
+
+    // Set the scroll position to the saved values
+    window.scrollTo(scrollX, scrollY);
+
+    document.addEventListener("keydown", function(event) {
+        var scrollAmount = 100; // Change this value to adjust the amount of scrolling
+        var direction = null;
+
+        switch (event.key) {
+            case "ArrowLeft":
+                direction = "left";
+                window.scrollBy(-scrollAmount, 0);
+                break;
+            case "ArrowRight":
+                direction = "right";
+                window.scrollBy(scrollAmount, 0);
+                break;
+            case "ArrowUp":
+                direction = "up";
+                window.scrollBy(0, -scrollAmount);
+                break;
+            case "ArrowDown":
+                direction = "down";
+                window.scrollBy(0, scrollAmount);
+                break;
+        }
+
+        // After scrolling, save the scroll position to localStorage
+        localStorage.setItem('scrollX', window.scrollX);
+        localStorage.setItem('scrollY', window.scrollY);
+
+        if (direction) {
+            // Simulate the click on the corresponding button
+            var button = document.getElementById('btn' + direction.charAt(0).toUpperCase() + direction.slice(1));
+            if (button) {
+                button.click();
+            }
+        }
+    });
+});
+</script>
+
+
+</body>
+</html>

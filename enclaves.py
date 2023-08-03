@@ -1,0 +1,192 @@
+import asyncio
+import json
+import os.path
+from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_file, \
+    occupied, load_files, build, update_user_file, hashify, occupied_by, has_item, generate_entities
+import tornado.ioloop
+import tornado.web
+import webbrowser
+
+max_size = 1000
+
+
+class BaseHandler(tornado.web.RequestHandler):
+    def write_error(self, status_code, **kwargs):
+        self.render("templates/error.html")
+
+    def get_current_user(self):
+        return self.get_secure_cookie("user")
+
+
+class MainHandler(BaseHandler):
+    def get(self):
+        message = self.get_argument("message", default="")
+        if not self.current_user:
+            self.render("templates/login.html")
+        else:
+            user = tornado.escape.xhtml_escape(self.current_user)
+            message = f"Welcome back, {user}"
+            self.render("templates/user_panel.html",
+                        user=user,
+                        file=load_user_file(user),
+                        message=message)
+
+
+
+class LogoutHandler(BaseHandler):
+    def get(self, data):
+        self.clear_all_cookies()
+        self.redirect("/")
+
+
+class MapHandler(BaseHandler):
+    def get(self):
+        data = json.dumps(load_files())
+        print(data)
+        self.render("templates/map.html",
+                    data=data,
+                    ensure_ascii=False)
+
+
+class BuildHandler(BaseHandler):
+    def get(self, data):
+        entity = self.get_argument("entity")
+        name = self.get_argument("name")
+        user = tornado.escape.xhtml_escape(self.current_user)
+
+        file = load_user_file(user)
+        is_occupied = occupied(file["x_pos"], file["y_pos"])
+        if not is_occupied:
+            build(entity=entity,
+                  name=name,
+                  user=user,
+                  file=file)
+
+            message = f"Successfully built {entity}"
+        else:
+            message = "Cannot build here"
+
+        self.render("templates/user_panel.html",
+                    user=user,
+                    file=load_user_file(user),
+                    message=message)
+
+
+class MoveHandler(BaseHandler):
+    def get(self, data):
+        target = self.get_argument("target", default="home")
+        entry = self.get_argument("direction")
+        user = tornado.escape.xhtml_escape(self.current_user)
+
+        def update_user_file(user, key, updated_value):
+            file_path = f"users/{hashify(user)}.json"
+            with open(file_path, "r") as infile:
+                file = json.load(infile)
+            file[key] = updated_value
+            with open(file_path, "w") as outfile:
+                json.dump(file, outfile, indent=2)
+
+        def move(user, direction, axis_key, axis_limit):
+            file = load_user_file(user)
+            new_pos = file[axis_key] + direction
+            if 1 <= new_pos <= axis_limit:
+                update_user_file(user, axis_key, new_pos)
+                new_ap = file["action_points"] - 1
+                update_user_file(user, "action_points", new_ap)
+                return True
+            return False
+
+        if entry == "left":
+            moved = move(user, -1, "x_pos", max_size)
+        elif entry == "right":
+            moved = move(user, 1, "x_pos", max_size)
+        elif entry == "down":
+            moved = move(user, 1, "y_pos", max_size)
+        elif entry == "up":
+            moved = move(user, -1, "y_pos", max_size)
+        else:
+            moved = False
+        message = "Moved" if moved else "Invalid move"
+
+        if target == "map":
+            self.render("templates/map.html", user=user, data=json.dumps(load_files()), message=message)
+        else:
+            self.render("templates/user_panel.html", user=user, file=load_user_file(user), message=message)
+
+
+class ChopHandler(BaseHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        file = load_user_file(user)
+        proper_tile = occupied_by(file["x_pos"], file["y_pos"], what="forest")
+
+        item = "axe"
+        if not has_item(user, item):
+            message = f"You have no {item} at hand"
+
+        elif proper_tile:
+            new_wood = file["resources"]["wood"] + 1
+            update_user_file(user, values="resources", updated_values={"wood": new_wood})
+            new_ap = file["action_points"] - 1
+            update_user_file(user, values="action_points", updated_values=new_ap)
+            message = "Chopping successful"
+        else:
+            message = "Not on a forest tile"
+        self.render("templates/user_panel.html", user=user, file=load_user_file(user), message=message)
+
+
+class LoginHandler(BaseHandler):
+    def post(self, data):
+        user = self.get_argument("name")[:8]
+        password = self.get_argument("password")
+
+        if not exists_user(user):
+            add_user(user, password)
+            create_user_file(user)
+        if login_validate(user, password):
+            self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
+
+            message = f"Welcome, {user}!"
+            self.render("templates/user_panel.html",
+                        user=user,
+                        file=load_user_file(user),
+                        message=message)
+        else:
+            self.render("templates/notfound.html")
+
+
+def make_app():
+    return tornado.web.Application([
+        (r"/", MainHandler),
+        (r"/login(.*)", LoginHandler),
+        (r"/logout(.*)", LogoutHandler),
+        (r"/move(.*)", MoveHandler),
+        (r"/chop", ChopHandler),
+        (r"/map", MapHandler),
+        (r"/build(.*)", BuildHandler),
+        (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),
+        (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),
+        (r'/(favicon.ico)', tornado.web.StaticFileHandler, {"path": "graphics"}),
+    ])
+
+
+async def main():
+    app = make_app()
+    port = 8888
+    app.listen(port)
+    app.settings["cookie_secret"] = cookie_get()
+    check_users_db()
+    webbrowser.open(f"http://127.0.0.1:{port}")
+
+    if not os.path.exists("environment"):
+        os.mkdir("environment")
+
+    generate_entities(entity_type="forest", probability=0.25, entity_data={})
+
+    await asyncio.Event().wait()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+    # If you want to add a test user after starting the server, you can call add_user here
+    # add_user("testuser", "testpass")
