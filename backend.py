@@ -20,7 +20,11 @@ def generate_entities(entity_type, probability, additional_entity_data=None, siz
                                every):  # Starting from 1 and assuming the environment has a height of 100 blocks
                 if random.random() <= probability:
                     # Add the new entity to the list
-                    new_entity = {"type": entity_type, "x_pos": x_pos, "y_pos": y_pos, **additional_entity_data}
+                    new_entity = {"type": entity_type,
+                                  "x_pos": x_pos,
+                                  "y_pos": y_pos,
+                                  "control": "N/A",
+                                  **additional_entity_data}
                     entities.append(new_entity)
 
         # Write the new list of entities to a file
@@ -107,6 +111,8 @@ def build(entity, name, user, file):
         "hp": 100,
         "size": 1,
         "actions": [],
+        "control": user,
+
         **entity_data.get(entity, {})
     }, what="construction")
 
