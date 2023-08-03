@@ -26,10 +26,15 @@ class MainHandler(BaseHandler):
         else:
             user = tornado.escape.xhtml_escape(self.current_user)
             message = f"Welcome back, {user}"
+
+            file = load_user_file(user)
+            is_occupied = occupied(file["x_pos"], file["y_pos"])
+
             self.render("templates/user_panel.html",
                         user=user,
                         file=load_user_file(user),
-                        message=message)
+                        message=message,
+                        is_occupied=is_occupied)
 
 
 
@@ -56,6 +61,7 @@ class BuildHandler(BaseHandler):
 
         file = load_user_file(user)
         is_occupied = occupied(file["x_pos"], file["y_pos"])
+
         if not is_occupied:
             build(entity=entity,
                   name=name,
@@ -66,10 +72,14 @@ class BuildHandler(BaseHandler):
         else:
             message = "Cannot build here"
 
+        file = load_user_file(user)
+        is_occupied = occupied(file["x_pos"], file["y_pos"])
+
         self.render("templates/user_panel.html",
                     user=user,
                     file=load_user_file(user),
-                    message=message)
+                    message=message,
+                    is_occupied=is_occupied)
 
 
 class MoveHandler(BaseHandler):
@@ -109,9 +119,21 @@ class MoveHandler(BaseHandler):
         message = "Moved" if moved else "Invalid move"
 
         if target == "map":
-            self.render("templates/map.html", user=user, data=json.dumps(load_files()), message=message)
+
+
+            self.render("templates/map.html",
+                        user=user,
+                        data=json.dumps(load_files()),
+                        message=message)
         else:
-            self.render("templates/user_panel.html", user=user, file=load_user_file(user), message=message)
+            file = load_user_file(user)
+            is_occupied = occupied(file["x_pos"], file["y_pos"])
+
+            self.render("templates/user_panel.html",
+                        user=user,
+                        file=load_user_file(user),
+                        message=message,
+                        is_occupied=is_occupied)
 
 
 class ChopHandler(BaseHandler):
@@ -132,7 +154,15 @@ class ChopHandler(BaseHandler):
             message = "Chopping successful"
         else:
             message = "Not on a forest tile"
-        self.render("templates/user_panel.html", user=user, file=load_user_file(user), message=message)
+
+        file = load_user_file(user)
+        is_occupied = occupied(file["x_pos"], file["y_pos"])
+
+        self.render("templates/user_panel.html",
+                    user=user,
+                    file=load_user_file(user),
+                    message=message,
+                    is_occupied=is_occupied)
 
 
 class LoginHandler(BaseHandler):
@@ -147,10 +177,15 @@ class LoginHandler(BaseHandler):
             self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
 
             message = f"Welcome, {user}!"
+
+            file = load_user_file(user)
+            is_occupied = occupied(file["x_pos"], file["y_pos"])
+
             self.render("templates/user_panel.html",
                         user=user,
                         file=load_user_file(user),
-                        message=message)
+                        message=message,
+                        is_occupied=is_occupied)
         else:
             self.render("templates/notfound.html")
 

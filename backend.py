@@ -63,6 +63,7 @@ def hashify(data):
 
 
 def occupied(x, y):
+    """in the future consider map index"""
     is_occupied = False
 
     for folder in ["users", "environment"]:
@@ -71,7 +72,7 @@ def occupied(x, y):
                 contents = json.load(infile)
                 for entry in contents["construction"]:
                     if entry["y_pos"] == y and entry["x_pos"] == x:
-                        is_occupied = True
+                        is_occupied = entry
                         break
 
     return is_occupied
@@ -87,6 +88,7 @@ def has_item(player, item_name):
 
 
 def occupied_by(x, y, what):
+    """in the future consider map index"""
     for folder in ["users", "environment"]:
         for file in os.listdir(folder):
             with open(os.path.join(folder, file), "r") as infile:

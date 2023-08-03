@@ -181,11 +181,7 @@ hr {
 
                   {%end%}
 
-               <div class="col">
-                <p>Wood: {{file["resources"]["wood"]}}</p>
-                <p>Food: {{file["resources"]["food"]}}</p>
-                <p>Bismuth: {{file["resources"]["bismuth"]}}</p>
-                   </div>
+
             </div>
 
             <!-- buildings column -->
@@ -209,6 +205,29 @@ hr {
                 <p>Bismuth: {{file["resources"]["bismuth"]}}</p>
                    </div>
             </div>
+
+            <!-- tile column -->
+            <div class="col-md-6">
+               <h1>Current Tile</h1>
+
+               {{is_occupied}}
+               <div class="col">
+
+               </div>
+            </div>
+
+            <!-- resource column -->
+            <div class="col-md-6">
+               <h1>Available Resources</h1>
+
+                <p>Wood: {{file["resources"]["wood"]}}</p>
+                <p>Food: {{file["resources"]["food"]}}</p>
+                <p>Bismuth: {{file["resources"]["bismuth"]}}</p>
+               <div class="col">
+
+               </div>
+            </div>
+
          </div>
 
       </div>
