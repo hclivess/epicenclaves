@@ -315,25 +315,18 @@ function createMap(data) {
     entitiesOnTile[tileKey].push(tileElement);
   });
 
-  // Function to show the tooltip above the entity if it's close to the top of the grid
-  function showTooltip(entity, tooltip) {
+function showTooltip(entity, tooltip) {
     var rect = entity.getBoundingClientRect();
-    var tooltipHeight = tooltip.offsetHeight;
-    var top = rect.top - tooltipHeight - 5; // Adjust the tooltip position above the entity
-    var left = rect.left + entity.offsetWidth / 2 - tooltip.offsetWidth / 2; // Center the tooltip horizontally
+    var left = rect.right; // Move the tooltip to the right side of the entity
+    var top = rect.top; // Move the tooltip above the entity
 
-    // Check if the tooltip is too close to the top of the grid, then reposition it below the entity
-    if (top < 10) {
-      tooltip.classList.add("above");
-      top = rect.bottom + 5; // Adjust the tooltip position below the entity
-    } else {
-      tooltip.classList.remove("above");
-    }
-
+    tooltip.style.position = 'fixed'; // Set the position to fixed
     tooltip.style.top = top + "px";
     tooltip.style.left = left + "px";
     tooltip.classList.add("visible");
-  }
+}
+
+
 
   // Add event listeners for tooltip display
   Object.values(entitiesOnTile).forEach(function (entityGroup) {
