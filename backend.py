@@ -254,6 +254,8 @@ def load_files():
     for result_map in results_map:
         position_str, data_str, control = result_map
         data = json.loads(data_str)
+
+
         x_pos, y_pos = map(int, position_str.split(","))
         map_info = {
             "x_pos": x_pos,
@@ -275,11 +277,38 @@ def load_files():
 
 
 
-def update_user_file(user, updated_values):
-    # Use the save_map_data function to update user data in the SQLite database
-    sqlite.save_map_data(position=user,
-                         data=updated_values,
-                         control=None)
+import sqlite3
+import json
+
+import sqlite3
+import json
+
+def update_user_file(username, updated_values):
+    # Connect to the database
+    conn = sqlite3.connect("user_data.db")
+    cursor = conn.cursor()
+
+    # Build the SQL query
+    update_query = "UPDATE user_data SET "
+    values = []
+    for key, value in updated_values.items():
+        if key in ["items", "construction"]:
+            value = json.dumps(value)
+        update_query += f"{key}=?, "
+        values.append(value)
+    update_query = update_query.rstrip(", ") + " WHERE username=?"
+
+    # Add the username to the values list
+    values.append(username)
+
+    # Execute the SQL query
+    cursor.execute(update_query, tuple(values))
+
+    # Commit changes and close the connection
+    conn.commit()
+    conn.close()
+
+
 
 
 def append_user_file(user, append_values, what):
