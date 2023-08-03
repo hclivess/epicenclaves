@@ -149,6 +149,7 @@ def create_user_file(user):
     conn.commit()
     conn.close()
 
+
 def load_user_file(user):
     # Connect to the database
     conn = sqlite3.connect("user_data.db")
@@ -162,7 +163,10 @@ def load_user_file(user):
     conn.close()
 
     if result:
-        username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth, items = result
+        username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth, items_str = result
+
+        # Convert the items string back to a list of dictionaries
+        items = json.loads(items_str)
 
         return {
             "username": username,
@@ -179,7 +183,6 @@ def load_user_file(user):
             "food": food,
             "bismuth": bismuth,
             "items": items
-
         }
     else:
         return None

@@ -198,7 +198,7 @@ hr {
                <p>Position: {{entity["x_pos"]}}, {{entity["y_pos"]}}</p>
                 <p>Control: {{entity["control"]}}</p>
 
-                   {%for action in entity["actions"]%}
+                   {%for action in entity["data"]["actions"]%}
                         <p>Actions: <a id="btnAct" class="btn btn-move btn-lg active" href="/{{action}}" role="button">{{action}}</a></p>
                     {%end%}
 
