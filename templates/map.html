@@ -25,8 +25,8 @@ body {
   position: absolute;
   font-size: 10px;
   text-align: center;
-  width: 100px;
-  height: 100px;
+  width: 125px;
+  height: 125px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -78,7 +78,7 @@ body {
 
 .forest:before {
   content: "\1F332 ";
-  font-size: 40px;
+  font-size: 30px;
 }
 
 .forest {
@@ -172,10 +172,10 @@ const jsonData = {% raw data %};
 // Function to create the map elements
 function createMap(data) {
   var mapContainer = document.getElementById("map");
-  var gridSize = 100; /* Default Grid size */
+  var gridSize = 125; /* Default Grid size */
   var maxX = 0;
   var maxY = 0;
-  var entitySize = 100; /* Default entity size */
+  var entitySize = 125; /* Default entity size */
 
   data.forEach(function (item) {
     if (item.type === "player") {
@@ -372,7 +372,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     window.scrollTo(scrollX, scrollY);
 
     document.addEventListener("keydown", function(event) {
-        var scrollAmount = 100; // Change this value to adjust the amount of scrolling
+        var scrollAmount = 125; // Change this value to adjust the amount of scrolling
         var direction = null;
 
         switch (event.key) {
