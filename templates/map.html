@@ -317,14 +317,16 @@ function showTooltip(entity, tooltip) {
 
 
 
-  // Add event listeners for tooltip display
+ // Add exclamation mark and tooltip for each group of entities on the same tile
   Object.values(entitiesOnTile).forEach(function (entityGroup) {
     if (entityGroup.length > 1) {
-      // Display exclamation mark emoji on the tile
-      var exclamationMark = document.createElement("div");
-      exclamationMark.className = "exclamation-mark";
-      exclamationMark.innerHTML = "❗️";
-      entityGroup[0].appendChild(exclamationMark);
+      // Display exclamation mark emoji on each entity
+      entityGroup.forEach(function (entity) {
+        var exclamationMark = document.createElement("div");
+        exclamationMark.className = "exclamation-mark";
+        exclamationMark.innerHTML = "❗️";
+        entity.appendChild(exclamationMark);
+      });
 
       // Set a tooltip to display information about all entities on hover
       var tooltip = document.createElement("div");
@@ -335,14 +337,15 @@ function showTooltip(entity, tooltip) {
       });
       mapContainer.appendChild(tooltip);
 
-      // Show tooltip on hover
-      entityGroup[0].addEventListener("mouseenter", function () {
-        showTooltip(entityGroup[0], tooltip);
-      });
+      // Show tooltip on hover of any entity in the group
+      entityGroup.forEach(function (entity) {
+        entity.addEventListener("mouseenter", function () {
+          showTooltip(entity, tooltip);
+        });
 
-      // Hide tooltip and show other entities on mouse leave
-      entityGroup[0].addEventListener("mouseleave", function () {
-        tooltip.classList.remove("visible");
+        entity.addEventListener("mouseleave", function () {
+          tooltip.classList.remove("visible");
+        });
       });
     }
   });
