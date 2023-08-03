@@ -16,6 +16,7 @@ def generate_entities(entity_type, probability, additional_entity_data=None, siz
         for y_pos in range(1, size, every):
             if random.random() <= probability:
                 data = {"type": entity_type}
+                print(f"Generating {data} on {x_pos}, {y_pos}")
                 if additional_entity_data:
                     data.update(additional_entity_data)
                 sqlite.save_map_data(position=(x_pos, y_pos), data=data, control=None)

@@ -43,4 +43,5 @@ Army Constitution:
 General Features:
 - Index map positions to map JSON file based on X, Y (supporting more than 100 players)
 - Quest system
+- Micro submaps (dungeons and constructed entries (space?))
 - Minecraft-style recipe system

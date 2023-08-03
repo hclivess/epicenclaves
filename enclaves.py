@@ -242,10 +242,12 @@ async def main():
 if __name__ == "__main__":
     if not os.path.exists("map_data.db"):
         create_map_table()
-        print("Generating")
+
         generate_entities(entity_type="forest",
                           probability=0.25,
-                          additional_entity_data={"actions": ["chop"]})
+                          additional_entity_data={"actions": ["chop"]},
+                          size=101,
+                          every=5)
 
     asyncio.run(main())
     # If you want to add a test user after starting the server, you can call add_user here
