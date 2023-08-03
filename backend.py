@@ -4,32 +4,20 @@ import string
 import os
 import json
 import random
+import sqlite
 
 users_db = sqlite3.connect("users.db")
 users_db_cursor = users_db.cursor()
 
 
 def generate_entities(entity_type, probability, additional_entity_data=None, size=101, every=10):
-    if not os.path.exists("environment/entities.json"):
-        # Initialize a new list of entities
-        entities = []
-
-        # Generate entities
-        for x_pos in range(1, size, every):  # Starting from 1 and assuming the environment has a width of 100 blocks
-            for y_pos in range(1, size,
-                               every):  # Starting from 1 and assuming the environment has a height of 100 blocks
-                if random.random() <= probability:
-                    # Add the new entity to the list
-                    new_entity = {"type": entity_type,
-                                  "x_pos": x_pos,
-                                  "y_pos": y_pos,
-                                  "control": "N/A",
-                                  **additional_entity_data}
-                    entities.append(new_entity)
-
-        # Write the new list of entities to a file
-        with open("environment/entities.json", "w") as outfile:
-            json.dump({"construction": entities}, outfile, indent=2)
+    for x_pos in range(1, size, every):
+        for y_pos in range(1, size, every):
+            if random.random() <= probability:
+                data = {"type": entity_type}
+                if additional_entity_data:
+                    data.update(additional_entity_data)
+                sqlite.save_map_data(position=(x_pos, y_pos), data=data, control=None)
 
 
 def check_users_db():
@@ -50,27 +38,37 @@ def hashify(data):
 
 
 def on_tile(x, y):
-    """in the future consider map index"""
-    on_tile = []
+    # Use the get_map_data function to retrieve data for the given position
+    entities = sqlite.get_map_data(position=(x, y))
 
-    for folder in ["users", "environment"]:
-        for file in os.listdir(folder):
-            with open(os.path.join(folder, file), "r") as infile:
-                contents = json.load(infile)
-                for entry in contents["construction"]:
-                    if entry["y_pos"] == y and entry["x_pos"] == x:
-                        on_tile.append(entry)
+    entity_data_list = []
+    for entity in entities:
+        if "data" in entity:
+            entity_data_list.append({"x_pos": entity["x_pos"], "y_pos": entity["y_pos"], "data": entity["data"],
+                                     "control": entity["control"]})
 
-    return on_tile
+    return entity_data_list
 
 
 def has_item(player, item_name):
-    with open(f"users/{hashify(player)}.json", "r") as infile:
-        contents = json.load(infile)
-        for item in contents["items"]:
+    # Connect to the database
+    conn = sqlite3.connect("user_data.db")
+    cursor = conn.cursor()
+
+    # Get the row for the specified player from the user_data table
+    cursor.execute("SELECT items FROM user_data WHERE username=?", (player,))
+    result = cursor.fetchone()
+
+    # Close the connection
+    conn.close()
+
+    if result:
+        items_str = result[0]
+        items = json.loads(items_str)
+        for item in items:
             if item.get("type") == item_name:
                 return True
-        return False
+    return False
 
 
 def has_ap(player):
@@ -82,16 +80,9 @@ def has_ap(player):
 
 
 def occupied_by(x, y, what):
-    """in the future consider map index"""
-    for folder in ["users", "environment"]:
-        for file in os.listdir(folder):
-            with open(os.path.join(folder, file), "r") as infile:
-                contents = json.load(infile)
-                for entry in contents["construction"]:
-                    if entry["y_pos"] == y and entry["x_pos"] == x and what == entry["type"]:
-                        return True
-
-    return False
+    # Use the get_map_data function to check if the given position is occupied by the specified entity type
+    data = sqlite.get_map_data(position=(x, y))
+    return data and data["data"].get("type") == what
 
 
 def build(entity, name, user, file):
@@ -118,73 +109,147 @@ def build(entity, name, user, file):
 
 
 def create_user_file(user):
-    if not os.path.exists("users"):
-        os.mkdir("users")
+    # Connect to the database
+    conn = sqlite3.connect("user_data.db")
+    cursor = conn.cursor()
 
-    with open(f"users/{hashify(user)}.json", "w") as outfile:
-        json.dump({
-            "username": user,
-            "type": "player",
-            "age": "0",
-            "img": "img/pp.png",
-            "y_pos": 1,
-            "x_pos": 1,
-            "exp": 0,
-            "hp": 100,
-            "armor": 0,
-            "construction": [],
-            "action_points": 5000,
-            "resources": {
-                "wood": 0,
-                "food": 0,
-                "bismuth": 0
-            },
-            "items": [{"type": "axe", "desc": "A tool to cut wood with in the forest"}]
-        }, outfile, indent=2)
+    # Create the table if it doesn't exist
+    cursor.execute('''CREATE TABLE IF NOT EXISTS user_data (
+                        username TEXT PRIMARY KEY,
+                        type TEXT,
+                        age TEXT,
+                        img TEXT,
+                        position TEXT,
+                        exp INTEGER,
+                        hp INTEGER,
+                        armor INTEGER,
+                        action_points INTEGER,
+                        wood INTEGER,
+                        food INTEGER,
+                        bismuth INTEGER,
+                        items TEXT
+                      )''')
+
+    # Convert the position tuple to a string representation
+    x_pos, y_pos = 1, 1  # Replace these with the actual x_pos and y_pos values
+    position_str = f"{x_pos},{y_pos}"
+
+    # Convert items dictionary to a JSON string
+    items_data = [{"type": "axe", "desc": "A tool to cut wood with in the forest"}]
+    items_str = json.dumps(items_data)
+
+    # Insert the user data into the database
+    cursor.execute('''INSERT OR IGNORE INTO user_data (username, type, age, img, position, exp, hp, armor, action_points, wood, food, bismuth, items)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                   (user, "player", "0", "img/pp.png", position_str, 0, 100, 0, 5000, 0, 0, 0, items_str))
+
+    # Commit changes and close the connection
+    conn.commit()
+    conn.close()
 
 
 def load_user_file(user):
-    with open(f"users/{hashify(user)}.json", "r") as infile:
-        return json.load(infile)
+    # Connect to the database
+    conn = sqlite3.connect("user_data.db")
+    cursor = conn.cursor()
+
+    # Retrieve the user data for the given username
+    cursor.execute("SELECT * FROM user_data WHERE username=?", (user,))
+    result = cursor.fetchone()
+
+    # Close the connection
+    conn.close()
+
+    if result:
+        username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth = result
+
+        return {
+            "username": username,
+            "type": user_type,
+            "age": age,
+            "img": img,
+            "x_pos": x_pos,
+            "y_pos": y_pos,
+            "exp": exp,
+            "hp": hp,
+            "armor": armor,
+            "action_points": action_points,
+            "wood": wood,
+            "food": food,
+            "bismuth": bismuth
+        }
+    else:
+        return None
 
 
 def load_files():
     all_files = []
-    for folder in ["users", "environment"]:
-        for file in os.listdir(folder):
-            with open(os.path.join(folder, file), "r") as infile:
-                all_files.append(json.load(infile))
+
+    # Load data from user_data.db
+    conn_user = sqlite3.connect("user_data.db")
+    cursor_user = conn_user.cursor()
+    cursor_user.execute("SELECT * FROM user_data")
+    results_user = cursor_user.fetchall()
+
+    for result_user in results_user:
+        username, user_type, age, img, position_str, exp, hp, armor, action_points, wood, food, bismuth = result_user
+
+        # Convert the position string back to a tuple
+        x_pos, y_pos = map(int, position_str.split(","))
+
+        user_data = {
+            "username": username,
+            "type": user_type,
+            "age": age,
+            "img": img,
+            "x_pos": x_pos,
+            "y_pos": y_pos,
+            "exp": exp,
+            "hp": hp,
+            "armor": armor,
+            "action_points": action_points,
+            "wood": wood,
+            "food": food,
+            "bismuth": bismuth
+        }
+
+        all_files.append(user_data)
+
+    conn_user.close()
+
+    # Load data from map_data.db
+    conn_map = sqlite3.connect("map_data.db")
+    cursor_map = conn_map.cursor()
+    cursor_map.execute("SELECT * FROM map_data")
+    results_map = cursor_map.fetchall()
+
+    for result_map in results_map:
+        position_str, data_str, controlled_by = result_map
+        data = json.loads(data_str)
+        x_pos, y_pos = map(int, position_str.split(","))
+        map_data = {"position": (x_pos, y_pos), "data": data, "controlled_by": controlled_by}
+        all_files.append(map_data)
+
+    conn_map.close()
 
     return all_files
 
 
 def update_user_file(user, updated_values):
-    file_path = f"users/{hashify(user)}.json"
-    with open(file_path, "r") as infile:
-        file = json.load(infile)
-
-    # Update the resources
-    if "resources" in updated_values:
-        for key in updated_values["resources"]:
-            file["resources"][key] = updated_values["resources"][key]
-
-    # Update the action points
-    if "action_points" in updated_values:
-        file["action_points"] = updated_values["action_points"]
-
-    with open(file_path, "w") as outfile:
-        json.dump(file, outfile, indent=2)
+    # Use the save_map_data function to update user data in the SQLite database
+    sqlite.save_map_data(position=user,
+                         data=updated_values,
+                         control=None)
 
 
 def append_user_file(user, append_values, what):
-    file_path = f"users/{hashify(user)}.json"
-    with open(file_path, "r") as infile:
-        file = json.load(infile)
-
-    file[what].append(append_values)
-
-    with open(file_path, "w") as outfile:
-        json.dump(file, outfile, indent=2)
+    # Use the get_map_data function to retrieve existing user data and then append the new values
+    data = sqlite.get_map_data(position=user)
+    if data:
+        data["data"][what].append(append_values)
+        sqlite.save_map_data(position=user,
+                             data=data["data"],
+                             control=None)
 
 
 def add_user(user, password):

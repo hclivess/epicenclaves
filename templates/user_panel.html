@@ -132,9 +132,9 @@ hr {
       <h4 class="card-title">Available Resources</h4>
     </div>
     <div class="card-body">
-      <p class="card-text">Wood: {{file["resources"]["wood"]}}</p>
-      <p class="card-text">Food: {{file["resources"]["food"]}}</p>
-      <p class="card-text">Bismuth: {{file["resources"]["bismuth"]}}</p>
+      <p class="card-text">Wood: {{file["wood"]}}</p>
+      <p class="card-text">Food: {{file["food"]}}</p>
+      <p class="card-text">Bismuth: {{file["bismuth"]}}</p>
     </div>
   </div>
 
@@ -190,10 +190,12 @@ hr {
                <h4>Current Tile</h4>
 
                {%for entity in on_tile%}
+
+
                <div class="col">
-                <p>Type: {{entity["type"]}}</p>
-                <p><img src=/img/assets/{{entity["type"]}}.png alt="Item Icon" class="menu-icon"></p>
-                <p>Position: ({{entity["x_pos"]}}, {{entity["y_pos"]}})</p>
+                <p>Type: {{entity["data"]["type"]}}</p>
+                <p><img src=/img/assets/{{entity["data"]["type"]}}.png alt="Item Icon" class="menu-icon"></p>
+               <p>Position: {{entity["x_pos"]}}, {{entity["y_pos"]}}</p>
                 <p>Control: {{entity["control"]}}</p>
 
                    {%for action in entity["actions"]%}

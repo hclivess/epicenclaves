@@ -6,6 +6,7 @@ from backend import exists_user, add_user, check_users_db, login_validate, cooki
 import tornado.ioloop
 import tornado.web
 import webbrowser
+from sqlite import create_map_table
 
 max_size = 1000
 
@@ -29,6 +30,7 @@ class MainHandler(BaseHandler):
 
             file = load_user_file(user)
             occupied = on_tile(file["x_pos"], file["y_pos"])
+            print(occupied)  # debug
 
             if file["action_points"] < 1:
                 message = f"You have action points left for this turn"
@@ -159,6 +161,7 @@ class ChopHandler(BaseHandler):
             }
 
             update_user_file(user, updated_values)
+
             message = "Chopping successful"
 
         elif not proper_tile:
@@ -175,7 +178,6 @@ class ChopHandler(BaseHandler):
                     file=load_user_file(user),
                     message=message,
                     on_tile=occupied)
-
 
 
 class LoginHandler(BaseHandler):
@@ -226,9 +228,6 @@ async def main():
     check_users_db()
     webbrowser.open(f"http://127.0.0.1:{port}")
 
-    if not os.path.exists("environment"):
-        os.mkdir("environment")
-
     generate_entities(entity_type="forest",
                       probability=0.25,
                       additional_entity_data={"actions": ["chop"]})
@@ -237,6 +236,7 @@ async def main():
 
 
 if __name__ == "__main__":
+    create_map_table()
     asyncio.run(main())
     # If you want to add a test user after starting the server, you can call add_user here
     # add_user("testuser", "testpass")
