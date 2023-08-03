@@ -53,7 +53,7 @@ class LogoutHandler(BaseHandler):
 class MapHandler(BaseHandler):
     def get(self):
         data = json.dumps(load_files())
-        print(data)
+        print("data", data) #debug
         self.render("templates/map.html",
                     data=data,
                     ensure_ascii=False)
@@ -237,15 +237,19 @@ async def main():
     check_users_db()
     webbrowser.open(f"http://127.0.0.1:{port}")
 
-    generate_entities(entity_type="forest",
-                      probability=0.25,
-                      additional_entity_data={"actions": ["chop"]})
+
 
     await asyncio.Event().wait()
 
 
 if __name__ == "__main__":
-    create_map_table()
+    if not os.path.exists("map_data.db"):
+        print("heureka")
+        create_map_table()
+        generate_entities(entity_type="forest",
+                          probability=0.25,
+                          additional_entity_data={"actions": ["chop"]})
+
     asyncio.run(main())
     # If you want to add a test user after starting the server, you can call add_user here
     # add_user("testuser", "testpass")

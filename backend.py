@@ -193,8 +193,15 @@ def load_user_file(user):
         return None
 
 
+import sqlite3
+import json
+
+
+import sqlite3
+import json
+
 def load_files():
-    all_files = []
+    all_files = {}
 
     # Load data from user_data.db
     conn_user = sqlite3.connect("user_data.db")
@@ -202,6 +209,7 @@ def load_files():
     cursor_user.execute("SELECT * FROM user_data")
     results_user = cursor_user.fetchall()
 
+    users_data = []
     for result_user in results_user:
         username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth, items_str, construction_str = result_user
 
@@ -222,30 +230,41 @@ def load_files():
             "hp": hp,
             "armor": armor,
             "action_points": action_points,
-            "wood": wood,
-            "food": food,
-            "bismuth": bismuth,
+            "resources": {"bismuth": bismuth, "wood": wood, "food": food},
             "items": items,
             "construction": construction
         }
 
-        all_files.append(user_data)
+        users_data.append(user_data)
 
+    all_files["user_data"] = users_data
     conn_user.close()
 
     # Load data from map_data.db
     conn_map = sqlite3.connect("map_data.db")
     cursor_map = conn_map.cursor()
-    cursor_map.execute("SELECT * FROM map_data")
+    cursor_map.execute("SELECT position, data, control FROM map_data")
     results_map = cursor_map.fetchall()
 
+    map_data = []
     for result_map in results_map:
-        position_str, data_str, controlled_by = result_map
+        position_str, data_str, control = result_map
         data = json.loads(data_str)
         x_pos, y_pos = map(int, position_str.split(","))
-        map_data = {"position": (x_pos, y_pos), "data": data, "controlled_by": controlled_by}
-        all_files.append(map_data)
+        map_info = {
+            "x_pos": x_pos,
+            "y_pos": y_pos,
+            "data": data
+        }
 
+        if control is not None:
+            map_info["control"] = json.loads(control)
+        else:
+            map_info["control"] = None
+
+        map_data.append(map_info)
+
+    all_files["construction"] = map_data
     conn_map.close()
 
     return all_files
