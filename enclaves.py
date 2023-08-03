@@ -110,7 +110,6 @@ class MoveHandler(BaseHandler):
                 return True
             return False
 
-
         if entry == "left":
             moved = move(user, -1, "x_pos", max_size)
         elif entry == "right":
@@ -150,7 +149,7 @@ class ChopHandler(BaseHandler):
         if not has_item(user, item):
             message = f"You have no {item} at hand"
 
-        elif proper_tile:
+        elif proper_tile and file["action_points"] > 0:
             new_wood = file["resources"]["wood"] + 1
             new_ap = file["action_points"] - 1
 
@@ -162,8 +161,11 @@ class ChopHandler(BaseHandler):
             update_user_file(user, updated_values)
             message = "Chopping successful"
 
-        else:
+        elif not proper_tile:
             message = "Not on a forest tile"
+
+        else:
+            message = "Out of action points"
 
         file = load_user_file(user)
         occupied = on_tile(file["x_pos"], file["y_pos"])
@@ -173,6 +175,7 @@ class ChopHandler(BaseHandler):
                     file=load_user_file(user),
                     message=message,
                     on_tile=occupied)
+
 
 
 class LoginHandler(BaseHandler):
