@@ -165,7 +165,7 @@ class ChopHandler(BaseHandler):
             message = "Not on a forest tile"
 
         else:
-            message = "Out of action points"
+            message = "Out of action points to chop"
 
         file = load_user_file(user)
         occupied = on_tile(file["x_pos"], file["y_pos"])
