@@ -1,0 +1,46 @@
+Resources:
+- Food (Produced from farm)
+- Wood (Harvested by people)
+- Population (Generated from houses)
+- Bismuth (Extracted from mines)
+- Nado (?)
+- Soldiers (Food + Population; Offense is with player + Defense, assigned to buildings)
+
+Structures:
+- Wood → House (Increase population)
+- Barracks (Increase population → Soldiers)
+- Farm (Increase population → Food)
+- Mine (Increase population → Bismuth)
+- Laboratory (Research???)
+- Sawmill (Convert wood to resources)
+- Smelter (Process bismuth)
+- Hospital
+
+Special Buildings:
+- Tavern (Improves personal health points)
+- Academy (Improves personal experience)
+
+Game Mechanics:
+- 1v1 battles when players are on the same tile
+- 100 action points per turn (block)
+- 1 movement costs one action point
+
+Personal Items:
+- Armor
+- Medipack
+- Cosmetic NFTs
+
+Army Constitution:
+- Turns to build units/buildings?
+- Detailed battle simulation (inspired by Warlords III)
+- Imperium Galactica
+- Factorio
+- Dwarf Fortress-like mechanics
+- Travian-like mechanics
+- Red Dragon-like mechanics
+- Diablo-like items with rolled stats
+
+General Features:
+- Index map positions to map JSON file based on X, Y (supporting more than 100 players)
+- Quest system
+- Minecraft-style recipe system
