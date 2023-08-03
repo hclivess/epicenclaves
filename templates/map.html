@@ -5,14 +5,54 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏰</text></svg>">
 <title>Epic Enclaves</title>
 <style>
+
 body {
   margin: 0;
   padding: 0;
-  background-color: #f0f8f0; /* Very light green background */
+  background-color: #f0f8f0;
+  font-family: Arial, sans-serif;
 }
 
 .map {
   position: relative;
+  margin-top: 50px;
+}
+
+.navigation-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 1em;
+  background-color: rgba(0, 0, 0, 0.1);
+  /* border-radius: 0 0 15px 0; */ /* Remove this line */
+  z-index: 9999;
+}
+
+.btn-group {
+  display: flex;
+  background-color: transparent;
+}
+
+.btn-group a {
+  text-decoration: none;
+  padding: 0.5em 1em;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-right: 5px;
+}
+
+.btn-group a:last-child {
+  margin-right: 0;
+}
+
+.btn-group a:hover {
+  background-color: #0056b3;
 }
 
 .grid-line {
@@ -51,75 +91,25 @@ body {
   z-index: 1;
 }
 
-.sawmill:before {
-  content: "\1FA93 ";
-  font-size: 20px;
-}
+/* Icons using ::before pseudo-element */
+.sawmill:before { content: "\1FA93 "; font-size: 20px; }
+.barracks:before { content: "\2694 "; font-size: 20px; }
+.house:before { content: "\1F3E0 "; font-size: 20px; }
+.farm:before { content: "\1F33E "; font-size: 20px; }
+.mine:before { content: "\26CF "; font-size: 20px; }
+.forest:before { content: "\1F332 "; font-size: 30px; }
 
-.barracks:before {
-  content: "\2694 ";
-  font-size: 20px;
-}
-
-.house:before {
-  content: "\1F3E0 ";
-  font-size: 20px;
-}
-
-.farm:before {
-  content: "\1F33E ";
-  font-size: 20px;
-}
-
-.mine:before {
-  content: "\26CF ";
-  font-size: 20px;
-}
-
-.forest:before {
-  content: "\1F332 ";
-  font-size: 30px;
-}
-
-.forest {
-  background-color: darkgreen;
-  color: white;
-}
-
-.sawmill {
-  background-color: blue;
-}
-
-.farm {
-  background-color: green;
-}
-
-.barracks {
-  background-color: red;
-}
-
-.mine {
-  background-color: #B59410;
-}
-
-.house {
-  background-color: gray;
-}
-
-.non-real-user-entity {
-  background-color: white;
-  z-index: 0;
-}
+/* Background color for entity types */
+.forest { background-color: darkgreen; color: white; }
+.sawmill { background-color: blue; }
+.farm { background-color: green; }
+.barracks { background-color: red; }
+.mine { background-color: #B59410; }
+.house { background-color: gray; }
 
 /* Additional styles for handling multiple entities on the same tile */
-.entity-group {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.entity-group .entity {
-  margin: 2px;
-}
+.entity-group { display: flex; flex-wrap: wrap; }
+.entity-group .entity { margin: 2px; }
 
 /* Styling for the exclamation mark emoji */
 .exclamation-mark {
@@ -142,27 +132,26 @@ body {
   visibility: hidden;
   opacity: 0;
   transition: opacity 0.2s, visibility 0.2s;
-  z-index: 10; /* Make sure the tooltip is above the entities */
+  z-index: 10;
 }
 
-.tooltip.visible {
-  visibility: visible;
-  opacity: 1;
-}
+.tooltip.visible { visibility: visible; opacity: 1; }
+
 </style>
 </head>
 <body>
 
-               <div class="btn-group">
-                  <a id="btnUp" class="btn btn-move btn-lg active" href="/move?direction=up&target=map" role="button">Up 🔼</a>
-                  <a id="btnDown" class="btn btn-move btn-lg active" href="/move?direction=down&target=map" role="button">Down 🔽</a>
-                  <a id="btnLeft" class="btn btn-move btn-lg active" href="/move?direction=left&target=map" role="button">Left ◀️</a>
-                  <a id="btnRight" class="btn btn-move btn-lg active" href="/move?direction=right&target=map" role="button">Right ▶️</a>
-                  <a class="btn btn-map btn-lg active" href="/" role="button">User Panel 👤</a>
-                  <a class="btn btn-quit btn-lg active" href="/logout" role="button">Logout 🌃</a>
+<div class="navigation-container">
+<div class="btn-group">
+  <a id="btnUp" class="btn btn-move btn-lg active" href="/move?direction=up&target=map" role="button">🔼 Up</a>
+  <a id="btnDown" class="btn btn-move btn-lg active" href="/move?direction=down&target=map" role="button">🔽 Down</a>
+  <a id="btnLeft" class="btn btn-move btn-lg active" href="/move?direction=left&target=map" role="button">◀️ Left</a>
+  <a id="btnRight" class="btn btn-move btn-lg active" href="/move?direction=right&target=map" role="button">▶️ Right</a>
+  <a class="btn btn-map btn-lg active" href="/" role="button">👤 User Panel</a>
+  <a class="btn btn-quit btn-lg active" href="/logout" role="button">🌃 Logout</a>
+</div>
+</div>
 
-
-               </div>
 
 <div class="map" id="map"></div>
 <script>
