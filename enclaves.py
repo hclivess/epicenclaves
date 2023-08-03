@@ -2,7 +2,7 @@ import asyncio
 import json
 import os.path
 from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_file, \
-    on_tile, load_files, build, update_user_file, hashify, occupied_by, has_item, generate_entities
+    on_tile, load_files, build, update_user_file, hashify, occupied_by, has_item, generate_entities, has_ap
 import tornado.ioloop
 import tornado.web
 import webbrowser
@@ -30,12 +30,14 @@ class MainHandler(BaseHandler):
             file = load_user_file(user)
             occupied = on_tile(file["x_pos"], file["y_pos"])
 
+            if file["action_points"] < 1:
+                message = f"You have action points left for this turn"
+
             self.render("templates/user_panel.html",
                         user=user,
                         file=load_user_file(user),
                         message=message,
                         on_tile=occupied)
-
 
 
 class LogoutHandler(BaseHandler):
@@ -99,12 +101,15 @@ class MoveHandler(BaseHandler):
         def move(user, direction, axis_key, axis_limit):
             file = load_user_file(user)
             new_pos = file[axis_key] + direction
-            if 1 <= new_pos <= axis_limit:
+
+            # Check if the action points are more than 0 before allowing movement
+            if file["action_points"] > 0 and 1 <= new_pos <= axis_limit:
                 update_user_file(user, axis_key, new_pos)
                 new_ap = file["action_points"] - 1
                 update_user_file(user, "action_points", new_ap)
                 return True
             return False
+
 
         if entry == "left":
             moved = move(user, -1, "x_pos", max_size)
@@ -116,10 +121,9 @@ class MoveHandler(BaseHandler):
             moved = move(user, -1, "y_pos", max_size)
         else:
             moved = False
-        message = "Moved" if moved else "Invalid move"
+        message = "Moved" if moved else "Moved out of bounds or no action points left"
 
         if target == "map":
-
 
             self.render("templates/map.html",
                         user=user,
@@ -141,8 +145,8 @@ class ChopHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
         file = load_user_file(user)
         proper_tile = occupied_by(file["x_pos"], file["y_pos"], what="forest")
-
         item = "axe"
+
         if not has_item(user, item):
             message = f"You have no {item} at hand"
 
