@@ -268,7 +268,6 @@ def load_files():
         position_str, data_str, control = result_map
         data = json.loads(data_str)
 
-
         x_pos, y_pos = map(int, position_str.split(","))
         map_info = {
             "x_pos": x_pos,
@@ -276,9 +275,9 @@ def load_files():
             "data": data
         }
 
-        if control is not None:
-            map_info["control"] = json.loads(control)
-        else:
+        try:
+            map_info["control"] = json.loads(control) if control else None
+        except json.JSONDecodeError:
             map_info["control"] = None
 
         map_data.append(map_info)
