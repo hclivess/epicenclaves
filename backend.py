@@ -39,20 +39,20 @@ def hashify(data):
     return hashified
 
 
-def on_tile(x, y):
+def tile_occupied(x, y):
     # Use the get_map_data function to retrieve data for the given position
     entities = sqlite.get_map_data(x_pos=x, y_pos=y)
 
-    entity_data_list = []
     for entity in entities:
         if "data" in entity:
-            entity_data_list.append({
+            return {
                 "x_pos": entity["x_pos"],
                 "y_pos": entity["y_pos"],
                 "data": entity["data"],
-            })
+            }
 
-    return entity_data_list
+    # If there are no entities with "data", return None
+    return None
 
 
 
@@ -194,11 +194,13 @@ class Actions:
     def get(self, type):
         if type == "inn":
             actions = [{"name": "sleep 10 hours", "action": "/rest?hours=10"},
-                       {"name": "sleep 20 hours", "action": "/rest?hours=20"}]
+                       {"name": "sleep 20 hours", "action": "/rest?hours=20"},
+                       {"name": "conquer", "action": "/conquer"}]
         elif type == "forest":
-            actions = [{"name": "chop", "action": "/chop"}]
+            actions = [{"name": "chop", "action": "/chop"},
+                       {"name": "conquer", "action": "/conquer"}]
         else:
-            actions = []
+            actions = [{"name": "conquer", "action": "/conquer"}]
 
         return actions
 
@@ -327,6 +329,42 @@ def exists_user(user):
     result = users_db_cursor.fetchall()
 
     return bool(result)
+def remove_construction(user, construction_coordinates):
+    # Connect to the database
+
+    #TODO CHANGE IN MAP INDEX TOO
+    conn = sqlite3.connect("db/user_data.db")
+    cursor = conn.cursor()
+
+    # Fetch the current user data from the database
+    cursor.execute("SELECT data FROM user_data WHERE username=?", (user,))
+    result = cursor.fetchone()
+
+    if not result:
+        print("User not found")
+        return
+
+    data_str = result[0]
+    # Convert the data string back to a dictionary
+    data = json.loads(data_str)
+
+    # Check if 'construction' key is in the data and is a list
+    if "construction" in data and isinstance(data["construction"], list):
+        # Iterate over the list and remove the construction with the given coordinates
+        data["construction"] = [construction for construction in data["construction"]
+                                if not (
+                        construction['x_pos'] == construction_coordinates['x_pos'] and construction['y_pos'] ==
+                        construction_coordinates['y_pos'])]
+
+    # Convert the updated data back to a JSON string
+    updated_data_str = json.dumps(data)
+
+    # Update the user data in the database
+    cursor.execute("UPDATE user_data SET data=? WHERE username=?", (updated_data_str, user))
+
+    # Commit changes and close the connection
+    conn.commit()
+    conn.close()
 
 def update_user_data(user, updated_values):
     # Connect to the database

@@ -197,22 +197,20 @@ hr {
             <div class="col-md-6">
                <h4>Current Tile</h4>
 
-               {%for entity in on_tile%}
 
 
                <div class="col">
-                <p>Type: {{entity["data"]["type"]}}</p>
-                <p><img src=/img/assets/{{entity["data"]["type"]}}.png alt="Item Icon" class="menu-icon"></p>
-               <p>Position: {{entity["x_pos"]}}, {{entity["y_pos"]}}</p>
-                <p>Control: {{entity["data"]["control"]}}</p>
+                <p>Type: {{on_tile["data"]["type"]}}</p>
+                <p><img src=/img/assets/{{on_tile["data"]["type"]}}.png alt="Item Icon" class="menu-icon"></p>
+               <p>Position: {{on_tile["x_pos"]}}, {{on_tile["y_pos"]}}</p>
+                <p>Control: {{on_tile["data"]["control"]}}</p>
 
-                   {%for action in actions.get(entity["data"]["type"])%}
+                   {%for action in actions.get(on_tile["data"]["type"])%}
                         <p>Actions: <a id="btnAct" class="btn btn-move btn-lg active" href="{{action['action']}}" role="button">{{action['name']}}</a></p>
                     {%end%}
 
                </div>
 
-                  {%end%}
 
                <div class="col">
 

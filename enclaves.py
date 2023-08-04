@@ -9,7 +9,7 @@ import tornado.escape
 
 import backend
 from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_data, \
-    on_tile, load_map, build, occupied_by, has_item, generate_entities, update_user_data
+    tile_occupied, load_map, build, occupied_by, has_item, generate_entities, update_user_data, remove_construction
 from sqlite import create_map_table
 
 max_size = 1000
@@ -34,7 +34,7 @@ class MainHandler(BaseHandler):
 
             file = load_user_data(user)
             print("file", file)  # debug
-            occupied = on_tile(file["x_pos"], file["y_pos"])
+            occupied = tile_occupied(file["x_pos"], file["y_pos"])
             print("occupied", occupied)  # debug
 
             if file["action_points"] < 1:
@@ -73,9 +73,10 @@ class BuildHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
 
         user_data = load_user_data(user)
-        occupied = on_tile(user_data["x_pos"], user_data["y_pos"])
+        occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         if not occupied:
+            message = "Building procedure not yet defined"
             if entity == "house":
                 if user_data["wood"] >= 50:
                     update_user_data(user=user,
@@ -93,7 +94,7 @@ class BuildHandler(BaseHandler):
             message = "Cannot build here"
 
         user_data = load_user_data(user)
-        occupied = on_tile(user_data["x_pos"], user_data["y_pos"])
+        occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         self.render("templates/user_panel.html",
                     user=user,
@@ -141,7 +142,7 @@ class MoveHandler(BaseHandler):
                         message=message)
         else:
             file = load_user_data(user)
-            occupied = on_tile(file["x_pos"], file["y_pos"])
+            occupied = tile_occupied(file["x_pos"], file["y_pos"])
 
             self.render("templates/user_panel.html",
                         user=user,
@@ -181,7 +182,36 @@ class RestHandler(BaseHandler):
             message = "Out of action points to rest"
 
         file = load_user_data(user)
-        occupied = on_tile(file["x_pos"], file["y_pos"])
+        occupied = tile_occupied(file["x_pos"], file["y_pos"])
+
+        self.render("templates/user_panel.html",
+                    user=user,
+                    file=file,
+                    message=message,
+                    on_tile=occupied,
+                    actions=actions,
+                    descriptions=descriptions)
+
+
+class ConquerHandler(BaseHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        file = load_user_data(user)
+        this_tile = tile_occupied(file["x_pos"], file["y_pos"])
+
+        print(this_tile)
+
+        owner = this_tile["data"]["control"]
+
+        if this_tile and file["action_points"] > 0:
+            remove_construction(owner, {"x_pos": file["x_pos"], "y_pos": file["y_pos"]})
+            update_user_data(user=user, updated_values={"construction": this_tile, "action_points": file["action_points"] - 1})
+            message = "Chopping successful"
+        else:
+            message = "Unable to conquer"
+
+        file = load_user_data(user)
+        occupied = tile_occupied(file["x_pos"], file["y_pos"])
 
         self.render("templates/user_panel.html",
                     user=user,
@@ -218,7 +248,7 @@ class ChopHandler(BaseHandler):
             message = "Out of action points to chop"
 
         file = load_user_data(user)
-        occupied = on_tile(file["x_pos"], file["y_pos"])
+        occupied = tile_occupied(file["x_pos"], file["y_pos"])
 
         self.render("templates/user_panel.html",
                     user=user,
@@ -243,7 +273,7 @@ class LoginHandler(BaseHandler):
             message = f"Welcome, {user}!"
 
             file = load_user_data(user)
-            occupied = on_tile(file["x_pos"], file["y_pos"])
+            occupied = tile_occupied(file["x_pos"], file["y_pos"])
 
             self.render("templates/user_panel.html",
                         user=user,
@@ -263,6 +293,7 @@ def make_app():
         (r"/logout(.*)", LogoutHandler),
         (r"/move(.*)", MoveHandler),
         (r"/chop", ChopHandler),
+        (r"/conquer", ConquerHandler),
         (r"/map", MapHandler),
         (r"/rest(.*)", RestHandler),
         (r"/build(.*)", BuildHandler),
