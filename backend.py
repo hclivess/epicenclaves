@@ -226,59 +226,73 @@ def load_user_data(user):
     else:
         return None
 
-def load_files():
+
+def load_map(user):
     users_data = []  # Create an empty list to store user data
 
     # Load data from user_data.db
     conn_user = sqlite3.connect("user_data.db")
     cursor_user = conn_user.cursor()
-    cursor_user.execute("SELECT * FROM user_data")
-    results_user = cursor_user.fetchall()
+    cursor_user.execute("SELECT * FROM user_data WHERE username = ?", (user,))
+    result_user = cursor_user.fetchone()
 
-    for result_user in results_user:
-        (username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood,
-         food, bismuth, items_str, construction_str) = result_user
+    if not result_user:
+        print("User not found")
+        return
 
-        # Convert the items string back to a list of dictionaries
-        items = json.loads(items_str)
+    (username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood,
+     food, bismuth, items_str, construction_str) = result_user
 
-        # Convert the construction string back to a list
-        construction = json.loads(construction_str)
+    # Convert the items string back to a list of dictionaries
+    items = json.loads(items_str)
 
-        user_data = {
-            "username": username,
-            "type": user_type,
-            "age": age,
-            "img": img,
-            "x_pos": x_pos,
-            "y_pos": y_pos,
-            "exp": exp,
-            "hp": hp,
-            "armor": armor,
-            "action_points": action_points,
-            "resources": {"bismuth": bismuth, "wood": wood, "food": food},
-            "items": items,
-            "construction": construction
-        }
+    # Convert the construction string back to a list
+    construction = json.loads(construction_str)
 
-        users_data.append(user_data)
+    user_data = {
+        "username": username,
+        "type": user_type,
+        "age": age,
+        "img": img,
+        "x_pos": x_pos,
+        "y_pos": y_pos,
+        "exp": exp,
+        "hp": hp,
+        "armor": armor,
+        "action_points": action_points,
+        "resources": {"bismuth": bismuth, "wood": wood, "food": food},
+        "items": items,
+        "construction": construction
+    }
+
+    users_data.append(user_data)
 
     conn_user.close()
 
     # Load data from map_data.db
     conn_map = sqlite3.connect("map_data.db")
     cursor_map = conn_map.cursor()
-    cursor_map.execute("SELECT x_pos, y_pos, data FROM map_data")  # Here
+
+    # Calculate the square of the distance
+    distance_squared = 500 ** 2
+
+    # Query to fetch map data within a distance of 500 from the user
+    cursor_map.execute("""
+        SELECT x_pos, y_pos, data 
+        FROM map_data 
+        WHERE ((x_pos - ?)*(x_pos - ?) + (y_pos - ?)*(y_pos - ?)) <= ?
+    """, (x_pos, x_pos, y_pos, y_pos, distance_squared))
+
     results_map = cursor_map.fetchall()
 
     map_data = []
     for result_map in results_map:
-        x_pos, y_pos, data_str = result_map
+        x_map, y_map, data_str = result_map
         data = json.loads(data_str)
 
         map_info = {
-            "x_pos": x_pos,
-            "y_pos": y_pos,
+            "x_pos": x_map,
+            "y_pos": y_map,
             **data  # Use the unpacking operator to merge the 'data' dictionary into 'map_info'
         }
 
@@ -287,9 +301,8 @@ def load_files():
     conn_map.close()
 
     # Combine users_data and map_data into a single list
-    total_data = users_data + [{"construction": map_data}]  # Efficiency can be improved here.
+    total_data = users_data + [{"construction": map_data}]
     return total_data
-
 
 
 def update_user_values(user, attribute, new_value):

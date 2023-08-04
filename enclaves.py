@@ -8,7 +8,7 @@ import tornado.ioloop
 import tornado.web
 
 from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_data, \
-    on_tile, load_files, build, update_user_file, occupied_by, has_item, generate_entities, update_user_values
+    on_tile, load_map, build, update_user_file, occupied_by, has_item, generate_entities, update_user_values
 from sqlite import create_map_table
 
 max_size = 1000
@@ -54,7 +54,9 @@ class LogoutHandler(BaseHandler):
 
 class MapHandler(BaseHandler):
     def get(self):
-        data = json.dumps(load_files())
+        user = tornado.escape.xhtml_escape(self.current_user)
+
+        data = json.dumps(load_map(user=user))
         # print("data", data) #debug todo: selective map drawing around player
         self.render("templates/map.html",
                     data=data,
@@ -148,7 +150,7 @@ class MoveHandler(BaseHandler):
 
             self.render("templates/map.html",
                         user=user,
-                        data=json.dumps(load_files()),
+                        data=json.dumps(load_map(user=user)),
                         message=message)
         else:
             file = load_user_data(user)
