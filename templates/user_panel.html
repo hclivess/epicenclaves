@@ -204,7 +204,7 @@ hr {
                <p>Position: {{entity["x_pos"]}}, {{entity["y_pos"]}}</p>
                 <p>Control: {{entity["control"]}}</p>
 
-                   {%for action in entity["data"]["actions"]%}
+                   {%for action in actions.get(entity["data"]["type"])%}
                         <p>Actions: <a id="btnAct" class="btn btn-move btn-lg active" href="{{action['action']}}" role="button">{{action['name']}}</a></p>
                     {%end%}
 

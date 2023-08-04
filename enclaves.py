@@ -7,6 +7,7 @@ import webbrowser
 import tornado.ioloop
 import tornado.web
 
+import backend
 from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_data, \
     on_tile, load_map, build, update_user_file, occupied_by, has_item, generate_entities, update_user_values
 from sqlite import create_map_table
@@ -43,7 +44,8 @@ class MainHandler(BaseHandler):
                         user=user,
                         file=file,
                         message=message,
-                        on_tile=occupied)
+                        on_tile=occupied,
+                        actions=backend.Actions())
 
 
 class LogoutHandler(BaseHandler):
@@ -72,20 +74,11 @@ class BuildHandler(BaseHandler):
         user_data = load_user_data(user)
         occupied = on_tile(user_data["x_pos"], user_data["y_pos"])
 
-        if entity == "inn":
-            actions = [
-                {"name": "sleep 10 hours", "action": "/rest?hours=10"},
-                {"name": "sleep 20 hours", "action": "/rest?hours=20"}
-            ]
-        else:
-            actions = None
-
         if not occupied:
             build(entity=entity,
                   name=name,
                   user=user,
-                  file=user_data,
-                  actions=actions)
+                  file=user_data)
 
             message = f"Successfully built {entity}"
         else:
@@ -98,7 +91,8 @@ class BuildHandler(BaseHandler):
                     user=user,
                     file=user_data,
                     message=message,
-                    on_tile=occupied)
+                    on_tile=occupied,
+                    actions=backend.Actions())
 
 
 import tornado.escape
@@ -160,7 +154,8 @@ class MoveHandler(BaseHandler):
                         user=user,
                         file=file,
                         message=message,
-                        on_tile=occupied)
+                        on_tile=occupied,
+                        actions=backend.Actions())
 
 
 class RestHandler(BaseHandler):
@@ -198,7 +193,8 @@ class RestHandler(BaseHandler):
                     user=user,
                     file=file,
                     message=message,
-                    on_tile=occupied)
+                    on_tile=occupied,
+                    actions=backend.Actions())
 
 
 class ChopHandler(BaseHandler):
@@ -233,7 +229,8 @@ class ChopHandler(BaseHandler):
                     user=user,
                     file=file,
                     message=message,
-                    on_tile=occupied)
+                    on_tile=occupied,
+                    actions=backend.Actions())
 
 
 class LoginHandler(BaseHandler):
@@ -256,7 +253,8 @@ class LoginHandler(BaseHandler):
                         user=user,
                         file=file,
                         message=message,
-                        on_tile=occupied)
+                        on_tile=occupied,
+                        actions=backend.Actions())
         else:
             self.render("templates/notfound.html")
 

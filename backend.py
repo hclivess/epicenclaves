@@ -103,7 +103,6 @@ def insert_map_data(db_file, data):
         "name": data["name"],
         "hp": data["hp"],
         "size": data["size"],
-        "actions": data["actions"],
         "control": data["control"],
         "type": data["type"]
     })
@@ -119,9 +118,7 @@ def insert_map_data(db_file, data):
     conn.close()
 
 
-def build(entity, name, user, file, actions=None):
-    if actions is None:
-        actions = []
+def build(entity, name, user, file):
 
     # Prepare the entity data based on the entity type
     entity_data = {
@@ -135,7 +132,6 @@ def build(entity, name, user, file, actions=None):
         "name": name,
         "hp": 100,
         "size": 1,
-        "actions": actions,
         "control": user,
         **entity_data
     }
@@ -183,6 +179,18 @@ def create_user_file(user):
     # Commit changes and close the connection
     conn.commit()
     conn.close()
+
+class Actions:
+    def get(self, type):
+        if type == "inn":
+            actions = [{"name": "sleep 10 hours", "action": "/rest?hours=10"},
+                       {"name": "sleep 20 hours", "action": "/rest?hours=20"}]
+        elif type == "forest":
+            actions = [{"name": "chop", "action": "/chop"}]
+        else:
+            actions = []
+
+        return actions
 
 
 def load_user_data(user):
