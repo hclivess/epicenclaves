@@ -208,6 +208,8 @@ class Descriptions:
             description = "A tool to cut wood with in the forest."
         elif type == "house":
             description = "A place for people to live in. Building a house increases your population limit."
+        elif type == "inn":
+            description = "A place to rest and restore health."
         else:
             description = "Description missing."
 
