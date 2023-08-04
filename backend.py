@@ -62,15 +62,17 @@ def has_item(player, item_name):
     cursor = conn.cursor()
 
     # Get the row for the specified player from the user_data table
-    cursor.execute("SELECT items FROM user_data WHERE username=?", (player,))
+    cursor.execute("SELECT data FROM user_data WHERE username=?", (player,))
     result = cursor.fetchone()
 
     # Close the connection
     conn.close()
 
     if result:
-        items_str = result[0]
-        items = json.loads(items_str)
+        data_str = result[0]
+        data = json.loads(data_str)
+        items = data.get('items', [])
+
         for item in items:
             if item.get("type") == item_name:
                 return True
