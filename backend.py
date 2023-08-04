@@ -46,12 +46,15 @@ def on_tile(x, y):
     entity_data_list = []
     for entity in entities:
         if "data" in entity:
-            entity_data_list.append({"x_pos": entity["x_pos"],
-                                     "y_pos": entity["y_pos"],
-                                     "data": entity["data"],
-                                     "control": entity["control"]})
+            entity_data_list.append({
+                "x_pos": entity["x_pos"],
+                "y_pos": entity["y_pos"],
+                "data": entity["data"],
+                "control": entity["control"]
+            })
 
     return entity_data_list
+
 
 
 def has_item(player, item_name):
@@ -134,7 +137,7 @@ def build(entity, name, user, file):
         **entity_data
     }
 
-    update_user_file(user, data, column="construction")
+    update_user_file(user, data, key="construction")
     insert_map_data("db/map_data.db", data)
 
 
@@ -317,41 +320,69 @@ def update_user_values(user, attribute, new_value):
     conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
 
-    # Update the specified attribute for the given user
-    cursor.execute(f"UPDATE user_data SET {attribute}=? WHERE username=?", (new_value, user))
-
-    # Commit the changes to the database
-    conn.commit()
-
-    # Close the database connection
-    conn.close()
-
-
-def update_user_file(user, updated_values, column):
-    # Connect to the database
-    conn = sqlite3.connect("db/user_data.db")
-    cursor = conn.cursor()
-
-    # Retrieve the existing data for the user
-    cursor.execute(f"SELECT {column} FROM user_data WHERE username=?", (user,))
+    # Fetch the current user data from the database
+    cursor.execute("SELECT data FROM user_data WHERE username=?", (user,))
     result = cursor.fetchone()
 
-    # Convert the column string back to a list
-    column_str = result[0]
-    column_data = json.loads(column_str)
+    if not result:
+        print("User not found")
+        return
 
-    # Update the data with the new values
-    column_data.append(updated_values)
+    data_str = result[0]
 
-    # Serialize the updated data list back to a string for storage
-    updated_column_str = json.dumps(column_data)
+    # Convert the data string back to a dictionary
+    data = json.loads(data_str)
 
-    # Update the specified column with the new data
-    cursor.execute(f"UPDATE user_data SET {column}=? WHERE username=?", (updated_column_str, user))
+    # Update the attribute value
+    data[attribute] = new_value
+
+    # Convert the updated data back to a JSON string
+    updated_data_str = json.dumps(data)
+
+    # Update the user data in the database
+    cursor.execute("UPDATE user_data SET data=? WHERE username=?", (updated_data_str, user))
 
     # Commit changes and close the connection
     conn.commit()
     conn.close()
+
+
+
+def update_user_file(user, updated_values, key):
+    # Connect to the database
+    conn = sqlite3.connect("db/user_data.db")
+    cursor = conn.cursor()
+
+    # Fetch the current user data from the database
+    cursor.execute("SELECT data FROM user_data WHERE username=?", (user,))
+    result = cursor.fetchone()
+
+    if not result:
+        print("User not found")
+        return
+
+    data_str = result[0]
+
+    # Convert the data string back to a dictionary
+    data = json.loads(data_str)
+
+    # Check if the key is in data and it is a list
+    if key in data and isinstance(data[key], list):
+        # Append the new values to the list
+        data[key].extend(updated_values)
+    else:
+        print(f"{key} not found in user data or it is not a list")
+
+    # Convert the updated data back to a JSON string
+    updated_data_str = json.dumps(data)
+
+    # Update the user data in the database
+    cursor.execute("UPDATE user_data SET data=? WHERE username=?", (updated_data_str, user))
+
+    # Commit changes and close the connection
+    conn.commit()
+    conn.close()
+
 
 
 def add_user(user, password):
