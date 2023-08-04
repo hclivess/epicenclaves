@@ -185,7 +185,7 @@ def create_user_file(user):
     conn.close()
 
 
-def load_user_file(user):
+def load_user_data(user):
     # Connect to the database
     conn = sqlite3.connect("user_data.db")
     cursor = conn.cursor()
@@ -268,15 +268,14 @@ def load_files():
     # Load data from map_data.db
     conn_map = sqlite3.connect("map_data.db")
     cursor_map = conn_map.cursor()
-    cursor_map.execute("SELECT position, data FROM map_data")  # here
+    cursor_map.execute("SELECT x_pos, y_pos, data FROM map_data")  # Here
     results_map = cursor_map.fetchall()
 
     map_data = []
     for result_map in results_map:
-        position_str, data_str = result_map
+        x_pos, y_pos, data_str = result_map
         data = json.loads(data_str)
 
-        x_pos, y_pos = map(int, position_str.split(","))
         map_info = {
             "x_pos": x_pos,
             "y_pos": y_pos,
@@ -288,25 +287,28 @@ def load_files():
     conn_map.close()
 
     # Combine users_data and map_data into a single list
-    total_data = users_data + [{"construction": map_data}] #todo efficiency
+    total_data = users_data + [{"construction": map_data}]  # Efficiency can be improved here.
     return total_data
 
 
-def update_values(user, new_wood, new_ap):
-    """TEMPORARY THIS NEEDS UPGRADE"""
+
+def update_user_values(user, attribute, new_value):
+    """
+    Update the specified attribute with the new value for the given user in the database.
+    """
     # Connect to the database
     conn = sqlite3.connect("user_data.db")
     cursor = conn.cursor()
 
-    # Assuming 'user_id' is a unique identifier for each user in the database
-    # Update the values in the 'wood' and 'action_points' columns for the specified user
-    cursor.execute("UPDATE user_data SET wood=?, action_points=? WHERE username=?", (new_wood, new_ap, user))
+    # Update the specified attribute for the given user
+    cursor.execute(f"UPDATE user_data SET {attribute}=? WHERE username=?", (new_value, user))
 
     # Commit the changes to the database
     conn.commit()
 
     # Close the database connection
     conn.close()
+
 
 def update_user_file(user, updated_values, column):
     # Connect to the database

@@ -7,8 +7,8 @@ import webbrowser
 import tornado.ioloop
 import tornado.web
 
-from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_file, \
-    on_tile, load_files, build, update_user_file, occupied_by, has_item, generate_entities, update_values
+from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_data, \
+    on_tile, load_files, build, update_user_file, occupied_by, has_item, generate_entities, update_user_values
 from sqlite import create_map_table
 
 max_size = 1000
@@ -31,10 +31,10 @@ class MainHandler(BaseHandler):
             user = tornado.escape.xhtml_escape(self.current_user)
             message = f"Welcome back, {user}"
 
-            file = load_user_file(user)
-            #print("file", file)  # debug
+            file = load_user_data(user)
+            # print("file", file)  # debug
             occupied = on_tile(file["x_pos"], file["y_pos"])
-            #print("occupied", occupied)  # debug
+            # print("occupied", occupied)  # debug
 
             if file["action_points"] < 1:
                 message = f"You have action points left for this turn"
@@ -55,7 +55,7 @@ class LogoutHandler(BaseHandler):
 class MapHandler(BaseHandler):
     def get(self):
         data = json.dumps(load_files())
-        #print("data", data) #debug todo: selective map drawing around player
+        # print("data", data) #debug todo: selective map drawing around player
         self.render("templates/map.html",
                     data=data,
                     ensure_ascii=False)
@@ -67,11 +67,14 @@ class BuildHandler(BaseHandler):
         name = self.get_argument("name")
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        file = load_user_file(user)
-        occupied = on_tile(file["x_pos"], file["y_pos"])
+        user_data = load_user_data(user)
+        occupied = on_tile(user_data["x_pos"], user_data["y_pos"])
 
         if entity == "inn":
-            actions = ["rest"]
+            actions = [
+                {"name": "sleep 10 hours", "action": "/rest?hours=10"},
+                {"name": "sleep 20 hours", "action": "/rest?hours=20"}
+            ]
         else:
             actions = None
 
@@ -79,24 +82,25 @@ class BuildHandler(BaseHandler):
             build(entity=entity,
                   name=name,
                   user=user,
-                  file=file,
+                  file=user_data,
                   actions=actions)
 
             message = f"Successfully built {entity}"
         else:
             message = "Cannot build here"
 
-        file = load_user_file(user)
-        occupied = on_tile(file["x_pos"], file["y_pos"])
+        user_data = load_user_data(user)
+        occupied = on_tile(user_data["x_pos"], user_data["y_pos"])
 
         self.render("templates/user_panel.html",
                     user=user,
-                    file=file,
+                    file=user_data,
                     message=message,
                     on_tile=occupied)
 
 
 import tornado.escape
+
 
 class MoveHandler(BaseHandler):
     def get(self, data):
@@ -117,7 +121,7 @@ class MoveHandler(BaseHandler):
             conn.close()
 
         def move(user, direction, axis_key, axis_limit):
-            file = load_user_file(user)
+            file = load_user_data(user)
             new_pos = file[axis_key] + direction
 
             # Check if the action points are more than 0 before allowing movement
@@ -147,7 +151,7 @@ class MoveHandler(BaseHandler):
                         data=json.dumps(load_files()),
                         message=message)
         else:
-            file = load_user_file(user)
+            file = load_user_data(user)
             occupied = on_tile(file["x_pos"], file["y_pos"])
 
             self.render("templates/user_panel.html",
@@ -157,11 +161,48 @@ class MoveHandler(BaseHandler):
                         on_tile=occupied)
 
 
+class RestHandler(BaseHandler):
+    def get(self, parameters):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        file = load_user_data(user)
+        hours = self.get_argument("hours", default="1")
+
+        proper_tile = occupied_by(file["x_pos"], file["y_pos"], what="inn")
+
+        if proper_tile and file["action_points"] > 0 and file["hp"] < 99:
+            new_hp = file["hp"] + int(hours)
+            new_ap = file["action_points"] - int(hours)
+            if new_hp > 100:
+                new_hp = 100
+
+            update_user_values(user=user, attribute="hp", new_value=new_hp)
+            update_user_values(user=user, attribute="action_points", new_value=new_ap)
+
+            message = "You feel more rested"
+
+        elif file["hp"] > 99:
+            message = "You are already fully rested"
+
+        elif not proper_tile:
+            message = "You cannot rest here, inn required"
+
+        else:
+            message = "Out of action points to rest"
+
+        file = load_user_data(user)
+        occupied = on_tile(file["x_pos"], file["y_pos"])
+
+        self.render("templates/user_panel.html",
+                    user=user,
+                    file=file,
+                    message=message,
+                    on_tile=occupied)
+
 
 class ChopHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-        file = load_user_file(user)
+        file = load_user_data(user)
         proper_tile = occupied_by(file["x_pos"], file["y_pos"], what="forest")
         item = "axe"
 
@@ -172,7 +213,8 @@ class ChopHandler(BaseHandler):
             new_wood = file["wood"] + 1
             new_ap = file["action_points"] - 1
 
-            update_values(user=user, new_ap=new_ap, new_wood=new_wood)
+            update_user_values(user=user, attribute="wood", new_value=new_wood)
+            update_user_values(user=user, attribute="action_points", new_value=new_ap)
 
             message = "Chopping successful"
 
@@ -182,7 +224,7 @@ class ChopHandler(BaseHandler):
         else:
             message = "Out of action points to chop"
 
-        file = load_user_file(user)
+        file = load_user_data(user)
         occupied = on_tile(file["x_pos"], file["y_pos"])
 
         self.render("templates/user_panel.html",
@@ -205,7 +247,7 @@ class LoginHandler(BaseHandler):
 
             message = f"Welcome, {user}!"
 
-            file = load_user_file(user)
+            file = load_user_data(user)
             occupied = on_tile(file["x_pos"], file["y_pos"])
 
             self.render("templates/user_panel.html",
@@ -225,10 +267,11 @@ def make_app():
         (r"/move(.*)", MoveHandler),
         (r"/chop", ChopHandler),
         (r"/map", MapHandler),
+        (r"/rest(.*)", RestHandler),
         (r"/build(.*)", BuildHandler),
         (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),
         (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),
-        (r'/(favicon.ico)', tornado.web.StaticFileHandler, {"path": "graphics"}),
+        # (r'/(favicon.ico)', tornado.web.StaticFileHandler, {"path": "graphics"}),
     ])
 
 
@@ -240,8 +283,6 @@ async def main():
     check_users_db()
     webbrowser.open(f"http://127.0.0.1:{port}")
 
-
-
     await asyncio.Event().wait()
 
 
@@ -251,7 +292,9 @@ if __name__ == "__main__":
 
         generate_entities(entity_type="forest",
                           probability=0.25,
-                          additional_entity_data={"actions": ["chop"]},
+                          additional_entity_data={"actions": [
+                              {"name": "Chop 1 wood", "action": "chop"},
+                          ]},
                           size=101,
                           every=5)
 
