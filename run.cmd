@@ -1,0 +1,2 @@
+python enclaves.py
+pause
