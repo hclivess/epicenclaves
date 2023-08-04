@@ -116,8 +116,27 @@ class MoveHandler(BaseHandler):
             conn = sqlite3.connect("db/user_data.db")
             cursor = conn.cursor()
 
-            # Update the specified key in the user_data table
-            cursor.execute(f"UPDATE user_data SET {key}=? WHERE username=?", (updated_value, user))
+            # Fetch the current user data from the database
+            cursor.execute("SELECT data FROM user_data WHERE username=?", (user,))
+            result = cursor.fetchone()
+
+            if not result:
+                print("User not found")
+                return
+
+            data_str = result[0]
+
+            # Convert the data string back to a dictionary
+            data = json.loads(data_str)
+
+            # Update the value of the specified key
+            data[key] = updated_value
+
+            # Convert the updated data back to a JSON string
+            updated_data_str = json.dumps(data)
+
+            # Update the user data in the database
+            cursor.execute("UPDATE user_data SET data=? WHERE username=?", (updated_data_str, user))
 
             # Commit changes and close the connection
             conn.commit()

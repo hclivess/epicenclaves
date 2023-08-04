@@ -146,38 +146,44 @@ def create_user_file(user):
     # Create the table if it doesn't exist
     cursor.execute('''CREATE TABLE IF NOT EXISTS user_data (
                         username TEXT PRIMARY KEY,
-                        type TEXT,
-                        age TEXT,
-                        img TEXT,
                         x_pos INTEGER,
                         y_pos INTEGER,
-                        exp INTEGER,
-                        hp INTEGER,
-                        armor INTEGER,
-                        action_points INTEGER,
-                        wood INTEGER,
-                        food INTEGER,
-                        bismuth INTEGER,
-                        items TEXT,
-                        construction TEXT,
-                        pop_lim INTEGER
+                        data TEXT
                       )''')
 
     # Convert the position tuple to a string representation
     x_pos, y_pos = 1, 1  # Replace these with the actual x_pos and y_pos values
 
-    # Convert items dictionary to a JSON string
-    items_data = [{"type": "axe"}]
-    items_str = json.dumps(items_data)
+    # Prepare the data dictionary
+    data = {
+        "type": "player",
+        "age": "0",
+        "img": "img/pp.png",
+        "exp": 0,
+        "hp": 100,
+        "armor": 0,
+        "action_points": 5000,
+        "wood": 0,
+        "food": 0,
+        "bismuth": 0,
+        "items": [{"type": "axe"}],
+        "construction": [],
+        "pop_lim": 0
+    }
+    data_str = json.dumps(data)
 
     # Insert the user data into the database
-    cursor.execute('''INSERT OR IGNORE INTO user_data (username, type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth, items, construction, pop_lim)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                   (user, "player", "0", "img/pp.png", x_pos, y_pos, 0, 100, 0, 5000, 0, 0, 0, items_str, "[]", 0))
+    cursor.execute('''INSERT OR IGNORE INTO user_data (username, x_pos, y_pos, data)
+                      VALUES (?, ?, ?, ?)''',
+                   (user, x_pos, y_pos, data_str))
 
     # Commit changes and close the connection
     conn.commit()
     conn.close()
+
+
+
+
 
 
 class Actions:
@@ -218,32 +224,20 @@ def load_user_data(user):
     conn.close()
 
     if result:
-        username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth, items_str, construction_str, pop_lim = result
+        username, x_pos, y_pos, data_str = result
 
-        # Convert the items string back to a list of dictionaries
-        items = json.loads(items_str)
+        # Convert the data string back to a dictionary
+        data = json.loads(data_str)
 
-        # Convert the construction string back to a list
-        construction = json.loads(construction_str)
-
-        return {
+        # Prepare the final result
+        user_data = {
             "username": username,
-            "type": user_type,
-            "age": age,
-            "img": img,
             "x_pos": x_pos,
-            "y_pos": y_pos,
-            "exp": exp,
-            "hp": hp,
-            "armor": armor,
-            "action_points": action_points,
-            "wood": wood,
-            "food": food,
-            "bismuth": bismuth,
-            "items": items,
-            "construction": construction,
-            "pop_lim": pop_lim
+            "y_pos": y_pos
         }
+        user_data.update(data)
+
+        return user_data
     else:
         return None
 
@@ -261,31 +255,18 @@ def load_map(user):
         print("User not found")
         return
 
-    (username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood,
-     food, bismuth, items_str, construction_str, pop_lim) = result_user
+    username, x_pos, y_pos, data_str = result_user
 
-    # Convert the items string back to a list of dictionaries
-    items = json.loads(items_str)
+    # Convert the data string back to a dictionary
+    data = json.loads(data_str)
 
-    # Convert the construction string back to a list
-    construction = json.loads(construction_str)
-
+    # Prepare the user_data dictionary
     user_data = {
         "username": username,
-        "type": user_type,
-        "age": age,
-        "img": img,
         "x_pos": x_pos,
-        "y_pos": y_pos,
-        "exp": exp,
-        "hp": hp,
-        "armor": armor,
-        "action_points": action_points,
-        "resources": {"bismuth": bismuth, "wood": wood, "food": food},
-        "items": items,
-        "construction": construction,
-        "pop_lim": pop_lim
+        "y_pos": y_pos
     }
+    user_data.update(data)  # This will add the data from 'data' to 'user_data'
 
     users_data.append(user_data)
 
@@ -325,6 +306,7 @@ def load_map(user):
     # Combine users_data and map_data into a single list
     total_data = users_data + [{"construction": map_data}]
     return total_data
+
 
 
 def update_user_values(user, attribute, new_value):
