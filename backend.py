@@ -19,7 +19,7 @@ def generate_entities(entity_type, probability, additional_entity_data=None, siz
                 print(f"Generating {data} on {x_pos}, {y_pos}")
                 if additional_entity_data:
                     data.update(additional_entity_data)
-                sqlite.save_map_data(position=(x_pos, y_pos), data=data, control=None)
+                sqlite.save_map_data(x_pos=x_pos, y_pos=y_pos, data=data, control=None)
 
 
 def check_users_db():
@@ -41,7 +41,7 @@ def hashify(data):
 
 def on_tile(x, y):
     # Use the get_map_data function to retrieve data for the given position
-    entities = sqlite.get_map_data(position=(x, y))
+    entities = sqlite.get_map_data(x_pos=x, y_pos=y)
 
     entity_data_list = []
     for entity in entities:
@@ -85,7 +85,7 @@ def has_ap(player):
 
 def occupied_by(x, y, what):
     # Use the get_map_data function to check if the given position is occupied by the specified entity type
-    entities = sqlite.get_map_data(position=(x, y))
+    entities = sqlite.get_map_data(x_pos=x, y_pos=y)
     for entity in entities:
         if entity["data"].get("type") == what:
             return True
@@ -98,17 +98,26 @@ def insert_map_data(db_file, data):
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
 
+    # Prepare the data dictionary to be stored as a JSON string
+    data_str = json.dumps({
+        "name": data["name"],
+        "hp": data["hp"],
+        "size": data["size"],
+        "actions": data["actions"],
+        "control": data["control"],
+        "type": data["type"]
+    })
+
     # Prepare and execute the SQL query to insert data into the map_data table
     cursor.execute(
-        "INSERT INTO map_data (position, data, control) VALUES (?, ?, ?)",
-        (f"{data['x_pos']},{data['y_pos']}",
-         f'{{"name": "{data["name"]}", "hp": {data["hp"]}, "size": {data["size"]}, "actions": {data["actions"]}, "control": "{data["control"]}", "type": "{data["type"]}"}}',
-         data["control"])
+        "INSERT OR REPLACE INTO map_data (x_pos, y_pos, data, control) VALUES (?, ?, ?, ?)",
+        (data['x_pos'], data['y_pos'], data_str, data["control"])
     )
 
     # Commit the changes and close the connection
     conn.commit()
     conn.close()
+
 
 def build(entity, name, user, file):
     # Prepare the entity data based on the entity type
