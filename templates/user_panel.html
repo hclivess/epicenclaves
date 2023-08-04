@@ -226,7 +226,7 @@ hr {
                <div class="col">
                 <p>Type: {{item["type"]}}</p>
                 <p><img src=/img/assets/{{item["type"]}}.png alt="Item Icon" class="menu-icon"></p>
-                <p>{{item["desc"]}}</p>
+                <p>{{descriptions.get(item["type"])}}</p>
                </div>
 
                   {%end%}

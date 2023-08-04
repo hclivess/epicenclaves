@@ -45,7 +45,8 @@ class MainHandler(BaseHandler):
                         file=file,
                         message=message,
                         on_tile=occupied,
-                        actions=backend.Actions())
+                        actions=actions,
+                        descriptions=descriptions)
 
 
 class LogoutHandler(BaseHandler):
@@ -92,7 +93,8 @@ class BuildHandler(BaseHandler):
                     file=user_data,
                     message=message,
                     on_tile=occupied,
-                    actions=backend.Actions())
+                    actions=actions,
+                    descriptions=descriptions)
 
 
 import tornado.escape
@@ -155,7 +157,8 @@ class MoveHandler(BaseHandler):
                         file=file,
                         message=message,
                         on_tile=occupied,
-                        actions=backend.Actions())
+                        actions=actions,
+                        descriptions=descriptions)
 
 
 class RestHandler(BaseHandler):
@@ -194,7 +197,8 @@ class RestHandler(BaseHandler):
                     file=file,
                     message=message,
                     on_tile=occupied,
-                    actions=backend.Actions())
+                    actions=actions,
+                    descriptions=descriptions)
 
 
 class ChopHandler(BaseHandler):
@@ -230,7 +234,8 @@ class ChopHandler(BaseHandler):
                     file=file,
                     message=message,
                     on_tile=occupied,
-                    actions=backend.Actions())
+                    actions=actions,
+                    descriptions=descriptions)
 
 
 class LoginHandler(BaseHandler):
@@ -254,7 +259,8 @@ class LoginHandler(BaseHandler):
                         file=file,
                         message=message,
                         on_tile=occupied,
-                        actions=backend.Actions())
+                        actions=actions,
+                        descriptions=descriptions)
         else:
             self.render("templates/notfound.html")
 
@@ -296,6 +302,8 @@ if __name__ == "__main__":
                           size=101,
                           every=5)
 
+    actions = backend.Actions()
+    descriptions = backend.Descriptions()
     asyncio.run(main())
     # If you want to add a test user after starting the server, you can call add_user here
     # add_user("testuser", "testpass")

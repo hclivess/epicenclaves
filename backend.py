@@ -168,7 +168,7 @@ def create_user_file(user):
     x_pos, y_pos = 1, 1  # Replace these with the actual x_pos and y_pos values
 
     # Convert items dictionary to a JSON string
-    items_data = [{"type": "axe", "desc": "A tool to cut wood with in the forest"}]
+    items_data = [{"type": "axe", "desc": "blabla"}]
     items_str = json.dumps(items_data)
 
     # Insert the user data into the database
@@ -192,6 +192,14 @@ class Actions:
 
         return actions
 
+class Descriptions:
+    def get(self, type):
+        if type == "axe":
+            description = "A tool to cut wood with in the forest"
+        else:
+            description = ""
+
+        return description
 
 def load_user_data(user):
     # Connect to the database
