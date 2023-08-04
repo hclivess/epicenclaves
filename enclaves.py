@@ -1,7 +1,6 @@
 import asyncio
 import json
 import os.path
-import sqlite3
 import webbrowser
 
 import tornado.ioloop
@@ -10,7 +9,7 @@ import tornado.escape
 
 import backend
 from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_data, \
-    on_tile, load_map, build, occupied_by, has_item, generate_entities, update_user_values
+    on_tile, load_map, build, occupied_by, has_item, generate_entities, update_user_data
 from sqlite import create_map_table
 
 max_size = 1000
@@ -84,7 +83,7 @@ class BuildHandler(BaseHandler):
 
             if entity == "house":
                 current_pop_lim = user_data["pop_lim"]
-                update_user_values(user, "pop_lim", current_pop_lim + 10)
+                update_user_data(user=user, updated_values={"pop_lim": current_pop_lim + 10})
 
             message = f"Successfully built {entity}"
         else:
@@ -111,46 +110,14 @@ class MoveHandler(BaseHandler):
         entry = self.get_argument("direction")
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        def update_user_data(user, key, updated_value):
-            # Connect to the database
-            conn = sqlite3.connect("db/user_data.db")
-            cursor = conn.cursor()
-
-            # Fetch the current user data from the database
-            cursor.execute("SELECT data FROM user_data WHERE username=?", (user,))
-            result = cursor.fetchone()
-
-            if not result:
-                print("User not found")
-                return
-
-            data_str = result[0]
-
-            # Convert the data string back to a dictionary
-            data = json.loads(data_str)
-
-            # Update the value of the specified key
-            data[key] = updated_value
-
-            # Convert the updated data back to a JSON string
-            updated_data_str = json.dumps(data)
-
-            # Update the user data in the database
-            cursor.execute("UPDATE user_data SET data=? WHERE username=?", (updated_data_str, user))
-
-            # Commit changes and close the connection
-            conn.commit()
-            conn.close()
-
         def move(user, direction, axis_key, axis_limit):
             file = load_user_data(user)
             new_pos = file[axis_key] + direction
 
             # Check if the action points are more than 0 before allowing movement
             if file["action_points"] > 0 and 1 <= new_pos <= axis_limit:
-                update_user_data(user, axis_key, new_pos)
-                new_ap = file["action_points"] - 1
-                update_user_data(user, "action_points", new_ap)
+                # Update both the position and the action points in one go
+                update_user_data(user, {axis_key: new_pos, "action_points": file["action_points"] - 1})
                 return True
             return False
 
@@ -199,8 +166,8 @@ class RestHandler(BaseHandler):
             if new_hp > 100:
                 new_hp = 100
 
-            update_user_values(user=user, attribute="hp", new_value=new_hp)
-            update_user_values(user=user, attribute="action_points", new_value=new_ap)
+            update_user_data(user=user, updated_values={"hp": new_hp})
+            update_user_data(user=user, updated_values={"action_points": new_ap})
 
             message = "You feel more rested"
 
@@ -239,8 +206,8 @@ class ChopHandler(BaseHandler):
             new_wood = file["wood"] + 1
             new_ap = file["action_points"] - 1
 
-            update_user_values(user=user, attribute="wood", new_value=new_wood)
-            update_user_values(user=user, attribute="action_points", new_value=new_ap)
+            update_user_data(user=user, updated_values={"wood": new_wood})
+            update_user_data(user=user, updated_values={"action_points": new_ap})
 
             message = "Chopping successful"
 

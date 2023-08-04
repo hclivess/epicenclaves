@@ -138,7 +138,7 @@ def build(entity, name, user, file):
         **entity_data
     }
 
-    update_user_file(user, data, key="construction")
+    update_user_data(user=user, updated_values={"construction": data})
     insert_map_data("db/map_data.db", data)
 
 
@@ -315,77 +315,6 @@ def load_map(user):
 
 
 
-def update_user_values(user, attribute, new_value):
-    """
-    Update the specified attribute with the new value for the given user in the database.
-    """
-    # Connect to the database
-    conn = sqlite3.connect("db/user_data.db")
-    cursor = conn.cursor()
-
-    # Fetch the current user data from the database
-    cursor.execute("SELECT data FROM user_data WHERE username=?", (user,))
-    result = cursor.fetchone()
-
-    if not result:
-        print("User not found")
-        return
-
-    data_str = result[0]
-
-    # Convert the data string back to a dictionary
-    data = json.loads(data_str)
-
-    # Update the attribute value
-    data[attribute] = new_value
-
-    # Convert the updated data back to a JSON string
-    updated_data_str = json.dumps(data)
-
-    # Update the user data in the database
-    cursor.execute("UPDATE user_data SET data=? WHERE username=?", (updated_data_str, user))
-
-    # Commit changes and close the connection
-    conn.commit()
-    conn.close()
-
-
-
-def update_user_file(user, updated_values, key):
-    # Connect to the database
-    conn = sqlite3.connect("db/user_data.db")
-    cursor = conn.cursor()
-
-    # Fetch the current user data from the database
-    cursor.execute("SELECT data FROM user_data WHERE username=?", (user,))
-    result = cursor.fetchone()
-
-    if not result:
-        print("User not found")
-        return
-
-    data_str = result[0]
-
-    # Convert the data string back to a dictionary
-    data = json.loads(data_str)
-
-    # Check if the key is in data and it is a list
-    if key in data and isinstance(data[key], list):
-        # Append the new values to the list
-        data[key].append(updated_values)  # use append instead of extend
-    else:
-        print(f"{key} not found in user data or it is not a list")
-
-    # Convert the updated data back to a JSON string
-    updated_data_str = json.dumps(data)
-
-    # Update the user data in the database
-    cursor.execute("UPDATE user_data SET data=? WHERE username=?", (updated_data_str, user))
-
-    # Commit changes and close the connection
-    conn.commit()
-    conn.close()
-
 
 
 def add_user(user, password):
@@ -398,6 +327,43 @@ def exists_user(user):
     result = users_db_cursor.fetchall()
 
     return bool(result)
+
+def update_user_data(user, updated_values):
+    # Connect to the database
+    conn = sqlite3.connect("db/user_data.db")
+    cursor = conn.cursor()
+
+    # Fetch the current user data from the database
+    cursor.execute("SELECT data FROM user_data WHERE username=?", (user,))
+    result = cursor.fetchone()
+
+    if not result:
+        print("User not found")
+        return
+
+    data_str = result[0]
+    # Convert the data string back to a dictionary
+    data = json.loads(data_str)
+
+    # Iterate over the updated values and update them in the data dictionary
+    for key, value in updated_values.items():
+        # Check if key is 'construction'
+        if key == "construction" and key in data and isinstance(data[key], list):
+            # Append the new value to the existing list
+            data[key].append(value)
+        else:
+            data[key] = value  # else just update the value
+
+    # Convert the updated data back to a JSON string
+    updated_data_str = json.dumps(data)
+
+    # Update the user data in the database
+    cursor.execute("UPDATE user_data SET data=? WHERE username=?", (updated_data_str, user))
+
+    # Commit changes and close the connection
+    conn.commit()
+    conn.close()
+
 
 
 def login_validate(user, password):
