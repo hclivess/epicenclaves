@@ -9,7 +9,7 @@ import tornado.escape
 
 import backend
 from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_data, \
-    tile_occupied, load_map, build, occupied_by, has_item, generate_entities, update_user_data, remove_construction
+    tile_occupied, load_map, build, occupied_by, has_item, generate_entities, update_user_data, remove_construction, update_map_data
 from sqlite import create_map_table
 
 max_size = 1000
@@ -199,14 +199,16 @@ class ConquerHandler(BaseHandler):
         file = load_user_data(user)
         this_tile = tile_occupied(file["x_pos"], file["y_pos"])
 
-        print(this_tile)
-
         owner = this_tile["data"]["control"]
 
         if this_tile and file["action_points"] > 0:
             remove_construction(owner, {"x_pos": file["x_pos"], "y_pos": file["y_pos"]})
-            update_user_data(user=user, updated_values={"construction": this_tile, "action_points": file["action_points"] - 1})
-            message = "Chopping successful"
+
+            update_user_data(user=user, updated_values={"construction": this_tile, "action_points": file["action_points"] - 1})  # BUT ONLY IF IT IS NOT THERE
+            update_user_data(user=user, updated_values=this_tile)
+
+            update_map_data({"x_pos": file["x_pos"], "y_pos": file["y_pos"], "data": {"control": user}})
+            message = "Takeover successful"
         else:
             message = "Unable to conquer"
 

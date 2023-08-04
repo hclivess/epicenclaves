@@ -95,6 +95,41 @@ def occupied_by(x, y, what):
             return True
     return False
 
+def update_map_data(update_data):
+    # Extract x, y and new data from the update_data dict
+    x = update_data.get('x_pos')
+    y = update_data.get('y_pos')
+    new_data = update_data.get('data')
+
+    # Connect to the database
+    conn = sqlite3.connect("db/map_data.db")
+    cursor = conn.cursor()
+
+    # Fetch the existing data
+    cursor.execute("SELECT data FROM map_data WHERE x_pos=? AND y_pos=?", (x, y))
+    row = cursor.fetchone()
+
+    if row is not None:
+        # Parse the JSON string into a Python dictionary
+        data = json.loads(row[0])
+
+        # Merge new data with the old data, new data takes precedence
+        data.update(new_data)
+
+        # Convert the updated data back into a JSON string
+        data_str = json.dumps(data)
+
+        # Update the row in the map_data table
+        cursor.execute(
+            "UPDATE map_data SET data = ? WHERE x_pos = ? AND y_pos = ?",
+            (data_str, x, y)
+        )
+
+        # Commit the changes
+        conn.commit()
+    else:
+        print("No data found at the given coordinates.")
+
 
 def insert_map_data(db_file, data):
     # Connect to the database
