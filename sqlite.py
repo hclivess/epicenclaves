@@ -44,18 +44,19 @@ def get_map_data(x_pos, y_pos):
 
     # Retrieve data and control for the given position
     cursor.execute("SELECT x_pos, y_pos, data FROM map_data WHERE x_pos = ? AND y_pos = ?", (x_pos, y_pos))
-    results = cursor.fetchall()
+    result = cursor.fetchone()
 
     # Close the connection
     conn.close()
 
-    entities = []
-    for result in results:
+    if result:
         x_pos, y_pos, data_str = result
         # Convert the data string back to a dictionary
         data = json.loads(data_str)
-        entities.append({"x_pos": x_pos, "y_pos": y_pos, "data": data})
+        return {"x_pos": x_pos, "y_pos": y_pos, **data}  # Unpacks the data dictionary
 
-    return entities
+    # Return None if no entity was found
+    return None
+
 
 

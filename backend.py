@@ -41,16 +41,11 @@ def hashify(data):
 
 def tile_occupied(x, y):
     # Use the get_map_data function to retrieve data for the given position
-    entities = sqlite.get_map_data(x_pos=x, y_pos=y)
+    entity = sqlite.get_map_data(x_pos=x, y_pos=y)
 
-    for entity in entities:
-        if "data" in entity:
-            data_dict = entity["data"]
-            return {
-                "x_pos": entity["x_pos"],
-                "y_pos": entity["y_pos"],
-                **data_dict,  # Unpacks the data dictionary
-            }
+    # If an entity is found at the given position, return its data
+    if entity:
+        return entity
 
     # If there are no entities with "data", return a placeholder dict
     return {
