@@ -60,7 +60,7 @@ class MapHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
 
         data = json.dumps(load_map(user=user))
-        print("data", data) #debug todo: selective map drawing around player
+        print("data", data)  # debug todo: selective map drawing around player
         self.render("templates/map.html",
                     data=data,
                     ensure_ascii=False)
@@ -76,16 +76,19 @@ class BuildHandler(BaseHandler):
         occupied = on_tile(user_data["x_pos"], user_data["y_pos"])
 
         if not occupied:
-            build(entity=entity,
-                  name=name,
-                  user=user,
-                  file=user_data)
-
             if entity == "house":
-                current_pop_lim = user_data["pop_lim"]
-                update_user_data(user=user, updated_values={"pop_lim": current_pop_lim + 10})
+                if user_data["wood"] >= 50:
+                    update_user_data(user=user,
+                                     updated_values={"pop_lim": user_data["pop_lim"] + 10,
+                                                     "wood": user_data["wood"] - 50})
+                    build(entity=entity,
+                          name=name,
+                          user=user,
+                          user_data=user_data)
 
-            message = f"Successfully built {entity}"
+                    message = f"Successfully built {entity}"
+                else:
+                    message = "Not enough wood to build a house"
         else:
             message = "Cannot build here"
 
@@ -99,9 +102,6 @@ class BuildHandler(BaseHandler):
                     on_tile=occupied,
                     actions=actions,
                     descriptions=descriptions)
-
-
-
 
 
 class MoveHandler(BaseHandler):
