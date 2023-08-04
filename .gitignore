@@ -1,5 +1,5 @@
 /cookie_secret
-/users.db
+/db/auth.db
 /users/
 /.idea/
 /environment/

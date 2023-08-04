@@ -112,7 +112,7 @@ class MoveHandler(BaseHandler):
 
         def update_user_data(user, key, updated_value):
             # Connect to the database
-            conn = sqlite3.connect("user_data.db")
+            conn = sqlite3.connect("db/user_data.db")
             cursor = conn.cursor()
 
             # Update the specified key in the user_data table
@@ -289,7 +289,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    if not os.path.exists("map_data.db"):
+    if not os.path.exists("db/map_data.db"):
         create_map_table()
 
         generate_entities(entity_type="forest",

@@ -1,7 +1,7 @@
 import os
 import os.path
 
-to_wipeout = ["users.db", "map_data.db", "cookie_secret", "user_data.db"]
+to_wipeout = ["db/auth.db", "db/map_data.db", "cookie_secret", "db/user_data.db"]
 
 
 def delete(to_wipeout):

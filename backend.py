@@ -7,7 +7,7 @@ from hashlib import blake2b
 
 import sqlite
 
-users_db = sqlite3.connect("users.db")
+users_db = sqlite3.connect("db/auth.db")
 users_db_cursor = users_db.cursor()
 
 
@@ -56,7 +56,7 @@ def on_tile(x, y):
 
 def has_item(player, item_name):
     # Connect to the database
-    conn = sqlite3.connect("user_data.db")
+    conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
 
     # Get the row for the specified player from the user_data table
@@ -141,12 +141,12 @@ def build(entity, name, user, file, actions=None):
     }
 
     update_user_file(user, data, column="construction")
-    insert_map_data("map_data.db", data)
+    insert_map_data("db/map_data.db", data)
 
 
 def create_user_file(user):
     # Connect to the database
-    conn = sqlite3.connect("user_data.db")
+    conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
 
     # Create the table if it doesn't exist
@@ -187,7 +187,7 @@ def create_user_file(user):
 
 def load_user_data(user):
     # Connect to the database
-    conn = sqlite3.connect("user_data.db")
+    conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
 
     # Retrieve the user data for the given username
@@ -230,8 +230,8 @@ def load_user_data(user):
 def load_map(user):
     users_data = []  # Create an empty list to store user data
 
-    # Load data from user_data.db
-    conn_user = sqlite3.connect("user_data.db")
+    # Load data from db/user_data.db
+    conn_user = sqlite3.connect("db/user_data.db")
     cursor_user = conn_user.cursor()
     cursor_user.execute("SELECT * FROM user_data WHERE username = ?", (user,))
     result_user = cursor_user.fetchone()
@@ -269,8 +269,8 @@ def load_map(user):
 
     conn_user.close()
 
-    # Load data from map_data.db
-    conn_map = sqlite3.connect("map_data.db")
+    # Load data from db/map_data.db
+    conn_map = sqlite3.connect("db/map_data.db")
     cursor_map = conn_map.cursor()
 
     # Calculate the square of the distance
@@ -310,7 +310,7 @@ def update_user_values(user, attribute, new_value):
     Update the specified attribute with the new value for the given user in the database.
     """
     # Connect to the database
-    conn = sqlite3.connect("user_data.db")
+    conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
 
     # Update the specified attribute for the given user
@@ -325,7 +325,7 @@ def update_user_values(user, attribute, new_value):
 
 def update_user_file(user, updated_values, column):
     # Connect to the database
-    conn = sqlite3.connect("user_data.db")
+    conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
 
     # Retrieve the existing data for the user
