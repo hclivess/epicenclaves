@@ -70,11 +70,17 @@ class BuildHandler(BaseHandler):
         file = load_user_file(user)
         occupied = on_tile(file["x_pos"], file["y_pos"])
 
+        if entity == "inn":
+            actions = ["rest"]
+        else:
+            actions = None
+
         if not occupied:
             build(entity=entity,
                   name=name,
                   user=user,
-                  file=file)
+                  file=file,
+                  actions=actions)
 
             message = f"Successfully built {entity}"
         else:

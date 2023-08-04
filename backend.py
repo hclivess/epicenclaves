@@ -119,7 +119,10 @@ def insert_map_data(db_file, data):
     conn.close()
 
 
-def build(entity, name, user, file):
+def build(entity, name, user, file, actions=None):
+    if actions is None:
+        actions = []
+
     # Prepare the entity data based on the entity type
     entity_data = {
         "type": entity,
@@ -132,7 +135,7 @@ def build(entity, name, user, file):
         "name": name,
         "hp": 100,
         "size": 1,
-        "actions": [],
+        "actions": actions,
         "control": user,
         **entity_data
     }
