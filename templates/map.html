@@ -102,6 +102,7 @@ body {
 /* Background color for entity types */
 .forest { background-color: darkgreen; color: white; }
 .sawmill { background-color: blue; }
+.inn { background-color: cyan; }
 .farm { background-color: green; }
 .barracks { background-color: red; }
 .mine { background-color: #B59410; }
@@ -193,31 +194,7 @@ function createMap(data) {
       playerLabel.innerHTML += "armor: " + item.armor + "<br>";
       playerElement.appendChild(playerLabel);
 
-      // Process and display construction for "type: real" players
-      item.construction.forEach(function (construction) {
-        var constructionX = (construction.x_pos - 1) * gridSize;
-        var constructionY = (construction.y_pos - 1) * gridSize;
-        if (constructionX > maxX) {
-          maxX = constructionX;
-        }
-        if (constructionY > maxY) {
-          maxY = constructionY;
-        }
-        var constructionElement = document.createElement("div");
-        constructionElement.className = "entity construction " + construction.type;
-        constructionElement.style.top = constructionY + "px";
-        constructionElement.style.left = constructionX + "px";
-        var textLabel = document.createElement("div");
-        textLabel.className = "text-label";
-        textLabel.innerHTML = "pos: " + construction.x_pos + ", " + construction.y_pos + "<br>";
-        Object.entries(construction).forEach(function ([key, value]) {
-          if (key !== "name" && key !== "x_pos" && key !== "y_pos") {
-            textLabel.innerHTML += key + ": " + value + "<br>";
-          }
-        });
-        constructionElement.appendChild(textLabel);
-        mapContainer.appendChild(constructionElement);
-      });
+
 
       var playerX = (item.x_pos - 1) * gridSize;
       var playerY = (item.y_pos - 1) * gridSize;
