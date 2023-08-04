@@ -369,7 +369,7 @@ def update_user_file(user, updated_values, key):
     # Check if the key is in data and it is a list
     if key in data and isinstance(data[key], list):
         # Append the new values to the list
-        data[key].extend(updated_values)
+        data[key].append(updated_values)  # use append instead of extend
     else:
         print(f"{key} not found in user data or it is not a list")
 

@@ -34,9 +34,9 @@ class MainHandler(BaseHandler):
             message = f"Welcome back, {user}"
 
             file = load_user_data(user)
-            # print("file", file)  # debug
+            print("file", file)  # debug
             occupied = on_tile(file["x_pos"], file["y_pos"])
-            # print("occupied", occupied)  # debug
+            print("occupied", occupied)  # debug
 
             if file["action_points"] < 1:
                 message = f"You have action points left for this turn"
@@ -61,7 +61,7 @@ class MapHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
 
         data = json.dumps(load_map(user=user))
-        # print("data", data) #debug todo: selective map drawing around player
+        print("data", data) #debug todo: selective map drawing around player
         self.render("templates/map.html",
                     data=data,
                     ensure_ascii=False)
