@@ -19,7 +19,7 @@ def generate_entities(entity_type, probability, additional_entity_data=None, siz
                 print(f"Generating {data} on {x_pos}, {y_pos}")
                 if additional_entity_data:
                     data.update(additional_entity_data)
-                sqlite.save_map_data(x_pos=x_pos, y_pos=y_pos, data=data, control=None)
+                sqlite.save_map_data(x_pos=x_pos, y_pos=y_pos, data=data)
 
 
 def check_users_db():
@@ -50,7 +50,6 @@ def on_tile(x, y):
                 "x_pos": entity["x_pos"],
                 "y_pos": entity["y_pos"],
                 "data": entity["data"],
-                "control": entity["control"]
             })
 
     return entity_data_list
@@ -111,8 +110,8 @@ def insert_map_data(db_file, data):
 
     # Prepare and execute the SQL query to insert data into the map_data table
     cursor.execute(
-        "INSERT OR REPLACE INTO map_data (x_pos, y_pos, data, control) VALUES (?, ?, ?, ?)",
-        (data['x_pos'], data['y_pos'], data_str, data["control"])
+        "INSERT OR REPLACE INTO map_data (x_pos, y_pos, data) VALUES (?, ?, ?)",
+        (data['x_pos'], data['y_pos'], data_str)
     )
 
     # Commit the changes and close the connection

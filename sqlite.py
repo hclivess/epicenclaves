@@ -6,12 +6,11 @@ def create_map_table():
     conn = sqlite3.connect("db/map_data.db")
     cursor = conn.cursor()
 
-    # Create a table for the map data with columns: x_pos, y_pos, data, control
+    # Create a table for the map data with columns: x_pos, y_pos, data
     cursor.execute('''CREATE TABLE IF NOT EXISTS map_data (
                         x_pos INTEGER,
                         y_pos INTEGER,
                         data TEXT,
-                        control TEXT,
                         PRIMARY KEY (x_pos, y_pos)
                       )''')
 
@@ -19,7 +18,7 @@ def create_map_table():
     conn.commit()
     conn.close()
 
-def save_map_data(x_pos, y_pos, data, control):
+def save_map_data(x_pos, y_pos, data):
     # Connect to the database
     conn = sqlite3.connect("db/map_data.db")
     cursor = conn.cursor()
@@ -28,8 +27,8 @@ def save_map_data(x_pos, y_pos, data, control):
     data_str = json.dumps(data)
 
     # Insert or replace data for the given position
-    cursor.execute("INSERT OR REPLACE INTO map_data (x_pos, y_pos, data, control) VALUES (?, ?, ?, ?)",
-                   (x_pos, y_pos, data_str, control))
+    cursor.execute("INSERT OR REPLACE INTO map_data (x_pos, y_pos, data) VALUES (?, ?, ?)",
+                   (x_pos, y_pos, data_str))
 
     # Commit changes and close the connection
     conn.commit()
@@ -44,7 +43,7 @@ def get_map_data(x_pos, y_pos):
     cursor = conn.cursor()
 
     # Retrieve data and control for the given position
-    cursor.execute("SELECT x_pos, y_pos, data, control FROM map_data WHERE x_pos = ? AND y_pos = ?", (x_pos, y_pos))
+    cursor.execute("SELECT x_pos, y_pos, data FROM map_data WHERE x_pos = ? AND y_pos = ?", (x_pos, y_pos))
     results = cursor.fetchall()
 
     # Close the connection
@@ -52,10 +51,10 @@ def get_map_data(x_pos, y_pos):
 
     entities = []
     for result in results:
-        x_pos, y_pos, data_str, control = result
+        x_pos, y_pos, data_str = result
         # Convert the data string back to a dictionary
         data = json.loads(data_str)
-        entities.append({"x_pos": x_pos, "y_pos": y_pos, "data": data, "control": control})
+        entities.append({"x_pos": x_pos, "y_pos": y_pos, "data": data})
 
     return entities
 

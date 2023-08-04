@@ -322,7 +322,7 @@ if __name__ == "__main__":
 
         generate_entities(entity_type="forest",
                           probability=0.25,
-                          additional_entity_data=None,
+                          additional_entity_data={"control": "nobody"},
                           size=101,
                           every=5)
 
