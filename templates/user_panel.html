@@ -100,12 +100,13 @@ hr {
     <h4 class="card-title">Welcome, {{user}}</h4>
   </div>
   <div class="card-body">
-    <p class="card-text">Age: {{file["age"]}}</p>
-    <p class="card-text">Experience: {{file["exp"]}}</p>
-    <p class="card-text">Health Points: {{file["hp"]}}</p>
-    <p class="card-text">Armor: {{file["armor"]}}</p>
-    <p class="card-text">Action points: {{file["action_points"]}}</p>
-    <p class="card-text">Position: ({{file["x_pos"]}}, {{file["y_pos"]}})</p>
+      <p class="card-text">Age: {{file["age"]}}</p>
+      <p class="card-text">Experience: {{file["exp"]}}</p>
+      <p class="card-text">Health Points: {{file["hp"]}}</p>
+      <p class="card-text">Armor: {{file["armor"]}}</p>
+      <p class="card-text">Population limit: {{file["pop_lim"]}}</p>
+      <p class="card-text">Action points: {{file["action_points"]}}</p>
+      <p class="card-text">Position: ({{file["x_pos"]}}, {{file["y_pos"]}})</p>
   </div>
 </div>
 
@@ -122,7 +123,7 @@ hr {
                   <a id="btnLeft" class="btn btn-move btn-lg active" href="/move?direction=left" role="button">Left ◀️</a>
                   <a id="btnRight" class="btn btn-move btn-lg active" href="/move?direction=right" role="button">Right ▶️</a>
                   <a class="btn btn-map btn-lg active" href="/map" role="button">Map 🗺️</a>
-                  <a class="btn btn-quit btn-lg active" href="/logout" role="button">Logout 🌃</a>
+                  <a class="btn btn-quit btn-lg active" href="/logout" role="button">Logout 🌙</a>
                </div>
 
                 <div class="card mt-3">
@@ -154,7 +155,7 @@ hr {
                      <a class="btn btn-light btn-lg btn-block" href="/build?entity=house&name=town1">
                         <img src="/img/assets/house.png" alt="House Icon" class="menu-icon"> House
                      </a>
-                     <p>Build a house for your town</p>
+                     <p>{{descriptions.get("house")}}</p>
                   </div>
                </div>
 

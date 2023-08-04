@@ -92,7 +92,6 @@ def occupied_by(x, y, what):
     return False
 
 
-
 def insert_map_data(db_file, data):
     # Connect to the database
     conn = sqlite3.connect(db_file)
@@ -119,7 +118,6 @@ def insert_map_data(db_file, data):
 
 
 def build(entity, name, user, file):
-
     # Prepare the entity data based on the entity type
     entity_data = {
         "type": entity,
@@ -161,7 +159,8 @@ def create_user_file(user):
                         food INTEGER,
                         bismuth INTEGER,
                         items TEXT,
-                        construction TEXT
+                        construction TEXT,
+                        pop_lim INTEGER
                       )''')
 
     # Convert the position tuple to a string representation
@@ -172,13 +171,14 @@ def create_user_file(user):
     items_str = json.dumps(items_data)
 
     # Insert the user data into the database
-    cursor.execute('''INSERT OR IGNORE INTO user_data (username, type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth, items, construction)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                   (user, "player", "0", "img/pp.png", x_pos, y_pos, 0, 100, 0, 5000, 0, 0, 0, items_str, "[]"))
+    cursor.execute('''INSERT OR IGNORE INTO user_data (username, type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth, items, construction, pop_lim)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                   (user, "player", "0", "img/pp.png", x_pos, y_pos, 0, 100, 0, 5000, 0, 0, 0, items_str, "[]", 0))
 
     # Commit changes and close the connection
     conn.commit()
     conn.close()
+
 
 class Actions:
     def get(self, type):
@@ -192,14 +192,18 @@ class Actions:
 
         return actions
 
+
 class Descriptions:
     def get(self, type):
         if type == "axe":
-            description = "A tool to cut wood with in the forest"
+            description = "A tool to cut wood with in the forest."
+        elif type == "house":
+            description = "A place for people to live in. Building a house increases your population limit."
         else:
-            description = ""
+            description = "Description missing."
 
         return description
+
 
 def load_user_data(user):
     # Connect to the database
@@ -214,7 +218,7 @@ def load_user_data(user):
     conn.close()
 
     if result:
-        username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth, items_str, construction_str = result
+        username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood, food, bismuth, items_str, construction_str, pop_lim = result
 
         # Convert the items string back to a list of dictionaries
         items = json.loads(items_str)
@@ -237,7 +241,8 @@ def load_user_data(user):
             "food": food,
             "bismuth": bismuth,
             "items": items,
-            "construction": construction
+            "construction": construction,
+            "pop_lim": pop_lim
         }
     else:
         return None
@@ -257,7 +262,7 @@ def load_map(user):
         return
 
     (username, user_type, age, img, x_pos, y_pos, exp, hp, armor, action_points, wood,
-     food, bismuth, items_str, construction_str) = result_user
+     food, bismuth, items_str, construction_str, pop_lim) = result_user
 
     # Convert the items string back to a list of dictionaries
     items = json.loads(items_str)
@@ -278,7 +283,8 @@ def load_map(user):
         "action_points": action_points,
         "resources": {"bismuth": bismuth, "wood": wood, "food": food},
         "items": items,
-        "construction": construction
+        "construction": construction,
+        "pop_lim": pop_lim
     }
 
     users_data.append(user_data)
@@ -364,8 +370,6 @@ def update_user_file(user, updated_values, column):
     # Commit changes and close the connection
     conn.commit()
     conn.close()
-
-
 
 
 def add_user(user, password):

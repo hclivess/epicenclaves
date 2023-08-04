@@ -6,10 +6,11 @@ import webbrowser
 
 import tornado.ioloop
 import tornado.web
+import tornado.escape
 
 import backend
 from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_data, \
-    on_tile, load_map, build, update_user_file, occupied_by, has_item, generate_entities, update_user_values
+    on_tile, load_map, build, occupied_by, has_item, generate_entities, update_user_values
 from sqlite import create_map_table
 
 max_size = 1000
@@ -81,6 +82,10 @@ class BuildHandler(BaseHandler):
                   user=user,
                   file=user_data)
 
+            if entity == "house":
+                current_pop_lim = user_data["pop_lim"]
+                update_user_values(user, "pop_lim", current_pop_lim + 10)
+
             message = f"Successfully built {entity}"
         else:
             message = "Cannot build here"
@@ -97,7 +102,7 @@ class BuildHandler(BaseHandler):
                     descriptions=descriptions)
 
 
-import tornado.escape
+
 
 
 class MoveHandler(BaseHandler):
