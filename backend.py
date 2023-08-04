@@ -168,7 +168,7 @@ def create_user_file(user):
     x_pos, y_pos = 1, 1  # Replace these with the actual x_pos and y_pos values
 
     # Convert items dictionary to a JSON string
-    items_data = [{"type": "axe", "desc": "blabla"}]
+    items_data = [{"type": "axe"}]
     items_str = json.dumps(items_data)
 
     # Insert the user data into the database

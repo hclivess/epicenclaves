@@ -24,6 +24,7 @@ Game Mechanics:
 - 1v1 battles when players are on the same tile
 - 100 action points per turn (block)
 - 1 movement costs one action point
+- Damage type + resistance?
 
 Personal Items:
 - Armor
