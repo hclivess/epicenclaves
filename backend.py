@@ -52,7 +52,13 @@ def tile_occupied(x, y):
             }
 
     # If there are no entities with "data", return None
-    return None
+    return {
+                "x_pos": x,
+                "y_pos": y,
+                "data": {"type": "empty",
+                         "control": "nobody",
+                         "hp": 0},
+            }
 
 
 
@@ -235,7 +241,7 @@ class Actions:
             actions = [{"name": "chop", "action": "/chop"},
                        {"name": "conquer", "action": "/conquer"}]
         else:
-            actions = [{"name": "conquer", "action": "/conquer"}]
+            actions = []
 
         return actions
 
