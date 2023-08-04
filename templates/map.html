@@ -93,20 +93,48 @@ body {
 
 /* Icons using ::before pseudo-element */
 .sawmill:before { content: "\1FA93 "; font-size: 20px; }
+.inn:before { content: "\1F3E8 "; font-size: 20px; }
 .barracks:before { content: "\2694 "; font-size: 20px; }
 .house:before { content: "\1F3E0 "; font-size: 20px; }
 .farm:before { content: "\1F33E "; font-size: 20px; }
 .mine:before { content: "\26CF "; font-size: 20px; }
 .forest:before { content: "\1F332 "; font-size: 30px; }
 
-/* Background color for entity types */
-.forest { background-color: darkgreen; color: white; }
-.sawmill { background-color: blue; }
-.inn { background-color: cyan; }
-.farm { background-color: green; }
-.barracks { background-color: red; }
-.mine { background-color: #B59410; }
-.house { background-color: gray; }
+.forest {
+  background: linear-gradient(to right, darkgreen, black);
+  color: white;
+}
+
+.sawmill {
+  background: linear-gradient(to right, blue, black);
+  color: white;
+}
+
+.inn {
+  background: linear-gradient(to right, cyan, black);
+  color: white;
+}
+
+.farm {
+  background: linear-gradient(to right, green, black);
+  color: white;
+}
+
+.barracks {
+  background: linear-gradient(to right, red, black);
+  color: white;
+}
+
+.mine {
+  background: linear-gradient(to right, #B59410, black);
+  color: white;
+}
+
+.house {
+  background: linear-gradient(to right, gray, black);
+  color: white;
+}
+
 
 /* Additional styles for handling multiple entities on the same tile */
 .entity-group { display: flex; flex-wrap: wrap; }
