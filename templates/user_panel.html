@@ -200,12 +200,12 @@ hr {
 
 
                <div class="col">
-                <p>Type: {{on_tile["data"]["type"]}}</p>
-                <p><img src=/img/assets/{{on_tile["data"]["type"]}}.png alt="Item Icon" class="menu-icon"></p>
+                <p>Type: {{on_tile["type"]}}</p>
+                <p><img src=/img/assets/{{on_tile["type"]}}.png alt="Item Icon" class="menu-icon"></p>
                <p>Position: {{on_tile["x_pos"]}}, {{on_tile["y_pos"]}}</p>
-                <p>Control: {{on_tile["data"]["control"]}}</p>
+                <p>Control: {{on_tile["control"]}}</p>
 
-                   {%for action in actions.get(on_tile["data"]["type"])%}
+                   {%for action in actions.get(on_tile["type"])%}
                         <p>Actions: <a id="btnAct" class="btn btn-move btn-lg active" href="{{action['action']}}" role="button">{{action['name']}}</a></p>
                     {%end%}
 
@@ -240,10 +240,10 @@ hr {
 
                   {%for building in file["construction"]%}
                <div class="col">
-                <p>Type: {{building["data"]["type"]}}</p>
-                <p><img src=/img/assets/{{building["data"]["type"]}}.png alt="Item Icon" class="menu-icon"></p>
+                <p>Type: {{building["type"]}}</p>
+                <p><img src=/img/assets/{{building["type"]}}.png alt="Item Icon" class="menu-icon"></p>
                 <p>Position: ({{building["x_pos"]}}, {{building["y_pos"]}})</p>
-                <p>Hitpoints: {{building["data"]["hp"]}}</p>
+                <p>Hitpoints: {{building["hp"]}}</p>
 
                </div>
 

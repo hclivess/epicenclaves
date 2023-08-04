@@ -76,8 +76,9 @@ class BuildHandler(BaseHandler):
         user_data = load_user_data(user)
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
-        if not occupied:
+        if occupied["type"] == "empty":
             message = "Building procedure not yet defined"
+
             if entity == "house":
                 if user_data["wood"] >= 50:
                     update_user_data(user=user,
@@ -90,7 +91,22 @@ class BuildHandler(BaseHandler):
 
                     message = f"Successfully built {entity}"
                 else:
-                    message = "Not enough wood to build a house"
+                    message = f"Not enough wood to build {entity}"
+
+            elif entity == "inn":
+                if user_data["wood"] >= 50:
+                    update_user_data(user=user,
+                                     updated_values={"pop_lim": user_data["pop_lim"] + 10,
+                                                     "wood": user_data["wood"] - 50})
+                    build(entity=entity,
+                          name=name,
+                          user=user,
+                          user_data=user_data)
+
+                    message = f"Successfully built {entity}"
+                else:
+                    message = f"Not enough wood to build {entity}"
+
         else:
             message = "Cannot build here"
 
@@ -200,12 +216,12 @@ class ConquerHandler(BaseHandler):
         file = load_user_data(user)
         this_tile = tile_occupied(file["x_pos"], file["y_pos"])
 
-        owner = this_tile["data"]["control"]
+        owner = this_tile["control"]
 
         if owner == user:
             message = "You already own this tile"
 
-        elif this_tile and file["action_points"] > 0:
+        elif this_tile["type"] != "empty" and file["action_points"] > 0:
             remove_construction(owner, {"x_pos": file["x_pos"], "y_pos": file["y_pos"]})
 
             update_user_data(user=user,
@@ -214,6 +230,8 @@ class ConquerHandler(BaseHandler):
 
             update_map_data({"x_pos": file["x_pos"], "y_pos": file["y_pos"], "data": {"control": user}})
             message = "Takeover successful"
+        else:
+            message = "Cannot acquire an empty tile"
 
         file = load_user_data(user)
         occupied = tile_occupied(file["x_pos"], file["y_pos"])

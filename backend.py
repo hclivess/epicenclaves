@@ -45,20 +45,21 @@ def tile_occupied(x, y):
 
     for entity in entities:
         if "data" in entity:
+            data_dict = entity["data"]
             return {
                 "x_pos": entity["x_pos"],
                 "y_pos": entity["y_pos"],
-                "data": entity["data"],
+                **data_dict,  # Unpacks the data dictionary
             }
 
-    # If there are no entities with "data", return None
+    # If there are no entities with "data", return a placeholder dict
     return {
-                "x_pos": x,
-                "y_pos": y,
-                "data": {"type": "empty",
-                         "control": "nobody",
-                         "hp": 0},
-            }
+        "x_pos": x,
+        "y_pos": y,
+        "type": "empty",
+        "control": "nobody",
+        "hp": 0,  # CLUTCH todo
+    }
 
 
 
@@ -100,6 +101,7 @@ def occupied_by(x, y, what):
         if entity["data"].get("type") == what:
             return True
     return False
+
 
 def update_map_data(update_data):
     # Extract x, y and new data from the update_data dict
@@ -208,9 +210,9 @@ def create_user_file(user):
         "hp": 100,
         "armor": 0,
         "action_points": 5000,
-        "wood": 0,
-        "food": 0,
-        "bismuth": 0,
+        "wood": 500,
+        "food": 500,
+        "bismuth": 500,
         "items": [{"type": "axe"}],
         "construction": [],
         "pop_lim": 0
@@ -227,10 +229,6 @@ def create_user_file(user):
     conn.close()
 
 
-
-
-
-
 class Actions:
     def get(self, type):
         if type == "inn":
@@ -240,6 +238,8 @@ class Actions:
         elif type == "forest":
             actions = [{"name": "chop", "action": "/chop"},
                        {"name": "conquer", "action": "/conquer"}]
+        elif type == "house":
+            actions = [{"name": "conquer", "action": "/conquer"}]
         else:
             actions = []
 
@@ -357,9 +357,6 @@ def load_map(user):
     return total_data
 
 
-
-
-
 def add_user(user, password):
     users_db.execute("INSERT OR IGNORE INTO users VALUES (?,?)", (user, hash_password(password)))
     users_db.commit()
@@ -370,10 +367,12 @@ def exists_user(user):
     result = users_db_cursor.fetchall()
 
     return bool(result)
+
+
 def remove_construction(user, construction_coordinates):
     # Connect to the database
 
-    #TODO CHANGE IN MAP INDEX TOO
+    # TODO CHANGE IN MAP INDEX TOO
     conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
 
@@ -394,8 +393,8 @@ def remove_construction(user, construction_coordinates):
         # Iterate over the list and remove the construction with the given coordinates
         data["construction"] = [construction for construction in data["construction"]
                                 if not (
-                        construction['x_pos'] == construction_coordinates['x_pos'] and construction['y_pos'] ==
-                        construction_coordinates['y_pos'])]
+                    construction['x_pos'] == construction_coordinates['x_pos'] and construction['y_pos'] ==
+                    construction_coordinates['y_pos'])]
 
     # Convert the updated data back to a JSON string
     updated_data_str = json.dumps(data)
@@ -406,6 +405,7 @@ def remove_construction(user, construction_coordinates):
     # Commit changes and close the connection
     conn.commit()
     conn.close()
+
 
 def update_user_data(user, updated_values):
     # Connect to the database
@@ -442,7 +442,6 @@ def update_user_data(user, updated_values):
     # Commit changes and close the connection
     conn.commit()
     conn.close()
-
 
 
 def login_validate(user, password):
