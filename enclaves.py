@@ -292,9 +292,7 @@ if __name__ == "__main__":
 
         generate_entities(entity_type="forest",
                           probability=0.25,
-                          additional_entity_data={"actions": [
-                              {"name": "Chop 1 wood", "action": "chop"},
-                          ]},
+                          additional_entity_data=None,
                           size=101,
                           every=5)
 

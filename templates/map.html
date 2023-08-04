@@ -187,19 +187,6 @@ body {
 // Your JSON data (you can replace this with any JSON data)
 const jsonData = {% raw data %};
 
-// Function to convert objects in the "actions" array to strings
-function stringifyActions(data) {
-  data.forEach(function (item) {
-    if (item.construction && Array.isArray(item.construction)) {
-      item.construction.forEach(function (construction) {
-        if (construction.actions && Array.isArray(construction.actions)) {
-          construction.actions = construction.actions.map(action => action.name); // Keep only the "name" property
-        }
-      });
-    }
-  });
-}
-
 // Function to create the map elements
 function createMap(data) {
   var mapContainer = document.getElementById("map");
@@ -208,13 +195,43 @@ function createMap(data) {
   var maxY = 0;
   var entitySize = 125; /* Default entity size */
 
-  // Fix the "actions" array before creating the map elements
-  stringifyActions(data);
-
   data.forEach(function (item) {
     if (item.type === "player") {
       // Create player element and position it on the map
-      // Your existing code for creating player elements...
+      var playerElement = document.createElement("div");
+      playerElement.className = "entity player";
+      playerElement.style.backgroundColor = "purple";
+      var playerX = (item.x_pos - 1) * gridSize;
+      var playerY = (item.y_pos - 1) * gridSize;
+      playerElement.style.top = playerY + "px";
+      playerElement.style.left = playerX + "px";
+      mapContainer.appendChild(playerElement);
+
+      // Create player's image and set the source
+      var playerImg = document.createElement("img");
+      playerImg.src = item.img;
+      playerElement.appendChild(playerImg);
+
+      // Create player's label and display specific player information
+      var playerLabel = document.createElement("div");
+      playerLabel.className = "text-label";
+      playerLabel.innerHTML = "username: " + item.username + "<br>";
+      playerLabel.innerHTML += "pos: " + item.x_pos + ", " + item.y_pos + "<br>";
+      playerLabel.innerHTML += "exp: " + item.exp + "<br>";
+      playerLabel.innerHTML += "hp: " + item.hp + "<br>";
+      playerLabel.innerHTML += "armor: " + item.armor + "<br>";
+      playerElement.appendChild(playerLabel);
+
+
+
+      var playerX = (item.x_pos - 1) * gridSize;
+      var playerY = (item.y_pos - 1) * gridSize;
+      if (playerX > maxX) {
+        maxX = playerX;
+      }
+      if (playerY > maxY) {
+        maxY = playerY;
+      }
     } else {
        // Process and display construction for non-real user entities
       if (item.construction) {
@@ -234,9 +251,11 @@ function createMap(data) {
           var textLabel = document.createElement("div");
           textLabel.className = "text-label";
           textLabel.innerHTML = "pos: " + construction.x_pos + ", " + construction.y_pos + "<br>";
-          if (construction.actions && construction.actions.length > 0) {
-            textLabel.innerHTML += "Actions: " + construction.actions.join(", ") + "<br>";
-          }
+          Object.entries(construction).forEach(function ([key, value]) {
+            if (key !== "name" && key !== "x_pos" && key !== "y_pos") {
+              textLabel.innerHTML += key + ": " + value + "<br>";
+            }
+          });
           constructionElement.appendChild(textLabel);
           mapContainer.appendChild(constructionElement);
         });
