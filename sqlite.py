@@ -145,29 +145,34 @@ def update_map_data(update_data):
 
 
 def insert_map_data(db_file, data):
+    print("insert_map_data", db_file, data)
     # Connect to the database
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
 
-    # Prepare the data dictionary to be stored as a JSON string
-    data_str = json.dumps({
-        "name": data["name"],
-        "hp": data["hp"],
-        "size": data["size"],
-        "control": data["control"],
-        "type": data["type"]
-    })
+    for coord, construction_info in data.items():
+        try:
+            x_pos, y_pos = map(int, coord.split(','))
+            # Prepare the construction_info dictionary to be stored as a JSON string
+            construction_info_str = json.dumps({
+                "name": construction_info.get("name", ""),
+                "hp": construction_info.get("hp", 0),
+                "size": construction_info.get("size", 0),
+                "control": construction_info.get("control", ""),
+                "type": construction_info.get("type", "")
+            })
 
-    # Prepare and execute the SQL query to insert data into the map_data table
-    cursor.execute(
-        "INSERT OR REPLACE INTO map_data (x_pos, y_pos, data) VALUES (?, ?, ?)",
-        (data['x_pos'], data['y_pos'], data_str)
-    )
+            # Prepare and execute the SQL query to insert data into the map_data table
+            cursor.execute(
+                "INSERT OR REPLACE INTO map_data (x_pos, y_pos, data) VALUES (?, ?, ?)",
+                (x_pos, y_pos, construction_info_str)
+            )
+        except ValueError:
+            print(f"Invalid coordinate format for '{coord}'. Skipping this entry.")
 
     # Commit the changes and close the connection
     conn.commit()
     conn.close()
-
 
 def create_user(user):
     # Connect to the database
@@ -247,37 +252,51 @@ def login_validate(user, password):
     return bool(result)
 
 
+import sqlite3
+import json
+
 def update_user_data(user, updated_values):
+    print("update_user_data", user, updated_values)  # debug
     # Connect to the database
     conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
 
     # Fetch the current user data from the database
-    cursor.execute("SELECT data FROM user_data WHERE username=?", (user,))
+    cursor.execute("SELECT data, construction FROM user_data WHERE username=?", (user,))
     result = cursor.fetchone()
 
     if not result:
         print("User not found")
         return
 
-    data_str = result[0]
-    # Convert the data string back to a dictionary
+    data_str, construction_str = result
+    # Convert the data strings back to dictionaries
     data = json.loads(data_str)
+    construction = json.loads(construction_str)
+
+    # If "construction" is not a dictionary, initialize it as an empty dictionary
+    if not isinstance(construction, dict):
+        construction = {}
 
     # Iterate over the updated values and update them in the data dictionary
     for key, value in updated_values.items():
         # Check if key is 'construction'
-        if key == "construction" and key in data and isinstance(data[key], list):
-            # Append the new value to the existing list
-            data[key].append(value)
+        if key == "construction" and isinstance(value, dict):
+            # Convert the construction data to be indexed by 'x, y'
+            for coord, construction_info in value.items():
+                x_pos, y_pos = map(int, coord.split(','))
+                if "construction" not in construction:
+                    construction["construction"] = {}
+                construction["construction"][f"{x_pos},{y_pos}"] = construction_info
         else:
             data[key] = value  # else just update the value
 
-    # Convert the updated data back to a JSON string
+    # Convert the updated data and construction data back to JSON strings
     updated_data_str = json.dumps(data)
+    updated_construction_str = json.dumps(construction)
 
     # Update the user data in the database
-    cursor.execute("UPDATE user_data SET data=? WHERE username=?", (updated_data_str, user))
+    cursor.execute("UPDATE user_data SET data=?, construction=? WHERE username=?", (updated_data_str, updated_construction_str, user))
 
     # Commit changes and close the connection
     conn.commit()

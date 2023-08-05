@@ -66,13 +66,13 @@ def build(entity, name, user, user_data):
 
     # Update user data
     data = {
-        "x_pos": user_data["x_pos"],
-        "y_pos": user_data["y_pos"],
-        "name": name,
-        "hp": 100,
-        "size": 1,
-        "control": user,
-        **entity_data
+        f"{user_data['x_pos']},{user_data['y_pos']}": {
+            "name": name,
+            "hp": 100,
+            "size": 1,
+            "control": user,
+            **entity_data
+        }
     }
 
     update_user_data(user=user, updated_values={"construction": data})
