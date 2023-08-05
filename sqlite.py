@@ -393,7 +393,7 @@ def load_all_user_data():
     return user_data_dict
 
 
-def load_all_map_and_user_data():
+def load_surrounding_map_and_user_data():
     user_data_dict = load_all_user_data()
 
     all_map_data = {}  # We'll use a dictionary to ensure no duplicates
