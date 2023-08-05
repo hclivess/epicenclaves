@@ -323,11 +323,8 @@ def update_user_data(user, updated_values):
 
 
 def remove_construction(user, construction_coordinates):
-    # TODO UPDATE NEEDED
+    print("remove_construction", user, construction_coordinates)
 
-    # Connect to the database
-
-    # TODO CHANGE IN MAP INDEX TOO
     conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
 
@@ -343,13 +340,12 @@ def remove_construction(user, construction_coordinates):
     # Convert the data string back to a dictionary
     data = json.loads(data_str)
 
-    # Check if 'construction' key is in the data and is a list
-    if "construction" in data and isinstance(data["construction"], list):
-        # Iterate over the list and remove the construction with the given coordinates
-        data["construction"] = [construction for construction in data["construction"]
-                                if not (
-                    construction['x_pos'] == construction_coordinates['x_pos'] and construction['y_pos'] ==
-                    construction_coordinates['y_pos'])]
+    coords_str = f"{construction_coordinates['x_pos']},{construction_coordinates['y_pos']}"
+
+    # Check if 'construction' key is in the data and the specific construction exists in it
+    if "construction" in data and coords_str in data["construction"]:
+        # Remove the construction with the given coordinates
+        del data["construction"][coords_str]
 
     # Convert the updated data back to a JSON string
     updated_data_str = json.dumps(data)
