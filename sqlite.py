@@ -393,15 +393,31 @@ def load_all_user_data():
     return user_data_dict
 
 
-
-def load_all_map_data():
+def load_all_map_and_user_data():
     user_data_dict = load_all_user_data()
 
-    total_data = []
-    for username, user_data in user_data_dict.items():
-        total_data.append({username: user_data})
+    all_map_data = {}  # We'll use a dictionary to ensure no duplicates
 
-    return total_data
+    # For each user, fetch map data based on their x_pos and y_pos
+    for username, user_data in user_data_dict.items():
+        user_map_data = load_map_data(user_data['x_pos'], user_data['y_pos'])
+
+        for entry in user_map_data:
+            key = (entry['x_pos'], entry['y_pos'])  # Using tuple (x, y) as unique identifier for a position
+            all_map_data[key] = entry  # This will overwrite duplicates ensuring only one entry per position
+
+    # Now convert dictionary values to a list
+    combined_map_data = list(all_map_data.values())
+
+    # Prepare the final result as a dictionary with two keys
+    result = {
+        "users": user_data_dict,  # This is already a dictionary with usernames as keys
+        "construction": combined_map_data
+    }
+
+    return result
+
+
 
 
 def check_users_db():
