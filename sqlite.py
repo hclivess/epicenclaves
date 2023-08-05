@@ -3,15 +3,16 @@ import sqlite3
 from hashlib import blake2b
 from contextlib import closing
 
-
 users_db = sqlite3.connect("db/auth.db")
 users_db_cursor = users_db.cursor()
+
 
 def hash_password(password):
     salt = "vGY13MMUH4khKGscQOOg"
     passhash = blake2b(digest_size=30)
     passhash.update((password + salt).encode())
     return passhash.hexdigest()
+
 
 def create_map_table():
     # Connect to the database or create one if it doesn't exist
@@ -30,6 +31,7 @@ def create_map_table():
     conn.commit()
     conn.close()
 
+
 def save_map_data(x_pos, y_pos, data):
     # Connect to the database
     conn = sqlite3.connect("db/map_data.db")
@@ -47,8 +49,6 @@ def save_map_data(x_pos, y_pos, data):
     conn.close()
 
 
-
-
 class SQLiteConnectionPool:
     def __init__(self, db_name):
         self.db_name = db_name
@@ -62,6 +62,7 @@ class SQLiteConnectionPool:
 
     def return_connection(self, conn):
         self.pool.append(conn)
+
 
 # Use prepared statements for SQL queries
 def get_map_data(x_pos, y_pos):
@@ -79,8 +80,10 @@ def get_map_data(x_pos, y_pos):
     # Return None if no entity was found
     return None
 
+
 # Initialize a connection pool
 conn_pool = SQLiteConnectionPool("db/map_data.db")
+
 
 def has_item(player, item_name):
     # Connect to the database
@@ -166,7 +169,7 @@ def insert_map_data(db_file, data):
     conn.close()
 
 
-def create_user_file(user):
+def create_user(user):
     # Connect to the database
     conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
@@ -211,7 +214,7 @@ def create_user_file(user):
     conn.close()
 
 
-def load_user_data(user):
+def load_user(user):
     # Connect to the database
     conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
@@ -243,7 +246,6 @@ def load_user_data(user):
         return user_data
     else:
         return None
-
 
 
 def login_validate(user, password):
@@ -339,6 +341,7 @@ def exists_user(user):
 
     return bool(result)
 
+
 def load_map_data(x_pos, y_pos):
     conn_map = sqlite3.connect("db/map_data.db")
     cursor_map = conn_map.cursor()
@@ -369,6 +372,7 @@ def load_map_data(x_pos, y_pos):
 
     return map_data
 
+
 def load_all_user_data():
     conn_user = sqlite3.connect("db/user_data.db")
     cursor_user = conn_user.cursor()
@@ -396,6 +400,7 @@ def load_all_user_data():
         user_data_list.append(user_data)
 
     return user_data_list
+
 
 def load_all_map_data():
     user_data_list = load_all_user_data()

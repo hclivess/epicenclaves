@@ -9,7 +9,7 @@ import tornado.escape
 
 import backend
 from backend import cookie_get, tile_occupied, build, occupied_by, generate_entities
-from sqlite import create_map_table, has_item, update_map_data, create_user_file, load_user_data, login_validate, \
+from sqlite import create_map_table, has_item, update_map_data, create_user, load_user, login_validate, \
     update_user_data, remove_construction, add_user, exists_user, load_all_map_data, check_users_db
 
 max_size = 1000
@@ -32,7 +32,7 @@ class MainHandler(BaseHandler):
             user = tornado.escape.xhtml_escape(self.current_user)
             message = f"Welcome back, {user}"
 
-            file = load_user_data(user)
+            file = load_user(user)
             print("file", file)  # debug
             occupied = tile_occupied(file["x_pos"], file["y_pos"])
             print("occupied", occupied)  # debug
@@ -72,7 +72,7 @@ class BuildHandler(BaseHandler):
         name = self.get_argument("name")
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        user_data = load_user_data(user)
+        user_data = load_user(user)
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         if occupied["type"] == "empty":
@@ -109,7 +109,7 @@ class BuildHandler(BaseHandler):
         else:
             message = "Cannot build here"
 
-        user_data = load_user_data(user)
+        user_data = load_user(user)
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         self.render("templates/user_panel.html",
@@ -128,7 +128,7 @@ class MoveHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
 
         def move(user, direction, axis_key, axis_limit):
-            file = load_user_data(user)
+            file = load_user(user)
             new_pos = file[axis_key] + direction
 
             # Check if the action points are more than 0 before allowing movement
@@ -157,7 +157,7 @@ class MoveHandler(BaseHandler):
                         data=json.dumps(load_all_map_data()),
                         message=message)
         else:
-            file = load_user_data(user)
+            file = load_user(user)
             occupied = tile_occupied(file["x_pos"], file["y_pos"])
 
             self.render("templates/user_panel.html",
@@ -172,7 +172,7 @@ class MoveHandler(BaseHandler):
 class RestHandler(BaseHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
-        file = load_user_data(user)
+        file = load_user(user)
         hours = self.get_argument("hours", default="1")
 
         proper_tile = occupied_by(file["x_pos"], file["y_pos"], what="inn")
@@ -197,7 +197,7 @@ class RestHandler(BaseHandler):
         else:
             message = "Out of action points to rest"
 
-        file = load_user_data(user)
+        file = load_user(user)
         occupied = tile_occupied(file["x_pos"], file["y_pos"])
 
         self.render("templates/user_panel.html",
@@ -212,7 +212,7 @@ class RestHandler(BaseHandler):
 class ConquerHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-        file = load_user_data(user)
+        file = load_user(user)
         this_tile = tile_occupied(file["x_pos"], file["y_pos"])
 
         owner = this_tile["control"]
@@ -231,7 +231,7 @@ class ConquerHandler(BaseHandler):
         else:
             message = "Cannot acquire an empty tile"
 
-        file = load_user_data(user)
+        file = load_user(user)
         occupied = tile_occupied(file["x_pos"], file["y_pos"])
 
         self.render("templates/user_panel.html",
@@ -246,7 +246,7 @@ class ConquerHandler(BaseHandler):
 class ChopHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-        file = load_user_data(user)
+        file = load_user(user)
         proper_tile = occupied_by(file["x_pos"], file["y_pos"], what="forest")
         item = "axe"
 
@@ -268,7 +268,7 @@ class ChopHandler(BaseHandler):
         else:
             message = "Out of action points to chop"
 
-        file = load_user_data(user)
+        file = load_user(user)
         occupied = tile_occupied(file["x_pos"], file["y_pos"])
 
         self.render("templates/user_panel.html",
@@ -287,13 +287,13 @@ class LoginHandler(BaseHandler):
 
         if not exists_user(user):
             add_user(user, password)
-            create_user_file(user)
+            create_user(user)
         if login_validate(user, password):
             self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
 
             message = f"Welcome, {user}!"
 
-            file = load_user_data(user)
+            file = load_user(user)
             occupied = tile_occupied(file["x_pos"], file["y_pos"])
 
             self.render("templates/user_panel.html",
