@@ -109,7 +109,7 @@ def has_item(player, item_name):
 
 
 def update_map_data(update_data):
-    print("update_data", update_data)
+    print("update_map_data", update_data)
 
     # Connect to the database
     conn = sqlite3.connect("db/map_data.db")
