@@ -37,6 +37,7 @@ class MainHandler(BaseHandler):
             username = list(data.keys())[0]  # Get the first (and only) key in the dictionary
             user_data = data[username]  # Get the user's data
 
+            print("data", data)  # debug
             print("user_data", user_data)  # debug
             occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
             print("occupied", occupied)  # debug
@@ -62,8 +63,8 @@ class LogoutHandler(BaseHandler):
 class MapHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-
         data = json.dumps(load_all_map_data())
+
         print("data", data)  # debug
         self.render("templates/map.html",
                     data=data,

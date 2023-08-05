@@ -215,31 +215,23 @@ def create_user(user):
 
 
 def load_user(user):
-    # Connect to the database
     conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
 
-    # Retrieve the user data for the given username
-    cursor.execute("SELECT username, x_pos, y_pos, data, construction FROM user_data WHERE username=?", (user,))
+    cursor.execute("SELECT username, x_pos, y_pos, data FROM user_data WHERE username=?", (user,))
     result = cursor.fetchone()
 
-    # Close the connection
     conn.close()
 
     if result:
-        username, x_pos, y_pos, data_str, construction_str = result
-
-        # Convert the data string back to dictionaries
+        username, x_pos, y_pos, data_str = result
         data = json.loads(data_str)
-        construction = json.loads(construction_str) if construction_str else {}
 
-        # Prepare the final result
         user_data = {
             username: {
                 "x_pos": x_pos,
                 "y_pos": y_pos,
-                **data,
-                "construction": construction
+                **data
             }
         }
 
@@ -383,36 +375,35 @@ def load_all_user_data():
 
     if not all_users_results:
         print("No users found")
-        return []
+        return {}
 
-    user_data_list = []
+    user_data_dict = {}
     for result_user in all_users_results:
         username, x_pos, y_pos, data_str = result_user
         data = json.loads(data_str)
 
         user_data = {
-            "username": username,
             "x_pos": x_pos,
             "y_pos": y_pos,
             **data
         }
 
-        user_data_list.append(user_data)
+        user_data_dict[username] = user_data
 
-    return user_data_list
+    return user_data_dict
+
 
 
 def load_all_map_data():
-    user_data_list = load_all_user_data()
+    user_data_dict = load_all_user_data()
 
     total_data = []
-    for user_data in user_data_list:
+    for username, user_data in user_data_dict.items():
         user_construction = {"construction": load_map_data(user_data['x_pos'], user_data['y_pos'])}
-        total_data.append(user_data)
+        total_data.append({username: user_data})
         total_data.append(user_construction)
 
     return total_data
-
 
 def check_users_db():
     users_db.execute("CREATE TABLE IF NOT EXISTS users (username STRING PRIMARY KEY, passhash STRING)")
