@@ -237,7 +237,6 @@ class RestHandler(BaseHandler):
 
 class ConquerHandler(BaseHandler):
 
-    # TODO UPDATE NEEDED
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         data = load_user(user)
@@ -254,11 +253,19 @@ class ConquerHandler(BaseHandler):
         elif this_tile["type"] != "empty" and user_data["action_points"] > 0:
             remove_construction(owner, {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]})
 
+            # Update the "control" attribute
+            this_tile["control"] = user
+
+            # Construct the updated data for the specific position
+            updated_construction_data = {
+                f"{user_data['x_pos']},{user_data['y_pos']}": this_tile
+            }
+
+            # Call the update function
             update_user_data(user=user,
-                             updated_values={"construction": this_tile,
+                             updated_values={"construction": updated_construction_data,
                                              "action_points": user_data["action_points"] - 1})
 
-            update_map_data({"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"], "data": {"control": user}})
             message = "Takeover successful"
         else:
             message = "Cannot acquire an empty tile"
@@ -384,11 +391,11 @@ if __name__ == "__main__":
         create_map_table()
 
         generate_entities(entity_type="forest",
-                          probability=0.25,
+                          probability=0.50,
                           additional_entity_data={"control": "nobody",
                                                   "hp": 100},
-                          size=101,
-                          every=20)
+                          size=25,
+                          every=5)
 
     actions = backend.Actions()
     descriptions = backend.Descriptions()
