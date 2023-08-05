@@ -75,7 +75,7 @@ def get_map_data(x_pos, y_pos):
         x_pos, y_pos, data_str = result
         # Convert the data string back to a dictionary
         data = json.loads(data_str)
-        return {"x_pos": x_pos, "y_pos": y_pos, **data}  # Unpacks the data dictionary
+        return {f"{x_pos},{y_pos}": data}  # Removed ** to properly construct the dictionary
 
     # Return None if no entity was found
     return None
@@ -115,11 +115,12 @@ def update_map_data(update_data):
     conn = sqlite3.connect("db/map_data.db")
     cursor = conn.cursor()
 
+    # Get coordinates and data from the provided input
     coords = list(update_data.keys())[0]
     tile_data = update_data[coords]
 
-    x = tile_data.get('x_pos')
-    y = tile_data.get('y_pos')
+    # Split the coords into x and y positions
+    x, y = map(int, coords.split(','))
 
     # Fetch the existing data
     cursor.execute("SELECT data FROM map_data WHERE x_pos=? AND y_pos=?", (x, y))
@@ -146,6 +147,9 @@ def update_map_data(update_data):
 
     else:
         print(f"No data found at the given coordinates {x, y}.")
+
+    # Close the connection
+    conn.close()
 
 
 def insert_map_data(db_file, data):
