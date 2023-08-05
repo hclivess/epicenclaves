@@ -219,24 +219,36 @@ def create_user(user):
     conn.close()
 
 
-def load_user(user):
+import sqlite3
+import json
+
+
+def load_user(user, load_construction=True):
     conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
 
-    cursor.execute("SELECT username, x_pos, y_pos, data FROM user_data WHERE username=?", (user,))
+    if load_construction:
+        cursor.execute("SELECT username, x_pos, y_pos, data, construction FROM user_data WHERE username=?", (user,))
+    else:
+        cursor.execute("SELECT username, x_pos, y_pos, data FROM user_data WHERE username=?", (user,))
+
     result = cursor.fetchone()
 
     conn.close()
 
     if result:
-        username, x_pos, y_pos, data_str = result
+        username, x_pos, y_pos, data_str = result[:4]  # Extract the first 4 values from the result tuple
         data = json.loads(data_str)
+
+        # Load the "construction" data only if load_construction is True and the result tuple has at least 5 values
+        construction = json.loads(result[4]) if load_construction and len(result) >= 5 else {}
 
         user_data = {
             username: {
                 "x_pos": x_pos,
                 "y_pos": y_pos,
-                **data
+                **data,
+                "construction": construction
             }
         }
 
@@ -304,6 +316,9 @@ def update_user_data(user, updated_values):
 
 
 def remove_construction(user, construction_coordinates):
+
+    # TODO UPDATE NEEDED
+
     # Connect to the database
 
     # TODO CHANGE IN MAP INDEX TOO
