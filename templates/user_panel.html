@@ -238,10 +238,10 @@ hr {
         {% for coord, building in file["construction"].items() %}
         <div class="col-md-4"> <!-- Set this to col-md-4 to make 3 columns -->
 
-            <p>Type: {{ building.get(type) }}</p>
-            <p><img src="/img/assets/{{building.get(type)}}.png" alt="Item Icon" class="menu-icon"></p>
+            <p>Type: {{ building.get("type") }}</p>
+            <p><img src="/img/assets/{{building.get('type')}}.png" alt="Item Icon" class="menu-icon"></p>
             <p>Position: ({{ coord }})</p>
-            <p>Hitpoints: {{ building.get(hp) }}</p>
+            <p>Hitpoints: {{ building.get("hp") }}</p>
         </div>
         {% end %}
     </div> <!-- Close the row div -->

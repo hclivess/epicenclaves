@@ -255,7 +255,7 @@ class ConquerHandler(BaseHandler):
 
             # Update the "control" attribute
             key = list(this_tile.keys())[0]
-            this_tile[key]['type'] = user
+            this_tile[key]['control'] = user
 
             # Construct the updated data for the specific position
             updated_construction_data = this_tile
