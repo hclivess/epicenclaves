@@ -226,7 +226,6 @@ class ConquerHandler(BaseHandler):
 
             update_user_data(user=user,
                              updated_values={"construction": this_tile, "action_points": file["action_points"] - 1})
-            update_user_data(user=user, updated_values={"construction": this_tile})
 
             update_map_data({"x_pos": file["x_pos"], "y_pos": file["y_pos"], "data": {"control": user}})
             message = "Takeover successful"
