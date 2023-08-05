@@ -226,10 +226,6 @@ def create_user(user, x_pos=1, y_pos=1):
     conn.close()
 
 
-import sqlite3
-import json
-
-
 def load_user(user, load_construction=True):
     conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
@@ -321,37 +317,38 @@ def update_user_data(user, updated_values):
     conn.commit()
     conn.close()
 
-
 def remove_construction(user, construction_coordinates):
     print("remove_construction", user, construction_coordinates)
-
     conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
 
-    # Fetch the current user data from the database
-    cursor.execute("SELECT data FROM user_data WHERE username=?", (user,))
-    result = cursor.fetchone()
-
-    if not result:
+    # Fetch the current user data using the load_user function
+    user_data_wrapper = load_user(user)
+    if not user_data_wrapper:
         print("User not found")
         return
 
-    data_str = result[0]
-    # Convert the data string back to a dictionary
-    data = json.loads(data_str)
+    user_data = user_data_wrapper[user]  # This will get the actual data dictionary for the user
 
-    coords_str = f"{construction_coordinates['x_pos']},{construction_coordinates['y_pos']}"
+    # Form the key from the provided x_pos and y_pos
+    key = f"{construction_coordinates['x_pos']},{construction_coordinates['y_pos']}"
 
-    # Check if 'construction' key is in the data and the specific construction exists in it
-    if "construction" in data and coords_str in data["construction"]:
-        # Remove the construction with the given coordinates
-        del data["construction"][coords_str]
+    # Check if 'construction' key is in the user_data and is a dictionary
+    if "construction" in user_data and isinstance(user_data["construction"], dict):
+        # Try to pop the key. If the key is not present, do nothing.
+        user_data["construction"].pop(key, None)
 
     # Convert the updated data back to a JSON string
-    updated_data_str = json.dumps(data)
+    updated_data_str = json.dumps(user_data)
+
+    # Remove the "construction" key from user_data because it's stored in a separate column
+    construction_data = user_data.pop("construction", {})
+
+    # Convert the "construction" data back to a JSON string
+    construction_data_str = json.dumps(construction_data)
 
     # Update the user data in the database
-    cursor.execute("UPDATE user_data SET data=? WHERE username=?", (updated_data_str, user))
+    cursor.execute("UPDATE user_data SET data=?, construction=? WHERE username=?", (updated_data_str, construction_data_str, user))
 
     # Commit changes and close the connection
     conn.commit()
