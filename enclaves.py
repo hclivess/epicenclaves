@@ -8,10 +8,9 @@ import tornado.web
 import tornado.escape
 
 import backend
-from backend import exists_user, add_user, check_users_db, login_validate, cookie_get, create_user_file, load_user_data, \
-    tile_occupied, load_map, build, occupied_by, has_item, generate_entities, update_user_data, remove_construction, \
-    update_map_data
-from sqlite import create_map_table
+from backend import cookie_get, tile_occupied, build, occupied_by, generate_entities
+from sqlite import create_map_table, has_item, update_map_data, create_user_file, load_user_data, login_validate, \
+    update_user_data, remove_construction, add_user, exists_user, load_map, check_users_db
 
 max_size = 1000
 
