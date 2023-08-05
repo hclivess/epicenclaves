@@ -235,13 +235,13 @@ def load_user(user):
 
         # Prepare the final result
         user_data = {
-            "username": username,
-            "x_pos": x_pos,
-            "y_pos": y_pos,
+            username: {
+                "x_pos": x_pos,
+                "y_pos": y_pos,
+                **data,
+                "construction": construction
+            }
         }
-
-        # Merge data and construction into user_data
-        user_data.update(data)
 
         return user_data
     else:

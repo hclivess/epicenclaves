@@ -32,17 +32,21 @@ class MainHandler(BaseHandler):
             user = tornado.escape.xhtml_escape(self.current_user)
             message = f"Welcome back, {user}"
 
-            file = load_user(user)
-            print("file", file)  # debug
-            occupied = tile_occupied(file["x_pos"], file["y_pos"])
+            data = load_user(user)
+            # Get the user's data
+            username = list(data.keys())[0]  # Get the first (and only) key in the dictionary
+            user_data = data[username]  # Get the user's data
+
+            print("user_data", user_data)  # debug
+            occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
             print("occupied", occupied)  # debug
 
-            if file["action_points"] < 1:
+            if user_data["action_points"] < 1:
                 message = f"You have action points left for this turn"
 
             self.render("templates/user_panel.html",
                         user=user,
-                        file=file,
+                        file=user_data,
                         message=message,
                         on_tile=occupied,
                         actions=actions,
@@ -128,13 +132,17 @@ class MoveHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
 
         def move(user, direction, axis_key, axis_limit):
-            file = load_user(user)
-            new_pos = file[axis_key] + direction
+
+            data = load_user(user)
+            username = list(data.keys())[0]
+            user_data = data[username]
+
+            new_pos = user_data[axis_key] + direction
 
             # Check if the action points are more than 0 before allowing movement
-            if file["action_points"] > 0 and 1 <= new_pos <= axis_limit:
+            if user_data["action_points"] > 0 and 1 <= new_pos <= axis_limit:
                 # Update both the position and the action points in one go
-                update_user_data(user, {axis_key: new_pos, "action_points": file["action_points"] - 1})
+                update_user_data(user, {axis_key: new_pos, "action_points": user_data["action_points"] - 1})
                 return True
             return False
 
@@ -157,12 +165,15 @@ class MoveHandler(BaseHandler):
                         data=json.dumps(load_all_map_data()),
                         message=message)
         else:
-            file = load_user(user)
-            occupied = tile_occupied(file["x_pos"], file["y_pos"])
+            data = load_user(user)
+            username = list(data.keys())[0]
+            user_data = data[username]
+
+            occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
             self.render("templates/user_panel.html",
                         user=user,
-                        file=file,
+                        file=user_data,
                         message=message,
                         on_tile=occupied,
                         actions=actions,
@@ -172,14 +183,18 @@ class MoveHandler(BaseHandler):
 class RestHandler(BaseHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
-        file = load_user(user)
+
+        data = load_user(user)
+        username = list(data.keys())[0]
+        user_data = data[username]
+
         hours = self.get_argument("hours", default="1")
 
-        proper_tile = occupied_by(file["x_pos"], file["y_pos"], what="inn")
+        proper_tile = occupied_by(user_data["x_pos"], user_data["y_pos"], what="inn")
 
-        if proper_tile and file["action_points"] > 0 and file["hp"] < 99:
-            new_hp = file["hp"] + int(hours)
-            new_ap = file["action_points"] - int(hours)
+        if proper_tile and user_data["action_points"] > 0 and user_data["hp"] < 99:
+            new_hp = user_data["hp"] + int(hours)
+            new_ap = user_data["action_points"] - int(hours)
             if new_hp > 100:
                 new_hp = 100
 
@@ -188,7 +203,7 @@ class RestHandler(BaseHandler):
 
             message = "You feel more rested"
 
-        elif file["hp"] > 99:
+        elif user_data["hp"] > 99:
             message = "You are already fully rested"
 
         elif not proper_tile:
@@ -197,12 +212,15 @@ class RestHandler(BaseHandler):
         else:
             message = "Out of action points to rest"
 
-        file = load_user(user)
-        occupied = tile_occupied(file["x_pos"], file["y_pos"])
+        data = load_user(user)
+        username = list(data.keys())[0]
+        user_data = data[username]
+
+        occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         self.render("templates/user_panel.html",
                     user=user,
-                    file=file,
+                    file=user_data,
                     message=message,
                     on_tile=occupied,
                     actions=actions,
@@ -212,31 +230,38 @@ class RestHandler(BaseHandler):
 class ConquerHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-        file = load_user(user)
-        this_tile = tile_occupied(file["x_pos"], file["y_pos"])
+        data = load_user(user)
+        username = list(data.keys())[0]
+        user_data = data[username]
+
+        this_tile = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         owner = this_tile["control"]
 
         if owner == user:
             message = "You already own this tile"
 
-        elif this_tile["type"] != "empty" and file["action_points"] > 0:
-            remove_construction(owner, {"x_pos": file["x_pos"], "y_pos": file["y_pos"]})
+        elif this_tile["type"] != "empty" and user_data["action_points"] > 0:
+            remove_construction(owner, {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]})
 
             update_user_data(user=user,
-                             updated_values={"construction": this_tile, "action_points": file["action_points"] - 1})
+                             updated_values={"construction": this_tile, "action_points": user_data["action_points"] - 1})
 
-            update_map_data({"x_pos": file["x_pos"], "y_pos": file["y_pos"], "data": {"control": user}})
+            update_map_data({"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"], "data": {"control": user}})
             message = "Takeover successful"
         else:
             message = "Cannot acquire an empty tile"
 
-        file = load_user(user)
-        occupied = tile_occupied(file["x_pos"], file["y_pos"])
+        data = load_user(user)
+        username = list(data.keys())[0]
+        user_data = data[username]
+
+
+        occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         self.render("templates/user_panel.html",
                     user=user,
-                    file=file,
+                    file=user_data,
                     message=message,
                     on_tile=occupied,
                     actions=actions,
@@ -246,16 +271,20 @@ class ConquerHandler(BaseHandler):
 class ChopHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-        file = load_user(user)
-        proper_tile = occupied_by(file["x_pos"], file["y_pos"], what="forest")
+
+        data = load_user(user)
+        username = list(data.keys())[0]
+        user_data = data[username]
+
+        proper_tile = occupied_by(user_data["x_pos"], user_data["y_pos"], what="forest")
         item = "axe"
 
         if not has_item(user, item):
             message = f"You have no {item} at hand"
 
-        elif proper_tile and file["action_points"] > 0:
-            new_wood = file["wood"] + 1
-            new_ap = file["action_points"] - 1
+        elif proper_tile and user_data["action_points"] > 0:
+            new_wood = user_data["wood"] + 1
+            new_ap = user_data["action_points"] - 1
 
             update_user_data(user=user, updated_values={"wood": new_wood})
             update_user_data(user=user, updated_values={"action_points": new_ap})
@@ -268,12 +297,15 @@ class ChopHandler(BaseHandler):
         else:
             message = "Out of action points to chop"
 
-        file = load_user(user)
-        occupied = tile_occupied(file["x_pos"], file["y_pos"])
+        data = load_user(user)
+        username = list(data.keys())[0]
+        user_data = data[username]
+
+        occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         self.render("templates/user_panel.html",
                     user=user,
-                    file=file,
+                    file=user_data,
                     message=message,
                     on_tile=occupied,
                     actions=actions,
@@ -293,12 +325,14 @@ class LoginHandler(BaseHandler):
 
             message = f"Welcome, {user}!"
 
-            file = load_user(user)
-            occupied = tile_occupied(file["x_pos"], file["y_pos"])
+            data = load_user(user)
+            username = list(data.keys())[0]
+            user_data = data[username]
+            occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
             self.render("templates/user_panel.html",
                         user=user,
-                        file=file,
+                        file=user_data,
                         message=message,
                         on_tile=occupied,
                         actions=actions,
