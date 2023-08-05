@@ -7,6 +7,9 @@ from hashlib import blake2b
 
 import sqlite
 
+if not os.path.exists("db"):
+    os.mkdir("db")
+
 users_db = sqlite3.connect("db/auth.db")
 users_db_cursor = users_db.cursor()
 
@@ -304,6 +307,9 @@ def load_map(user):
     # Convert the data string back to a dictionary
     data = json.loads(data_str)
 
+    # Remove 'construction' from the data if present
+    data.pop('construction', None)
+
     # Prepare the user_data dictionary
     user_data = {
         "username": username,
@@ -350,6 +356,7 @@ def load_map(user):
     # Combine users_data and map_data into a single list
     total_data = users_data + [{"construction": map_data}]
     return total_data
+
 
 
 def add_user(user, password):

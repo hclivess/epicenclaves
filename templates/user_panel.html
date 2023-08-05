@@ -197,8 +197,6 @@ hr {
             <div class="col-md-6">
                <h4>Current Tile</h4>
 
-
-
                <div class="col">
                 <p>Type: {{on_tile["type"]}}</p>
                 <p><img src=/img/assets/{{on_tile["type"]}}.png alt="Item Icon" class="menu-icon"></p>
@@ -235,21 +233,20 @@ hr {
             </div>
 
             <!-- buildings column -->
-            <div class="col-md-6">
-               <h4>Acquired Tiles</h4>
+<div class="col-md-6">
+    <h4>Acquired Tiles</h4>
+    <div class="row">  <!-- Add a row div to contain the columns -->
+        {%for building in file["construction"]%}
+        <div class="col-md-4"> <!-- Set this to col-md-4 to make 3 columns -->
+            <p>Type: {{building["type"]}}</p>
+            <p><img src=/img/assets/{{building["type"]}}.png alt="Item Icon" class="menu-icon"></p>
+            <p>Position: ({{building["x_pos"]}}, {{building["y_pos"]}})</p>
+            <p>Hitpoints: {{building["hp"]}}</p>
+        </div>
+        {%end%}
+    </div> <!-- Close the row div -->
+</div>
 
-                  {%for building in file["construction"]%}
-               <div class="col">
-                <p>Type: {{building["type"]}}</p>
-                <p><img src=/img/assets/{{building["type"]}}.png alt="Item Icon" class="menu-icon"></p>
-                <p>Position: ({{building["x_pos"]}}, {{building["y_pos"]}})</p>
-                <p>Hitpoints: {{building["hp"]}}</p>
-
-               </div>
-
-                  {%end%}
-
-            </div>
 
 
 

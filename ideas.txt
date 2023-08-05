@@ -46,3 +46,28 @@ General Features:
 - Quest system
 - Micro submaps (dungeons and constructed entries (space?))
 - Minecraft-style recipe system
+
+
+map_data = {
+    (1, 2): {
+        'name': 'town1',
+        'hp': 100,
+        'size': 1,
+        'control': 'wer',
+        'type': 'house'
+    },
+    (2, 3): {
+        'name': 'town2',
+        'hp': 80,
+        'size': 2,
+        'control': 'joe',
+        'type': 'castle'
+    },
+    (3, 1): {
+        'name': 'town3',
+        'hp': 70,
+        'size': 1,
+        'control': 'sue',
+        'type': 'village'
+    }
+}

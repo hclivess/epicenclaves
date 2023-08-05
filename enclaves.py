@@ -61,7 +61,7 @@ class MapHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
 
         data = json.dumps(load_map(user=user))
-        print("data", data)  # debug todo: selective map drawing around player
+        print("data", data)  # debug
         self.render("templates/map.html",
                     data=data,
                     ensure_ascii=False)
@@ -226,7 +226,7 @@ class ConquerHandler(BaseHandler):
 
             update_user_data(user=user,
                              updated_values={"construction": this_tile, "action_points": file["action_points"] - 1})
-            update_user_data(user=user, updated_values=this_tile)
+            update_user_data(user=user, updated_values={"construction": this_tile})
 
             update_map_data({"x_pos": file["x_pos"], "y_pos": file["y_pos"], "data": {"control": user}})
             message = "Takeover successful"
