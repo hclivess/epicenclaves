@@ -251,7 +251,7 @@ class ConquerHandler(BaseHandler):
             message = "You already own this tile"
 
         elif this_tile["type"] != "empty" and user_data["action_points"] > 0:
-            remove_construction(owner, {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]})
+            remove_construction(owner, {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]}) #TODO FIX THIS, DOESNT WORK
 
             # Update the "control" attribute
             this_tile["control"] = user
@@ -260,6 +260,8 @@ class ConquerHandler(BaseHandler):
             updated_construction_data = {
                 f"{user_data['x_pos']},{user_data['y_pos']}": this_tile
             }
+
+            update_map_data(updated_construction_data)
 
             # Call the update function
             update_user_data(user=user,

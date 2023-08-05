@@ -109,14 +109,17 @@ def has_item(player, item_name):
 
 
 def update_map_data(update_data):
-    # Extract x, y and new data from the update_data dict
-    x = update_data.get('x_pos')
-    y = update_data.get('y_pos')
-    new_data = update_data.get('data')
+    print("update_data", update_data)
 
     # Connect to the database
     conn = sqlite3.connect("db/map_data.db")
     cursor = conn.cursor()
+
+    coords = list(update_data.keys())[0]
+    tile_data = update_data[coords]
+
+    x = tile_data.get('x_pos')
+    y = tile_data.get('y_pos')
 
     # Fetch the existing data
     cursor.execute("SELECT data FROM map_data WHERE x_pos=? AND y_pos=?", (x, y))
@@ -124,13 +127,13 @@ def update_map_data(update_data):
 
     if row is not None:
         # Parse the JSON string into a Python dictionary
-        data = json.loads(row[0])
+        existing_data = json.loads(row[0])
 
-        # Merge new data with the old data, new data takes precedence
-        data.update(new_data)
+        # Update only the 'control' key
+        existing_data["control"] = tile_data["control"]
 
         # Convert the updated data back into a JSON string
-        data_str = json.dumps(data)
+        data_str = json.dumps(existing_data)
 
         # Update the row in the map_data table
         cursor.execute(
@@ -140,8 +143,9 @@ def update_map_data(update_data):
 
         # Commit the changes
         conn.commit()
+
     else:
-        print("No data found at the given coordinates.")
+        print(f"No data found at the given coordinates {x, y}.")
 
 
 def insert_map_data(db_file, data):
