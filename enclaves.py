@@ -77,7 +77,10 @@ class BuildHandler(BaseHandler):
         name = self.get_argument("name")
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        user_data = load_user(user)
+        data = load_user(user)
+        username = list(data.keys())[0]
+        user_data = data[username]
+
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         if occupied["type"] == "empty":
@@ -114,7 +117,10 @@ class BuildHandler(BaseHandler):
         else:
             message = "Cannot build here"
 
-        user_data = load_user(user)
+        data = load_user(user)
+        username = list(data.keys())[0]
+        user_data = data[username]
+
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         self.render("templates/user_panel.html",
@@ -379,7 +385,7 @@ if __name__ == "__main__":
                           additional_entity_data={"control": "nobody",
                                                   "hp": 100},
                           size=101,
-                          every=5)
+                          every=50)
 
     actions = backend.Actions()
     descriptions = backend.Descriptions()
