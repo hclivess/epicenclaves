@@ -176,7 +176,8 @@ def create_user_file(user):
                         username TEXT PRIMARY KEY,
                         x_pos INTEGER,
                         y_pos INTEGER,
-                        data TEXT
+                        data TEXT,
+                        construction TEXT
                       )''')
 
     # Convert the position tuple to a string representation
@@ -201,9 +202,9 @@ def create_user_file(user):
     data_str = json.dumps(data)
 
     # Insert the user data into the database
-    cursor.execute('''INSERT OR IGNORE INTO user_data (username, x_pos, y_pos, data)
-                      VALUES (?, ?, ?, ?)''',
-                   (user, x_pos, y_pos, data_str))
+    cursor.execute('''INSERT OR IGNORE INTO user_data (username, x_pos, y_pos, data, construction)
+                       VALUES (?, ?, ?, ?, ?)''',
+                   (user, x_pos, y_pos, data_str, json.dumps([])))
 
     # Commit changes and close the connection
     conn.commit()
@@ -216,29 +217,33 @@ def load_user_data(user):
     cursor = conn.cursor()
 
     # Retrieve the user data for the given username
-    cursor.execute("SELECT * FROM user_data WHERE username=?", (user,))
+    cursor.execute("SELECT username, x_pos, y_pos, data, construction FROM user_data WHERE username=?", (user,))
     result = cursor.fetchone()
 
     # Close the connection
     conn.close()
 
     if result:
-        username, x_pos, y_pos, data_str = result
+        username, x_pos, y_pos, data_str, construction_str = result
 
-        # Convert the data string back to a dictionary
+        # Convert the data string back to dictionaries
         data = json.loads(data_str)
+        construction = json.loads(construction_str) if construction_str else {}
 
         # Prepare the final result
         user_data = {
             "username": username,
             "x_pos": x_pos,
-            "y_pos": y_pos
+            "y_pos": y_pos,
         }
+
+        # Merge data and construction into user_data
         user_data.update(data)
 
         return user_data
     else:
         return None
+
 
 
 def login_validate(user, password):
@@ -334,73 +339,72 @@ def exists_user(user):
 
     return bool(result)
 
+def load_map_data(x_pos, y_pos):
+    conn_map = sqlite3.connect("db/map_data.db")
+    cursor_map = conn_map.cursor()
 
-def load_all_map_data():
-    # Load data from db/user_data.db
+    distance_squared = 500 ** 2
+
+    cursor_map.execute("""
+        SELECT x_pos, y_pos, data 
+        FROM map_data 
+        WHERE ((x_pos - ?)*(x_pos - ?) + (y_pos - ?)*(y_pos - ?)) <= ?
+    """, (x_pos, x_pos, y_pos, y_pos, distance_squared))
+
+    results_map = cursor_map.fetchall()
+    conn_map.close()
+
+    map_data = []
+    for result_map in results_map:
+        x_map, y_map, data_str = result_map
+        data = json.loads(data_str)
+
+        map_info = {
+            "x_pos": x_map,
+            "y_pos": y_map,
+            **data
+        }
+
+        map_data.append(map_info)
+
+    return map_data
+
+def load_all_user_data():
     conn_user = sqlite3.connect("db/user_data.db")
     cursor_user = conn_user.cursor()
 
-    # Execute a query to get all users data
-    cursor_user.execute("SELECT * FROM user_data")
+    cursor_user.execute("SELECT username, x_pos, y_pos, data FROM user_data")
     all_users_results = cursor_user.fetchall()
+    conn_user.close()
 
     if not all_users_results:
         print("No users found")
-        return
+        return []
 
-    total_data = []
+    user_data_list = []
     for result_user in all_users_results:
         username, x_pos, y_pos, data_str = result_user
-
-        # Convert the data string back to a dictionary
         data = json.loads(data_str)
 
-        # Remove 'construction' from the data if present
-        data.pop('construction', None)
-
-        # Prepare the user_data dictionary
         user_data = {
             "username": username,
             "x_pos": x_pos,
-            "y_pos": y_pos
+            "y_pos": y_pos,
+            **data
         }
-        user_data.update(data)  # This will add the data from 'data' to 'user_data'
 
+        user_data_list.append(user_data)
+
+    return user_data_list
+
+def load_all_map_data():
+    user_data_list = load_all_user_data()
+
+    total_data = []
+    for user_data in user_data_list:
+        user_construction = {"construction": load_map_data(user_data['x_pos'], user_data['y_pos'])}
         total_data.append(user_data)
-
-        # Load data from db/map_data.db
-        conn_map = sqlite3.connect("db/map_data.db")
-        cursor_map = conn_map.cursor()
-
-        # Calculate the square of the distance
-        distance_squared = 500 ** 2
-
-        # Query to fetch map data within a distance of 500 from the user
-        cursor_map.execute("""
-            SELECT x_pos, y_pos, data 
-            FROM map_data 
-            WHERE ((x_pos - ?)*(x_pos - ?) + (y_pos - ?)*(y_pos - ?)) <= ?
-        """, (x_pos, x_pos, y_pos, y_pos, distance_squared))
-
-        results_map = cursor_map.fetchall()
-
-        map_data = []
-        for result_map in results_map:
-            x_map, y_map, data_str = result_map
-            data = json.loads(data_str)
-
-            map_info = {
-                "x_pos": x_map,
-                "y_pos": y_map,
-                **data  # Use the unpacking operator to merge the 'data' dictionary into 'map_info'
-            }
-
-            map_data.append(map_info)
-
-        total_data.append({"construction": map_data})
-
-    conn_map.close()
-    conn_user.close()
+        total_data.append(user_construction)
 
     return total_data
 
