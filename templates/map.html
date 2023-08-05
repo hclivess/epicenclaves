@@ -192,7 +192,6 @@ function createMap(data) {
   var gridSize = 125;  // Default Grid size
   var maxX = 0;
   var maxY = 0;
-  var entitySize = 125;  // Default entity size
 
   // Displaying users
   Object.entries(data.users).forEach(function ([username, user]) {
@@ -226,20 +225,10 @@ function createMap(data) {
         maxY = playerY;
       }
     }
-
-    // Displaying user-specific constructions
-    (user.construction || []).forEach(function (construction) {
-      processConstruction(construction);
-    });
   });
 
   // Displaying global constructions
   data.construction.forEach(function (construction) {
-    processConstruction(construction);
-  });
-
-  // Function to process and display construction
-  function processConstruction(construction) {
     var constructionX = (construction.x_pos - 1) * gridSize;
     var constructionY = (construction.y_pos - 1) * gridSize;
     if (constructionX > maxX) {
@@ -262,7 +251,7 @@ function createMap(data) {
     });
     constructionElement.appendChild(textLabel);
     mapContainer.appendChild(constructionElement);
-  }
+  });
 
   // Set the map's width and height based on the maximum X and Y positions of construction and players
   mapContainer.style.width = (maxX + gridSize) + "px";
@@ -303,8 +292,9 @@ function createMap(data) {
 
   function showTooltip(entity, tooltip) {
     var rect = entity.getBoundingClientRect();
-    var left = rect.right;
-    var top = rect.top;
+    var left = rect.right + 10; // Move the tooltip to the right side of the entity
+    var top = rect.top; // Move the tooltip above the entity
+
     tooltip.style.position = 'fixed';
     tooltip.style.top = top + "px";
     tooltip.style.left = left + "px";
@@ -314,33 +304,31 @@ function createMap(data) {
   // Add exclamation mark and tooltip for each group of entities on the same tile
   Object.values(entitiesOnTile).forEach(function (entityGroup) {
     if (entityGroup.length > 1) {
-      var exclamation = document.createElement("div");
-      exclamation.className = "exclamation";
-      exclamation.innerHTML = "!";
-      var rect = entityGroup[0].getBoundingClientRect();
-      exclamation.style.left = (rect.right - 5) + "px";
-      exclamation.style.top = (rect.top - 5) + "px";
-      exclamation.addEventListener('mouseenter', function() {
+      // Display exclamation mark emoji on each entity
+      entityGroup.forEach(function (entity) {
+        var exclamationMark = document.createElement("div");
+        exclamationMark.className = "exclamation-mark";
+        exclamationMark.innerHTML = "❗";
+        entity.appendChild(exclamationMark);
+
         var tooltip = document.createElement("div");
         tooltip.className = "tooltip";
-        entityGroup.forEach(function(entity) {
-          tooltip.innerHTML += entity.querySelector(".text-label").innerHTML + "<br><br>";
-        });
-        showTooltip(exclamation, tooltip);
         document.body.appendChild(tooltip);
+
+        entity.addEventListener("mouseenter", function () {
+          tooltip.innerHTML = entity.querySelector(".text-label").innerHTML;
+          showTooltip(entity, tooltip);
+        });
+        entity.addEventListener("mouseleave", function () {
+          tooltip.classList.remove("visible");
+        });
       });
-      exclamation.addEventListener('mouseleave', function() {
-        var tooltip = document.querySelector('.tooltip.visible');
-        if (tooltip) {
-          tooltip.parentNode.removeChild(tooltip);
-        }
-      });
-      mapContainer.appendChild(exclamation);
     }
   });
 }
 
 createMap(jsonData);
+
 
 </script>
 
