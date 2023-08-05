@@ -62,7 +62,9 @@ class LogoutHandler(BaseHandler):
 
 class MapHandler(BaseHandler):
     def get(self):
-        data = json.dumps(load_surrounding_map_and_user_data())
+        user = tornado.escape.xhtml_escape(self.current_user)
+
+        data = json.dumps(load_surrounding_map_and_user_data(user))
 
         print("data", data)  # debug
         self.render("templates/map.html",
@@ -168,7 +170,7 @@ class MoveHandler(BaseHandler):
 
             self.render("templates/map.html",
                         user=user,
-                        data=json.dumps(load_surrounding_map_and_user_data()),
+                        data=json.dumps(load_surrounding_map_and_user_data(user)),
                         message=message)
         else:
             data = load_user(user)
@@ -384,7 +386,7 @@ if __name__ == "__main__":
                           additional_entity_data={"control": "nobody",
                                                   "hp": 100},
                           size=101,
-                          every=50)
+                          every=20)
 
     actions = backend.Actions()
     descriptions = backend.Descriptions()

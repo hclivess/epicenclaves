@@ -228,30 +228,30 @@ function createMap(data) {
   });
 
   // Displaying global constructions
-  data.construction.forEach(function (construction) {
-    var constructionX = (construction.x_pos - 1) * gridSize;
-    var constructionY = (construction.y_pos - 1) * gridSize;
-    if (constructionX > maxX) {
-      maxX = constructionX;
+Object.values(jsonData.construction).forEach(function (construction) {
+  var constructionX = (construction.x_pos - 1) * gridSize;
+  var constructionY = (construction.y_pos - 1) * gridSize;
+  if (constructionX > maxX) {
+    maxX = constructionX;
+  }
+  if (constructionY > maxY) {
+    maxY = constructionY;
+  }
+  var constructionElement = document.createElement("div");
+  constructionElement.className = "entity construction " + construction.type;
+  constructionElement.style.top = constructionY + "px";
+  constructionElement.style.left = constructionX + "px";
+  var textLabel = document.createElement("div");
+  textLabel.className = "text-label";
+  textLabel.innerHTML = "pos: " + construction.x_pos + ", " + construction.y_pos + "<br>";
+  Object.entries(construction).forEach(function ([key, value]) {
+    if (key !== "x_pos" && key !== "y_pos") {
+      textLabel.innerHTML += key + ": " + value + "<br>";
     }
-    if (constructionY > maxY) {
-      maxY = constructionY;
-    }
-    var constructionElement = document.createElement("div");
-    constructionElement.className = "entity construction " + construction.type;
-    constructionElement.style.top = constructionY + "px";
-    constructionElement.style.left = constructionX + "px";
-    var textLabel = document.createElement("div");
-    textLabel.className = "text-label";
-    textLabel.innerHTML = "pos: " + construction.x_pos + ", " + construction.y_pos + "<br>";
-    Object.entries(construction).forEach(function ([key, value]) {
-      if (key !== "name" && key !== "x_pos" && key !== "y_pos") {
-        textLabel.innerHTML += key + ": " + value + "<br>";
-      }
-    });
-    constructionElement.appendChild(textLabel);
-    mapContainer.appendChild(constructionElement);
   });
+  constructionElement.appendChild(textLabel);
+  mapContainer.appendChild(constructionElement);
+});
 
   // Set the map's width and height based on the maximum X and Y positions of construction and players
   mapContainer.style.width = (maxX + gridSize) + "px";

@@ -393,31 +393,26 @@ def load_all_user_data():
     return user_data_dict
 
 
-def load_surrounding_map_and_user_data():
+def load_surrounding_map_and_user_data(user):
     user_data_dict = load_all_user_data()
 
-    all_map_data = {}  # We'll use a dictionary to ensure no duplicates
+    # Check if the specified user is in the user_data_dict
+    if user not in user_data_dict:
+        return {"error": "User not found."}
 
-    # For each user, fetch map data based on their x_pos and y_pos
-    for username, user_data in user_data_dict.items():
-        user_map_data = load_map_data(user_data['x_pos'], user_data['y_pos'])
+    user_data = user_data_dict[user]
 
-        for entry in user_map_data:
-            key = (entry['x_pos'], entry['y_pos'])  # Using tuple (x, y) as unique identifier for a position
-            all_map_data[key] = entry  # This will overwrite duplicates ensuring only one entry per position
-
-    # Now convert dictionary values to a list
-    combined_map_data = list(all_map_data.values())
+    # Fetch the map data for the specified user and transform it into a dictionary indexed by "x:y"
+    user_map_data_list = load_map_data(user_data['x_pos'], user_data['y_pos'])
+    user_map_data_dict = {f"{entry['x_pos']},{entry['y_pos']}": entry for entry in user_map_data_list}
 
     # Prepare the final result as a dictionary with two keys
     result = {
-        "users": user_data_dict,  # This is already a dictionary with usernames as keys
-        "construction": combined_map_data
+        "users": {user: user_data},  # Only include the specified user's data
+        "construction": user_map_data_dict  # This is now a dictionary indexed by "x:y"
     }
 
     return result
-
-
 
 
 def check_users_db():
