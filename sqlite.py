@@ -174,7 +174,8 @@ def insert_map_data(db_file, data):
     conn.commit()
     conn.close()
 
-def create_user(user):
+
+def create_user(user, x_pos=1, y_pos=1):
     # Connect to the database
     conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()
@@ -187,9 +188,6 @@ def create_user(user):
                         data TEXT,
                         construction TEXT
                       )''')
-
-    # Convert the position tuple to a string representation
-    x_pos, y_pos = 1, 1  # Replace these with the actual x_pos and y_pos values
 
     # Prepare the data dictionary
     data = {
@@ -204,15 +202,20 @@ def create_user(user):
         "food": 500,
         "bismuth": 500,
         "items": [{"type": "axe"}],
-        "construction": [],
         "pop_lim": 0
     }
     data_str = json.dumps(data)
 
+    # Prepare an empty construction dictionary
+    construction_data = {}
+
+    # Convert the construction dictionary to a JSON string
+    construction_str = json.dumps(construction_data)
+
     # Insert the user data into the database
     cursor.execute('''INSERT OR IGNORE INTO user_data (username, x_pos, y_pos, data, construction)
                        VALUES (?, ?, ?, ?, ?)''',
-                   (user, x_pos, y_pos, data_str, json.dumps([])))
+                   (user, x_pos, y_pos, data_str, construction_str))
 
     # Commit changes and close the connection
     conn.commit()
@@ -267,6 +270,7 @@ def login_validate(user, password):
 import sqlite3
 import json
 
+
 def update_user_data(user, updated_values):
     print("update_user_data", user, updated_values)  # debug
     # Connect to the database
@@ -308,7 +312,8 @@ def update_user_data(user, updated_values):
     updated_construction_str = json.dumps(construction)
 
     # Update the user data in the database
-    cursor.execute("UPDATE user_data SET data=?, construction=? WHERE username=?", (updated_data_str, updated_construction_str, user))
+    cursor.execute("UPDATE user_data SET data=?, construction=? WHERE username=?",
+                   (updated_data_str, updated_construction_str, user))
 
     # Commit changes and close the connection
     conn.commit()
@@ -316,7 +321,6 @@ def update_user_data(user, updated_values):
 
 
 def remove_construction(user, construction_coordinates):
-
     # TODO UPDATE NEEDED
 
     # Connect to the database
@@ -394,7 +398,6 @@ def load_map_data(x_pos, y_pos, distance=500):
     return map_data_dict
 
 
-
 def load_all_user_data():
     conn_user = sqlite3.connect("db/user_data.db")
     cursor_user = conn_user.cursor()
@@ -444,7 +447,6 @@ def load_surrounding_map_and_user_data(user):
     }
 
     return result
-
 
 
 def check_users_db():
