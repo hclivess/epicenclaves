@@ -335,72 +335,73 @@ def exists_user(user):
     return bool(result)
 
 
-def load_map(user):
-    users_data = []  # Create an empty list to store user data
-
+def load_all_map_data():
     # Load data from db/user_data.db
     conn_user = sqlite3.connect("db/user_data.db")
     cursor_user = conn_user.cursor()
-    cursor_user.execute("SELECT * FROM user_data WHERE username = ?", (user,))
-    result_user = cursor_user.fetchone()
 
-    if not result_user:
-        print("User not found")
+    # Execute a query to get all users data
+    cursor_user.execute("SELECT * FROM user_data")
+    all_users_results = cursor_user.fetchall()
+
+    if not all_users_results:
+        print("No users found")
         return
 
-    username, x_pos, y_pos, data_str = result_user
+    total_data = []
+    for result_user in all_users_results:
+        username, x_pos, y_pos, data_str = result_user
 
-    # Convert the data string back to a dictionary
-    data = json.loads(data_str)
-
-    # Remove 'construction' from the data if present
-    data.pop('construction', None)
-
-    # Prepare the user_data dictionary
-    user_data = {
-        "username": username,
-        "x_pos": x_pos,
-        "y_pos": y_pos
-    }
-    user_data.update(data)  # This will add the data from 'data' to 'user_data'
-
-    users_data.append(user_data)
-
-    conn_user.close()
-
-    # Load data from db/map_data.db
-    conn_map = sqlite3.connect("db/map_data.db")
-    cursor_map = conn_map.cursor()
-
-    # Calculate the square of the distance
-    distance_squared = 500 ** 2
-
-    # Query to fetch map data within a distance of 500 from the user
-    cursor_map.execute("""
-        SELECT x_pos, y_pos, data 
-        FROM map_data 
-        WHERE ((x_pos - ?)*(x_pos - ?) + (y_pos - ?)*(y_pos - ?)) <= ?
-    """, (x_pos, x_pos, y_pos, y_pos, distance_squared))
-
-    results_map = cursor_map.fetchall()
-
-    map_data = []
-    for result_map in results_map:
-        x_map, y_map, data_str = result_map
+        # Convert the data string back to a dictionary
         data = json.loads(data_str)
 
-        map_info = {
-            "x_pos": x_map,
-            "y_pos": y_map,
-            **data  # Use the unpacking operator to merge the 'data' dictionary into 'map_info'
-        }
+        # Remove 'construction' from the data if present
+        data.pop('construction', None)
 
-        map_data.append(map_info)
+        # Prepare the user_data dictionary
+        user_data = {
+            "username": username,
+            "x_pos": x_pos,
+            "y_pos": y_pos
+        }
+        user_data.update(data)  # This will add the data from 'data' to 'user_data'
+
+        total_data.append(user_data)
+
+        # Load data from db/map_data.db
+        conn_map = sqlite3.connect("db/map_data.db")
+        cursor_map = conn_map.cursor()
+
+        # Calculate the square of the distance
+        distance_squared = 500 ** 2
+
+        # Query to fetch map data within a distance of 500 from the user
+        cursor_map.execute("""
+            SELECT x_pos, y_pos, data 
+            FROM map_data 
+            WHERE ((x_pos - ?)*(x_pos - ?) + (y_pos - ?)*(y_pos - ?)) <= ?
+        """, (x_pos, x_pos, y_pos, y_pos, distance_squared))
+
+        results_map = cursor_map.fetchall()
+
+        map_data = []
+        for result_map in results_map:
+            x_map, y_map, data_str = result_map
+            data = json.loads(data_str)
+
+            map_info = {
+                "x_pos": x_map,
+                "y_pos": y_map,
+                **data  # Use the unpacking operator to merge the 'data' dictionary into 'map_info'
+            }
+
+            map_data.append(map_info)
+
+        total_data.append({"construction": map_data})
 
     conn_map.close()
+    conn_user.close()
 
-    # Combine users_data and map_data into a single list
-    total_data = users_data + [{"construction": map_data}]
     return total_data
 
 

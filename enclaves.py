@@ -10,7 +10,7 @@ import tornado.escape
 import backend
 from backend import cookie_get, tile_occupied, build, occupied_by, generate_entities
 from sqlite import create_map_table, has_item, update_map_data, create_user_file, load_user_data, login_validate, \
-    update_user_data, remove_construction, add_user, exists_user, load_map, check_users_db
+    update_user_data, remove_construction, add_user, exists_user, load_all_map_data, check_users_db
 
 max_size = 1000
 
@@ -59,7 +59,7 @@ class MapHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        data = json.dumps(load_map(user=user))
+        data = json.dumps(load_all_map_data())
         print("data", data)  # debug
         self.render("templates/map.html",
                     data=data,
@@ -154,7 +154,7 @@ class MoveHandler(BaseHandler):
 
             self.render("templates/map.html",
                         user=user,
-                        data=json.dumps(load_map(user=user)),
+                        data=json.dumps(load_all_map_data()),
                         message=message)
         else:
             file = load_user_data(user)
