@@ -230,7 +230,7 @@ function createMap(data) {
 
   // Displaying global constructions
   Object.entries(data.construction).forEach(function ([key, construction]) {
-    var [x_pos, y_pos] = key.split(":").map(Number);
+    var [x_pos, y_pos] = key.split(",").map(Number);
     var constructionX = (x_pos - 1) * gridSize;
     var constructionY = (y_pos - 1) * gridSize;
     if (constructionX > maxX) {

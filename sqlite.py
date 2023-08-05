@@ -354,7 +354,7 @@ def load_map_data(x_pos, y_pos):
         x_map, y_map, data_str = result_map
         data = json.loads(data_str)
 
-        key = f"{x_map}:{y_map}"
+        key = f"{x_map},{y_map}"
         map_data_dict[key] = data
 
     return map_data_dict
