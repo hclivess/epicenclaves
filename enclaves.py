@@ -62,7 +62,6 @@ class LogoutHandler(BaseHandler):
 
 class MapHandler(BaseHandler):
     def get(self):
-        user = tornado.escape.xhtml_escape(self.current_user)
         data = json.dumps(load_all_map_data())
 
         print("data", data)  # debug

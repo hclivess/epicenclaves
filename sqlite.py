@@ -399,11 +399,10 @@ def load_all_map_data():
 
     total_data = []
     for username, user_data in user_data_dict.items():
-        user_construction = {"construction": load_map_data(user_data['x_pos'], user_data['y_pos'])}
         total_data.append({username: user_data})
-        total_data.append(user_construction)
 
     return total_data
+
 
 def check_users_db():
     users_db.execute("CREATE TABLE IF NOT EXISTS users (username STRING PRIMARY KEY, passhash STRING)")
