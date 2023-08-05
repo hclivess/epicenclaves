@@ -298,12 +298,10 @@ def update_user_data(user, updated_values):
     for key, value in updated_values.items():
         # Check if key is 'construction'
         if key == "construction" and isinstance(value, dict):
-            # Convert the construction data to be indexed by 'x, y'
+            # Update the construction dictionary with the new values
             for coord, construction_info in value.items():
                 x_pos, y_pos = map(int, coord.split(','))
-                if "construction" not in construction:
-                    construction["construction"] = {}
-                construction["construction"][f"{x_pos},{y_pos}"] = construction_info
+                construction[f"{x_pos},{y_pos}"] = construction_info
         else:
             data[key] = value  # else just update the value
 
