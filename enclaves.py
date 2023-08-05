@@ -244,14 +244,14 @@ class ConquerHandler(BaseHandler):
         user_data = data[username]
 
         this_tile = tile_occupied(user_data["x_pos"], user_data["y_pos"])
-
+        print(this_tile)
         owner = this_tile["control"]
 
         if owner == user:
             message = "You already own this tile"
 
         elif this_tile["type"] != "empty" and user_data["action_points"] > 0:
-            remove_construction(owner, {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]}) #TODO FIX THIS, DOESNT WORK
+            remove_construction(owner, {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]})
 
             # Update the "control" attribute
             this_tile["control"] = user

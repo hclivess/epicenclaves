@@ -198,12 +198,11 @@ hr {
                <h4>Current Tile</h4>
 
                <div class="col">
-                <p>Type: {{on_tile["type"]}}</p>
-                <p><img src=/img/assets/{{on_tile["type"]}}.png alt="Item Icon" class="menu-icon"></p>
-               <p>Position: {{on_tile["x_pos"]}}, {{on_tile["y_pos"]}}</p>
-                <p>Control: {{on_tile["control"]}}</p>
+                <p>Type: {{list(on_tile.values())[0].get("type")}}</p>
+                <p><img src=/img/assets/{{list(on_tile.values())[0].get("type")}}.png alt="Item Icon" class="menu-icon"></p>
+                <p>Control: {{list(on_tile.values())[0].get("control")}}</p>
 
-                   {%for action in actions.get(on_tile["type"])%}
+                   {%for action in actions.get(list(on_tile.values())[0].get("type"))%}
                         <p>Actions: <a id="btnAct" class="btn btn-move btn-lg active" href="{{action['action']}}" role="button">{{action['name']}}</a></p>
                     {%end%}
 

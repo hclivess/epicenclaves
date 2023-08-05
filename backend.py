@@ -11,8 +11,6 @@ if not os.path.exists("db"):
     os.mkdir("db")
 
 
-
-
 def generate_entities(entity_type, probability, additional_entity_data=None, size=101, every=10):
     for x_pos in range(1, size, every):
         for y_pos in range(1, size, every):
@@ -24,29 +22,27 @@ def generate_entities(entity_type, probability, additional_entity_data=None, siz
                 sqlite.save_map_data(x_pos=x_pos, y_pos=y_pos, data=data)
 
 
-
-
 def hashify(data):
     hashified = blake2b(data.encode(), digest_size=15).hexdigest()
     return hashified
 
 
 def tile_occupied(x, y):
+    print("tile_occupied", x, y)
     # Use the get_map_data function to retrieve data for the given position
     entity = sqlite.get_map_data(x_pos=x, y_pos=y)
 
     # If an entity is found at the given position, return its data
-    if entity:
-        return entity
+    if not entity:
+        entity = {f"{x},{y}": {
+            "type": "empty",
+            "control": "nobody",
+            "hp": 0,  # CLUTCH todo
+        }}
 
+    print("entity", entity)
     # If there are no entities with "data", return a placeholder dict
-    return {
-        "x_pos": x,
-        "y_pos": y,
-        "type": "empty",
-        "control": "nobody",
-        "hp": 0,  # CLUTCH todo
-    }
+    return entity
 
 
 def occupied_by(x, y, what):

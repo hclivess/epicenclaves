@@ -317,6 +317,7 @@ def update_user_data(user, updated_values):
     conn.commit()
     conn.close()
 
+
 def remove_construction(user, construction_coordinates):
     print("remove_construction", user, construction_coordinates)
     conn = sqlite3.connect("db/user_data.db")
@@ -348,7 +349,8 @@ def remove_construction(user, construction_coordinates):
     construction_data_str = json.dumps(construction_data)
 
     # Update the user data in the database
-    cursor.execute("UPDATE user_data SET data=?, construction=? WHERE username=?", (updated_data_str, construction_data_str, user))
+    cursor.execute("UPDATE user_data SET data=?, construction=? WHERE username=?",
+                   (updated_data_str, construction_data_str, user))
 
     # Commit changes and close the connection
     conn.commit()

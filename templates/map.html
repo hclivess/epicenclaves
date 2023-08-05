@@ -247,9 +247,9 @@ function createMap(data) {
     textLabel.className = "text-label";
     textLabel.innerHTML = "pos: " + x_pos + ", " + y_pos + "<br>";
     Object.entries(construction).forEach(function ([key, value]) {
-      if (key !== "type") {
+
         textLabel.innerHTML += key + ": " + value + "<br>";
-      }
+
     });
     constructionElement.appendChild(textLabel);
     mapContainer.appendChild(constructionElement);
