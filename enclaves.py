@@ -236,6 +236,8 @@ class RestHandler(BaseHandler):
 
 
 class ConquerHandler(BaseHandler):
+
+    # TODO UPDATE NEEDED
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         data = load_user(user)
@@ -253,7 +255,8 @@ class ConquerHandler(BaseHandler):
             remove_construction(owner, {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]})
 
             update_user_data(user=user,
-                             updated_values={"construction": this_tile, "action_points": user_data["action_points"] - 1})
+                             updated_values={"construction": this_tile,
+                                             "action_points": user_data["action_points"] - 1})
 
             update_map_data({"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"], "data": {"control": user}})
             message = "Takeover successful"
@@ -263,7 +266,6 @@ class ConquerHandler(BaseHandler):
         data = load_user(user)
         username = list(data.keys())[0]
         user_data = data[username]
-
 
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
