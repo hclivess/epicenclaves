@@ -263,10 +263,85 @@ function createMap(data) {
     constructionElement.appendChild(textLabel);
     mapContainer.appendChild(constructionElement);
   }
+
+  // Set the map's width and height based on the maximum X and Y positions of construction and players
+  mapContainer.style.width = (maxX + gridSize) + "px";
+  mapContainer.style.height = (maxY + gridSize) + "px";
+
+  // Add grid lines
+  for (var x = 0; x <= maxX + gridSize; x += gridSize) {
+    var gridLine = document.createElement("div");
+    gridLine.className = "grid-line";
+    gridLine.style.width = "1px";
+    gridLine.style.height = maxY + gridSize + "px";
+    gridLine.style.left = x + "px";
+    gridLine.style.top = "0";
+    mapContainer.appendChild(gridLine);
+  }
+  for (var y = 0; y <= maxY + gridSize; y += gridSize) {
+    var gridLine = document.createElement("div");
+    gridLine.className = "grid-line";
+    gridLine.style.width = maxX + gridSize + "px";
+    gridLine.style.height = "1px";
+    gridLine.style.top = y + "px";
+    gridLine.style.left = "0";
+    mapContainer.appendChild(gridLine);
+  }
+
+  // Group entities on the same tile and adjust their size if there are multiple entities
+  var tileElements = mapContainer.querySelectorAll(".entity");
+  var entitiesOnTile = {};
+  tileElements.forEach(function (tileElement) {
+    var tileX = parseInt(tileElement.style.left);
+    var tileY = parseInt(tileElement.style.top);
+    var tileKey = tileX + "," + tileY;
+    if (!entitiesOnTile[tileKey]) {
+      entitiesOnTile[tileKey] = [];
+    }
+    entitiesOnTile[tileKey].push(tileElement);
+  });
+
+  function showTooltip(entity, tooltip) {
+    var rect = entity.getBoundingClientRect();
+    var left = rect.right;
+    var top = rect.top;
+    tooltip.style.position = 'fixed';
+    tooltip.style.top = top + "px";
+    tooltip.style.left = left + "px";
+    tooltip.classList.add("visible");
+  }
+
+  // Add exclamation mark and tooltip for each group of entities on the same tile
+  Object.values(entitiesOnTile).forEach(function (entityGroup) {
+    if (entityGroup.length > 1) {
+      var exclamation = document.createElement("div");
+      exclamation.className = "exclamation";
+      exclamation.innerHTML = "!";
+      var rect = entityGroup[0].getBoundingClientRect();
+      exclamation.style.left = (rect.right - 5) + "px";
+      exclamation.style.top = (rect.top - 5) + "px";
+      exclamation.addEventListener('mouseenter', function() {
+        var tooltip = document.createElement("div");
+        tooltip.className = "tooltip";
+        entityGroup.forEach(function(entity) {
+          tooltip.innerHTML += entity.querySelector(".text-label").innerHTML + "<br><br>";
+        });
+        showTooltip(exclamation, tooltip);
+        document.body.appendChild(tooltip);
+      });
+      exclamation.addEventListener('mouseleave', function() {
+        var tooltip = document.querySelector('.tooltip.visible');
+        if (tooltip) {
+          tooltip.parentNode.removeChild(tooltip);
+        }
+      });
+      mapContainer.appendChild(exclamation);
+    }
+  });
 }
 
-// Call the function with your jsonData
 createMap(jsonData);
+
 </script>
 
      <script>
