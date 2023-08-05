@@ -187,9 +187,10 @@ body {
 
 const jsonData = {% raw data %};  // Your JSON data
 
+
 function createMap(data) {
   var mapContainer = document.getElementById("map");
-  var gridSize = 125;  // Default Grid size
+  var gridSize = 125; // Default Grid size
   var maxX = 0;
   var maxY = 0;
 
@@ -228,30 +229,31 @@ function createMap(data) {
   });
 
   // Displaying global constructions
-Object.values(jsonData.construction).forEach(function (construction) {
-  var constructionX = (construction.x_pos - 1) * gridSize;
-  var constructionY = (construction.y_pos - 1) * gridSize;
-  if (constructionX > maxX) {
-    maxX = constructionX;
-  }
-  if (constructionY > maxY) {
-    maxY = constructionY;
-  }
-  var constructionElement = document.createElement("div");
-  constructionElement.className = "entity construction " + construction.type;
-  constructionElement.style.top = constructionY + "px";
-  constructionElement.style.left = constructionX + "px";
-  var textLabel = document.createElement("div");
-  textLabel.className = "text-label";
-  textLabel.innerHTML = "pos: " + construction.x_pos + ", " + construction.y_pos + "<br>";
-  Object.entries(construction).forEach(function ([key, value]) {
-    if (key !== "x_pos" && key !== "y_pos") {
-      textLabel.innerHTML += key + ": " + value + "<br>";
+  Object.entries(data.construction).forEach(function ([key, construction]) {
+    var [x_pos, y_pos] = key.split(":").map(Number);
+    var constructionX = (x_pos - 1) * gridSize;
+    var constructionY = (y_pos - 1) * gridSize;
+    if (constructionX > maxX) {
+      maxX = constructionX;
     }
+    if (constructionY > maxY) {
+      maxY = constructionY;
+    }
+    var constructionElement = document.createElement("div");
+    constructionElement.className = "entity construction " + construction.type;
+    constructionElement.style.top = constructionY + "px";
+    constructionElement.style.left = constructionX + "px";
+    var textLabel = document.createElement("div");
+    textLabel.className = "text-label";
+    textLabel.innerHTML = "pos: " + x_pos + ", " + y_pos + "<br>";
+    Object.entries(construction).forEach(function ([key, value]) {
+      if (key !== "type") {
+        textLabel.innerHTML += key + ": " + value + "<br>";
+      }
+    });
+    constructionElement.appendChild(textLabel);
+    mapContainer.appendChild(constructionElement);
   });
-  constructionElement.appendChild(textLabel);
-  mapContainer.appendChild(constructionElement);
-});
 
   // Set the map's width and height based on the maximum X and Y positions of construction and players
   mapContainer.style.width = (maxX + gridSize) + "px";
@@ -328,7 +330,6 @@ Object.values(jsonData.construction).forEach(function (construction) {
 }
 
 createMap(jsonData);
-
 
 </script>
 

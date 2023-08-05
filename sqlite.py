@@ -349,20 +349,16 @@ def load_map_data(x_pos, y_pos):
     results_map = cursor_map.fetchall()
     conn_map.close()
 
-    map_data = []
+    map_data_dict = {}
     for result_map in results_map:
         x_map, y_map, data_str = result_map
         data = json.loads(data_str)
 
-        map_info = {
-            "x_pos": x_map,
-            "y_pos": y_map,
-            **data
-        }
+        key = f"{x_map}:{y_map}"
+        map_data_dict[key] = data
 
-        map_data.append(map_info)
+    return map_data_dict
 
-    return map_data
 
 
 def load_all_user_data():
@@ -394,17 +390,18 @@ def load_all_user_data():
 
 
 def load_surrounding_map_and_user_data(user):
+    # Load all user data into a dictionary
     user_data_dict = load_all_user_data()
 
     # Check if the specified user is in the user_data_dict
     if user not in user_data_dict:
         return {"error": "User not found."}
 
+    # Fetch the data for the specified user from the user_data_dict
     user_data = user_data_dict[user]
 
     # Fetch the map data for the specified user and transform it into a dictionary indexed by "x:y"
-    user_map_data_list = load_map_data(user_data['x_pos'], user_data['y_pos'])
-    user_map_data_dict = {f"{entry['x_pos']},{entry['y_pos']}": entry for entry in user_map_data_list}
+    user_map_data_dict = load_map_data(user_data['x_pos'], user_data['y_pos'])
 
     # Prepare the final result as a dictionary with two keys
     result = {
@@ -413,6 +410,7 @@ def load_surrounding_map_and_user_data(user):
     }
 
     return result
+
 
 
 def check_users_db():
