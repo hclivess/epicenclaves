@@ -368,11 +368,11 @@ def exists_user(user):
     return bool(result)
 
 
-def load_map_data(x_pos, y_pos):
+def load_map_data(x_pos, y_pos, distance=500):
     conn_map = sqlite3.connect("db/map_data.db")
     cursor_map = conn_map.cursor()
 
-    distance_squared = 500 ** 2
+    distance_squared = distance ** 2
 
     cursor_map.execute("""
         SELECT x_pos, y_pos, data 
