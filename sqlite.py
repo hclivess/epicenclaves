@@ -212,7 +212,7 @@ def create_user(user, x_pos=1, y_pos=1):
         "wood": 500,
         "food": 500,
         "bismuth": 500,
-        "items": [{"type": "axe"}],
+        "items": [{"type": "axe", "damage": 1, "durability": 100}],
         "pop_lim": 0
     }
     data_str = json.dumps(data)
