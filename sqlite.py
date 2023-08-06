@@ -1,8 +1,11 @@
 import json
+import os
 import sqlite3
 from hashlib import blake2b
 from contextlib import closing
 
+if not os.path.exists("db"):
+    os.mkdir("db")
 users_db = sqlite3.connect("db/auth.db")
 users_db_cursor = users_db.cursor()
 

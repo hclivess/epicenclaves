@@ -47,10 +47,14 @@ def tile_occupied(x, y):
 
 def occupied_by(x, y, what):
     # Use the get_map_data function to check if the given position is occupied by the specified entity type
-    entity = sqlite.get_map_data(x_pos=x, y_pos=y)
+    entity_map = sqlite.get_map_data(x_pos=x, y_pos=y)
 
-    if entity.get("type") == what:
+    # Access the entity at the specified position
+    entity = entity_map.get(f"{x},{y}")
+
+    if entity and entity.get("type") == what:
         return True
+
     return False
 
 
