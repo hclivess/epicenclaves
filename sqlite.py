@@ -434,19 +434,17 @@ def load_surrounding_map_and_user_data(user):
     if user not in user_data_dict:
         return {"error": "User not found."}
 
-    # Fetch the data for the specified user from the user_data_dict
-    user_data = user_data_dict[user]
-
     # Fetch the map data for the specified user and transform it into a dictionary indexed by "x:y"
-    user_map_data_dict = load_map_data(user_data['x_pos'], user_data['y_pos'])
+    user_map_data_dict = load_map_data(user_data_dict[user]['x_pos'], user_data_dict[user]['y_pos'])
 
     # Prepare the final result as a dictionary with two keys
     result = {
-        "users": {user: user_data},  # Only include the specified user's data
+        "users": user_data_dict,  # Include all users' data
         "construction": user_map_data_dict  # This is now a dictionary indexed by "x:y"
     }
 
     return result
+
 
 
 def check_users_db():
