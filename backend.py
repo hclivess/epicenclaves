@@ -49,13 +49,15 @@ def occupied_by(x, y, what):
     # Use the get_map_data function to check if the given position is occupied by the specified entity type
     entity_map = sqlite.get_map_data(x_pos=x, y_pos=y)
 
-    # Access the entity at the specified position
-    entity = entity_map.get(f"{x},{y}")
+    if entity_map:
+        # Access the entity at the specified position
+        entity = entity_map.get(f"{x},{y}")
 
-    if entity and entity.get("type") == what:
-        return True
+        if entity and entity.get("type") == what:
+            return True
 
     return False
+
 
 
 def build(entity, name, user, user_data):
