@@ -10,6 +10,45 @@ users_db = sqlite3.connect("db/auth.db")
 users_db_cursor = users_db.cursor()
 
 
+def create_game_database():
+    # Create the 'db' directory if it doesn't exist
+    if not os.path.exists('db'):
+        os.makedirs('db')
+
+    # Connect to the SQLite database
+    db_path = os.path.join('db', 'game_data.db')
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Create the 'game' table with 'turn' column and insert default value
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS game (
+            turn INTEGER DEFAULT 0
+        )
+    ''')
+
+    # Commit the changes and close the connection
+    conn.commit()
+    conn.close()
+
+
+def update_turn(turn_value):
+    # Connect to the SQLite database
+    db_path = os.path.join('db', 'game_data.db')
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Update the 'turn' value in the 'game' table
+    cursor.execute('''
+        UPDATE game
+        SET turn = ?
+    ''', (turn_value,))
+
+    # Commit the changes and close the connection
+    conn.commit()
+    conn.close()
+
+
 def hash_password(password):
     salt = "vGY13MMUH4khKGscQOOg"
     passhash = blake2b(digest_size=30)
@@ -17,7 +56,7 @@ def hash_password(password):
     return passhash.hexdigest()
 
 
-def create_map_table():
+def create_map_database():
     # Connect to the database or create one if it doesn't exist
     conn = sqlite3.connect("db/map_data.db")
     cursor = conn.cursor()
@@ -185,7 +224,23 @@ def insert_map_data(db_file, data):
     conn.commit()
     conn.close()
 
+def create_user_db():
+    # Connect to the database
+    conn = sqlite3.connect("db/user_data.db")
+    cursor = conn.cursor()
 
+    # Create the table if it doesn't exist
+    cursor.execute('''CREATE TABLE IF NOT EXISTS user_data (
+                        username TEXT PRIMARY KEY,
+                        x_pos INTEGER,
+                        y_pos INTEGER,
+                        data TEXT,
+                        construction TEXT
+                      )''')
+
+    # Commit changes and close the connection
+    conn.commit()
+    conn.close()
 def create_user(user, x_pos=1, y_pos=1):
     # Connect to the database
     conn = sqlite3.connect("db/user_data.db")
@@ -444,7 +499,6 @@ def load_surrounding_map_and_user_data(user):
     }
 
     return result
-
 
 
 def check_users_db():

@@ -7,10 +7,12 @@ import tornado.ioloop
 import tornado.web
 import tornado.escape
 
+from turn_engine import TurnEngine
 import backend
 from backend import cookie_get, tile_occupied, build, occupied_by, generate_entities, get_user_data
-from sqlite import create_map_table, has_item, update_map_data, create_user, load_user, login_validate, \
-    update_user_data, remove_construction, add_user, exists_user, load_surrounding_map_and_user_data, check_users_db
+from sqlite import create_map_database, has_item, update_map_data, create_user, load_user, login_validate, \
+    update_user_data, remove_construction, add_user, exists_user, load_surrounding_map_and_user_data, check_users_db, \
+    create_user_db, create_game_database
 
 max_size = 1000
 
@@ -80,7 +82,6 @@ class BuildHandler(BaseHandler):
 
         user_data = get_user_data(user)
 
-
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         if occupied[f"{user_data['x_pos']},{user_data['y_pos']}"]["type"] == "empty":
@@ -119,7 +120,6 @@ class BuildHandler(BaseHandler):
 
         user_data = get_user_data(user)
 
-
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         self.render("templates/user_panel.html",
@@ -140,7 +140,6 @@ class MoveHandler(BaseHandler):
         def move(user, direction, axis_key, axis_limit):
 
             user_data = get_user_data(user)
-
 
             new_pos = user_data[axis_key] + direction
 
@@ -172,7 +171,6 @@ class MoveHandler(BaseHandler):
         else:
             user_data = get_user_data(user)
 
-
             occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
             self.render("templates/user_panel.html",
@@ -189,7 +187,6 @@ class RestHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
 
         user_data = get_user_data(user)
-
 
         hours = self.get_argument("hours", default="1")
 
@@ -217,7 +214,6 @@ class RestHandler(BaseHandler):
 
         user_data = get_user_data(user)
 
-
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         self.render("templates/user_panel.html",
@@ -234,7 +230,6 @@ class ConquerHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         user_data = get_user_data(user)
-
 
         this_tile = tile_occupied(user_data["x_pos"], user_data["y_pos"])
         print("this_tile", this_tile)
@@ -266,7 +261,6 @@ class ConquerHandler(BaseHandler):
 
         user_data = get_user_data(user)
 
-
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         self.render("templates/user_panel.html",
@@ -283,7 +277,6 @@ class ChopHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
 
         user_data = get_user_data(user)
-
 
         proper_tile = occupied_by(user_data["x_pos"], user_data["y_pos"], what="forest")
         item = "axe"
@@ -307,7 +300,6 @@ class ChopHandler(BaseHandler):
             message = "Out of action points to chop"
 
         user_data = get_user_data(user)
-
 
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
@@ -378,7 +370,7 @@ async def main():
 
 if __name__ == "__main__":
     if not os.path.exists("db/map_data.db"):
-        create_map_table()
+        create_map_database()
 
         generate_entities(entity_type="forest",
                           probability=0.50,
@@ -386,9 +378,16 @@ if __name__ == "__main__":
                                                   "hp": 100},
                           size=25,
                           every=5)
+    if not os.path.exists("db/game_data.db"):
+        create_game_database()
+
+    if not os.path.exists("db/user_data.db"):
+        create_user_db()
 
     actions = backend.Actions()
     descriptions = backend.Descriptions()
+
+    turn_engine = TurnEngine()  # reference to memory dict will be added here
+    turn_engine.start()
+
     asyncio.run(main())
-    # If you want to add a test user after starting the server, you can call add_user here
-    # add_user("testuser", "testpass")
