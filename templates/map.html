@@ -279,7 +279,7 @@ function createMap(data) {
     mapContainer.appendChild(gridLine);
   }
 
-  // Group entities on the same tile and adjust their size if there are multiple entities
+ // Group entities on the same tile and adjust their size if there are multiple entities
   var tileElements = mapContainer.querySelectorAll(".entity");
   var entitiesOnTile = {};
   tileElements.forEach(function (tileElement) {
@@ -292,8 +292,14 @@ function createMap(data) {
     entitiesOnTile[tileKey].push(tileElement);
   });
 
-  function showTooltip(entity, tooltip) {
-    var rect = entity.getBoundingClientRect();
+  function showTooltip(entityGroup, tooltip) {
+    var combinedLabel = "";
+    entityGroup.forEach(function (entity) {
+      combinedLabel += entity.querySelector(".text-label").innerHTML + "<br>";
+    });
+    tooltip.innerHTML = combinedLabel;
+
+    var rect = entityGroup[0].getBoundingClientRect();
     var left = rect.right + 10; // Move the tooltip to the right side of the entity
     var top = rect.top; // Move the tooltip above the entity
 
@@ -306,7 +312,6 @@ function createMap(data) {
   // Add exclamation mark and tooltip for each group of entities on the same tile
   Object.values(entitiesOnTile).forEach(function (entityGroup) {
     if (entityGroup.length > 1) {
-      // Display exclamation mark emoji on each entity
       entityGroup.forEach(function (entity) {
         var exclamationMark = document.createElement("div");
         exclamationMark.className = "exclamation-mark";
@@ -318,8 +323,7 @@ function createMap(data) {
         document.body.appendChild(tooltip);
 
         entity.addEventListener("mouseenter", function () {
-          tooltip.innerHTML = entity.querySelector(".text-label").innerHTML;
-          showTooltip(entity, tooltip);
+          showTooltip(entityGroup, tooltip);
         });
         entity.addEventListener("mouseleave", function () {
           tooltip.classList.remove("visible");
@@ -330,7 +334,6 @@ function createMap(data) {
 }
 
 createMap(jsonData);
-
 </script>
 
      <script>
