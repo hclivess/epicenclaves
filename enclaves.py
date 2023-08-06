@@ -82,17 +82,20 @@ class BuildHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
 
         user_data = get_user_data(user)
-
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
-        if occupied[f"{user_data['x_pos']},{user_data['y_pos']}"]["type"] == "empty":
+        if user_data["action_points"] < 1:
+            message = "Not enough action points to build"
+
+        elif occupied[f"{user_data['x_pos']},{user_data['y_pos']}"]["type"] == "empty":
             message = "Building procedure not yet defined"
 
             if entity == "house":
                 if user_data["wood"] >= 50:
                     update_user_data(user=user,
                                      updated_values={"pop_lim": user_data["pop_lim"] + 10,
-                                                     "wood": user_data["wood"] - 50})
+                                                     "wood": user_data["wood"] - 50,
+                                                     "action_points": user_data["action_points"] - 1})
                     build(entity=entity,
                           name=name,
                           user=user,
@@ -106,7 +109,8 @@ class BuildHandler(BaseHandler):
                 if user_data["wood"] >= 50:
                     update_user_data(user=user,
                                      updated_values={"pop_lim": user_data["pop_lim"] + 10,
-                                                     "wood": user_data["wood"] - 50})
+                                                     "wood": user_data["wood"] - 50,
+                                                     "action_points": user_data["action_points"] - 1})
                     build(entity=entity,
                           name=name,
                           user=user,
