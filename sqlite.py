@@ -263,7 +263,7 @@ def create_user(user, x_pos=1, y_pos=1):
         "exp": 0,
         "hp": 100,
         "armor": 0,
-        "action_points": 500000,
+        "action_points": 20,
         "wood": 500,
         "food": 500,
         "bismuth": 500,
