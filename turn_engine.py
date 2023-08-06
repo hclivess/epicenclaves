@@ -33,7 +33,7 @@ class TurnEngine(threading.Thread):
                 print("user", username, user_data)
 
                 if "action_points" in user_data:
-                    updated_action_points = user_data["action_points"] + 1
+                    updated_action_points = user_data["action_points"] + 5
                     update_user_data(user=username, updated_values={"action_points": updated_action_points})
 
         print(f"Current turn: {self.turn}")
