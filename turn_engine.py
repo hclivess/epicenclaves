@@ -30,7 +30,11 @@ class TurnEngine(threading.Thread):
             time.sleep(30)
 
     def run(self):
-        self.check_for_updates()
+        while self.running:
+            self.check_for_updates()
+
+    def stop(self):  # Add this method to stop the thread gracefully
+        self.running = False
 
 if __name__ == "__main__":
     turn_engine = TurnEngine()

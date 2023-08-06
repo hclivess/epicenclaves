@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os.path
+import signal
 import webbrowser
 
 import tornado.ioloop
@@ -365,7 +366,22 @@ async def main():
     check_users_db()
     webbrowser.open(f"http://127.0.0.1:{port}")
     print("app starting")
-    await asyncio.Event().wait()
+
+    # Instead of await asyncio.Event().wait(), create an event to listen for shutdown
+    shutdown_event = asyncio.Event()
+
+    # Signal handlers to set the event and stop the app
+    def handle_exit(*args):
+        shutdown_event.set()
+
+    signal.signal(signal.SIGINT, handle_exit)
+    signal.signal(signal.SIGTERM, handle_exit)
+
+    # Wait for shutdown signal
+    await shutdown_event.wait()
+    # After receiving the shutdown signal, stop the TurnEngine thread
+    turn_engine.stop()
+    turn_engine.join()
 
 
 if __name__ == "__main__":
@@ -390,4 +406,7 @@ if __name__ == "__main__":
     turn_engine = TurnEngine()  # reference to memory dict will be added here
     turn_engine.start()
 
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    finally:
+        print("Application has shut down.")
