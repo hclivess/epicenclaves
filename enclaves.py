@@ -84,7 +84,7 @@ class BuildHandler(BaseHandler):
 
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
-        if occupied["type"] == "empty":
+        if occupied[f"{user_data['x_pos']},{user_data['y_pos']}"]["type"] == "empty":
             message = "Building procedure not yet defined"
 
             if entity == "house":
