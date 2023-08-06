@@ -139,9 +139,8 @@ class MoveHandler(BaseHandler):
 
         def move(user, direction, axis_key, axis_limit):
 
-            data = load_user(user)
-            username = list(data.keys())[0]
-            user_data = data[username]
+            user_data = get_user_data(user)
+
 
             new_pos = user_data[axis_key] + direction
 
@@ -171,9 +170,8 @@ class MoveHandler(BaseHandler):
                         data=json.dumps(load_surrounding_map_and_user_data(user)),
                         message=message)
         else:
-            data = load_user(user)
-            username = list(data.keys())[0]
-            user_data = data[username]
+            user_data = get_user_data(user)
+
 
             occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
@@ -335,9 +333,8 @@ class LoginHandler(BaseHandler):
 
             message = f"Welcome, {user}!"
 
-            data = load_user(user)
-            username = list(data.keys())[0]
-            user_data = data[username]
+            user_data = get_user_data(user)
+
             occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
             self.render("templates/user_panel.html",
