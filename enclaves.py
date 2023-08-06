@@ -364,7 +364,7 @@ async def main():
     app.settings["cookie_secret"] = cookie_get()
     check_users_db()
     webbrowser.open(f"http://127.0.0.1:{port}")
-
+    print("app starting")
     await asyncio.Event().wait()
 
 

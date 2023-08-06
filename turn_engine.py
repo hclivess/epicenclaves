@@ -1,15 +1,17 @@
 import asyncio
 import blockchain
-from sqlite import update_turn, update_user_data, load_all_user_data, load_user
+import threading
+import time
+from sqlite import update_turn, update_user_data, load_all_user_data
 
-class TurnEngine:
+class TurnEngine(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.latest_block = None
         self.compare_block = None
         self.turn = 0
-        self.loop = asyncio.get_event_loop()
 
-    async def check_for_updates(self):
+    def check_for_updates(self):
         while True:
             self.latest_block = blockchain.last_bis_hash()
             if self.compare_block != self.latest_block:
@@ -25,10 +27,12 @@ class TurnEngine:
                         update_user_data(user=username, updated_values={"action_points": updated_action_points})
 
             print(f"Current turn: {self.turn}")
-            await asyncio.sleep(5)
+            time.sleep(5)
 
-    def start(self):
-        self.loop.run_until_complete(self.check_for_updates())
+    def run(self):
+        self.check_for_updates()
+
 if __name__ == "__main__":
     turn_engine = TurnEngine()
     turn_engine.start()
+    print("Turn enging started")
