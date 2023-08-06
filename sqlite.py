@@ -274,10 +274,6 @@ def login_validate(user, password):
     return bool(result)
 
 
-import sqlite3
-import json
-
-
 def update_user_data(user, updated_values):
     print("update_user_data", user, updated_values)  # debug
     # Connect to the database
