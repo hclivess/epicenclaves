@@ -8,7 +8,7 @@ import tornado.web
 import tornado.escape
 
 import backend
-from backend import cookie_get, tile_occupied, build, occupied_by, generate_entities
+from backend import cookie_get, tile_occupied, build, occupied_by, generate_entities, get_user_data
 from sqlite import create_map_table, has_item, update_map_data, create_user, load_user, login_validate, \
     update_user_data, remove_construction, add_user, exists_user, load_surrounding_map_and_user_data, check_users_db
 
@@ -78,9 +78,8 @@ class BuildHandler(BaseHandler):
         name = self.get_argument("name")
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        data = load_user(user)
-        username = list(data.keys())[0]
-        user_data = data[username]
+        user_data = get_user_data(user)
+
 
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
@@ -118,9 +117,8 @@ class BuildHandler(BaseHandler):
         else:
             message = "Cannot build here"
 
-        data = load_user(user)
-        username = list(data.keys())[0]
-        user_data = data[username]
+        user_data = get_user_data(user)
+
 
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
@@ -192,9 +190,8 @@ class RestHandler(BaseHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        data = load_user(user)
-        username = list(data.keys())[0]
-        user_data = data[username]
+        user_data = get_user_data(user)
+
 
         hours = self.get_argument("hours", default="1")
 
@@ -220,9 +217,8 @@ class RestHandler(BaseHandler):
         else:
             message = "Out of action points to rest"
 
-        data = load_user(user)
-        username = list(data.keys())[0]
-        user_data = data[username]
+        user_data = get_user_data(user)
+
 
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
@@ -239,9 +235,8 @@ class ConquerHandler(BaseHandler):
 
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-        data = load_user(user)
-        username = list(data.keys())[0]
-        user_data = data[username]
+        user_data = get_user_data(user)
+
 
         this_tile = tile_occupied(user_data["x_pos"], user_data["y_pos"])
         print("this_tile", this_tile)
@@ -271,9 +266,8 @@ class ConquerHandler(BaseHandler):
         else:
             message = "Cannot acquire an empty tile"
 
-        data = load_user(user)
-        username = list(data.keys())[0]
-        user_data = data[username]
+        user_data = get_user_data(user)
+
 
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
@@ -290,9 +284,8 @@ class ChopHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        data = load_user(user)
-        username = list(data.keys())[0]
-        user_data = data[username]
+        user_data = get_user_data(user)
+
 
         proper_tile = occupied_by(user_data["x_pos"], user_data["y_pos"], what="forest")
         item = "axe"
@@ -315,9 +308,8 @@ class ChopHandler(BaseHandler):
         else:
             message = "Out of action points to chop"
 
-        data = load_user(user)
-        username = list(data.keys())[0]
-        user_data = data[username]
+        user_data = get_user_data(user)
+
 
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 

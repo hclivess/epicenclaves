@@ -44,6 +44,12 @@ def tile_occupied(x, y):
     # If there are no entities with "data", return a placeholder dict
     return entity
 
+from sqlite import load_user
+def get_user_data(user):
+    data = load_user(user)
+    username = list(data.keys())[0]
+    user_data = data[username]
+    return user_data
 
 def occupied_by(x, y, what):
     # Use the get_map_data function to check if the given position is occupied by the specified entity type
