@@ -27,7 +27,7 @@ class TurnEngine(threading.Thread):
                         update_user_data(user=username, updated_values={"action_points": updated_action_points})
 
             print(f"Current turn: {self.turn}")
-            time.sleep(5)
+            time.sleep(30)
 
     def run(self):
         self.check_for_updates()
