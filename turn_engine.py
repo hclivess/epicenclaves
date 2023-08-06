@@ -10,6 +10,7 @@ class TurnEngine(threading.Thread):
         self.latest_block = None
         self.compare_block = None
         self.turn = 0
+        self.running = True
 
     def check_for_updates(self):
         while True:
