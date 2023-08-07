@@ -64,31 +64,107 @@ def occupied_by(x, y, what):
 
     return False
 
+def has_resources(user_data, cost):
+    for resource, amount in cost.items():
+        if user_data.get(resource, 0) < amount:
+            return False
+    return True
+
+# Defining cost structures for entities
+building_costs = {
+    "house": {"wood": 50},
+    "inn": {"wood": 50, "stone": 10},
+    # Add more entities and their cost structures here
+}
 
 
-def build(entity, name, user, user_data):
-    print("build", entity, name, user, user_data)
-    # Prepare the entity data based on the entity type
+def build(entity, name, user):
+    user_data = get_user_data(user)
+    occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
+
+    if user_data["action_points"] < 1:
+        return "Not enough action points to build"
+    elif occupied[f"{user_data['x_pos']},{user_data['y_pos']}"]["type"] != "empty":
+        return "Cannot build here"
+
+    if entity not in building_costs:
+        return "Building procedure not yet defined"
+
+    if not has_resources(user_data, building_costs[entity]):
+        return f"Not enough resources to build {entity}"
+
+    # Deduct resources
+    for resource, amount in building_costs[entity].items():
+        user_data[resource] -= amount
+
+    # Conditionally increase the pop_lim based on the entity
+    if entity == "house":
+        user_data["pop_lim"] += 10
+
+    # Update user's data
+    updated_values = {
+        "action_points": user_data["action_points"] - 1,
+        "wood": user_data["wood"],
+        "pop_lim": user_data.get("pop_lim", None)  # Only update if the key exists
+    }
+    if "stone" in user_data:
+        updated_values["stone"] = user_data["stone"]
+
+    update_user_data(user=user, updated_values=updated_values)
+
+    # Prepare and update the map data for the entity
     entity_data = {
         "type": entity,
+        "name": name,
+        "hp": 100,
+        "size": 1,
+        "control": user,
     }
-
-    # Update user data
-    data = {
-        f"{user_data['x_pos']},{user_data['y_pos']}": {
-            "name": name,
-            "hp": 100,
-            "size": 1,
-            "control": user,
-            **entity_data
-        }
-    }
-
+    data = {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data}
     update_user_data(user=user, updated_values={"construction": data})
     insert_map_data("db/map_data.db", data)
 
+    return f"Successfully built {entity}"
 
-class Actions:
+
+def move(user, entry, axis_limit, user_data):
+    move_map = {
+        "left": (-1, "x_pos"),
+        "right": (1, "x_pos"),
+        "down": (1, "y_pos"),
+        "up": (-1, "y_pos")
+    }
+
+    if entry in move_map:
+        direction, axis_key = move_map[entry]
+        new_pos = user_data[axis_key] + direction
+        if user_data["action_points"] > 0 and 1 <= new_pos <= axis_limit:
+            update_user_data(user, {axis_key: new_pos, "action_points": user_data["action_points"] - 1})
+            return True
+    return False
+
+def attempt_rest(user, user_data, hours_arg):
+    hours = int(hours_arg)
+    x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
+    proper_tile = occupied_by(x_pos, y_pos, what="inn")
+
+    # Check if the user is able to rest
+    can_rest = proper_tile and user_data["action_points"] >= hours and user_data["hp"] < 100
+
+    if can_rest:
+        new_hp = min(user_data["hp"] + hours, 100)  # Ensures HP doesn't exceed 100
+        new_ap = user_data["action_points"] - hours
+        update_user_data(user=user, updated_values={"hp": new_hp, "action_points": new_ap})
+        return "You feel more rested"
+
+    elif user_data["hp"] >= 100:
+        return "You are already fully rested"
+    elif not proper_tile:
+        return "You cannot rest here, inn required"
+    else:
+        return "Out of action points to rest"
+
+class TileActions:
     def get(self, type):
         if type == "inn":
             actions = [{"name": "sleep 10 hours", "action": "/rest?hours=10"},

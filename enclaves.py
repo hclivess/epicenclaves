@@ -10,7 +10,7 @@ import tornado.escape
 
 from turn_engine import TurnEngine
 import backend
-from backend import cookie_get, tile_occupied, build, occupied_by, generate_entities, get_user_data
+from backend import cookie_get, tile_occupied, build, occupied_by, generate_entities, get_user_data, move, attempt_rest
 from sqlite import create_map_database, has_item, update_map_data, create_user, load_user, login_validate, \
     update_user_data, remove_construction, add_user, exists_user, load_surrounding_map_and_user_data, check_users_db, \
     create_user_db, create_game_database
@@ -75,56 +75,17 @@ class MapHandler(BaseHandler):
                     ensure_ascii=False)
 
 
+
+
 class BuildHandler(BaseHandler):
     def get(self, data):
         entity = self.get_argument("entity")
         name = self.get_argument("name")
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        user_data = get_user_data(user)
-        occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
-
-        if user_data["action_points"] < 1:
-            message = "Not enough action points to build"
-
-        elif occupied[f"{user_data['x_pos']},{user_data['y_pos']}"]["type"] == "empty":
-            message = "Building procedure not yet defined"
-
-            if entity == "house":
-                if user_data["wood"] >= 50:
-                    update_user_data(user=user,
-                                     updated_values={"pop_lim": user_data["pop_lim"] + 10,
-                                                     "wood": user_data["wood"] - 50,
-                                                     "action_points": user_data["action_points"] - 1})
-                    build(entity=entity,
-                          name=name,
-                          user=user,
-                          user_data=user_data)
-
-                    message = f"Successfully built {entity}"
-                else:
-                    message = f"Not enough wood to build {entity}"
-
-            elif entity == "inn":
-                if user_data["wood"] >= 50:
-                    update_user_data(user=user,
-                                     updated_values={"pop_lim": user_data["pop_lim"] + 10,
-                                                     "wood": user_data["wood"] - 50,
-                                                     "action_points": user_data["action_points"] - 1})
-                    build(entity=entity,
-                          name=name,
-                          user=user,
-                          user_data=user_data)
-
-                    message = f"Successfully built {entity}"
-                else:
-                    message = f"Not enough wood to build {entity}"
-
-        else:
-            message = "Cannot build here"
+        message = build(entity, name, user)
 
         user_data = get_user_data(user)
-
         occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
 
         self.render("templates/user_panel.html",
@@ -142,84 +103,42 @@ class MoveHandler(BaseHandler):
         entry = self.get_argument("direction")
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        def move(user, direction, axis_key, axis_limit):
+        user_data = get_user_data(user)
 
-            user_data = get_user_data(user)
+        moved = move(user, entry, max_size, user_data)
 
-            new_pos = user_data[axis_key] + direction
-
-            # Check if the action points are more than 0 before allowing movement
-            if user_data["action_points"] > 0 and 1 <= new_pos <= axis_limit:
-                # Update both the position and the action points in one go
-                update_user_data(user, {axis_key: new_pos, "action_points": user_data["action_points"] - 1})
-                return True
-            return False
-
-        if entry == "left":
-            moved = move(user, -1, "x_pos", max_size)
-        elif entry == "right":
-            moved = move(user, 1, "x_pos", max_size)
-        elif entry == "down":
-            moved = move(user, 1, "y_pos", max_size)
-        elif entry == "up":
-            moved = move(user, -1, "y_pos", max_size)
-        else:
-            moved = False
         message = "Moved" if moved else "Moved out of bounds or no action points left"
 
         if target == "map":
-
-            self.render("templates/map.html",
-                        user=user,
-                        data=json.dumps(load_surrounding_map_and_user_data(user)),
-                        message=message)
+            self.render(
+                "templates/map.html",
+                user=user,
+                data=json.dumps(load_surrounding_map_and_user_data(user)),
+                message=message
+            )
         else:
-            user_data = get_user_data(user)
-
             occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
-
-            self.render("templates/user_panel.html",
-                        user=user,
-                        file=user_data,
-                        message=message,
-                        on_tile=occupied,
-                        actions=actions,
-                        descriptions=descriptions)
+            self.render(
+                "templates/user_panel.html",
+                user=user,
+                file=user_data,
+                message=message,
+                on_tile=occupied,
+                actions=actions,
+                descriptions=descriptions
+            )
 
 
 class RestHandler(BaseHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
-
         user_data = get_user_data(user)
-
         hours = self.get_argument("hours", default="1")
 
-        proper_tile = occupied_by(user_data["x_pos"], user_data["y_pos"], what="inn")
+        message = attempt_rest(user, user_data, hours)
 
-        if proper_tile and user_data["action_points"] > 0 and user_data["hp"] < 99:
-            new_hp = user_data["hp"] + int(hours)
-            new_ap = user_data["action_points"] - int(hours)
-            if new_hp > 100:
-                new_hp = 100
-
-            update_user_data(user=user, updated_values={"hp": new_hp})
-            update_user_data(user=user, updated_values={"action_points": new_ap})
-
-            message = "You feel more rested"
-
-        elif user_data["hp"] > 99:
-            message = "You are already fully rested"
-
-        elif not proper_tile:
-            message = "You cannot rest here, inn required"
-
-        else:
-            message = "Out of action points to rest"
-
-        user_data = get_user_data(user)
-
-        occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
+        x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
+        occupied = tile_occupied(x_pos, y_pos)
 
         self.render("templates/user_panel.html",
                     user=user,
@@ -404,7 +323,7 @@ if __name__ == "__main__":
     if not os.path.exists("db/user_data.db"):
         create_user_db()
 
-    actions = backend.Actions()
+    actions = backend.TileActions()
     descriptions = backend.Descriptions()
 
     turn_engine = TurnEngine()  # reference to memory dict will be added here
