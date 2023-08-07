@@ -97,49 +97,50 @@ def build(entity, name, user):
     user_data = get_user_data(user)
     occupied = load_tile(user_data["x_pos"], user_data["y_pos"])
 
-    if user_data["action_points"] < 1:
-        return "Not enough action points to build"
-    elif occupied[f"{user_data['x_pos']},{user_data['y_pos']}"]["type"] != "empty":
-        return "Cannot build here"
+    for entry in occupied:
+        if user_data["action_points"] < 1:
+            return "Not enough action points to build"
+        elif entry[f"{user_data['x_pos']},{user_data['y_pos']}"]["type"] != "empty":
+            return "Cannot build here"
 
-    if entity not in building_costs:
-        return "Building procedure not yet defined"
+        if entity not in building_costs:
+            return "Building procedure not yet defined"
 
-    if not has_resources(user_data, building_costs[entity]):
-        return f"Not enough resources to build {entity}"
+        if not has_resources(user_data, building_costs[entity]):
+            return f"Not enough resources to build {entity}"
 
-    # Deduct resources
-    for resource, amount in building_costs[entity].items():
-        user_data[resource] -= amount
+        # Deduct resources
+        for resource, amount in building_costs[entity].items():
+            user_data[resource] -= amount
 
-    # Conditionally increase the pop_lim based on the entity
-    if entity == "house":
-        user_data["pop_lim"] += 10
+        # Conditionally increase the pop_lim based on the entity
+        if entity == "house":
+            user_data["pop_lim"] += 10
 
-    # Update user's data
-    updated_values = {
-        "action_points": user_data["action_points"] - 1,
-        "wood": user_data["wood"],
-        "pop_lim": user_data.get("pop_lim", None)  # Only update if the key exists
-    }
-    if "stone" in user_data:
-        updated_values["stone"] = user_data["stone"]
+        # Update user's data
+        updated_values = {
+            "action_points": user_data["action_points"] - 1,
+            "wood": user_data["wood"],
+            "pop_lim": user_data.get("pop_lim", None)  # Only update if the key exists
+        }
+        if "stone" in user_data:
+            updated_values["stone"] = user_data["stone"]
 
-    update_user_data(user=user, updated_values=updated_values)
+        update_user_data(user=user, updated_values=updated_values)
 
-    # Prepare and update the map data for the entity
-    entity_data = {
-        "type": entity,
-        "name": name,
-        "hp": 100,
-        "size": 1,
-        "control": user,
-    }
-    data = {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data}
-    update_user_data(user=user, updated_values={"construction": data})
-    insert_map_data("db/map_data.db", data)
+        # Prepare and update the map data for the entity
+        entity_data = {
+            "type": entity,
+            "name": name,
+            "hp": 100,
+            "size": 1,
+            "control": user,
+        }
+        data = {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data}
+        update_user_data(user=user, updated_values={"construction": data})
+        insert_map_data("db/map_data.db", data)
 
-    return f"Successfully built {entity}"
+        return f"Successfully built {entity}"
 
 
 def move(user, entry, axis_limit, user_data):
