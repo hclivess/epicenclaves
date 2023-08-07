@@ -150,7 +150,54 @@ def has_item(player, item_name):
     return False
 
 
-def update_map_data(update_data, coords):
+def update_map_data(update_data):
+    print("update_map_data", update_data)
+
+    # Connect to the database
+    conn = sqlite3.connect("db/map_data.db")
+    cursor = conn.cursor()
+
+    # Get coordinates and data from the provided input
+    coords = list(update_data.keys())[0]
+    tile_data = update_data[coords]
+
+    # Split the coords into x and y positions
+    x, y = map(int, coords.split(','))
+
+    # Fetch the existing data
+    cursor.execute("SELECT data FROM map_data WHERE x_pos=? AND y_pos=?", (x, y))
+    row = cursor.fetchone()
+
+    if row is not None:
+        # Parse the JSON string into a Python dictionary
+        existing_data = json.loads(row[0])
+
+        # Update only the 'control' key
+        existing_data["control"] = tile_data["control"]
+
+        # Convert the updated data back into a JSON string
+        data_str = json.dumps(existing_data)
+
+        # Update the row in the map_data table
+        cursor.execute(
+            "UPDATE map_data SET data = ? WHERE x_pos = ? AND y_pos = ?",
+            (data_str, x, y)
+        )
+
+        # Commit the changes
+        conn.commit()
+
+    else:
+        print(f"No data found at the given coordinates {x, y}.")
+
+    # Close the connection
+    conn.close()
+
+import sqlite3
+
+def remove_from_map(coords, entity_type):
+    print("remove_from_map", coords, entity_type)
+
     # Connect to the database
     conn = sqlite3.connect("db/map_data.db")
     cursor = conn.cursor()
@@ -158,45 +205,35 @@ def update_map_data(update_data, coords):
     # Split the coords into x and y positions
     x, y = map(int, coords.split(','))
 
-    if update_data is None:
-        # Delete the entry from the database if update_data is None
-        cursor.execute(
-            "DELETE FROM map_data WHERE x_pos = ? AND y_pos = ?",
-            (x, y)
-        )
-        print(f"Data at coordinates {x, y} removed.")
+    # Fetch data for the given coordinates
+    cursor.execute("SELECT data FROM map_data WHERE x_pos=? AND y_pos=?", (x, y))
+    row = cursor.fetchone()
+
+    if row is not None:
+        # Parse the JSON string into a Python dictionary
+        existing_data = json.loads(row[0])
+
+        # Check if the type matches
+        if existing_data.get("type") == entity_type:
+            # Delete the row from the map_data table
+            cursor.execute(
+                "DELETE FROM map_data WHERE x_pos = ? AND y_pos = ?",
+                (x, y)
+            )
+            # Commit the changes
+            conn.commit()
+            print(f"Entity of type {entity_type} at coordinates {x, y} has been removed.")
+        else:
+            print(f"Entity of type {entity_type} not found at the given coordinates {x, y}.")
 
     else:
-        # Fetch the existing data
-        cursor.execute("SELECT data FROM map_data WHERE x_pos=? AND y_pos=?", (x, y))
-        row = cursor.fetchone()
-
-        if row is not None:
-            tile_data = update_data[coords]
-            # Parse the JSON string into a Python dictionary
-            existing_data = json.loads(row[0])
-
-            # Update only the 'control' key
-            existing_data["control"] = tile_data["control"]
-
-            # Convert the updated data back into a JSON string
-            data_str = json.dumps(existing_data)
-
-            # Update the row in the map_data table
-            cursor.execute(
-                "UPDATE map_data SET data = ? WHERE x_pos = ? AND y_pos = ?",
-                (data_str, x, y)
-            )
-
-        else:
-            print(f"No data found at the given coordinates {x, y}.")
-
-    # Commit the changes
-    conn.commit()
+        print(f"No data found at the given coordinates {x, y}.")
 
     # Close the connection
     conn.close()
 
+# Example Usage:
+# remove_from_map("1,2", "forest")
 
 def insert_map_data(db_file, data):
     print("insert_map_data", db_file, data)
@@ -270,7 +307,7 @@ def create_user(user, x_pos=1, y_pos=1):
         "exp": 0,
         "hp": 100,
         "armor": 0,
-        "action_points": 20,
+        "action_points": 200,
         "wood": 500,
         "food": 500,
         "bismuth": 500,
@@ -383,7 +420,7 @@ def update_user_data(user, updated_values):
     conn.close()
 
 
-def remove_construction(user, construction_coordinates):
+def remove_from_user(user, construction_coordinates):
     print("remove_construction", user, construction_coordinates)
     conn = sqlite3.connect("db/user_data.db")
     cursor = conn.cursor()

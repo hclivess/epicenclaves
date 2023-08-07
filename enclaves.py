@@ -12,8 +12,8 @@ from turn_engine import TurnEngine
 import backend
 from backend import cookie_get, load_tile, build, occupied_by, generate_entities, get_user_data, move, attempt_rest
 from sqlite import create_map_database, has_item, update_map_data, create_user, load_user, login_validate, \
-    update_user_data, remove_construction, add_user, exists_user, load_surrounding_map_and_user_data, check_users_db, \
-    create_user_db, create_game_database
+    update_user_data, remove_from_user, add_user, exists_user, load_surrounding_map_and_user_data, check_users_db, \
+    create_user_db, create_game_database, remove_from_map
 
 max_size = 1000
 
@@ -75,8 +75,6 @@ class MapHandler(BaseHandler):
                     ensure_ascii=False)
 
 
-
-
 class BuildHandler(BaseHandler):
     def get(self, data):
         entity = self.get_argument("entity")
@@ -105,7 +103,7 @@ class MoveHandler(BaseHandler):
 
         user_data = get_user_data(user)
         moved = move(user, entry, max_size, user_data)
-        user_data = get_user_data(user) #update
+        user_data = get_user_data(user)  # update
 
         message = "Moved" if moved else "Moved out of bounds or no action points left"
 
@@ -156,14 +154,17 @@ class FightHandler(BaseHandler):
         user_data = get_user_data(user)
         target = self.get_argument("target")
 
-
         this_tile = load_tile(user_data["x_pos"], user_data["y_pos"])
         print("this_tile", this_tile)
 
         for entry in this_tile:
-            if target == list(entry.values())[0].get("type") and user_data["action_points"] > 0:
+            if user_data["action_points"] < 1:
+                message = "Not enough action points to slay"
 
-                update_map_data(None, list(entry.keys())[0])
+            elif target == list(entry.values())[0].get("type") == "boar":
+
+                remove_from_map(entity_type="boar", coords=list(entry.keys())[0])
+
                 update_user_data(user=user,
                                  updated_values={"action_points": user_data["action_points"] - 1,
                                                  "exp": user_data["exp"] + 1,
@@ -171,7 +172,7 @@ class FightHandler(BaseHandler):
 
                 message = "Slaughter successful"
             else:
-                message = "Cannot slay an empty tile"
+                message = "Cannot slay this type of entity"
 
             user_data = get_user_data(user)
 
@@ -203,7 +204,7 @@ class ConquerHandler(BaseHandler):
                 message = "You already own this tile"
 
             elif list(entry.values())[0].get("type") == target and user_data["action_points"] > 0:
-                remove_construction(owner, {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]})
+                remove_from_user(owner, {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]})
 
                 # Update the "control" attribute
                 key = list(entry.keys())[0]
@@ -212,7 +213,7 @@ class ConquerHandler(BaseHandler):
                 # Construct the updated data for the specific position
                 updated_data = entry
 
-                update_map_data(updated_data, list(entry.keys())[0])
+                update_map_data(updated_data)
 
                 # Call the update function
                 update_user_data(user=user,
@@ -361,7 +362,10 @@ if __name__ == "__main__":
         generate_entities(entity_type="boar",
                           probability=0.25,
                           additional_entity_data={"control": "nobody",
-                                                  "hp": 100},
+                                                  "hp": 100,
+                                                  "armor": 0,
+                                                  "damage": 1,
+                                                  "sound": "squeek"},
                           size=25,
                           every=5)
 
