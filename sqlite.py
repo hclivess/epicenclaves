@@ -258,7 +258,7 @@ def create_user(user, x_pos=1, y_pos=1):
     # Prepare the data dictionary
     data = {
         "type": "player",
-        "age": "0",
+        "age": 0,
         "img": "img/pp.png",
         "exp": 0,
         "hp": 100,
