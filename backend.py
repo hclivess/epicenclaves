@@ -44,12 +44,16 @@ def tile_occupied(x, y):
     # If there are no entities with "data", return a placeholder dict
     return entity
 
+
 from sqlite import load_user
+
+
 def get_user_data(user):
     data = load_user(user)
     username = list(data.keys())[0]
     user_data = data[username]
     return user_data
+
 
 def occupied_by(x, y, what):
     # Use the get_map_data function to check if the given position is occupied by the specified entity type
@@ -64,11 +68,13 @@ def occupied_by(x, y, what):
 
     return False
 
+
 def has_resources(user_data, cost):
     for resource, amount in cost.items():
         if user_data.get(resource, 0) < amount:
             return False
     return True
+
 
 # Defining cost structures for entities
 building_costs = {
@@ -143,6 +149,7 @@ def move(user, entry, axis_limit, user_data):
             return True
     return False
 
+
 def attempt_rest(user, user_data, hours_arg):
     hours = int(hours_arg)
     x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
@@ -163,6 +170,7 @@ def attempt_rest(user, user_data, hours_arg):
         return "You cannot rest here, inn required"
     else:
         return "Out of action points to rest"
+
 
 class TileActions:
     def get(self, type):
