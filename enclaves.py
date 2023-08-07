@@ -157,12 +157,18 @@ class FightHandler(BaseHandler):
 
         this_tile = load_tile(user_data["x_pos"], user_data["y_pos"])
         print("this_tile", this_tile)
+        occupied = load_tile(user_data["x_pos"], user_data["y_pos"])
+
+        not_good = False
+
+        message = "Cannot slay this type of entity"
+
+        user_data = get_user_data(user)
 
         if user_data["action_points"] < 1:
+            not_good = True
             message = "Not enough action points to slay"
-
-            occupied = load_tile(user_data["x_pos"], user_data["y_pos"])
-
+        if not_good:
             self.render("templates/user_panel.html",
                         user=user,
                         file=user_data,
@@ -185,25 +191,25 @@ class FightHandler(BaseHandler):
                     messages = []
 
                     boar = Boar()  # local instance is sufficient, also should be used in generator!
-                    boar.hp -= user_data["items"] # there should be user object that also calls update when it needs to write to db
+                    boar.hp -= 1  # there should be user object that also calls update when it needs to write to db
 
+                    while boar.alive and user_data["alive"]:
+                        if boar.hp < 1:
+                            messages.append("The boar is dead")
+                            boar.alive = False
 
+                        elif user_data["hp"] < 1:
+                            messages.append("You died")
+                            user_data["alive"] = False
+                            # todo roll survival dice
+                        else:
+                            messages.append("The boar takes 1 damage")
+                            boar.hp -= 1
+                            messages.append("You take 1 damage")
+                            user_data["hp"] = user_data["hp"] - 1
 
-
-                else:
-                    messages = "Cannot slay this type of entity"
-
-                user_data = get_user_data(user)
-
-                occupied = load_tile(user_data["x_pos"], user_data["y_pos"])
-
-                self.render("templates/fight.html",
-                            user=user,
-                            file=user_data,
-                            messages=messages,
-                            on_tile=occupied,
-                            actions=actions,
-                            descriptions=descriptions)
+                    self.render("templates/fight.html",
+                                messages=messages)
 
 
 class ConquerHandler(BaseHandler):

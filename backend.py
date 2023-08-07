@@ -97,6 +97,7 @@ class Boar:
         self.hp = 100
         self.damage = 1
         self.armor = 0
+        self.alive = True
 
 def build(entity, name, user):
     user_data = get_user_data(user)
