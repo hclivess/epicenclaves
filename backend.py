@@ -27,22 +27,31 @@ def hashify(data):
     return hashified
 
 
-def structure_check(x, y):
-    print("tile_occupied", x, y)
+def load_tile(x, y):
+    print("load_tile", x, y)
+
     # Use the get_map_data function to retrieve data for the given position
-    entity = sqlite.get_map_data(x_pos=x, y_pos=y)
+    entities_from_db = sqlite.get_map_data(x_pos=x, y_pos=y)
 
-    # If an entity is found at the given position, return its data
-    if not entity:
-        entity = {f"{x},{y}": {
-            "type": "empty",
-            "control": "nobody",
-            "hp": 0,  # CLUTCH todo
-        }}
+    # If entities_from_db is not a list (either a single dict or None), convert it into a list
+    if not isinstance(entities_from_db, list):
+        entities_from_db = [entities_from_db] if entities_from_db else []
 
-    print("entity", entity)
-    # If there are no entities with "data", return a placeholder dict
-    return entity
+    # If no entities are found at the given position, provide a default "empty" entity
+    if not entities_from_db:
+        entities_from_db = [{
+            f"{x},{y}": {
+                "type": "empty",
+                "control": "nobody",
+                "hp": 0,  # CLUTCH todo
+            }
+        }]
+
+    for entity in entities_from_db:
+        print("entity", entity)
+
+    return entities_from_db
+
 
 
 from sqlite import load_user
@@ -86,7 +95,7 @@ building_costs = {
 
 def build(entity, name, user):
     user_data = get_user_data(user)
-    occupied = structure_check(user_data["x_pos"], user_data["y_pos"])
+    occupied = load_tile(user_data["x_pos"], user_data["y_pos"])
 
     if user_data["action_points"] < 1:
         return "Not enough action points to build"
@@ -177,12 +186,14 @@ class TileActions:
         if type == "inn":
             actions = [{"name": "sleep 10 hours", "action": "/rest?hours=10"},
                        {"name": "sleep 20 hours", "action": "/rest?hours=20"},
-                       {"name": "conquer", "action": "/conquer"}]
+                       {"name": "conquer", "action": f"/conquer?target={type}"}]
         elif type == "forest":
             actions = [{"name": "chop", "action": "/chop"},
-                       {"name": "conquer", "action": "/conquer"}]
+                       {"name": "conquer", "action": f"/conquer?target={type}"}]
         elif type == "house":
-            actions = [{"name": "conquer", "action": "/conquer"}]
+            actions = [{"name": "conquer", "action": f"/conquer?target={type}"}]
+        elif type == "boar":
+            actions = [{"name": "slay", "action": f"/fight?target={type}"}]
         else:
             actions = []
 

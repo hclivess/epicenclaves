@@ -150,45 +150,49 @@ def has_item(player, item_name):
     return False
 
 
-def update_map_data(update_data):
-    print("update_map_data", update_data)
-
+def update_map_data(update_data, coords):
     # Connect to the database
     conn = sqlite3.connect("db/map_data.db")
     cursor = conn.cursor()
 
-    # Get coordinates and data from the provided input
-    coords = list(update_data.keys())[0]
-    tile_data = update_data[coords]
-
     # Split the coords into x and y positions
     x, y = map(int, coords.split(','))
 
-    # Fetch the existing data
-    cursor.execute("SELECT data FROM map_data WHERE x_pos=? AND y_pos=?", (x, y))
-    row = cursor.fetchone()
-
-    if row is not None:
-        # Parse the JSON string into a Python dictionary
-        existing_data = json.loads(row[0])
-
-        # Update only the 'control' key
-        existing_data["control"] = tile_data["control"]
-
-        # Convert the updated data back into a JSON string
-        data_str = json.dumps(existing_data)
-
-        # Update the row in the map_data table
+    if update_data is None:
+        # Delete the entry from the database if update_data is None
         cursor.execute(
-            "UPDATE map_data SET data = ? WHERE x_pos = ? AND y_pos = ?",
-            (data_str, x, y)
+            "DELETE FROM map_data WHERE x_pos = ? AND y_pos = ?",
+            (x, y)
         )
-
-        # Commit the changes
-        conn.commit()
+        print(f"Data at coordinates {x, y} removed.")
 
     else:
-        print(f"No data found at the given coordinates {x, y}.")
+        # Fetch the existing data
+        cursor.execute("SELECT data FROM map_data WHERE x_pos=? AND y_pos=?", (x, y))
+        row = cursor.fetchone()
+
+        if row is not None:
+            tile_data = update_data[coords]
+            # Parse the JSON string into a Python dictionary
+            existing_data = json.loads(row[0])
+
+            # Update only the 'control' key
+            existing_data["control"] = tile_data["control"]
+
+            # Convert the updated data back into a JSON string
+            data_str = json.dumps(existing_data)
+
+            # Update the row in the map_data table
+            cursor.execute(
+                "UPDATE map_data SET data = ? WHERE x_pos = ? AND y_pos = ?",
+                (data_str, x, y)
+            )
+
+        else:
+            print(f"No data found at the given coordinates {x, y}.")
+
+    # Commit the changes
+    conn.commit()
 
     # Close the connection
     conn.close()
@@ -224,6 +228,7 @@ def insert_map_data(db_file, data):
     conn.commit()
     conn.close()
 
+
 def create_user_db():
     # Connect to the database
     conn = sqlite3.connect("db/user_data.db")
@@ -241,6 +246,8 @@ def create_user_db():
     # Commit changes and close the connection
     conn.commit()
     conn.close()
+
+
 def create_user(user, x_pos=1, y_pos=1):
     # Connect to the database
     conn = sqlite3.connect("db/user_data.db")

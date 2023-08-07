@@ -178,16 +178,19 @@ hr {
             <div class="col-md-6">
                <h4>Current Tile</h4>
 
+                {%for entry in on_tile%}
                <div class="col">
-                <p>Type: {{list(on_tile.values())[0].get("type")}}</p>
-                <p><img src=/img/assets/{{list(on_tile.values())[0].get("type")}}.png alt="Item Icon" class="menu-icon"></p>
-                <p>Control: {{list(on_tile.values())[0].get("control")}}</p>
+                <p>Type: {{list(entry.values())[0].get("type")}}</p>
+                <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Item Icon" class="menu-icon"></p>
+                <p>Control: {{list(entry.values())[0].get("control")}}</p>
 
-                   {%for action in actions.get(list(on_tile.values())[0].get("type"))%}
+                   {%for action in actions.get(list(entry.values())[0].get("type"))%}
                         <p>Actions: <a id="btnAct" class="btn btn-move btn-lg active" href="{{action['action']}}" role="button">{{action['name']}}</a></p>
                     {%end%}
 
                </div>
+                {%end%}
+
 
 
                <div class="col">
