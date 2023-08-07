@@ -53,7 +53,6 @@ def load_tile(x, y):
     return entities_from_db
 
 
-
 from sqlite import load_user
 
 
@@ -92,6 +91,12 @@ building_costs = {
     # Add more entities and their cost structures here
 }
 
+
+class Boar:
+    def __init__(self):
+        self.hp = 100
+        self.damage = 1
+        self.armor = 0
 
 def build(entity, name, user):
     user_data = get_user_data(user)

@@ -10,7 +10,8 @@ import tornado.escape
 
 from turn_engine import TurnEngine
 import backend
-from backend import cookie_get, load_tile, build, occupied_by, generate_entities, get_user_data, move, attempt_rest
+from backend import cookie_get, load_tile, build, occupied_by, generate_entities, get_user_data, move, attempt_rest, \
+    Boar
 from sqlite import create_map_database, has_item, update_map_data, create_user, load_user, login_validate, \
     update_user_data, remove_from_user, add_user, exists_user, load_surrounding_map_and_user_data, check_users_db, \
     create_user_db, create_game_database, remove_from_map
@@ -157,24 +158,8 @@ class FightHandler(BaseHandler):
         this_tile = load_tile(user_data["x_pos"], user_data["y_pos"])
         print("this_tile", this_tile)
 
-        for entry in this_tile:
-            if user_data["action_points"] < 1:
-                message = "Not enough action points to slay"
-
-            elif target == list(entry.values())[0].get("type") == "boar":
-
-                remove_from_map(entity_type="boar", coords=list(entry.keys())[0])
-
-                update_user_data(user=user,
-                                 updated_values={"action_points": user_data["action_points"] - 1,
-                                                 "exp": user_data["exp"] + 1,
-                                                 "food": user_data["food"] + 1})
-
-                message = "Slaughter successful"
-            else:
-                message = "Cannot slay this type of entity"
-
-            user_data = get_user_data(user)
+        if user_data["action_points"] < 1:
+            message = "Not enough action points to slay"
 
             occupied = load_tile(user_data["x_pos"], user_data["y_pos"])
 
@@ -185,6 +170,40 @@ class FightHandler(BaseHandler):
                         on_tile=occupied,
                         actions=actions,
                         descriptions=descriptions)
+
+        else:
+            for entry in this_tile:
+                if target == list(entry.values())[0].get("type") == "boar":
+
+                    remove_from_map(entity_type="boar", coords=list(entry.keys())[0])
+
+                    update_user_data(user=user,
+                                     updated_values={"action_points": user_data["action_points"] - 1,
+                                                     "exp": user_data["exp"] + 1,
+                                                     "food": user_data["food"] + 1})
+
+                    messages = []
+
+                    boar = Boar()  # local instance is sufficient, also should be used in generator!
+                    boar.hp -= user_data["items"] # there should be user object that also calls update when it needs to write to db
+
+
+
+
+                else:
+                    messages = "Cannot slay this type of entity"
+
+                user_data = get_user_data(user)
+
+                occupied = load_tile(user_data["x_pos"], user_data["y_pos"])
+
+                self.render("templates/fight.html",
+                            user=user,
+                            file=user_data,
+                            messages=messages,
+                            on_tile=occupied,
+                            actions=actions,
+                            descriptions=descriptions)
 
 
 class ConquerHandler(BaseHandler):
@@ -365,7 +384,7 @@ if __name__ == "__main__":
                                                   "hp": 100,
                                                   "armor": 0,
                                                   "damage": 1,
-                                                  "sound": "squeek"},
+                                                  "sound": "squeak"},
                           size=25,
                           every=5)
 
