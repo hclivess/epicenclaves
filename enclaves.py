@@ -161,9 +161,13 @@ class FightHandler(BaseHandler):
 
         user_data = get_user_data(user)
 
+        message = None
         if user_data["action_points"] < 1:
             message = "Not enough action points to slay"
+        if not user_data["alive"]:
+            message = "You are dead"
 
+        if message:
             self.render("templates/user_panel.html",
                         user=user,
                         file=user_data,
@@ -181,7 +185,8 @@ class FightHandler(BaseHandler):
                     boar = Boar()  # local instance is sufficient, also should be used in generator!
                     boar.hp -= 1  # there should be user object that also calls update when it needs to write to db
 
-                    while boar.alive and user_data["alive"]:
+                    escaped = False
+                    while boar.alive and user_data["alive"] and not escaped:
                         if boar.hp < 1:
                             messages.append("The boar is dead")
                             boar.alive = False
@@ -195,14 +200,16 @@ class FightHandler(BaseHandler):
                         elif user_data["hp"] < 1:
                             if death_roll(boar.kill_chance):
                                 messages.append("You died")
+                                user_data["alive"] = False
                                 update_user_data(user=user,
-                                                 updated_values={"alive": False,
+                                                 updated_values={"alive": user_data["alive"],
                                                                  "hp": user_data["hp"]})
                             else:
-                                messages.append("You barely escaped")
+                                messages.append("You are almost dead but managed to escape")
+                                escaped = True
                                 update_user_data(user=user,
                                                  updated_values={"action_points": user_data["action_points"] - 1,
-                                                                 "hp": user_data["hp"]})
+                                                                 "hp": 1})
 
                         else:
                             messages.append("The boar takes 1 damage")
