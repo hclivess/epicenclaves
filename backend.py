@@ -123,8 +123,6 @@ def build(entity, name, user):
             "wood": user_data["wood"],
             "pop_lim": user_data.get("pop_lim", None)  # Only update if the key exists
         }
-        if "stone" in user_data:
-            updated_values["stone"] = user_data["stone"]
 
         update_user_data(user=user, updated_values=updated_values)
 

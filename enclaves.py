@@ -104,8 +104,8 @@ class MoveHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
 
         user_data = get_user_data(user)
-
         moved = move(user, entry, max_size, user_data)
+        user_data = get_user_data(user) #update
 
         message = "Moved" if moved else "Moved out of bounds or no action points left"
 
