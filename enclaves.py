@@ -10,7 +10,7 @@ import tornado.escape
 
 from turn_engine import TurnEngine
 import backend
-from backend import cookie_get, tile_occupied, build, occupied_by, generate_entities, get_user_data, move, attempt_rest
+from backend import cookie_get, structure_check, build, occupied_by, generate_entities, get_user_data, move, attempt_rest
 from sqlite import create_map_database, has_item, update_map_data, create_user, load_user, login_validate, \
     update_user_data, remove_construction, add_user, exists_user, load_surrounding_map_and_user_data, check_users_db, \
     create_user_db, create_game_database
@@ -42,7 +42,7 @@ class MainHandler(BaseHandler):
 
             print("data", data)  # debug
             print("user_data", user_data)  # debug
-            occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
+            occupied = structure_check(user_data["x_pos"], user_data["y_pos"])
             print("occupied", occupied)  # debug
 
             if user_data["action_points"] < 1:
@@ -86,7 +86,7 @@ class BuildHandler(BaseHandler):
         message = build(entity, name, user)
 
         user_data = get_user_data(user)
-        occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
+        occupied = structure_check(user_data["x_pos"], user_data["y_pos"])
 
         self.render("templates/user_panel.html",
                     user=user,
@@ -117,7 +117,7 @@ class MoveHandler(BaseHandler):
                 message=message
             )
         else:
-            occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
+            occupied = structure_check(user_data["x_pos"], user_data["y_pos"])
             self.render(
                 "templates/user_panel.html",
                 user=user,
@@ -138,7 +138,7 @@ class RestHandler(BaseHandler):
         message = attempt_rest(user, user_data, hours)
 
         x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
-        occupied = tile_occupied(x_pos, y_pos)
+        occupied = structure_check(x_pos, y_pos)
 
         self.render("templates/user_panel.html",
                     user=user,
@@ -155,7 +155,7 @@ class ConquerHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
         user_data = get_user_data(user)
 
-        this_tile = tile_occupied(user_data["x_pos"], user_data["y_pos"])
+        this_tile = structure_check(user_data["x_pos"], user_data["y_pos"])
         print("this_tile", this_tile)
         owner = list(this_tile.values())[0].get("control")
 
@@ -185,7 +185,7 @@ class ConquerHandler(BaseHandler):
 
         user_data = get_user_data(user)
 
-        occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
+        occupied = structure_check(user_data["x_pos"], user_data["y_pos"])
 
         self.render("templates/user_panel.html",
                     user=user,
@@ -225,7 +225,7 @@ class ChopHandler(BaseHandler):
 
         user_data = get_user_data(user)
 
-        occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
+        occupied = structure_check(user_data["x_pos"], user_data["y_pos"])
 
         self.render("templates/user_panel.html",
                     user=user,
@@ -251,7 +251,7 @@ class LoginHandler(BaseHandler):
 
             user_data = get_user_data(user)
 
-            occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
+            occupied = structure_check(user_data["x_pos"], user_data["y_pos"])
 
             self.render("templates/user_panel.html",
                         user=user,

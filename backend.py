@@ -27,7 +27,7 @@ def hashify(data):
     return hashified
 
 
-def tile_occupied(x, y):
+def structure_check(x, y):
     print("tile_occupied", x, y)
     # Use the get_map_data function to retrieve data for the given position
     entity = sqlite.get_map_data(x_pos=x, y_pos=y)
@@ -86,7 +86,7 @@ building_costs = {
 
 def build(entity, name, user):
     user_data = get_user_data(user)
-    occupied = tile_occupied(user_data["x_pos"], user_data["y_pos"])
+    occupied = structure_check(user_data["x_pos"], user_data["y_pos"])
 
     if user_data["action_points"] < 1:
         return "Not enough action points to build"
