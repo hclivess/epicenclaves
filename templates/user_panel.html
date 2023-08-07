@@ -37,37 +37,15 @@ hr {
             margin: 5px;
          }
          /* Customize button styles */
-         .btn-map {
+         .btn-up {
             background-color: #007bff;
             color: #fff;
             border-color: #007bff;
             margin: 5px; /* Normal spacing between navigation buttons */
          }
 
-         .btn-map:hover {
+         .btn-up:hover {
             background-color: #0056b3;
-         }
-
-
-          .btn-quit {
-            background-color: #007bff;
-            color: #fff;
-            border-color: #007bff;
-            margin: 5px; /* Normal spacing between navigation buttons */
-         }
-
-         .btn-quit:hover {
-            background-color: crimson;
-         }
-
-
-         .btn-move {
-            background-color: #28a745;
-            color: #fff;
-            margin: 5px; /* Normal spacing between navigation buttons */
-         }
-         .btn-move:hover {
-            background-color: #218838;
          }
 
          /* Compact user statistics */
@@ -118,13 +96,13 @@ hr {
             <div class="col-md-6 navigation-menu">
 
 <div class="btn-group">
-    <a id="btnUp" class="btn btn-lg active" href="/move?direction=up" role="button">Up 🔼</a>
-    <a id="btnDown" class="btn btn-lg active" href="/move?direction=down" role="button">Down 🔽</a>
-    <a id="btnLeft" class="btn btn-lg active" href="/move?direction=left" role="button">Left ◀️</a>
-    <a id="btnRight" class="btn btn-lg active" href="/move?direction=right" role="button">Right ▶️</a>
-    <a class="btn btn-lg active btn-map" href="/map" role="button">Map 🗺️</a>
-    <a class="btn btn-lg active btn-refresh" href="/" role="button">Refresh 🔄</a> <!-- Modified Refresh button to navigate to / -->
-    <a class="btn btn-lg active btn-logout" href="/logout" role="button">Logout 🌙</a>
+    <a id="btnUp" class="btn btn-lg active btn-up" href="/move?direction=up" role="button">Up 🔼</a>
+    <a id="btnDown" class="btn btn-lg active btn-up" href="/move?direction=down" role="button">Down 🔽</a>
+    <a id="btnLeft" class="btn btn-lg active btn-up" href="/move?direction=left" role="button">Left ◀️</a>
+    <a id="btnRight" class="btn btn-lg active btn-up" href="/move?direction=right" role="button">Right ▶️</a>
+    <a class="btn btn-lg active btn-up" href="/map" role="button">Map 🗺️</a>
+    <a class="btn btn-lg active btn-up" href="/" role="button">Refresh 🔄</a> <!-- Modified Refresh button to navigate to / -->
+    <a class="btn btn-lg active btn-up" href="/logout" role="button">Logout 🌙</a>
 </div>
 
 
