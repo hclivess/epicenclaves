@@ -11,6 +11,12 @@ if not os.path.exists("db"):
     os.mkdir("db")
 
 
+def death_roll(hit_chance):
+    if hit_chance < 0 or hit_chance > 1:
+        raise ValueError("Hit chance should be between 0 and 1 inclusive.")
+    return random.random() < hit_chance
+
+
 def generate_entities(entity_type, probability, additional_entity_data=None, size=101, every=10):
     for x_pos in range(1, size, every):
         for y_pos in range(1, size, every):
@@ -87,7 +93,7 @@ def has_resources(user_data, cost):
 # Defining cost structures for entities
 building_costs = {
     "house": {"wood": 50},
-    "inn": {"wood": 50, "stone": 10},
+    "inn": {"wood": 50},
     # Add more entities and their cost structures here
 }
 
@@ -98,6 +104,8 @@ class Boar:
         self.damage = 1
         self.armor = 0
         self.alive = True
+        self.kill_chance = 0.1
+
 
 def build(entity, name, user):
     user_data = get_user_data(user)

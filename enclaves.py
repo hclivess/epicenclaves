@@ -11,7 +11,7 @@ import tornado.escape
 from turn_engine import TurnEngine
 import backend
 from backend import cookie_get, load_tile, build, occupied_by, generate_entities, get_user_data, move, attempt_rest, \
-    Boar
+    Boar, death_roll
 from sqlite import create_map_database, has_item, update_map_data, create_user, load_user, login_validate, \
     update_user_data, remove_from_user, add_user, exists_user, load_surrounding_map_and_user_data, check_users_db, \
     create_user_db, create_game_database, remove_from_map
@@ -159,16 +159,11 @@ class FightHandler(BaseHandler):
         print("this_tile", this_tile)
         occupied = load_tile(user_data["x_pos"], user_data["y_pos"])
 
-        not_good = False
-
-        message = "Cannot slay this type of entity"
-
         user_data = get_user_data(user)
 
         if user_data["action_points"] < 1:
-            not_good = True
             message = "Not enough action points to slay"
-        if not_good:
+
             self.render("templates/user_panel.html",
                         user=user,
                         file=user_data,
@@ -181,13 +176,6 @@ class FightHandler(BaseHandler):
             for entry in this_tile:
                 if target == list(entry.values())[0].get("type") == "boar":
 
-                    remove_from_map(entity_type="boar", coords=list(entry.keys())[0])
-
-                    update_user_data(user=user,
-                                     updated_values={"action_points": user_data["action_points"] - 1,
-                                                     "exp": user_data["exp"] + 1,
-                                                     "food": user_data["food"] + 1})
-
                     messages = []
 
                     boar = Boar()  # local instance is sufficient, also should be used in generator!
@@ -197,11 +185,25 @@ class FightHandler(BaseHandler):
                         if boar.hp < 1:
                             messages.append("The boar is dead")
                             boar.alive = False
+                            remove_from_map(entity_type="boar", coords=list(entry.keys())[0])
+                            update_user_data(user=user,
+                                             updated_values={"action_points": user_data["action_points"] - 1,
+                                                             "exp": user_data["exp"] + 1,
+                                                             "food": user_data["food"] + 1,
+                                                             "hp": user_data["hp"]})
 
                         elif user_data["hp"] < 1:
-                            messages.append("You died")
-                            user_data["alive"] = False
-                            # todo roll survival dice
+                            if death_roll(boar.kill_chance):
+                                messages.append("You died")
+                                update_user_data(user=user,
+                                                 updated_values={"alive": False,
+                                                                 "hp": user_data["hp"]})
+                            else:
+                                messages.append("You barely escaped")
+                                update_user_data(user=user,
+                                                 updated_values={"action_points": user_data["action_points"] - 1,
+                                                                 "hp": user_data["hp"]})
+
                         else:
                             messages.append("The boar takes 1 damage")
                             boar.hp -= 1
