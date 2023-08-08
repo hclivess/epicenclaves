@@ -14,7 +14,7 @@ from backend import cookie_get, build, occupied_by, generate_entities, get_user_
     Boar, death_roll, get_tile
 from sqlite import create_map_database, has_item, update_map_data, create_user, update_user_data, login_validate, \
     remove_from_user, add_user, exists_user, get_surrounding_map_and_user_data, check_users_db, \
-    create_user_db, create_game_database, remove_from_map, get_map_to_memory, get_users_to_memory, get_user
+    create_user_db, create_game_database, remove_from_map, load_map_to_memory, load_users_to_memory, get_user
 
 max_size = 1000
 
@@ -413,8 +413,8 @@ if __name__ == "__main__":
     actions = backend.TileActions()
     descriptions = backend.Descriptions()
 
-    mapdb = get_map_to_memory()
-    usersdb = get_users_to_memory()
+    mapdb = load_map_to_memory()
+    usersdb = load_users_to_memory()
 
     turn_engine = TurnEngine(usersdb)  # reference to memory dict will be added here
     turn_engine.start()
