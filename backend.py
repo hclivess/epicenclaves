@@ -112,8 +112,10 @@ class Enemy:
 
     def is_alive(self):
         return self.alive
+
     def roll_damage(self):
         return random.randint(self.min_damage, self.max_damage)
+
 
 class Boar(Enemy):
     def __init__(self):
@@ -184,11 +186,7 @@ def move(user, entry, axis_limit, user_data, users_dict):
         direction, axis_key = move_map[entry]
         new_pos = user_data.get(axis_key, 0) + direction
 
-        print(f"Trying to move {entry}. New position: {new_pos}")
-
         if user_data.get("action_points", 0) > 0 and 1 <= new_pos <= axis_limit:
-            print(
-                f"Update user data: New {axis_key}: {new_pos}, Action Points: {user_data['action_points'] - 1}")
             update_user_data(user, {axis_key: new_pos, "action_points": user_data["action_points"] - 1}, users_dict)
             return True
     return False
