@@ -328,7 +328,7 @@ class LoginHandler(BaseHandler):
 
         if not exists_user(user):
             add_user(user, password)
-            create_user(user)
+            create_user(user_data_dict=usersdb, user=user)
         if login_validate(user, password):
             self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
 
@@ -393,16 +393,9 @@ async def main():
     turn_engine.join()
 
 
-if __name__ == "__main__":
+def init_databases():
     if not os.path.exists("db/map_data.db"):
         create_map_database()
-
-        generate_entities(entity_type="forest",
-                          probability=0.50,
-                          additional_entity_data={"control": "nobody",
-                                                  "hp": 100},
-                          size=25,
-                          every=5)
 
     if not os.path.exists("db/game_data.db"):
         create_game_database()
@@ -410,16 +403,34 @@ if __name__ == "__main__":
     if not os.path.exists("db/user_data.db"):
         create_user_db()
 
-    actions = backend.TileActions()
-    descriptions = backend.Descriptions()
 
+def initialize_map_and_users():
     mapdb = load_map_to_memory()
     usersdb = load_users_to_memory()
 
-    turn_engine = TurnEngine(usersdb)  # reference to memory dict will be added here
+    if not os.path.exists("db/map_data.db"):
+        generate_entities(mapdb=mapdb,
+                          entity_type="forest",
+                          probability=0.50,
+                          additional_entity_data={"control": "nobody",
+                                                  "hp": 100},
+                          size=25,
+                          every=5)
+    return mapdb, usersdb
+
+
+if __name__ == "__main__":
+    init_databases()
+    mapdb, usersdb = initialize_map_and_users()
+
+    actions = backend.TileActions()
+    descriptions = backend.Descriptions()
+
+    turn_engine = TurnEngine(usersdb, mapdb)  # reference to memory dict will be added here
     turn_engine.start()
 
     try:
         asyncio.run(main())
     finally:
         print("Application has shut down.")
+

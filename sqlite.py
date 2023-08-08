@@ -74,21 +74,10 @@ def create_map_database():
     conn.close()
 
 
-def save_map_data(x_pos, y_pos, data):
-    # Connect to the database
-    conn = sqlite3.connect("db/map_data.db")
-    cursor = conn.cursor()
-
-    # Convert the data dictionary to a string for storage
-    data_str = json.dumps(data)
-
-    # Insert or replace data for the given position
-    cursor.execute("INSERT OR REPLACE INTO map_data (x_pos, y_pos, data) VALUES (?, ?, ?)",
-                   (x_pos, y_pos, data_str))
-
-    # Commit changes and close the connection
-    conn.commit()
-    conn.close()
+def save_map_data(map_data_dict, x_pos, y_pos, data):
+    # Use a string coordinate key like 'x,y'
+    coord_key = f"{x_pos},{y_pos}"
+    map_data_dict[coord_key] = data
 
 
 class SQLiteConnectionPool:
@@ -171,35 +160,16 @@ def remove_from_map(coords, entity_type, map_data_dict):
         print(f"No data found at the given coordinates {coords}.")
 
 
-def insert_map_data(db_file, data):
-    print("insert_map_data", db_file, data)
-    # Connect to the database
-    conn = sqlite3.connect(db_file)
-    cursor = conn.cursor()
+def insert_map_data(existing_data, new_data):
+    print("insert_map_data", new_data)
 
-    for coord, construction_info in data.items():
-        try:
-            x_pos, y_pos = map(int, coord.split(','))
-            # Prepare the construction_info dictionary to be stored as a JSON string
-            construction_info_str = json.dumps({
-                "name": construction_info.get("name", ""),
-                "hp": construction_info.get("hp", 0),
-                "size": construction_info.get("size", 0),
-                "control": construction_info.get("control", ""),
-                "type": construction_info.get("type", "")
-            })
-
-            # Prepare and execute the SQL query to insert data into the map_data table
-            cursor.execute(
-                "INSERT OR REPLACE INTO map_data (x_pos, y_pos, data) VALUES (?, ?, ?)",
-                (x_pos, y_pos, construction_info_str)
-            )
-        except ValueError:
-            print(f"Invalid coordinate format for '{coord}'. Skipping this entry.")
-
-    # Commit the changes and close the connection
-    conn.commit()
-    conn.close()
+    for coord, construction_info in new_data.items():
+        if coord in existing_data:
+            # If the coordinate already exists, update its values
+            existing_data[coord].update(construction_info)
+        else:
+            # If the coordinate doesn't exist, create a new entry
+            existing_data[coord] = construction_info
 
 
 def create_user_db():
@@ -221,22 +191,11 @@ def create_user_db():
     conn.close()
 
 
-def create_user(user, x_pos=1, y_pos=1):
-    # Connect to the database
-    conn = sqlite3.connect("db/user_data.db")
-    cursor = conn.cursor()
-
-    # Create the table if it doesn't exist
-    cursor.execute('''CREATE TABLE IF NOT EXISTS user_data (
-                        username TEXT PRIMARY KEY,
-                        x_pos INTEGER,
-                        y_pos INTEGER,
-                        data TEXT,
-                        construction TEXT
-                      )''')
-
+def create_user(user_data_dict, user, x_pos=1, y_pos=1):
     # Prepare the data dictionary
     data = {
+        "x_pos": x_pos,
+        "y_pos": y_pos,
         "type": "player",
         "age": 0,
         "img": "img/pp.png",
@@ -252,22 +211,9 @@ def create_user(user, x_pos=1, y_pos=1):
         "alive": True,
         "online": True
     }
-    data_str = json.dumps(data)
 
-    # Prepare an empty construction dictionary
-    construction_data = {}
-
-    # Convert the construction dictionary to a JSON string
-    construction_str = json.dumps(construction_data)
-
-    # Insert the user data into the database
-    cursor.execute('''INSERT OR IGNORE INTO user_data (username, x_pos, y_pos, data, construction)
-                       VALUES (?, ?, ?, ?, ?)''',
-                   (user, x_pos, y_pos, data_str, construction_str))
-
-    # Commit changes and close the connection
-    conn.commit()
-    conn.close()
+    # Insert or update user data in the passed dictionary
+    user_data_dict[user] = data
 
 
 def get_user(user, user_data_dict, get_construction=True):
@@ -322,8 +268,6 @@ def update_user_data(user, updated_values, user_data_dict):
             user_entry[key] = value
 
 
-
-
 def remove_from_user(user, construction_coordinates, user_data_dict):
     key = f"{construction_coordinates['x_pos']},{construction_coordinates['y_pos']}"
 
@@ -347,6 +291,7 @@ def exists_user(user):
     result = users_db_cursor.fetchall()
 
     return bool(result)
+
 
 def save_map_from_memory(map_data_dict):
     # Connect to the database and get a cursor
@@ -405,6 +350,37 @@ def get_map_data_limit(x_pos, y_pos, map_data_dict, distance=500):
         if (x_map - x_pos) ** 2 + (y_map - y_pos) ** 2 <= distance ** 2:
             map_data_dict[coords] = data_str
     return map_data_dict
+
+
+def save_users_from_memory(user_data_dict):
+    conn_user = sqlite3.connect("db/user_data.db")
+    cursor_user = conn_user.cursor()
+
+    for username, user_data in user_data_dict.items():
+        x_pos = user_data["x_pos"]
+        y_pos = user_data["y_pos"]
+
+        data_copy = user_data.copy()
+        del data_copy["x_pos"]
+        del data_copy["y_pos"]
+
+        data_str = json.dumps(data_copy)
+
+        # Check if the user entry exists
+        cursor_user.execute("SELECT 1 FROM user_data WHERE username = ?", (username,))
+        exists = cursor_user.fetchone()
+
+        # Update the existing user entry if it exists, else insert a new entry
+        if exists:
+            cursor_user.execute("UPDATE user_data SET x_pos = ?, y_pos = ?, data = ? WHERE username = ?",
+                                (x_pos, y_pos, data_str, username))
+        else:
+            cursor_user.execute("INSERT INTO user_data (username, x_pos, y_pos, data) VALUES (?, ?, ?, ?)",
+                                (username, x_pos, y_pos, data_str))
+
+    # Commit the changes and close the database connection
+    conn_user.commit()
+    conn_user.close()
 
 
 def load_users_to_memory():

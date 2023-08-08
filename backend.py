@@ -3,8 +3,7 @@ import random
 import string
 from hashlib import blake2b
 
-import sqlite
-from sqlite import insert_map_data, update_user_data, get_user
+from sqlite import insert_map_data, update_user_data, get_user, get_map_data, save_map_data
 
 if not os.path.exists("db"):
     os.mkdir("db")
@@ -16,7 +15,7 @@ def death_roll(hit_chance):
     return random.random() < hit_chance
 
 
-def generate_entities(entity_type, probability, additional_entity_data=None, start_x=1, start_y=1, size=101, every=10,
+def generate_entities(entity_type, probability, mapdb, additional_entity_data=None, start_x=1, start_y=1, size=101, every=10,
                       max_entities=None):
     generated_count = 0
 
@@ -29,7 +28,7 @@ def generate_entities(entity_type, probability, additional_entity_data=None, sta
                 print(f"Generating {data} on {x_pos}, {y_pos}")
                 if additional_entity_data:
                     data.update(additional_entity_data)
-                sqlite.save_map_data(x_pos=x_pos, y_pos=y_pos, data=data)
+                save_map_data(x_pos=x_pos, y_pos=y_pos, data=data, map_data_dict=mapdb)
 
                 generated_count += 1
 
@@ -43,7 +42,7 @@ def get_tile(x, y, mapdb):
     print("get_tile", x, y)
 
     # Use the get_map_data function to retrieve data for the given position
-    entities_from_db = sqlite.get_map_data(x_pos=x, y_pos=y, map_data_dict=mapdb)
+    entities_from_db = get_map_data(x_pos=x, y_pos=y, map_data_dict=mapdb)
 
     # If entities_from_db is not a list (either a single dict or None), convert it into a list
     if not isinstance(entities_from_db, list):
@@ -165,7 +164,7 @@ def build(entity, name, user, mapdb, usersdb):
         update_user_data(user=user,
                          updated_values={"construction": data},
                          user_data_dict=usersdb)
-        insert_map_data("db/map_data.db", data)
+        insert_map_data(mapdb, data)
 
         return f"Successfully built {entity}"
 
