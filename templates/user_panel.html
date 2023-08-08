@@ -175,28 +175,36 @@ hr {
             </div>
 
             <!-- tile column -->
-            <div class="col-md-6">
-               <h4>Current Tile</h4>
+           <div class="col-md-6">
+    <h4>Current Tile</h4>
 
-                {%for entry in on_tile%}
-               <div class="col">
-                <p>Type: {{list(entry.values())[0].get("type")}}</p>
-                <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Item Icon" class="menu-icon"></p>
-                <p>Control: {{list(entry.values())[0].get("control")}}</p>
+    {% for entry in on_tile %}
+    <div class="row"> <!-- Create a new row for each entry -->
 
-                   {%for action in actions.get(list(entry.values())[0].get("type"))%}
-                        <p>Actions: <a id="btnAct" class="btn btn-move btn-lg active" href="{{action['action']}}" role="button">{{action['name']}}</a></p>
-                    {%end%}
+        <div class="col">
+            <p>Type: {{ list(entry.values())[0].get("type") }}</p>
+            <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Item Icon" class="menu-icon"></p>
+            <p>Control: {{ list(entry.values())[0].get("control") }}</p>
 
-               </div>
-                {%end%}
+            <p>Actions:</p>
 
-
-
-               <div class="col">
-
-               </div>
+            {% for action in actions.get(list(entry.values())[0].get("type")) %}
+            <div class="container p-1">
+                <a id="btnAct" class="btn btn-light btn-lg btn-block" href="{{ action['action'] }}" role="button">{{ action['name'] }}</a>
             </div>
+            {% end %}
+
+        </div>
+
+        <div class="col">
+            <!-- You can place other content for each entry here -->
+        </div>
+
+    </div> <!-- Close the row for each entry -->
+    {% end %}
+
+</div>
+
 
 
             <!-- items column -->
