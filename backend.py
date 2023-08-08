@@ -17,15 +17,22 @@ def death_roll(hit_chance):
     return random.random() < hit_chance
 
 
-def generate_entities(entity_type, probability, additional_entity_data=None, start_x=1, start_y=1, size=101, every=10):
+def generate_entities(entity_type, probability, additional_entity_data=None, start_x=1, start_y=1, size=101, every=10,
+                      max_entities=None):
+    generated_count = 0
+
     for x_pos in range(start_x, size, every):
         for y_pos in range(start_y, size, every):
+            if max_entities is not None and generated_count >= max_entities:
+                return
             if random.random() <= probability:
                 data = {"type": entity_type}
                 print(f"Generating {data} on {x_pos}, {y_pos}")
                 if additional_entity_data:
                     data.update(additional_entity_data)
                 sqlite.save_map_data(x_pos=x_pos, y_pos=y_pos, data=data)
+
+                generated_count += 1
 
 
 def hashify(data):
@@ -98,13 +105,20 @@ building_costs = {
 }
 
 
-class Boar:
+class Enemy:
+    def __init__(self, hp, damage, armor, alive=True, kill_chance=0.01):
+        self.hp = hp
+        self.damage = damage
+        self.armor = armor
+        self.alive = alive
+        self.kill_chance = kill_chance
+
+    def is_alive(self):
+        return self.alive
+
+class Boar(Enemy):
     def __init__(self):
-        self.hp = 100
-        self.damage = 1
-        self.armor = 0
-        self.alive = True
-        self.kill_chance = 0.01
+        super().__init__(hp=100, damage=1, armor=0)
 
 
 def build(entity, name, user):

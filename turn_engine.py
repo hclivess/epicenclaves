@@ -3,7 +3,7 @@ import blockchain
 import threading
 import time
 from sqlite import update_turn, update_user_data, load_all_user_data
-
+from backend import generate_entities
 
 def interruptible_sleep(seconds, interval=1, stop_condition=None):
     total_time_slept = 0
@@ -35,6 +35,18 @@ class TurnEngine(threading.Thread):
                 if "action_points" in user_data:
                     update_user_data(user=username, updated_values={"action_points": user_data["action_points"] + 5,
                                                                     "age": user_data["age"] + 1})
+
+            generate_entities(entity_type="boar",
+                              probability=0.25,
+                              additional_entity_data={"control": "nobody",
+                                                      "hp": 100,
+                                                      "armor": 0,
+                                                      "damage": 1,
+                                                      "sound": "squeak"},
+                              size=25,
+                              every=5,
+                              max_entities=1
+                              )
 
         print(f"Current turn: {self.turn}")
 

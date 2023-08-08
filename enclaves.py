@@ -136,6 +136,8 @@ class RestHandler(BaseHandler):
 
         message = attempt_rest(user, user_data, hours)
 
+        user_data = get_user_data(user) #update
+
         x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
         occupied = load_tile(x_pos, y_pos)
 
@@ -183,7 +185,6 @@ class FightHandler(BaseHandler):
                     messages = []
 
                     boar = Boar()  # local instance is sufficient, also should be used in generator!
-                    boar.hp -= 1  # there should be user object that also calls update when it needs to write to db
 
                     escaped = False
                     while boar.alive and user_data["alive"] and not escaped:
@@ -212,9 +213,9 @@ class FightHandler(BaseHandler):
                                                                  "hp": 1})
 
                         else:
-                            messages.append("The boar takes 1 damage")
                             boar.hp -= 1
-                            messages.append("You take 1 damage")
+                            messages.append(f"The boar takes 1 damage and is left with {boar.hp} hp")
+                            messages.append(f"You take 1 damage and are left with {user_data['hp']} hp")
                             user_data["hp"] = user_data["hp"] - 1
 
                     self.render("templates/fight.html",
@@ -393,15 +394,7 @@ if __name__ == "__main__":
                                                   "hp": 100},
                           size=25,
                           every=5)
-        generate_entities(entity_type="boar",
-                          probability=0.25,
-                          additional_entity_data={"control": "nobody",
-                                                  "hp": 100,
-                                                  "armor": 0,
-                                                  "damage": 1,
-                                                  "sound": "squeak"},
-                          size=25,
-                          every=5)
+
 
     if not os.path.exists("db/game_data.db"):
         create_game_database()
