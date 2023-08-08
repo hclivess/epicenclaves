@@ -106,20 +106,14 @@ class SQLiteConnectionPool:
         self.pool.append(conn)
 
 
-# Use prepared statements for SQL queries
-def get_map_data(x_pos, y_pos):
-    with closing(conn_pool.get_connection()) as conn:
-        with closing(conn.cursor()) as cursor:
-            cursor.execute("SELECT x_pos, y_pos, data FROM map_data WHERE x_pos = ? AND y_pos = ?", (x_pos, y_pos))
-            result = cursor.fetchone()
+def get_map_data(x_pos, y_pos, map_data_dict):
+    key = f"{x_pos},{y_pos}"
 
-    if result:
-        x_pos, y_pos, data_str = result
-        # Convert the data string back to a dictionary
-        data = json.loads(data_str)
-        return {f"{x_pos},{y_pos}": data}  # Removed ** to properly construct the dictionary
+    # Check if the key exists in the map_data_dict
+    if key in map_data_dict:
+        return {key: map_data_dict[key]}
 
-    # Return None if no entity was found
+    # Return None if no data was found for the given coordinates
     return None
 
 
@@ -150,12 +144,8 @@ def has_item(player, item_name):
     return False
 
 
-def update_map_data(update_data):
+def update_map_data(update_data, map_data_dict):
     print("update_map_data", update_data)
-
-    # Connect to the database
-    conn = sqlite3.connect("db/map_data.db")
-    cursor = conn.cursor()
 
     # Get coordinates and data from the provided input
     coords = list(update_data.keys())[0]
@@ -164,76 +154,36 @@ def update_map_data(update_data):
     # Split the coords into x and y positions
     x, y = map(int, coords.split(','))
 
-    # Fetch the existing data
-    cursor.execute("SELECT data FROM map_data WHERE x_pos=? AND y_pos=?", (x, y))
-    row = cursor.fetchone()
+    # Create a key using the coordinates
+    key = f"{x},{y}"
 
-    if row is not None:
-        # Parse the JSON string into a Python dictionary
-        existing_data = json.loads(row[0])
-
+    # Check if the key exists in the map_data_dict
+    if key in map_data_dict:
         # Update only the 'control' key
-        existing_data["control"] = tile_data["control"]
-
-        # Convert the updated data back into a JSON string
-        data_str = json.dumps(existing_data)
-
-        # Update the row in the map_data table
-        cursor.execute(
-            "UPDATE map_data SET data = ? WHERE x_pos = ? AND y_pos = ?",
-            (data_str, x, y)
-        )
-
-        # Commit the changes
-        conn.commit()
-
+        map_data_dict[key]["control"] = tile_data["control"]
     else:
         print(f"No data found at the given coordinates {x, y}.")
 
-    # Close the connection
-    conn.close()
 
-import sqlite3
-
-def remove_from_map(coords, entity_type):
+def remove_from_map(coords, entity_type, map_data_dict):
     print("remove_from_map", coords, entity_type)
 
-    # Connect to the database
-    conn = sqlite3.connect("db/map_data.db")
-    cursor = conn.cursor()
+    # Create a key using the coordinates
+    key = coords
 
-    # Split the coords into x and y positions
-    x, y = map(int, coords.split(','))
-
-    # Fetch data for the given coordinates
-    cursor.execute("SELECT data FROM map_data WHERE x_pos=? AND y_pos=?", (x, y))
-    row = cursor.fetchone()
-
-    if row is not None:
-        # Parse the JSON string into a Python dictionary
-        existing_data = json.loads(row[0])
-
+    # Check if the key exists in the map_data_dict
+    if key in map_data_dict:
         # Check if the type matches
-        if existing_data.get("type") == entity_type:
-            # Delete the row from the map_data table
-            cursor.execute(
-                "DELETE FROM map_data WHERE x_pos = ? AND y_pos = ?",
-                (x, y)
-            )
-            # Commit the changes
-            conn.commit()
-            print(f"Entity of type {entity_type} at coordinates {x, y} has been removed.")
+        if map_data_dict[key].get("type") == entity_type:
+            # Remove the key from the map_data_dict
+            del map_data_dict[key]
+            print(f"Entity of type {entity_type} at coordinates {coords} has been removed.")
         else:
-            print(f"Entity of type {entity_type} not found at the given coordinates {x, y}.")
-
+            print(f"Entity of type {entity_type} not found at the given coordinates {coords}.")
     else:
-        print(f"No data found at the given coordinates {x, y}.")
+        print(f"No data found at the given coordinates {coords}.")
 
-    # Close the connection
-    conn.close()
 
-# Example Usage:
-# remove_from_map("1,2", "forest")
 
 def insert_map_data(db_file, data):
     print("insert_map_data", db_file, data)
@@ -333,38 +283,32 @@ def create_user(user, x_pos=1, y_pos=1):
     conn.close()
 
 
-def load_user(user, load_construction=True):
-    conn = sqlite3.connect("db/user_data.db")
-    cursor = conn.cursor()
-
-    if load_construction:
-        cursor.execute("SELECT username, x_pos, y_pos, data, construction FROM user_data WHERE username=?", (user,))
-    else:
-        cursor.execute("SELECT username, x_pos, y_pos, data FROM user_data WHERE username=?", (user,))
-
-    result = cursor.fetchone()
-
-    conn.close()
-
-    if result:
-        username, x_pos, y_pos, data_str = result[:4]  # Extract the first 4 values from the result tuple
-        data = json.loads(data_str)
-
-        # Load the "construction" data only if load_construction is True and the result tuple has at least 5 values
-        construction = json.loads(result[4]) if load_construction and len(result) >= 5 else {}
-
-        user_data = {
-            username: {
-                "x_pos": x_pos,
-                "y_pos": y_pos,
-                **data,
-                "construction": construction
-            }
-        }
-
-        return user_data
-    else:
+def load_user(user, user_data_dict, load_construction=True):
+    # Check if the user exists in the user_data_dict
+    if user not in user_data_dict:
+        print(f"User {user} not found in the dictionary.")
         return None
+
+    user_entry = user_data_dict[user]
+
+    # Extract x_pos, y_pos, and other data from user_entry
+    x_pos = user_entry.get("x_pos", 0)
+    y_pos = user_entry.get("y_pos", 0)
+    data = {k: v for k, v in user_entry.items() if k not in ["x_pos", "y_pos", "construction"]}
+
+    # Load the "construction" data only if load_construction is True
+    construction = user_entry["construction"] if load_construction and "construction" in user_entry else {}
+
+    user_data = {
+        user: {
+            "x_pos": x_pos,
+            "y_pos": y_pos,
+            **data,
+            "construction": construction
+        }
+    }
+
+    return user_data
 
 
 def login_validate(user, password):
@@ -374,24 +318,17 @@ def login_validate(user, password):
     return bool(result)
 
 
-def update_user_data(user, updated_values):
+def update_user_data(user, updated_values, user_data_dict):
     print("update_user_data", user, updated_values)  # debug
-    # Connect to the database
-    conn = sqlite3.connect("db/user_data.db")
-    cursor = conn.cursor()
 
-    # Fetch the current user data from the database
-    cursor.execute("SELECT data, construction FROM user_data WHERE username=?", (user,))
-    result = cursor.fetchone()
-
-    if not result:
+    # Check if user exists in the user_data_dict
+    if user not in user_data_dict:
         print("User not found")
         return
 
-    data_str, construction_str = result
-    # Convert the data strings back to dictionaries
-    data = json.loads(data_str)
-    construction = json.loads(construction_str)
+    # Get user's current data and construction info
+    data = user_data_dict[user].get("data", {})
+    construction = user_data_dict[user].get("construction", {})
 
     # If "construction" is not a dictionary, initialize it as an empty dictionary
     if not isinstance(construction, dict):
@@ -403,61 +340,26 @@ def update_user_data(user, updated_values):
         if key == "construction" and isinstance(value, dict):
             # Update the construction dictionary with the new values
             for coord, construction_info in value.items():
-                x_pos, y_pos = map(int, coord.split(','))
-                construction[f"{x_pos},{y_pos}"] = construction_info
+                construction[coord] = construction_info
         else:
             data[key] = value  # else just update the value
 
-    # Convert the updated data and construction data back to JSON strings
-    updated_data_str = json.dumps(data)
-    updated_construction_str = json.dumps(construction)
-
-    # Update the user data in the database
-    cursor.execute("UPDATE user_data SET data=?, construction=? WHERE username=?",
-                   (updated_data_str, updated_construction_str, user))
-
-    # Commit changes and close the connection
-    conn.commit()
-    conn.close()
+    # Update the user_data_dict with the updated data and construction info
+    user_data_dict[user]["data"] = data
+    user_data_dict[user]["construction"] = construction
 
 
-def remove_from_user(user, construction_coordinates):
-    print("remove_construction", user, construction_coordinates)
-    conn = sqlite3.connect("db/user_data.db")
-    cursor = conn.cursor()
+def remove_from_user(user, construction_coordinates, user_data_dict):
+    key = f"{construction_coordinates['x_pos']},{construction_coordinates['y_pos']}"
 
-    # Fetch the current user data using the load_user function
-    user_data_wrapper = load_user(user)
-    if not user_data_wrapper:
+    if user not in user_data_dict:
         print("User not found")
         return
 
-    user_data = user_data_wrapper[user]  # This will get the actual data dictionary for the user
+    user_data = user_data_dict[user]
 
-    # Form the key from the provided x_pos and y_pos
-    key = f"{construction_coordinates['x_pos']},{construction_coordinates['y_pos']}"
-
-    # Check if 'construction' key is in the user_data and is a dictionary
     if "construction" in user_data and isinstance(user_data["construction"], dict):
-        # Try to pop the key. If the key is not present, do nothing.
         user_data["construction"].pop(key, None)
-
-    # Convert the updated data back to a JSON string
-    updated_data_str = json.dumps(user_data)
-
-    # Remove the "construction" key from user_data because it's stored in a separate column
-    construction_data = user_data.pop("construction", {})
-
-    # Convert the "construction" data back to a JSON string
-    construction_data_str = json.dumps(construction_data)
-
-    # Update the user data in the database
-    cursor.execute("UPDATE user_data SET data=?, construction=? WHERE username=?",
-                   (updated_data_str, construction_data_str, user))
-
-    # Commit changes and close the connection
-    conn.commit()
-    conn.close()
 
 
 def add_user(user, password):
@@ -472,21 +374,21 @@ def exists_user(user):
     return bool(result)
 
 
-def load_map_data(x_pos, y_pos, distance=500):
+def load_map_to_memory():
+    # Connect to the database and get a cursor
     conn_map = sqlite3.connect("db/map_data.db")
     cursor_map = conn_map.cursor()
 
-    distance_squared = distance ** 2
+    # Execute a query to fetch all records from the map_data table
+    cursor_map.execute("SELECT x_pos, y_pos, data FROM map_data")
 
-    cursor_map.execute("""
-        SELECT x_pos, y_pos, data 
-        FROM map_data 
-        WHERE ((x_pos - ?)*(x_pos - ?) + (y_pos - ?)*(y_pos - ?)) <= ?
-    """, (x_pos, x_pos, y_pos, y_pos, distance_squared))
-
+    # Fetch all results
     results_map = cursor_map.fetchall()
+
+    # Close the database connection
     conn_map.close()
 
+    # Convert the results to a dictionary
     map_data_dict = {}
     for result_map in results_map:
         x_map, y_map, data_str = result_map
@@ -498,7 +400,17 @@ def load_map_data(x_pos, y_pos, distance=500):
     return map_data_dict
 
 
+def load_map_data(x_pos, y_pos, map_data_dict, distance=500):
+    for coords, data_str in map_data_dict.items():
+        x_map, y_map = map(int, coords.split(","))
+        if (x_map - x_pos) ** 2 + (y_map - y_pos) ** 2 <= distance ** 2:
+            map_data_dict[coords] = data_str
+    return map_data_dict
+
+
 def load_all_user_data():
+    # todo some functions use this and shouldnt
+
     conn_user = sqlite3.connect("db/user_data.db")
     cursor_user = conn_user.cursor()
 
@@ -526,16 +438,15 @@ def load_all_user_data():
     return user_data_dict
 
 
-def load_surrounding_map_and_user_data(user):
-    # Load all user data into a dictionary
-    user_data_dict = load_all_user_data()
-
+def load_surrounding_map_and_user_data(user, user_data_dict, map_data_dict):
     # Check if the specified user is in the user_data_dict
     if user not in user_data_dict:
         return {"error": "User not found."}
 
     # Fetch the map data for the specified user and transform it into a dictionary indexed by "x:y"
-    user_map_data_dict = load_map_data(user_data_dict[user]['x_pos'], user_data_dict[user]['y_pos'])
+    user_map_data_dict = load_map_data(user_data_dict[user]['x_pos'],
+                                       user_data_dict[user]['y_pos'],
+                                       map_data_dict=map_data_dict)
 
     # Prepare the final result as a dictionary with two keys
     result = {

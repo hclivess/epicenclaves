@@ -1,11 +1,10 @@
 import os
 import random
-import sqlite3
 import string
 from hashlib import blake2b
 
 import sqlite
-from sqlite import insert_map_data, update_user_data
+from sqlite import insert_map_data, update_user_data, load_user
 
 if not os.path.exists("db"):
     os.mkdir("db")
@@ -40,11 +39,11 @@ def hashify(data):
     return hashified
 
 
-def load_tile(x, y):
+def load_tile(x, y, mapdb):
     print("load_tile", x, y)
 
     # Use the get_map_data function to retrieve data for the given position
-    entities_from_db = sqlite.get_map_data(x_pos=x, y_pos=y)
+    entities_from_db = sqlite.get_map_data(x_pos=x, y_pos=y, map_data_dict=mapdb)
 
     # If entities_from_db is not a list (either a single dict or None), convert it into a list
     if not isinstance(entities_from_db, list):
@@ -66,19 +65,16 @@ def load_tile(x, y):
     return entities_from_db
 
 
-from sqlite import load_user
-
-
-def get_user_data(user):
-    data = load_user(user)
+def get_user_data(user, usersdb):
+    data = load_user(user, usersdb)
     username = list(data.keys())[0]
     user_data = data[username]
     return user_data
 
 
-def occupied_by(x, y, what):
+def occupied_by(x, y, what, mapdb):
     # Use the get_map_data function to check if the given position is occupied by the specified entity type
-    entity_map = sqlite.get_map_data(x_pos=x, y_pos=y)
+    entity_map = sqlite.get_map_data(x_pos=x, y_pos=y, map_data_dict=mapdb)
 
     if entity_map:
         # Access the entity at the specified position
@@ -116,14 +112,15 @@ class Enemy:
     def is_alive(self):
         return self.alive
 
+
 class Boar(Enemy):
     def __init__(self):
         super().__init__(hp=100, damage=1, armor=0)
 
 
-def build(entity, name, user):
-    user_data = get_user_data(user)
-    occupied = load_tile(user_data["x_pos"], user_data["y_pos"])
+def build(entity, name, user, mapdb, usersdb):
+    user_data = get_user_data(user, usersdb)
+    occupied = load_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
 
     for entry in occupied:
         if user_data["action_points"] < 1:
@@ -152,7 +149,9 @@ def build(entity, name, user):
             "pop_lim": user_data.get("pop_lim", None)  # Only update if the key exists
         }
 
-        update_user_data(user=user, updated_values=updated_values)
+        update_user_data(user=user,
+                         updated_values=updated_values,
+                         user_data_dict=usersdb)
 
         # Prepare and update the map data for the entity
         entity_data = {
@@ -163,13 +162,15 @@ def build(entity, name, user):
             "control": user,
         }
         data = {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data}
-        update_user_data(user=user, updated_values={"construction": data})
+        update_user_data(user=user,
+                         updated_values={"construction": data},
+                         user_data_dict=usersdb)
         insert_map_data("db/map_data.db", data)
 
         return f"Successfully built {entity}"
 
 
-def move(user, entry, axis_limit, user_data):
+def move(user, entry, axis_limit, user_data, users_dict):
     move_map = {
         "left": (-1, "x_pos"),
         "right": (1, "x_pos"),
@@ -181,15 +182,15 @@ def move(user, entry, axis_limit, user_data):
         direction, axis_key = move_map[entry]
         new_pos = user_data[axis_key] + direction
         if user_data["action_points"] > 0 and 1 <= new_pos <= axis_limit:
-            update_user_data(user, {axis_key: new_pos, "action_points": user_data["action_points"] - 1})
+            update_user_data(user, {axis_key: new_pos, "action_points": user_data["action_points"] - 1}, users_dict)
             return True
     return False
 
 
-def attempt_rest(user, user_data, hours_arg):
+def attempt_rest(user, user_data, hours_arg, usersdb, mapdb):
     hours = int(hours_arg)
     x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
-    proper_tile = occupied_by(x_pos, y_pos, what="inn")
+    proper_tile = occupied_by(x_pos, y_pos, what="inn", mapdb=mapdb)
 
     # Check if the user is able to rest
     can_rest = proper_tile and user_data["action_points"] >= hours and user_data["hp"] < 100
@@ -197,7 +198,9 @@ def attempt_rest(user, user_data, hours_arg):
     if can_rest:
         new_hp = min(user_data["hp"] + hours, 100)  # Ensures HP doesn't exceed 100
         new_ap = user_data["action_points"] - hours
-        update_user_data(user=user, updated_values={"hp": new_hp, "action_points": new_ap})
+        update_user_data(user=user,
+                         updated_values={"hp": new_hp, "action_points": new_ap},
+                         user_data_dict=usersdb)
         return "You feel more rested"
 
     elif user_data["hp"] >= 100:
