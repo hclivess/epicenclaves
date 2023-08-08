@@ -135,7 +135,7 @@ def has_item(player, item_name):
 
     if result:
         data_str = result[0]
-        data = json.loads(data_str)
+        data = json.gets(data_str)
         items = data.get('items', [])
 
         for item in items:
@@ -283,7 +283,7 @@ def create_user(user, x_pos=1, y_pos=1):
     conn.close()
 
 
-def load_user(user, user_data_dict, load_construction=True):
+def get_user(user, user_data_dict, get_construction=True):
     # Check if the user exists in the user_data_dict
     if user not in user_data_dict:
         print(f"User {user} not found in the dictionary.")
@@ -296,8 +296,8 @@ def load_user(user, user_data_dict, load_construction=True):
     y_pos = user_entry.get("y_pos", 0)
     data = {k: v for k, v in user_entry.items() if k not in ["x_pos", "y_pos", "construction"]}
 
-    # Load the "construction" data only if load_construction is True
-    construction = user_entry["construction"] if load_construction and "construction" in user_entry else {}
+    # get the "construction" data only if get_construction is True
+    construction = user_entry["construction"] if get_construction and "construction" in user_entry else {}
 
     user_data = {
         user: {
@@ -374,7 +374,7 @@ def exists_user(user):
     return bool(result)
 
 
-def load_map_to_memory():
+def get_map_to_memory():
     # Connect to the database and get a cursor
     conn_map = sqlite3.connect("db/map_data.db")
     cursor_map = conn_map.cursor()
@@ -392,7 +392,7 @@ def load_map_to_memory():
     map_data_dict = {}
     for result_map in results_map:
         x_map, y_map, data_str = result_map
-        data = json.loads(data_str)
+        data = json.gets(data_str)
 
         key = f"{x_map},{y_map}"
         map_data_dict[key] = data
@@ -400,7 +400,7 @@ def load_map_to_memory():
     return map_data_dict
 
 
-def load_map_data(x_pos, y_pos, map_data_dict, distance=500):
+def get_map_data(x_pos, y_pos, map_data_dict, distance=500):
     for coords, data_str in map_data_dict.items():
         x_map, y_map = map(int, coords.split(","))
         if (x_map - x_pos) ** 2 + (y_map - y_pos) ** 2 <= distance ** 2:
@@ -408,7 +408,7 @@ def load_map_data(x_pos, y_pos, map_data_dict, distance=500):
     return map_data_dict
 
 
-def load_all_user_data():
+def get_users_to_memory():
     # todo some functions use this and shouldnt
 
     conn_user = sqlite3.connect("db/user_data.db")
@@ -425,7 +425,7 @@ def load_all_user_data():
     user_data_dict = {}
     for result_user in all_users_results:
         username, x_pos, y_pos, data_str = result_user
-        data = json.loads(data_str)
+        data = json.gets(data_str)
 
         user_data = {
             "x_pos": x_pos,
@@ -438,13 +438,13 @@ def load_all_user_data():
     return user_data_dict
 
 
-def load_surrounding_map_and_user_data(user, user_data_dict, map_data_dict):
+def get_surrounding_map_and_user_data(user, user_data_dict, map_data_dict):
     # Check if the specified user is in the user_data_dict
     if user not in user_data_dict:
         return {"error": "User not found."}
 
     # Fetch the map data for the specified user and transform it into a dictionary indexed by "x:y"
-    user_map_data_dict = load_map_data(user_data_dict[user]['x_pos'],
+    user_map_data_dict = get_map_data(user_data_dict[user]['x_pos'],
                                        user_data_dict[user]['y_pos'],
                                        map_data_dict=map_data_dict)
 

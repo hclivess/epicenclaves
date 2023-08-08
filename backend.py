@@ -4,7 +4,7 @@ import string
 from hashlib import blake2b
 
 import sqlite
-from sqlite import insert_map_data, update_user_data, load_user
+from sqlite import insert_map_data, update_user_data, get_user
 
 if not os.path.exists("db"):
     os.mkdir("db")
@@ -39,8 +39,8 @@ def hashify(data):
     return hashified
 
 
-def load_tile(x, y, mapdb):
-    print("load_tile", x, y)
+def get_tile(x, y, mapdb):
+    print("get_tile", x, y)
 
     # Use the get_map_data function to retrieve data for the given position
     entities_from_db = sqlite.get_map_data(x_pos=x, y_pos=y, map_data_dict=mapdb)
@@ -66,7 +66,7 @@ def load_tile(x, y, mapdb):
 
 
 def get_user_data(user, usersdb):
-    data = load_user(user, usersdb)
+    data = get_user(user, usersdb)
     username = list(data.keys())[0]
     user_data = data[username]
     return user_data
@@ -120,7 +120,7 @@ class Boar(Enemy):
 
 def build(entity, name, user, mapdb, usersdb):
     user_data = get_user_data(user, usersdb)
-    occupied = load_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+    occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
 
     for entry in occupied:
         if user_data["action_points"] < 1:

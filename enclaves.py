@@ -11,10 +11,10 @@ import tornado.escape
 from turn_engine import TurnEngine
 import backend
 from backend import cookie_get, build, occupied_by, generate_entities, get_user_data, move, attempt_rest, \
-    Boar, death_roll, load_tile
+    Boar, death_roll, get_tile
 from sqlite import create_map_database, has_item, update_map_data, create_user, update_user_data, login_validate, \
-    remove_from_user, add_user, exists_user, load_surrounding_map_and_user_data, check_users_db, \
-    create_user_db, create_game_database, remove_from_map, load_map_to_memory, load_all_user_data, load_user
+    remove_from_user, add_user, exists_user, get_surrounding_map_and_user_data, check_users_db, \
+    create_user_db, create_game_database, remove_from_map, get_map_to_memory, get_users_to_memory, get_user
 
 max_size = 1000
 
@@ -36,14 +36,14 @@ class MainHandler(BaseHandler):
             user = tornado.escape.xhtml_escape(self.current_user)
             message = f"Welcome back, {user}"
 
-            data = load_user(user, usersdb)
+            data = get_user(user, usersdb)
             # Get the user's data
             username = list(data.keys())[0]  # Get the first (and only) key in the dictionary
             user_data = data[username]  # Get the user's data
 
             print("data", data)  # debug
             print("user_data", user_data)  # debug
-            occupied = load_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+            occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
             print("occupied", occupied)  # debug
 
             if user_data["action_points"] < 1:
@@ -68,7 +68,7 @@ class MapHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        data = json.dumps(load_surrounding_map_and_user_data(user, usersdb, mapdb))
+        data = json.dumps(get_surrounding_map_and_user_data(user, usersdb, mapdb))
 
         print("data", data)  # debug
         self.render("templates/map.html",
@@ -85,7 +85,7 @@ class BuildHandler(BaseHandler):
         message = build(entity, name, user, mapdb, usersdb=usersdb)
 
         user_data = get_user_data(user, usersdb=usersdb)
-        occupied = load_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+        occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
 
         self.render("templates/user_panel.html",
                     user=user,
@@ -112,11 +112,11 @@ class MoveHandler(BaseHandler):
             self.render(
                 "templates/map.html",
                 user=user,
-                data=json.dumps(load_surrounding_map_and_user_data(user, usersdb, mapdb)),
+                data=json.dumps(get_surrounding_map_and_user_data(user, usersdb, mapdb)),
                 message=message
             )
         else:
-            occupied = load_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+            occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
             self.render(
                 "templates/user_panel.html",
                 user=user,
@@ -139,7 +139,7 @@ class RestHandler(BaseHandler):
         user_data = get_user_data(user, usersdb)  # update
 
         x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
-        occupied = load_tile(x_pos, y_pos, mapdb)
+        occupied = get_tile(x_pos, y_pos, mapdb)
 
         self.render("templates/user_panel.html",
                     user=user,
@@ -157,9 +157,9 @@ class FightHandler(BaseHandler):
         user_data = get_user_data(user, usersdb)
         target = self.get_argument("target")
 
-        this_tile = load_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+        this_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
         print("this_tile", this_tile)
-        occupied = load_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+        occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
 
         user_data = get_user_data(user, usersdb)
 
@@ -231,7 +231,7 @@ class ConquerHandler(BaseHandler):
         user_data = get_user_data(user, usersdb)
         target = self.get_argument("target", default="home")
 
-        this_tile = load_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+        this_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
         print("this_tile", this_tile)
 
         for entry in this_tile:
@@ -265,7 +265,7 @@ class ConquerHandler(BaseHandler):
 
             user_data = get_user_data(user, usersdb)
 
-            occupied = load_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+            occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
 
             self.render("templates/user_panel.html",
                         user=user,
@@ -310,7 +310,7 @@ class ChopHandler(BaseHandler):
 
         user_data = get_user_data(user, usersdb)
 
-        occupied = load_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+        occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
 
         self.render("templates/user_panel.html",
                     user=user,
@@ -336,7 +336,7 @@ class LoginHandler(BaseHandler):
 
             user_data = get_user_data(user, usersdb)
 
-            occupied = load_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+            occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
 
             self.render("templates/user_panel.html",
                         user=user,
@@ -413,8 +413,8 @@ if __name__ == "__main__":
     actions = backend.TileActions()
     descriptions = backend.Descriptions()
 
-    mapdb = load_map_to_memory()
-    usersdb = load_all_user_data()
+    mapdb = get_map_to_memory()
+    usersdb = get_users_to_memory()
 
     turn_engine = TurnEngine(usersdb)  # reference to memory dict will be added here
     turn_engine.start()

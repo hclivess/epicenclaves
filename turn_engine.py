@@ -2,7 +2,7 @@ import asyncio
 import blockchain
 import threading
 import time
-from sqlite import update_turn, update_user_data, load_all_user_data
+from sqlite import update_turn, update_user_data, get_users_to_memory
 from backend import generate_entities
 
 
@@ -31,7 +31,7 @@ class TurnEngine(threading.Thread):
             self.compare_block = self.latest_block
             update_turn(self.turn)
 
-            for username, user_data in load_all_user_data().items():
+            for username, user_data in self.usersdb.items():
                 print("user", username, user_data)
 
                 if "action_points" in user_data:
