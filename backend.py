@@ -1,9 +1,8 @@
 import os
 import random
-import string
 from hashlib import blake2b
 
-from sqlite import insert_map_data, update_user_data, get_user, get_map_data, save_map_data
+from sqlite import get_map_data, save_map_data
 
 if not os.path.exists("db"):
     os.mkdir("db")
@@ -249,13 +248,148 @@ class Descriptions:
         return description
 
 
-def cookie_get():
-    filename = "cookie_secret"
-    if not os.path.exists(filename):
-        cookie_secret = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(30))
-        with open(filename, "w") as infile:
-            infile.write(cookie_secret)
+def has_item(data, item_type):
+    items = data.get('items', [])
+
+    for item in items:
+        if item.get("type") == item_type:
+            return True
+
+    return False
+
+
+def update_map_data(update_data, map_data_dict):
+    print("update_map_data", update_data)
+
+    # Get coordinates and data from the provided input
+    coords = list(update_data.keys())[0]
+    tile_data = update_data[coords]
+
+    # Split the coords into x and y positions
+    x, y = map(int, coords.split(','))
+
+    # Create a key using the coordinates
+    key = f"{x},{y}"
+
+    # Check if the key exists in the map_data_dict
+    if key in map_data_dict:
+        # Update only the 'control' key
+        map_data_dict[key]["control"] = tile_data["control"]
     else:
-        with open(filename) as infile:
-            cookie_secret = infile.read()
-    return cookie_secret
+        print(f"No data found at the given coordinates {x, y}.")
+
+
+def remove_from_map(coords, entity_type, map_data_dict):
+    print("remove_from_map", coords, entity_type)
+
+    # Create a key using the coordinates
+    key = coords
+
+    # Check if the key exists in the map_data_dict
+    if key in map_data_dict:
+        # Check if the type matches
+        if map_data_dict[key].get("type") == entity_type:
+            # Remove the key from the map_data_dict
+            del map_data_dict[key]
+            print(f"Entity of type {entity_type} at coordinates {coords} has been removed.")
+        else:
+            print(f"Entity of type {entity_type} not found at the given coordinates {coords}.")
+    else:
+        print(f"No data found at the given coordinates {coords}.")
+
+
+def insert_map_data(existing_data, new_data):
+    print("insert_map_data", new_data)
+
+    for coord, construction_info in new_data.items():
+        if coord in existing_data:
+            # If the coordinate already exists, update its values
+            existing_data[coord].update(construction_info)
+        else:
+            # If the coordinate doesn't exist, create a new entry
+            existing_data[coord] = construction_info
+
+
+def get_user(user, user_data_dict, get_construction=True):
+    # Check if the user exists in the user_data_dict
+    if user not in user_data_dict:
+        print(f"User {user} not found in the dictionary.")
+        return None
+
+    user_entry = user_data_dict[user]
+
+    # Extract x_pos, y_pos, and other data from user_entry
+    x_pos = user_entry.get("x_pos", 0)
+    y_pos = user_entry.get("y_pos", 0)
+    data = {k: v for k, v in user_entry.items() if k not in ["x_pos", "y_pos", "construction"]}
+
+    # get the "construction" data only if get_construction is True
+    construction = user_entry["construction"] if get_construction and "construction" in user_entry else {}
+
+    user_data = {
+        user: {
+            "x_pos": x_pos,
+            "y_pos": y_pos,
+            **data,
+            "construction": construction
+        }
+    }
+
+    return user_data
+
+
+def update_user_data(user, updated_values, user_data_dict):
+    print("update_user_data", user, updated_values)
+
+    if user not in user_data_dict:
+        print("User not found")
+        return
+
+    user_entry = user_data_dict[user]
+
+    for key, value in updated_values.items():
+        if key == "construction" and "construction" in user_entry and isinstance(value, dict):
+            for coord, construction_info in value.items():
+                user_entry["construction"][coord] = construction_info
+        else:
+            user_entry[key] = value
+
+
+def remove_from_user(user, construction_coordinates, user_data_dict):
+    key = f"{construction_coordinates['x_pos']},{construction_coordinates['y_pos']}"
+
+    if user not in user_data_dict:
+        print("User not found")
+        return
+
+    user_data = user_data_dict[user]
+
+    if "construction" in user_data and isinstance(user_data["construction"], dict):
+        user_data["construction"].pop(key, None)
+
+
+def get_map_data_limit(x_pos, y_pos, map_data_dict, distance=500):
+    for coords, data_str in map_data_dict.items():
+        x_map, y_map = map(int, coords.split(","))
+        if (x_map - x_pos) ** 2 + (y_map - y_pos) ** 2 <= distance ** 2:
+            map_data_dict[coords] = data_str
+    return map_data_dict
+
+
+def get_surrounding_map_and_user_data(user, user_data_dict, map_data_dict):
+    # Check if the specified user is in the user_data_dict
+    if user not in user_data_dict:
+        return {"error": "User not found."}
+
+    # Fetch the map data for the specified user and transform it into a dictionary indexed by "x:y"
+    user_map_data_dict = get_map_data_limit(user_data_dict[user]['x_pos'],
+                                            user_data_dict[user]['y_pos'],
+                                            map_data_dict=map_data_dict)
+
+    # Prepare the final result as a dictionary with two keys
+    result = {
+        "users": user_data_dict,  # Include all users' data
+        "construction": user_map_data_dict  # This is now a dictionary indexed by "x:y"
+    }
+
+    return result

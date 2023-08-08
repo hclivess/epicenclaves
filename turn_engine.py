@@ -2,8 +2,8 @@ import asyncio
 import blockchain
 import threading
 import time
-from sqlite import update_turn, update_user_data, save_map_from_memory, save_users_from_memory
-from backend import generate_entities
+from sqlite import update_turn, save_map_from_memory, save_users_from_memory
+from backend import generate_entities, update_user_data
 
 
 def interruptible_sleep(seconds, interval=1, stop_condition=None):
@@ -28,6 +28,7 @@ class TurnEngine(threading.Thread):
     def save_databases(self):
         save_map_from_memory(self.mapdb)
         save_users_from_memory(self.usersdb)
+
     def check_for_updates(self):
         self.latest_block = blockchain.last_bis_hash()
         if self.compare_block != self.latest_block:

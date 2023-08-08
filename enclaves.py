@@ -10,11 +10,10 @@ import tornado.escape
 
 from turn_engine import TurnEngine
 import backend
-from backend import cookie_get, build, occupied_by, generate_entities, get_user_data, move, attempt_rest, \
-    Boar, death_roll, get_tile
-from sqlite import create_map_database, has_item, update_map_data, create_user, update_user_data, auth_login_validate, \
-    remove_from_user, auth_add_user, auth_exists_user, get_surrounding_map_and_user_data, auth_check_users_db, \
-    create_user_db, create_game_database, remove_from_map, load_map_to_memory, load_users_to_memory, get_user
+from backend import build, occupied_by, generate_entities, get_user_data, move, attempt_rest, \
+    Boar, death_roll, get_tile, has_item, update_map_data, remove_from_map, get_user, update_user_data, remove_from_user, get_surrounding_map_and_user_data
+from auth import auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db
+from sqlite import create_user, load_map_to_memory, load_users_to_memory, create_map_database, create_game_database, create_users_db
 
 max_size = 1000
 
@@ -373,7 +372,7 @@ async def main():
     app = make_app()
     port = 8888
     app.listen(port)
-    app.settings["cookie_secret"] = cookie_get()
+    app.settings["cookie_secret"] = auth_cookie_get()
     auth_check_users_db()
     webbrowser.open(f"http://127.0.0.1:{port}")
     print("app starting")
@@ -396,21 +395,34 @@ async def main():
 
 
 def init_databases():
-    if not os.path.exists("db/map_data.db"):
+    map_exists = os.path.exists("db/map_data.db")
+    game_exists = os.path.exists("db/game_data.db")
+    user_exists = os.path.exists("db/user_data.db")
+
+    if not map_exists:
         create_map_database()
 
-    if not os.path.exists("db/game_data.db"):
+    if not game_exists:
         create_game_database()
 
-    if not os.path.exists("db/user_data.db"):
-        create_user_db()
+    if not user_exists:
+        create_users_db()
 
+    return {
+        'map_exists': map_exists
+    }
 
 def initialize_map_and_users():
     mapdb = load_map_to_memory()
     usersdb = load_users_to_memory()
 
-    if not os.path.exists("db/map_data.db"):
+    return mapdb, usersdb
+
+if __name__ == "__main__":
+    db_status = init_databases()
+    mapdb, usersdb = initialize_map_and_users()
+
+    if not db_status['map_exists']:
         generate_entities(mapdb=mapdb,
                           entity_type="forest",
                           probability=0.50,
@@ -418,21 +430,14 @@ def initialize_map_and_users():
                                                   "hp": 100},
                           size=25,
                           every=5)
-    return mapdb, usersdb
-
-
-if __name__ == "__main__":
-    init_databases()
-    mapdb, usersdb = initialize_map_and_users()
 
     actions = backend.TileActions()
     descriptions = backend.Descriptions()
 
-    turn_engine = TurnEngine(usersdb, mapdb)  # reference to memory dict will be added here
+    turn_engine = TurnEngine(usersdb, mapdb)
     turn_engine.start()
 
     try:
         asyncio.run(main())
     finally:
         print("Application has shut down.")
-
