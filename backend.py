@@ -17,9 +17,9 @@ def death_roll(hit_chance):
     return random.random() < hit_chance
 
 
-def generate_entities(entity_type, probability, additional_entity_data=None, size=101, every=10):
-    for x_pos in range(1, size, every):
-        for y_pos in range(1, size, every):
+def generate_entities(entity_type, probability, additional_entity_data=None, start_x=1, start_y=1, size=101, every=10):
+    for x_pos in range(start_x, size, every):
+        for y_pos in range(start_y, size, every):
             if random.random() <= probability:
                 data = {"type": entity_type}
                 print(f"Generating {data} on {x_pos}, {y_pos}")
@@ -104,7 +104,7 @@ class Boar:
         self.damage = 1
         self.armor = 0
         self.alive = True
-        self.kill_chance = 0.1
+        self.kill_chance = 0.01
 
 
 def build(entity, name, user):
