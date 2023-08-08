@@ -2,7 +2,7 @@ import asyncio
 import blockchain
 import threading
 import time
-from sqlite import update_turn, update_user_data, get_users_to_memory
+from sqlite import update_turn, update_user_data
 from backend import generate_entities
 
 

@@ -11,7 +11,7 @@ def last_bis_hash():
     for i in range(retries):
         try:
             last_block_raw = requests.get(url=url, timeout=timeout).text
-            last_block = json.gets(last_block_raw)["block_hash"]
+            last_block = json.loads(last_block_raw)["block_hash"]
             return last_block
         except (requests.ConnectionError, requests.Timeout) as e:
             print(f"Attempt {i + 1} failed. Error: {e}")

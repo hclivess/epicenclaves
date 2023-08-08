@@ -121,26 +121,13 @@ def get_map_data(x_pos, y_pos, map_data_dict):
 conn_pool = SQLiteConnectionPool("db/map_data.db")
 
 
-def has_item(player, item_name):
-    # Connect to the database
-    conn = sqlite3.connect("db/user_data.db")
-    cursor = conn.cursor()
+def has_item(data, item_type):
+    items = data.get('items', [])
 
-    # Get the row for the specified player from the user_data table
-    cursor.execute("SELECT data FROM user_data WHERE username=?", (player,))
-    result = cursor.fetchone()
+    for item in items:
+        if item.get("type") == item_type:
+            return True
 
-    # Close the connection
-    conn.close()
-
-    if result:
-        data_str = result[0]
-        data = json.gets(data_str)
-        items = data.get('items', [])
-
-        for item in items:
-            if item.get("type") == item_name:
-                return True
     return False
 
 
@@ -182,7 +169,6 @@ def remove_from_map(coords, entity_type, map_data_dict):
             print(f"Entity of type {entity_type} not found at the given coordinates {coords}.")
     else:
         print(f"No data found at the given coordinates {coords}.")
-
 
 
 def insert_map_data(db_file, data):
@@ -319,34 +305,22 @@ def login_validate(user, password):
 
 
 def update_user_data(user, updated_values, user_data_dict):
-    print("update_user_data", user, updated_values)  # debug
+    print("update_user_data", user, updated_values)
 
-    # Check if user exists in the user_data_dict
     if user not in user_data_dict:
         print("User not found")
         return
 
-    # Get user's current data and construction info
-    data = user_data_dict[user].get("data", {})
-    construction = user_data_dict[user].get("construction", {})
+    user_entry = user_data_dict[user]
 
-    # If "construction" is not a dictionary, initialize it as an empty dictionary
-    if not isinstance(construction, dict):
-        construction = {}
-
-    # Iterate over the updated values and update them in the data dictionary
     for key, value in updated_values.items():
-        # Check if key is 'construction'
-        if key == "construction" and isinstance(value, dict):
-            # Update the construction dictionary with the new values
+        if key == "construction" and "construction" in user_entry and isinstance(value, dict):
             for coord, construction_info in value.items():
-                construction[coord] = construction_info
+                user_entry["construction"][coord] = construction_info
         else:
-            data[key] = value  # else just update the value
+            user_entry[key] = value
 
-    # Update the user_data_dict with the updated data and construction info
-    user_data_dict[user]["data"] = data
-    user_data_dict[user]["construction"] = construction
+
 
 
 def remove_from_user(user, construction_coordinates, user_data_dict):
@@ -392,7 +366,7 @@ def get_map_to_memory():
     map_data_dict = {}
     for result_map in results_map:
         x_map, y_map, data_str = result_map
-        data = json.gets(data_str)
+        data = json.loads(data_str)
 
         key = f"{x_map},{y_map}"
         map_data_dict[key] = data
@@ -400,7 +374,7 @@ def get_map_to_memory():
     return map_data_dict
 
 
-def get_map_data(x_pos, y_pos, map_data_dict, distance=500):
+def get_map_data_limit(x_pos, y_pos, map_data_dict, distance=500):
     for coords, data_str in map_data_dict.items():
         x_map, y_map = map(int, coords.split(","))
         if (x_map - x_pos) ** 2 + (y_map - y_pos) ** 2 <= distance ** 2:
@@ -425,7 +399,7 @@ def get_users_to_memory():
     user_data_dict = {}
     for result_user in all_users_results:
         username, x_pos, y_pos, data_str = result_user
-        data = json.gets(data_str)
+        data = json.loads(data_str)
 
         user_data = {
             "x_pos": x_pos,
@@ -444,9 +418,9 @@ def get_surrounding_map_and_user_data(user, user_data_dict, map_data_dict):
         return {"error": "User not found."}
 
     # Fetch the map data for the specified user and transform it into a dictionary indexed by "x:y"
-    user_map_data_dict = get_map_data(user_data_dict[user]['x_pos'],
-                                       user_data_dict[user]['y_pos'],
-                                       map_data_dict=map_data_dict)
+    user_map_data_dict = get_map_data_limit(user_data_dict[user]['x_pos'],
+                                            user_data_dict[user]['y_pos'],
+                                            map_data_dict=map_data_dict)
 
     # Prepare the final result as a dictionary with two keys
     result = {
