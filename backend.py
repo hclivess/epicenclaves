@@ -15,7 +15,8 @@ def death_roll(hit_chance):
     return random.random() < hit_chance
 
 
-def generate_entities(entity_type, probability, mapdb, additional_entity_data=None, start_x=1, start_y=1, size=101, every=10,
+def generate_entities(entity_type, probability, mapdb, additional_entity_data=None, start_x=1, start_y=1, size=101,
+                      every=10,
                       max_entities=None):
     generated_count = 0
 
@@ -73,7 +74,7 @@ def get_user_data(user, usersdb):
 
 def occupied_by(x, y, what, mapdb):
     # Use the get_map_data function to check if the given position is occupied by the specified entity type
-    entity_map = sqlite.get_map_data(x_pos=x, y_pos=y, map_data_dict=mapdb)
+    entity_map = get_map_data(x_pos=x, y_pos=y, map_data_dict=mapdb)
 
     if entity_map:
         # Access the entity at the specified position
@@ -101,20 +102,22 @@ building_costs = {
 
 
 class Enemy:
-    def __init__(self, hp, damage, armor, alive=True, kill_chance=0.01):
+    def __init__(self, hp, armor, min_damage=0, max_damage=2, alive=True, kill_chance=0.01):
         self.hp = hp
-        self.damage = damage
         self.armor = armor
         self.alive = alive
         self.kill_chance = kill_chance
+        self.min_damage = min_damage
+        self.max_damage = max_damage
 
     def is_alive(self):
         return self.alive
-
+    def roll_damage(self):
+        return random.randint(self.min_damage, self.max_damage)
 
 class Boar(Enemy):
     def __init__(self):
-        super().__init__(hp=100, damage=1, armor=0)
+        super().__init__(hp=100, max_damage=1, armor=0)
 
 
 def build(entity, name, user, mapdb, usersdb):
@@ -189,7 +192,6 @@ def move(user, entry, axis_limit, user_data, users_dict):
             update_user_data(user, {axis_key: new_pos, "action_points": user_data["action_points"] - 1}, users_dict)
             return True
     return False
-
 
 
 def attempt_rest(user, user_data, hours_arg, usersdb, mapdb):

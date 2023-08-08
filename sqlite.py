@@ -244,7 +244,7 @@ def get_user(user, user_data_dict, get_construction=True):
     return user_data
 
 
-def login_validate(user, password):
+def auth_login_validate(user, password):
     users_db_cursor.execute("SELECT * FROM users WHERE username = ? AND passhash = ?", (user, hash_password(password)))
     result = users_db_cursor.fetchall()
 
@@ -281,12 +281,12 @@ def remove_from_user(user, construction_coordinates, user_data_dict):
         user_data["construction"].pop(key, None)
 
 
-def add_user(user, password):
+def auth_add_user(user, password):
     users_db.execute("INSERT OR IGNORE INTO users VALUES (?,?)", (user, hash_password(password)))
     users_db.commit()
 
 
-def exists_user(user):
+def auth_exists_user(user):
     users_db_cursor.execute("SELECT * FROM users WHERE username = ?", (user,))
     result = users_db_cursor.fetchall()
 
@@ -294,6 +294,7 @@ def exists_user(user):
 
 
 def save_map_from_memory(map_data_dict):
+    print("saving map to drive")
     # Connect to the database and get a cursor
     conn_map = sqlite3.connect("db/map_data.db")
     cursor_map = conn_map.cursor()
@@ -353,6 +354,7 @@ def get_map_data_limit(x_pos, y_pos, map_data_dict, distance=500):
 
 
 def save_users_from_memory(user_data_dict):
+    print("saving users to drive")
     conn_user = sqlite3.connect("db/user_data.db")
     cursor_user = conn_user.cursor()
 
@@ -430,6 +432,6 @@ def get_surrounding_map_and_user_data(user, user_data_dict, map_data_dict):
     return result
 
 
-def check_users_db():
+def auth_check_users_db():
     users_db.execute("CREATE TABLE IF NOT EXISTS users (username STRING PRIMARY KEY, passhash STRING)")
     users_db.commit()

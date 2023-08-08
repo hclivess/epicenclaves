@@ -12,8 +12,8 @@ from turn_engine import TurnEngine
 import backend
 from backend import cookie_get, build, occupied_by, generate_entities, get_user_data, move, attempt_rest, \
     Boar, death_roll, get_tile
-from sqlite import create_map_database, has_item, update_map_data, create_user, update_user_data, login_validate, \
-    remove_from_user, add_user, exists_user, get_surrounding_map_and_user_data, check_users_db, \
+from sqlite import create_map_database, has_item, update_map_data, create_user, update_user_data, auth_login_validate, \
+    remove_from_user, auth_add_user, auth_exists_user, get_surrounding_map_and_user_data, auth_check_users_db, \
     create_user_db, create_game_database, remove_from_map, load_map_to_memory, load_users_to_memory, get_user
 
 max_size = 1000
@@ -199,7 +199,7 @@ class FightHandler(BaseHandler):
                                                              "hp": user_data["hp"]},
                                              user_data_dict=usersdb)
 
-                        elif user_data["hp"] < 1:
+                        elif user_data["hp"] < 2:
                             if death_roll(boar.kill_chance):
                                 messages.append("You died")
                                 user_data["alive"] = False
@@ -216,10 +216,12 @@ class FightHandler(BaseHandler):
                                                  user_data_dict=usersdb)
 
                         else:
-                            boar.hp -= 1
+                            boar.hp -= 1 #base this off weapon
                             messages.append(f"The boar takes 1 damage and is left with {boar.hp} hp")
-                            messages.append(f"You take 1 damage and are left with {user_data['hp']} hp")
-                            user_data["hp"] = user_data["hp"] - 1
+
+                            boar_dmg_roll = boar.roll_damage()
+                            user_data["hp"] = user_data["hp"] - boar_dmg_roll
+                            messages.append(f"You take {boar_dmg_roll} damage and are left with {user_data['hp']} hp")
 
                     self.render("templates/fight.html",
                                 messages=messages)
@@ -326,10 +328,10 @@ class LoginHandler(BaseHandler):
         user = self.get_argument("name")[:8]
         password = self.get_argument("password")
 
-        if not exists_user(user):
-            add_user(user, password)
+        if not auth_exists_user(user):
+            auth_add_user(user, password)
             create_user(user_data_dict=usersdb, user=user)
-        if login_validate(user, password):
+        if auth_login_validate(user, password):
             self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
 
             message = f"Welcome, {user}!"
@@ -372,7 +374,7 @@ async def main():
     port = 8888
     app.listen(port)
     app.settings["cookie_secret"] = cookie_get()
-    check_users_db()
+    auth_check_users_db()
     webbrowser.open(f"http://127.0.0.1:{port}")
     print("app starting")
 
