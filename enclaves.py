@@ -383,6 +383,8 @@ async def main():
     # Signal handlers to set the event and stop the app
     def handle_exit(*args):
         shutdown_event.set()
+        turn_engine.stop()
+        turn_engine.join()
 
     signal.signal(signal.SIGINT, handle_exit)
     signal.signal(signal.SIGTERM, handle_exit)
@@ -390,8 +392,7 @@ async def main():
     # Wait for shutdown signal
     await shutdown_event.wait()
     # After receiving the shutdown signal, stop the TurnEngine thread
-    turn_engine.stop()
-    turn_engine.join()
+
 
 
 def init_databases():
