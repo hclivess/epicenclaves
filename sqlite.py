@@ -249,7 +249,8 @@ def create_user(user, x_pos=1, y_pos=1):
         "bismuth": 500,
         "items": [{"type": "axe", "damage": 1, "durability": 100}],
         "pop_lim": 0,
-        "alive": True
+        "alive": True,
+        "online": True
     }
     data_str = json.dumps(data)
 
