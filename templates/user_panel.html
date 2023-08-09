@@ -34,14 +34,14 @@ hr {
          }
 
          .btn-group {
-            margin: 5px;
+            margin: 2px;
          }
          /* Customize button styles */
          .btn-up {
             background-color: #007bff;
             color: #fff;
             border-color: #007bff;
-            margin: 5px; /* Normal spacing between navigation buttons */
+            margin: 2px; /* Normal spacing between navigation buttons */
          }
 
          .btn-up:hover {
@@ -95,15 +95,33 @@ hr {
             <!-- Navigation menu placed next to the compact-stats -->
             <div class="col-md-6 navigation-menu">
 
-<div class="btn-group">
-    <a id="btnUp" class="btn btn-lg active btn-up" href="/move?direction=up" role="button">Up 🔼</a>
-    <a id="btnDown" class="btn btn-lg active btn-up" href="/move?direction=down" role="button">Down 🔽</a>
-    <a id="btnLeft" class="btn btn-lg active btn-up" href="/move?direction=left" role="button">Left ◀️</a>
-    <a id="btnRight" class="btn btn-lg active btn-up" href="/move?direction=right" role="button">Right ▶️</a>
-    <a class="btn btn-lg active btn-up" href="/map" role="button">Map 🗺️</a>
-    <a class="btn btn-lg active btn-up" href="/" role="button">Refresh 🔄</a> <!-- Modified Refresh button to navigate to / -->
-    <a class="btn btn-lg active btn-up" href="/logout" role="button">Logout 🌙</a>
+<div class="container mt-3">
+
+    <!-- First Row for Navigation Buttons -->
+    <div class="row justify-content-center">
+        <div class="btn-group" role="group">
+            <a id="btnUp" class="btn btn-lg active btn-up" href="/move?direction=up" role="button">Up 🔼</a>
+            <a id="btnLeft" class="btn btn-lg active btn-up" href="/move?direction=left" role="button">Left ◀️</a>
+            <a id="btnDown" class="btn btn-lg active btn-up" href="/move?direction=down" role="button">Down 🔽</a>
+            <a id="btnRight" class="btn btn-lg active btn-up" href="/move?direction=right" role="button">Right ▶️</a>
+        </div>
+    </div>
+
+    <!-- Second Row for Other Actions -->
+    <div class="row justify-content-center mt-1">
+        <div class="btn-group" role="group">
+            <a class="btn btn-lg active btn-up" href="/map" role="button">Map 🗺️</a>
+            <a class="btn btn-lg active btn-up" href="/" role="button">Refresh 🔄</a>
+            <a class="btn btn-lg active btn-up" href="/logout" role="button">Logout 🌙</a>
+        </div>
+    </div>
+
 </div>
+
+
+
+
+
 
 
 
