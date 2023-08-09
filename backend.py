@@ -242,7 +242,9 @@ class TileActions:
 
     def get(self, entry):
         type = list(entry.values())[0].get("type")
-        name = list(entry.values())[0].get("name", None)
+        if type == "player":
+            name = list(entry.keys())[0]
+            print("name", name)
 
         if type == "inn":
             actions = [{"name": "sleep 10 hours", "action": "/rest?hours=10"},
@@ -256,7 +258,7 @@ class TileActions:
         elif type == "boar":
             actions = [{"name": "fight", "action": f"/fight?target={type}"}]
         elif type == "player":
-            actions = [{"name": "challenge", "action": f"/fight?target={type}"}]
+            actions = [{"name": "challenge", "action": f"/fight?target={type}&name={name}"}]
         else:
             actions = []
 
