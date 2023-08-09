@@ -60,11 +60,7 @@ def get_tile(x, y, user, mapdb, usersdb):
 
     # If no entities are found at the given position, provide a default "empty" entity
     if not map_entities and not user_entities:
-        combined_entities = [{
-            f"{x},{y}": {
-                "type": "empty",
-            }
-        }]
+        combined_entities = []
     else:
         combined_entities = map_entities + user_entities
 
