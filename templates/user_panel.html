@@ -200,8 +200,13 @@ hr {
     <div class="row"> <!-- Create a new row for each entry -->
 
         <div class="col">
+            {% if list(entry.values())[0].get("type") == "player" %}
+            <p>Name: {{ list(entry.keys())[0] }}</p>
+            {% end %}
+
             <p>Type: {{ list(entry.values())[0].get("type") }}</p>
             <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Item Icon" class="menu-icon"></p>
+
             <p>Control: {{ list(entry.values())[0].get("control") }}</p>
 
             <p>Actions:</p>
