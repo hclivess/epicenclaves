@@ -37,6 +37,13 @@ hr {
             margin: 2px;
          }
 
+.profile-pic {
+    max-width: 50px;
+    max-height: 50px;
+    display: block;
+    margin: 0 auto;  /* This is optional but can be used to center the image if it's in a block
+
+
 .btn-up {
     background-color: #007bff;
     border-color: #b0b0b0 !important;  /* Light gray border with !important to override other styles */
@@ -197,6 +204,7 @@ hr {
     <h4>Current Tile</h4>
 
     {% for entry in on_tile %}
+    <!-- instead of conditionals here additional dicts should be passed, one for players, one for entities -->
     <div class="row"> <!-- Create a new row for each entry -->
 
         <div class="col">
@@ -211,7 +219,7 @@ hr {
             <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Icon" class="menu-icon"></p>
             <p>Control: {{ list(entry.values())[0].get("control") }}</p>
             {% else %}
-            <p><img src=/img/assets/{{list(entry.values())[0].get("img")}} alt="pp" class="menu-icon"></p>
+            <p><img src="{{list(entry.values())[0].get('img')}}" alt="Profile Picture" class="profile-pic"></p>
             {% end %}
 
             <p>Actions:</p>

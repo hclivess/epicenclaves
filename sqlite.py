@@ -151,7 +151,7 @@ def create_users_db():
     conn.close()
 
 
-def create_user(user_data_dict, user, x_pos=1, y_pos=1, profile_pic="/img/pps/default.png"):
+def create_user(user_data_dict, user, x_pos=1, y_pos=1, profile_pic=""):
     # Prepare the data dictionary
     data = {
         "x_pos": x_pos,
