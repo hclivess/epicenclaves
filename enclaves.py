@@ -326,34 +326,40 @@ class ChopHandler(BaseHandler):
 
 import os
 
+import re
+
 
 class LoginHandler(BaseHandler):
     def post(self, data):
-        user = self.get_argument("name")[:8]
+        user = self.get_argument("name")[:16]
+
+        # Sanity check for username
+        if not re.match("^[a-zA-Z0-9]*$", user):
+            self.render("templates/denied.html", message="Username should consist of alphanumericals only!")
+            return
+
         password = self.get_argument("password")
 
-        # 1. Obtain the uploaded file from the request
-        uploaded_file = self.request.files.get("profile_picture", None)
+        # The rest of the code remains unchanged...
 
-        # Default path for profile picture
+        uploaded_file = self.request.files.get("profile_picture", None)
         profile_pic_path = "img/pps/default.png"
 
-        # If a picture was uploaded, save it
         if uploaded_file:
-            save_dir = "img/pps/"
+            uploaded_file = uploaded_file[0]
+            file_size = len(uploaded_file['body'])
+            if file_size > 50 * 1024:
+                self.render("templates/denied.html", message="Profile picture size should be less than 50 KB!")
+                return
 
-            # Ensure the directory exists
+            save_dir = "img/pps/"
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
 
-            uploaded_file = uploaded_file[0]
             filename = uploaded_file['filename']
             file_extension = os.path.splitext(filename)[-1].lower()
-
-            # Construct the save path using the naming convention
             save_path = f"img/pps/{user}{file_extension}"
 
-            # Save the uploaded file to the server's file system
             with open(save_path, "wb") as f:
                 f.write(uploaded_file['body'])
 
@@ -364,13 +370,9 @@ class LoginHandler(BaseHandler):
             create_user(user_data_dict=usersdb, user=user, profile_pic=profile_pic_path)
         if auth_login_validate(user, password):
             self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
-
             message = f"Welcome, {user}!"
-
             user_data = get_user_data(user, usersdb)
-
             on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
-
             self.render("templates/user_panel.html",
                         user=user,
                         file=user_data,
@@ -378,6 +380,7 @@ class LoginHandler(BaseHandler):
                         on_tile=on_tile,
                         actions=actions,
                         descriptions=descriptions)
+
 
 def make_app():
     return tornado.web.Application([

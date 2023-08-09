@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏰</text></svg>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Action Denied</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9e6e6;
+            color: #a33434;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        a {
+            color: #bf4747;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Action Denied</h1>
+    <p>{{ message }}</p> <!-- Dynamically loaded message based on context -->
+    <p>Please try the following:</p>
+    <ul>
+        <li><a href="javascript:history.back()">Go back to the previous page</a> and try a different action.</li>
+        <li>If you believe this is an error, <a href="mailto:support@example.com">contact our support team</a> for assistance.</li>
+    </ul>
+</body>
+</html>
