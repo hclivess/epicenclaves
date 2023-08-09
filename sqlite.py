@@ -148,14 +148,14 @@ def create_users_db():
     conn.close()
 
 
-def create_user(user_data_dict, user, x_pos=1, y_pos=1):
+def create_user(user_data_dict, user, x_pos=1, y_pos=1, profile_pic="/img/pps/default.png"):
     # Prepare the data dictionary
     data = {
         "x_pos": x_pos,
         "y_pos": y_pos,
         "type": "player",
         "age": 0,
-        "img": "img/pp.png",
+        "img": profile_pic,
         "exp": 0,
         "hp": 100,
         "armor": 0,
@@ -166,7 +166,7 @@ def create_user(user_data_dict, user, x_pos=1, y_pos=1):
         "items": [{"type": "axe", "damage": 1, "durability": 100}],
         "pop_lim": 0,
         "alive": True,
-        "online": True
+        "online": True,
     }
 
     # Insert or update user data in the passed dictionary

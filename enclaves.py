@@ -324,14 +324,44 @@ class ChopHandler(BaseHandler):
                     descriptions=descriptions)
 
 
+import os
+
+
 class LoginHandler(BaseHandler):
     def post(self, data):
         user = self.get_argument("name")[:8]
         password = self.get_argument("password")
 
+        # 1. Obtain the uploaded file from the request
+        uploaded_file = self.request.files.get("profile_picture", None)
+
+        # Default path for profile picture
+        profile_pic_path = "img/pp.png"
+
+        # If a picture was uploaded, save it
+        if uploaded_file:
+            save_dir = "img/pps/"
+
+            # Ensure the directory exists
+            if not os.path.exists(save_dir):
+                os.makedirs(save_dir)
+
+            uploaded_file = uploaded_file[0]
+            filename = uploaded_file['filename']
+            file_extension = os.path.splitext(filename)[-1].lower()
+
+            # Construct the save path using the naming convention
+            save_path = f"img/pps/{user}{file_extension}"
+
+            # Save the uploaded file to the server's file system
+            with open(save_path, "wb") as f:
+                f.write(uploaded_file['body'])
+
+            profile_pic_path = save_path
+
         if not auth_exists_user(user):
             auth_add_user(user, password)
-            create_user(user_data_dict=usersdb, user=user)
+            create_user(user_data_dict=usersdb, user=user, profile_pic=profile_pic_path)
         if auth_login_validate(user, password):
             self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
 
@@ -348,9 +378,6 @@ class LoginHandler(BaseHandler):
                         on_tile=on_tile,
                         actions=actions,
                         descriptions=descriptions)
-        else:
-            self.render("templates/notfound.html")
-
 
 def make_app():
     return tornado.web.Application([
