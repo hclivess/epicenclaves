@@ -44,8 +44,8 @@ class MainHandler(BaseHandler):
 
             print("data", data)  # debug
             print("user_data", user_data)  # debug
-            occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
-            print("occupied", occupied)  # debug
+            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+            print("on_tile", on_tile)  # debug
 
             if user_data["action_points"] < 1:
                 message = f"You have action points left for this turn"
@@ -54,7 +54,7 @@ class MainHandler(BaseHandler):
                         user=user,
                         file=user_data,
                         message=message,
-                        on_tile=occupied,
+                        on_tile=on_tile,
                         actions=actions,
                         descriptions=descriptions)
 
@@ -86,13 +86,13 @@ class BuildHandler(BaseHandler):
         message = build(entity, name, user, mapdb, usersdb=usersdb)
 
         user_data = get_user_data(user, usersdb=usersdb)
-        occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
 
         self.render("templates/user_panel.html",
                     user=user,
                     file=user_data,
                     message=message,
-                    on_tile=occupied,
+                    on_tile=on_tile,
                     actions=actions,
                     descriptions=descriptions)
 
@@ -117,13 +117,13 @@ class MoveHandler(BaseHandler):
                 message=message
             )
         else:
-            occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
             self.render(
                 "templates/user_panel.html",
                 user=user,
                 file=user_data,
                 message=message,
-                on_tile=occupied,
+                on_tile=on_tile,
                 actions=actions,
                 descriptions=descriptions
             )
@@ -140,13 +140,13 @@ class RestHandler(BaseHandler):
         user_data = get_user_data(user, usersdb)  # update
 
         x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
-        occupied = get_tile(x_pos, y_pos, mapdb)
+        on_tile = get_tile(x_pos, y_pos, mapdb)
 
         self.render("templates/user_panel.html",
                     user=user,
                     file=user_data,
                     message=message,
-                    on_tile=occupied,
+                    on_tile=on_tile,
                     actions=actions,
                     descriptions=descriptions)
 
@@ -160,7 +160,7 @@ class FightHandler(BaseHandler):
 
         this_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
         print("this_tile", this_tile)
-        occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
 
         user_data = get_user_data(user, usersdb)
 
@@ -175,7 +175,7 @@ class FightHandler(BaseHandler):
                         user=user,
                         file=user_data,
                         message=message,
-                        on_tile=occupied,
+                        on_tile=on_tile,
                         actions=actions,
                         descriptions=descriptions)
 
@@ -268,13 +268,13 @@ class ConquerHandler(BaseHandler):
 
             user_data = get_user_data(user, usersdb)
 
-            occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
 
             self.render("templates/user_panel.html",
                         user=user,
                         file=user_data,
                         message=message,
-                        on_tile=occupied,
+                        on_tile=on_tile,
                         actions=actions,
                         descriptions=descriptions)
 
@@ -313,13 +313,13 @@ class ChopHandler(BaseHandler):
 
         user_data = get_user_data(user, usersdb)
 
-        occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
 
         self.render("templates/user_panel.html",
                     user=user,
                     file=user_data,
                     message=message,
-                    on_tile=occupied,
+                    on_tile=on_tile,
                     actions=actions,
                     descriptions=descriptions)
 
@@ -339,13 +339,13 @@ class LoginHandler(BaseHandler):
 
             user_data = get_user_data(user, usersdb)
 
-            occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
+            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
 
             self.render("templates/user_panel.html",
                         user=user,
                         file=user_data,
                         message=message,
-                        on_tile=occupied,
+                        on_tile=on_tile,
                         actions=actions,
                         descriptions=descriptions)
         else:
