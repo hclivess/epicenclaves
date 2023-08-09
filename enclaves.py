@@ -339,7 +339,7 @@ class LoginHandler(BaseHandler):
 
             user_data = get_user_data(user, usersdb)
 
-            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb, usersdb)
+            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
 
             self.render("templates/user_panel.html",
                         user=user,

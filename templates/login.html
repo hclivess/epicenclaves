@@ -38,17 +38,21 @@
       <h1 class="mb-4 text-center">Epic Enclaves</h1> <!-- Separate Heading -->
       <!-- Welcome Image -->
       <img src="img/assets/castle_500.png" alt="Welcome to Epic Enclaves" class="welcome-image">
-      <form action="/login" method="post">
-         <div class="form-group">
-            <label class="form-label" for="name">Name:</label>
-            <input type="text" id="name" name="name" class="form-control" required>
-         </div>
-         <div class="form-group">
-            <label class="form-label" for="password">Password:</label>
-            <input type="password" id="password" name="password" class="form-control" required>
-         </div>
-         <button type="submit" class="btn btn-primary">Sign in / Sign up</button> <!-- Clear Indication for Sign in/Sign up -->
-      </form>
+         <form action="/login" method="post" enctype="multipart/form-data">
+             <div class="form-group">
+                 <label class="form-label" for="name">Name:</label>
+                 <input type="text" id="name" name="name" class="form-control" required>
+             </div>
+             <div class="form-group">
+                 <label class="form-label" for="password">Password:</label>
+                 <input type="password" id="password" name="password" class="form-control" required>
+             </div>
+             <div class="form-group"> <!-- Profile Picture Upload -->
+                 <label class="form-label" for="profile_picture">Profile Picture:</label>
+                 <input type="file" id="profile_picture" name="profile_picture" class="form-control" accept="image/*">
+             </div>
+             <button type="submit" class="btn btn-primary">Sign in / Sign up</button> <!-- Clear Indication for Sign in/Sign up -->
+         </form>
    </div>
 </body>
 </html>
