@@ -15,7 +15,7 @@ from backend import build, occupied_by, generate_entities, get_user_data, move, 
 from auth import auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db
 from sqlite import create_user, load_map_to_memory, load_users_to_memory, create_map_database, create_game_database, create_users_db
 
-max_size = 1000
+max_size = 1000000
 
 def get_coords(entry):
     return list(entry.keys())[0]
