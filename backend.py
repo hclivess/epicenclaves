@@ -251,8 +251,9 @@ class TileActions:
             actions = [{"name": "conquer", "action": f"/conquer?target={type}"}]
         elif type == "boar":
             actions = [{"name": "slay", "action": f"/fight?target={type}"}]
-        else:
-            actions = []
+        elif type == "player":
+            actions = [{"name": "challenge", "action": f"/fight?target={type}"}]
+        else:            actions = []
 
         return actions
 
