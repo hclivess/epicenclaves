@@ -106,7 +106,7 @@ def get_map_at_coords(x_pos, y_pos, map_data_dict):
     return None
 
 
-def get_users_at_coords(x_pos, y_pos, users_dict, include_construction=True):
+def get_users_at_coords(x_pos, y_pos, user, users_dict, include_construction=True, include_self=True):
     """Returns user data at a specific coordinate"""
 
     for username, user_data in users_dict.items():
