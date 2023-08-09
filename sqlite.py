@@ -94,7 +94,8 @@ class SQLiteConnectionPool:
         self.pool.append(conn)
 
 
-def get_map_data(x_pos, y_pos, map_data_dict):
+def get_map_at_coords(x_pos, y_pos, map_data_dict):
+    """returns map data at a specific coordinate"""
     key = f"{x_pos},{y_pos}"
 
     # Check if the key exists in the map_data_dict
@@ -102,6 +103,20 @@ def get_map_data(x_pos, y_pos, map_data_dict):
         return {key: map_data_dict[key]}
 
     # Return None if no data was found for the given coordinates
+    return None
+
+
+def get_users_at_coords(x_pos, y_pos, users_dict, include_construction=True):
+    """Returns user data at a specific coordinate"""
+
+    for username, user_data in users_dict.items():
+        if user_data["x_pos"] == x_pos and user_data["y_pos"] == y_pos:
+            if not include_construction:
+                user_data = user_data.copy()  # So we don't modify the original data
+                user_data.pop('construction', None)  # Remove the construction data if present
+            return {username: user_data}
+
+    # Return None if no user was found for the given coordinates
     return None
 
 

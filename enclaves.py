@@ -42,6 +42,7 @@ class MainHandler(BaseHandler):
             username = list(data.keys())[0]  # Get the first (and only) key in the dictionary
             user_data = data[username]  # Get the user's data
 
+            print("usersdb", usersdb)  # debug
             print("data", data)  # debug
             print("user_data", user_data)  # debug
             on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
