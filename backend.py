@@ -239,7 +239,11 @@ def attempt_rest(user, user_data, hours_arg, usersdb, mapdb):
 
 
 class TileActions:
-    def get(self, type):
+
+    def get(self, entry):
+        type = list(entry.values())[0].get("type")
+        name = list(entry.values())[0].get("name", None)
+
         if type == "inn":
             actions = [{"name": "sleep 10 hours", "action": "/rest?hours=10"},
                        {"name": "sleep 20 hours", "action": "/rest?hours=20"},
@@ -250,10 +254,11 @@ class TileActions:
         elif type == "house":
             actions = [{"name": "conquer", "action": f"/conquer?target={type}"}]
         elif type == "boar":
-            actions = [{"name": "slay", "action": f"/fight?target={type}"}]
+            actions = [{"name": "fight", "action": f"/fight?target={type}"}]
         elif type == "player":
             actions = [{"name": "challenge", "action": f"/fight?target={type}"}]
-        else:            actions = []
+        else:
+            actions = []
 
         return actions
 

@@ -159,9 +159,8 @@ class FightHandler(BaseHandler):
         user_data = get_user_data(user, usersdb)
         target = self.get_argument("target")
 
-        this_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
-        print("this_tile", this_tile)
         on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
+        print("on_tile", on_tile)
 
         user_data = get_user_data(user, usersdb)
 
@@ -181,7 +180,7 @@ class FightHandler(BaseHandler):
                         descriptions=descriptions)
 
         else:
-            for entry in this_tile:
+            for entry in on_tile:
                 if target == list(entry.values())[0].get("type") == "boar":
 
                     messages = []
@@ -218,7 +217,7 @@ class FightHandler(BaseHandler):
                                                  user_data_dict=usersdb)
 
                         else:
-                            boar.hp -= 1 #base this off weapon
+                            boar.hp -= 1 #base this off equipped weapon
                             messages.append(f"The boar takes 1 damage and is left with {boar.hp} hp")
 
                             boar_dmg_roll = boar.roll_damage()

@@ -206,11 +206,12 @@ hr {
 
             <p>Actions:</p>
 
-            {% for action in actions.get(list(entry.values())[0].get("type")) %}
-            <div class="container p-1">
-                <a id="btnAct" class="btn btn-light btn-lg btn-block" href="{{ action['action'] }}" role="button">{{ action['name'] }}</a>
-            </div>
+            {% for action in actions.get(entry) %}
+                <div class="container p-1">
+                    <a id="btnAct" class="btn btn-light btn-lg btn-block" href="{{ action['action'] }}" role="button">{{ action['name'] }}</a>
+                </div>
             {% end %}
+
 
         </div>
 
