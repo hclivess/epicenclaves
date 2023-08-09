@@ -21,7 +21,7 @@ def generate_entities(entity_class, probability, mapdb, start_x=1, start_y=1, si
     additional_entity_data = {
         "control": "nobody",
         "type": getattr(entity_instance, "type", entity_class.__name__),
-        **({"hp": entity_instance.hp} if hasattr(entity_instance, "hp") else {}),
+        **({"cls": entity_instance.cls} if hasattr(entity_instance, "cls") else {}),
         **({"armor": entity_instance.armor} if hasattr(entity_instance, "armor") else {}),
         **({"max_damage": entity_instance.max_damage} if hasattr(entity_instance, "max_damage") else {})
     }
@@ -108,13 +108,15 @@ building_costs = {
 
 
 class Enemy:
-    def __init__(self, hp, armor, min_damage=0, max_damage=2, alive=True, kill_chance=0.01):
+    def __init__(self, hp, armor, cls="enemy", min_damage=0, max_damage=2, alive=True, kill_chance=0.01):
         self.hp = hp
         self.armor = armor
         self.alive = alive
         self.kill_chance = kill_chance
         self.min_damage = min_damage
         self.max_damage = max_damage
+        self.cls = cls
+
 
     def is_alive(self):
         return self.alive
@@ -133,6 +135,7 @@ class Scenery:
     def __init__(self, hp):
         self.hp = hp
         self.type = "forest"
+        self.cls = "scenery"
 
 
 class Tree(Scenery):
@@ -144,52 +147,61 @@ def build(entity, name, user, mapdb, usersdb):
     user_data = get_user_data(user, usersdb)
     on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
 
+    if user_data["action_points"] < 1:
+        return "Not enough action points to build"
+
+    # Check if a building or scenery already exists on the tile
+    building_or_scenery_exists = False
     for entry in on_tile:
-        if user_data["action_points"] < 1:
-            return "Not enough action points to build"
-        elif entry[f"{user_data['x_pos']},{user_data['y_pos']}"]["type"] != "empty":
-            return "Cannot build here"
+        tile_data = entry.get(f"{user_data['x_pos']},{user_data['y_pos']}")
+        if tile_data and (tile_data["cls"] == "building" or tile_data["cls"] == "scenery"):
+            building_or_scenery_exists = True
+            break
 
-        if entity not in building_costs:
-            return "Building procedure not yet defined"
+    if building_or_scenery_exists:
+        return "Cannot build here"
 
-        if not has_resources(user_data, building_costs[entity]):
-            return f"Not enough resources to build {entity}"
+    if entity not in building_costs:
+        return "Building procedure not yet defined"
 
-        # Deduct resources
-        for resource, amount in building_costs[entity].items():
-            user_data[resource] -= amount
+    if not has_resources(user_data, building_costs[entity]):
+        return f"Not enough resources to build {entity}"
 
-        # Conditionally increase the pop_lim based on the entity
-        if entity == "house":
-            user_data["pop_lim"] += 10
+    # Deduct resources
+    for resource, amount in building_costs[entity].items():
+        user_data[resource] -= amount
 
-        # Update user's data
-        updated_values = {
-            "action_points": user_data["action_points"] - 1,
-            "wood": user_data["wood"],
-            "pop_lim": user_data.get("pop_lim", None)  # Only update if the key exists
-        }
+    # Conditionally increase the pop_lim based on the entity
+    if entity == "house":
+        user_data["pop_lim"] += 10
 
-        update_user_data(user=user,
-                         updated_values=updated_values,
-                         user_data_dict=usersdb)
+    # Update user's data
+    updated_values = {
+        "action_points": user_data["action_points"] - 1,
+        "wood": user_data["wood"],
+        "pop_lim": user_data.get("pop_lim", None)  # Only update if the key exists
+    }
 
-        # Prepare and update the map data for the entity
-        entity_data = {
-            "type": entity,
-            "name": name,
-            "hp": 100,
-            "size": 1,
-            "control": user,
-        }
-        data = {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data}
-        update_user_data(user=user,
-                         updated_values={"construction": data},
-                         user_data_dict=usersdb)
-        insert_map_data(mapdb, data)
+    update_user_data(user=user,
+                     updated_values=updated_values,
+                     user_data_dict=usersdb)
 
-        return f"Successfully built {entity}"
+    # Prepare and update the map data for the entity
+    entity_data = {
+        "type": entity,
+        "name": name,
+        "hp": 100,
+        "size": 1,
+        "control": user,
+        "cls": "building"
+    }
+    data = {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data}
+    update_user_data(user=user,
+                     updated_values={"construction": data},
+                     user_data_dict=usersdb)
+    insert_map_data(mapdb, data)
+
+    return f"Successfully built {entity}"
 
 
 def move(user, entry, axis_limit, user_data, users_dict):

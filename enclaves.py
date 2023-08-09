@@ -3,6 +3,10 @@ import json
 import os.path
 import signal
 import webbrowser
+import os
+import re
+import io
+from PIL import Image
 
 import tornado.ioloop
 import tornado.web
@@ -11,14 +15,18 @@ import tornado.escape
 from turn_engine import TurnEngine
 import backend
 from backend import build, occupied_by, generate_entities, get_user_data, move, attempt_rest, \
-    Boar, Tree,death_roll, get_tile, has_item, update_map_data, remove_from_map, get_user, update_user_data, remove_from_user, get_surrounding_map_and_user_data
+    Boar, Tree, death_roll, get_tile, has_item, update_map_data, remove_from_map, get_user, update_user_data, \
+    remove_from_user, get_surrounding_map_and_user_data
 from auth import auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db
-from sqlite import create_user, load_map_to_memory, load_users_to_memory, create_map_database, create_game_database, create_users_db
+from sqlite import create_user, load_map_to_memory, load_users_to_memory, create_map_database, create_game_database, \
+    create_users_db
 
 max_size = 1000000
 
+
 def get_coords(entry):
     return list(entry.keys())[0]
+
 
 class BaseHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, **kwargs):
@@ -141,7 +149,7 @@ class RestHandler(BaseHandler):
         user_data = get_user_data(user, usersdb)  # update
 
         x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
-        on_tile = get_tile(x_pos, y_pos, mapdb, usersdb)
+        on_tile = get_tile(x_pos, y_pos, mapdb, user, usersdb)
 
         self.render("templates/user_panel.html",
                     user=user,
@@ -217,7 +225,7 @@ class FightHandler(BaseHandler):
                                                  user_data_dict=usersdb)
 
                         else:
-                            boar.hp -= 1 #base this off equipped weapon
+                            boar.hp -= 1  # base this off equipped weapon
                             messages.append(f"The boar takes 1 damage and is left with {boar.hp} hp")
 
                             boar_dmg_roll = boar.roll_damage()
@@ -313,7 +321,7 @@ class ChopHandler(BaseHandler):
 
         user_data = get_user_data(user, usersdb)
 
-        on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb, usersdb)
+        on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
 
         self.render("templates/user_panel.html",
                     user=user,
@@ -322,11 +330,6 @@ class ChopHandler(BaseHandler):
                     on_tile=on_tile,
                     actions=actions,
                     descriptions=descriptions)
-
-
-import os
-
-import re
 
 
 class LoginHandler(BaseHandler):
@@ -340,8 +343,6 @@ class LoginHandler(BaseHandler):
 
         password = self.get_argument("password")
 
-        # The rest of the code remains unchanged...
-
         uploaded_file = self.request.files.get("profile_picture", None)
         profile_pic_path = "img/pps/default.png"
 
@@ -352,12 +353,25 @@ class LoginHandler(BaseHandler):
                 self.render("templates/denied.html", message="Profile picture size should be less than 50 KB!")
                 return
 
+            # Check file extension
+            filename = uploaded_file['filename']
+            file_extension = os.path.splitext(filename)[-1].lower()
+
+            if file_extension not in ['.jpg', '.jpeg', '.png', '.gif']:
+                self.render("templates/denied.html", message="Invalid file type!")
+                return
+
+            # Attempt to open the image using PIL
+            try:
+                Image.open(io.BytesIO(uploaded_file['body']))
+            except:
+                self.render("templates/denied.html", message="Uploaded file is not a valid image!")
+                return
+
             save_dir = "img/pps/"
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
 
-            filename = uploaded_file['filename']
-            file_extension = os.path.splitext(filename)[-1].lower()
             save_path = f"img/pps/{user}{file_extension}"
 
             with open(save_path, "wb") as f:
@@ -426,7 +440,6 @@ async def main():
     # After receiving the shutdown signal, stop the TurnEngine thread
 
 
-
 def init_databases():
     map_exists = os.path.exists("db/map_data.db")
     game_exists = os.path.exists("db/game_data.db")
@@ -445,11 +458,13 @@ def init_databases():
         'map_exists': map_exists
     }
 
+
 def initialize_map_and_users():
     mapdb = load_map_to_memory()
     usersdb = load_users_to_memory()
 
     return mapdb, usersdb
+
 
 if __name__ == "__main__":
     db_status = init_databases()
