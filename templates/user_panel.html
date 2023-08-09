@@ -205,10 +205,13 @@ hr {
             {% end %}
 
             <p>Type: {{ list(entry.values())[0].get("type") }}</p>
-            <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Item Icon" class="menu-icon"></p>
+
 
             {% if list(entry.values())[0].get("type") != "player" %}
+            <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Icon" class="menu-icon"></p>
             <p>Control: {{ list(entry.values())[0].get("control") }}</p>
+            {% else %}
+            <p><img src=/img/assets/{{list(entry.values())[0].get("img")}} alt="pp" class="menu-icon"></p>
             {% end %}
 
             <p>Actions:</p>

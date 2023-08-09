@@ -107,7 +107,9 @@ def get_map_at_coords(x_pos, y_pos, map_data_dict):
 
 
 def get_users_at_coords(x_pos, y_pos, user, users_dict, include_construction=True, include_self=True):
-    """Returns user data at a specific coordinate"""
+    """Returns a list of user data at a specific coordinate"""
+
+    users_at_coords = []
 
     for username, user_data in users_dict.items():
         # Skip this user if it's the same as the specified user and include_self is False
@@ -118,10 +120,11 @@ def get_users_at_coords(x_pos, y_pos, user, users_dict, include_construction=Tru
             if not include_construction:
                 user_data = user_data.copy()  # So we don't modify the original data
                 user_data.pop('construction', None)  # Remove the construction data if present
-            return {username: user_data}
+            users_at_coords.append({username: user_data})
 
-    # Return None if no user was found for the given coordinates
-    return None
+    # Return the list of users at the given coordinates (may be empty if no users found)
+    return users_at_coords
+
 
 
 

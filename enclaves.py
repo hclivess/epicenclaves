@@ -336,7 +336,7 @@ class LoginHandler(BaseHandler):
         uploaded_file = self.request.files.get("profile_picture", None)
 
         # Default path for profile picture
-        profile_pic_path = "img/pp.png"
+        profile_pic_path = "img/pps/default.png"
 
         # If a picture was uploaded, save it
         if uploaded_file:
