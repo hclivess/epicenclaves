@@ -2,7 +2,7 @@ import os
 import random
 from hashlib import blake2b
 
-from sqlite import get_map_at_coords, save_map_data
+from sqlite import get_map_at_coords, save_map_data, get_users_at_coords
 
 if not os.path.exists("db"):
     os.mkdir("db")
@@ -43,28 +43,36 @@ def hashify(data):
     return hashified
 
 
-def get_tile(x, y, mapdb):
+def get_tile(x, y, mapdb, usersdb):
     print("get_tile", x, y)
 
     # Use the get_map_data function to retrieve data for the given position
     map_entities = get_map_at_coords(x_pos=x, y_pos=y, map_data_dict=mapdb)
+    user_entities = get_users_at_coords(x_pos=x, y_pos=y, users_dict=usersdb)
 
     # If map_entities is not a list (either a single dict or None), convert it into a list
     if not isinstance(map_entities, list):
         map_entities = [map_entities] if map_entities else []
 
+    # If user_entities is not a list (either a single dict or None), convert it into a list
+    if not isinstance(user_entities, list):
+        user_entities = [user_entities] if user_entities else []
+
     # If no entities are found at the given position, provide a default "empty" entity
-    if not map_entities:
-        map_entities = [{
+    if not map_entities and not user_entities:
+        combined_entities = [{
             f"{x},{y}": {
                 "type": "empty",
             }
         }]
+    else:
+        combined_entities = map_entities + user_entities
 
-    for entity in map_entities:
-        print("entity", entity)
+    for entity in combined_entities:
+        print("entity...", entity)
 
-    return map_entities
+    return combined_entities
+
 
 
 def get_user_data(user, usersdb):
