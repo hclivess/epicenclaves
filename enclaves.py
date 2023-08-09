@@ -11,7 +11,7 @@ import tornado.escape
 from turn_engine import TurnEngine
 import backend
 from backend import build, occupied_by, generate_entities, get_user_data, move, attempt_rest, \
-    Boar, death_roll, get_tile, has_item, update_map_data, remove_from_map, get_user, update_user_data, remove_from_user, get_surrounding_map_and_user_data
+    Boar, Tree,death_roll, get_tile, has_item, update_map_data, remove_from_map, get_user, update_user_data, remove_from_user, get_surrounding_map_and_user_data
 from auth import auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db
 from sqlite import create_user, load_map_to_memory, load_users_to_memory, create_map_database, create_game_database, create_users_db
 
@@ -427,12 +427,11 @@ if __name__ == "__main__":
 
     if not db_status['map_exists']:
         generate_entities(mapdb=mapdb,
-                          entity_type="forest",
-                          probability=0.50,
-                          additional_entity_data={"control": "nobody",
-                                                  "hp": 100},
-                          size=25,
-                          every=5)
+                          entity_class=Tree,
+                          probability=0.5,
+                          size=50,
+                          every=10,
+                          )
 
     actions = backend.TileActions()
     descriptions = backend.Descriptions()
