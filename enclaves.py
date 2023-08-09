@@ -45,7 +45,7 @@ class MainHandler(BaseHandler):
             print("usersdb", usersdb)  # debug
             print("data", data)  # debug
             print("user_data", user_data)  # debug
-            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb, usersdb)
+            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
             print("on_tile", on_tile)  # debug
 
             if user_data["action_points"] < 1:
@@ -87,7 +87,7 @@ class BuildHandler(BaseHandler):
         message = build(entity, name, user, mapdb, usersdb=usersdb)
 
         user_data = get_user_data(user, usersdb=usersdb)
-        on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb, usersdb)
+        on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
 
         self.render("templates/user_panel.html",
                     user=user,
@@ -118,7 +118,7 @@ class MoveHandler(BaseHandler):
                 message=message
             )
         else:
-            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb, usersdb)
+            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
             self.render(
                 "templates/user_panel.html",
                 user=user,

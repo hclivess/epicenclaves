@@ -48,7 +48,7 @@ def get_tile(x, y, user, mapdb, usersdb):
 
     # Use the get_map_data function to retrieve data for the given position
     map_entities = get_map_at_coords(x_pos=x, y_pos=y, map_data_dict=mapdb)
-    user_entities = get_users_at_coords(x_pos=x, y_pos=y, user=user,  users_dict=usersdb, include_construction=False)
+    user_entities = get_users_at_coords(x_pos=x, y_pos=y, user=user,  users_dict=usersdb, include_construction=False, include_self=False)
 
     # If map_entities is not a list (either a single dict or None), convert it into a list
     if not isinstance(map_entities, list):
@@ -146,9 +146,9 @@ class Tree(Scenery):
 
 def build(entity, name, user, mapdb, usersdb):
     user_data = get_user_data(user, usersdb)
-    occupied = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb, usersdb)
+    on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
 
-    for entry in occupied:
+    for entry in on_tile:
         if user_data["action_points"] < 1:
             return "Not enough action points to build"
         elif entry[f"{user_data['x_pos']},{user_data['y_pos']}"]["type"] != "empty":

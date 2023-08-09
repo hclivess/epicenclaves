@@ -110,6 +110,10 @@ def get_users_at_coords(x_pos, y_pos, user, users_dict, include_construction=Tru
     """Returns user data at a specific coordinate"""
 
     for username, user_data in users_dict.items():
+        # Skip this user if it's the same as the specified user and include_self is False
+        if username == user and not include_self:
+            continue
+
         if user_data["x_pos"] == x_pos and user_data["y_pos"] == y_pos:
             if not include_construction:
                 user_data = user_data.copy()  # So we don't modify the original data
@@ -118,6 +122,7 @@ def get_users_at_coords(x_pos, y_pos, user, users_dict, include_construction=Tru
 
     # Return None if no user was found for the given coordinates
     return None
+
 
 
 # Initialize a connection pool
