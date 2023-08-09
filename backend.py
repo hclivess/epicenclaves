@@ -245,6 +245,8 @@ class TileActions:
         if type == "player":
             name = list(entry.keys())[0]
             print("name", name)
+        else:
+            name = None
 
         if type == "inn":
             actions = [{"name": "sleep 10 hours", "action": "/rest?hours=10"},
