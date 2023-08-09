@@ -17,6 +17,8 @@ from sqlite import create_user, load_map_to_memory, load_users_to_memory, create
 
 max_size = 1000
 
+def get_coords(entry):
+    return list(entry.keys())[0]
 
 class BaseHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, **kwargs):
@@ -190,7 +192,7 @@ class FightHandler(BaseHandler):
                         if boar.hp < 1:
                             messages.append("The boar is dead")
                             boar.alive = False
-                            remove_from_map(entity_type="boar", coords=list(entry.keys())[0], map_data_dict=mapdb)
+                            remove_from_map(entity_type="boar", coords=get_coords(entry), map_data_dict=mapdb)
                             update_user_data(user=user,
                                              updated_values={"action_points": user_data["action_points"] - 1,
                                                              "exp": user_data["exp"] + 1,
@@ -246,7 +248,7 @@ class ConquerHandler(BaseHandler):
                 remove_from_user(owner, {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]}, usersdb)
 
                 # Update the "control" attribute
-                key = list(entry.keys())[0]
+                key = get_coords(entry)
                 entry[key]['control'] = user
 
                 # Construct the updated data for the specific position
