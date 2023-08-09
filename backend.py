@@ -58,8 +58,6 @@ def get_tile(x, y, mapdb):
         map_entities = [{
             f"{x},{y}": {
                 "type": "empty",
-                "control": "nobody",
-                "hp": 0,  # CLUTCH todo
             }
         }]
 
