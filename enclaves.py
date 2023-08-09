@@ -291,7 +291,7 @@ class ChopHandler(BaseHandler):
                                   mapdb=mapdb)
         item = "axe"
 
-        if not has_item(user, item):
+        if not has_item(user_data, item):
             message = f"You have no {item} at hand"
 
         elif proper_tile and user_data["action_points"] > 0:
