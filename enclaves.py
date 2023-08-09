@@ -146,10 +146,10 @@ class RestHandler(BaseHandler):
 
         message = attempt_rest(user, user_data, hours, usersdb, mapdb)
 
-        user_data = get_user_data(user, usersdb)  # update
+        user_data = get_user_data(user, usersdb)
 
         x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
-        on_tile = get_tile(x_pos, y_pos, mapdb, user, usersdb)
+        on_tile = get_tile(x_pos, y_pos, user, mapdb, usersdb)
 
         self.render("templates/user_panel.html",
                     user=user,
