@@ -17,7 +17,7 @@ import backend
 from backend import build, occupied_by, spawn, get_user_data, move, attempt_rest, \
     Boar, Tree, death_roll, get_tile_map, get_tile_users, has_item, update_map_data, remove_from_map, get_user, \
     update_user_data, \
-    remove_from_user, get_surrounding_map_and_user_data
+    remove_from_user, get_surrounding_map_and_user_data, get_values
 from auth import auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db
 from sqlite import create_user, load_map_to_memory, load_users_to_memory, create_map_database, create_game_database, \
     create_users_db
@@ -170,6 +170,7 @@ class FightHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
         user_data = get_user_data(user, usersdb)
         target = self.get_argument("target")
+        target_name = self.get_argument("name")
 
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
         on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
@@ -193,24 +194,27 @@ class FightHandler(BaseHandler):
                         descriptions=descriptions)
 
         else:
+
+            messages = []
             for entry in on_tile_map:
-                if target == list(entry.values())[0].get("cls") == "enemy":  # todo change this to cls
+                entry_type = get_values(entry).get("type")
+                escaped = False
 
-                    messages = []
+                if target == "boar" and entry_type == "boar":
+                    boar = Boar()
 
-                    boar = Boar()  # local instance is sufficient, also should be used in generator!
-
-                    escaped = False
                     while boar.alive and user_data["alive"] and not escaped:
                         if boar.hp < 1:
                             messages.append("The boar is dead")
                             boar.alive = False
                             remove_from_map(entity_type="boar", coords=get_coords(entry), map_data_dict=mapdb)
                             update_user_data(user=user,
-                                             updated_values={"action_points": user_data["action_points"] - 1,
-                                                             "exp": user_data["exp"] + 1,
-                                                             "food": user_data["food"] + 1,
-                                                             "hp": user_data["hp"]},
+                                             updated_values={
+                                                 "action_points": user_data["action_points"] - 1,
+                                                 "exp": user_data["exp"] + 1,
+                                                 "food": user_data["food"] + 1,
+                                                 "hp": user_data["hp"]
+                                             },
                                              user_data_dict=usersdb)
 
                         elif user_data["hp"] < 2:
@@ -218,27 +222,45 @@ class FightHandler(BaseHandler):
                                 messages.append("You died")
                                 user_data["alive"] = False
                                 update_user_data(user=user,
-                                                 updated_values={"alive": user_data["alive"],
-                                                                 "hp": user_data["hp"]},
+                                                 updated_values={"alive": user_data["alive"], "hp": user_data["hp"]},
                                                  user_data_dict=usersdb)
                             else:
                                 messages.append("You are almost dead but managed to escape")
-                                escaped = True
                                 update_user_data(user=user,
                                                  updated_values={"action_points": user_data["action_points"] - 1,
                                                                  "hp": 1},
                                                  user_data_dict=usersdb)
+                                escaped = True
 
                         else:
-                            boar.hp -= 1  # base this off equipped weapon
+                            boar.hp -= 1
                             messages.append(f"The boar takes 1 damage and is left with {boar.hp} hp")
 
                             boar_dmg_roll = boar.roll_damage()
-                            user_data["hp"] = user_data["hp"] - boar_dmg_roll
+                            user_data["hp"] -= boar_dmg_roll
                             messages.append(f"You take {boar_dmg_roll} damage and are left with {user_data['hp']} hp")
 
-                    self.render("templates/fight.html",
-                                messages=messages)
+                elif target == "player" and entry_type == "player" and target_name == entry_name:
+                    messages.append(f"You challenged {entry_name}")
+
+                else:
+                    print(entry, "too bad")
+                    pass
+
+            for entry in on_tile_users:
+                entry_type = get_values(entry).get("type")
+                entry_name = get_coords(entry)
+                escaped = False
+
+
+                if target == "player" and entry_type == "player" and target_name == entry_name:
+                    messages.append(f"You challenged {entry_name}")
+
+                else:
+                    print(entry, "too bad")
+                    pass
+
+            self.render("templates/fight.html", messages=messages)
 
 
 class ConquerHandler(BaseHandler):
@@ -251,12 +273,12 @@ class ConquerHandler(BaseHandler):
 
         for entry in on_tile_map:
             print("entry", entry)
-            owner = list(entry.values())[0].get("control")
+            owner = get_values(entry).get("control")
 
             if owner == user:
                 message = "You already own this tile"
 
-            elif list(entry.values())[0].get("type") == target and user_data["action_points"] > 0:
+            elif get_values(entry).get("type") == target and user_data["action_points"] > 0:
                 remove_from_user(owner, {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]}, usersdb)
 
                 # Update the "control" attribute

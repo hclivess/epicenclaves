@@ -404,6 +404,8 @@ def get_map_data_limit(x_pos, y_pos, map_data_dict, distance=500):
     return map_data_dict
 
 
+def get_values(entry):
+    return list(entry.values())[0]
 def get_surrounding_map_and_user_data(user, user_data_dict, map_data_dict):
     # Check if the specified user is in the user_data_dict
     if user not in user_data_dict:
