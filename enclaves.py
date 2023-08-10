@@ -334,7 +334,7 @@ class FightHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
         user_data = get_user_data(user, usersdb)
         target = self.get_argument("target")
-        target_name = self.get_argument("name")
+        target_name = self.get_argument("name", default=None)
 
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
         on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
