@@ -14,7 +14,7 @@ def death_roll(hit_chance):
     return random.random() < hit_chance
 
 
-def generate_entities(entity_class, probability, mapdb, start_x=1, start_y=1, size=101, every=10, max_entities=None):
+def spawn(entity_class, probability, mapdb, start_x=1, start_y=1, size=101, every=10, max_entities=None):
     generated_count = 0
     entity_instance = entity_class()
 

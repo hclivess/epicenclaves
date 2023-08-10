@@ -3,7 +3,7 @@ import blockchain
 import threading
 import time
 from sqlite import update_turn, save_map_from_memory, save_users_from_memory
-from backend import generate_entities, update_user_data, Boar
+from backend import spawn, update_user_data, Boar
 
 
 def interruptible_sleep(seconds, interval=1, stop_condition=None):
@@ -46,13 +46,13 @@ class TurnEngine(threading.Thread):
                                                      "age": user_data["age"] + 1},
                                      user_data_dict=self.usersdb)
 
-            generate_entities(mapdb=self.mapdb,
-                              entity_class=Boar,
-                              probability=0.25,
-                              size=25,
-                              every=5,
-                              max_entities=1
-                              )
+            spawn(mapdb=self.mapdb,
+                  entity_class=Boar,
+                  probability=0.25,
+                  size=25,
+                  every=5,
+                  max_entities=1
+                  )
 
         print(f"Current turn: {self.turn}")
 

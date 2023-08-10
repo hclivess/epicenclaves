@@ -14,7 +14,7 @@ import tornado.escape
 
 from turn_engine import TurnEngine
 import backend
-from backend import build, occupied_by, generate_entities, get_user_data, move, attempt_rest, \
+from backend import build, occupied_by, spawn, get_user_data, move, attempt_rest, \
     Boar, Tree, death_roll, get_tile, has_item, update_map_data, remove_from_map, get_user, update_user_data, \
     remove_from_user, get_surrounding_map_and_user_data
 from auth import auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db
@@ -242,10 +242,10 @@ class ConquerHandler(BaseHandler):
         user_data = get_user_data(user, usersdb)
         target = self.get_argument("target", default="home")
 
-        this_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb)
-        print("this_tile", this_tile)
+        on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
+        print("this_tile", on_tile)
 
-        for entry in this_tile:
+        for entry in on_tile:
             print("entry", entry)
             owner = list(entry.values())[0].get("control")
 
@@ -276,7 +276,7 @@ class ConquerHandler(BaseHandler):
 
             user_data = get_user_data(user, usersdb)
 
-            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], mapdb, usersdb)
+            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
 
             self.render("templates/user_panel.html",
                         user=user,
@@ -471,12 +471,12 @@ if __name__ == "__main__":
     mapdb, usersdb = initialize_map_and_users()
 
     if not db_status['map_exists']:
-        generate_entities(mapdb=mapdb,
-                          entity_class=Tree,
-                          probability=0.5,
-                          size=50,
-                          every=10,
-                          )
+        spawn(mapdb=mapdb,
+              entity_class=Tree,
+              probability=0.5,
+              size=50,
+              every=10,
+              )
 
     actions = backend.TileActions()
     descriptions = backend.Descriptions()
