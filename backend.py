@@ -49,13 +49,13 @@ def get_tile_map(x, y, mapdb):
         map_entities = [map_entities] if map_entities else []
     return map_entities
 
+
 def get_tile_users(x, y, user, usersdb):
-    user_entities = get_users_at_coords(x_pos=x, y_pos=y, user=user, users_dict=usersdb, include_construction=False, include_self=False)
+    user_entities = get_users_at_coords(x_pos=x, y_pos=y, user=user, users_dict=usersdb, include_construction=False,
+                                        include_self=False)
     if not isinstance(user_entities, list):
         user_entities = [user_entities] if user_entities else []
     return user_entities
-
-
 
 
 def get_user_data(user, usersdb):
@@ -103,7 +103,6 @@ class Enemy:
         self.min_damage = min_damage
         self.max_damage = max_damage
         self.cls = cls
-
 
     def is_alive(self):
         return self.alive
@@ -192,6 +191,8 @@ def build(entity, name, user, mapdb, usersdb):
 
 
 def move(user, entry, axis_limit, user_data, users_dict):
+    return_message = {"success": False,
+                      "message": None}
     move_map = {
         "left": (-1, "x_pos"),
         "right": (1, "x_pos"),
@@ -203,10 +204,20 @@ def move(user, entry, axis_limit, user_data, users_dict):
         direction, axis_key = move_map[entry]
         new_pos = user_data.get(axis_key, 0) + direction
 
-        if user_data.get("action_points", 0) > 0 and 1 <= new_pos <= axis_limit:
+        if not user_data.get("alive"):
+            return_message["message"] = "Cannot move while dead"
+
+        elif user_data.get("action_points", 0) > 0:
+            return_message["message"] = "Out of action points"
+
+        elif 1 <= new_pos <= axis_limit:
+            return_message["message"] = "Out of bounds"
+
+        else:
+            return_message["success"] = True
             update_user_data(user, {axis_key: new_pos, "action_points": user_data["action_points"] - 1}, users_dict)
-            return True
-    return False
+
+    return return_message
 
 
 def attempt_rest(user, user_data, hours_arg, usersdb, mapdb):
@@ -406,6 +417,8 @@ def get_map_data_limit(x_pos, y_pos, map_data_dict, distance=500):
 
 def get_values(entry):
     return list(entry.values())[0]
+
+
 def get_surrounding_map_and_user_data(user, user_data_dict, map_data_dict):
     # Check if the specified user is in the user_data_dict
     if user not in user_data_dict:
