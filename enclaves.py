@@ -164,6 +164,118 @@ class RestHandler(BaseHandler):
                     descriptions=descriptions)
 
 
+def fight_player(entry, target_name, user_data, usersdb):
+    rolled = False
+    messages = []
+    entry_name = get_coords(entry)
+
+    if target_name == entry_name:
+        messages.append(f"You challenged {entry_name}")
+
+        # Directly use and modify the HP from the nested dictionary
+        while entry[entry_name]["alive"] and user_data["alive"] and not rolled:
+            user_data["hp"] -= 1
+            messages.append(f"{entry_name} hits you for 1 damage, you have {user_data['hp']} left")
+
+            entry[entry_name]["hp"] -= 1
+            messages.append(f"You hit {entry_name} for 1 damage, they have {entry[entry_name]['hp']} left")
+
+            if entry[entry_name]["hp"] < 2:
+                messages.append(f"{entry_name} should roll")
+                if death_roll(0.5):
+                    messages.append("Enemy killed")
+                    entry[entry_name]["alive"] = False
+                else:
+                    messages.append("You barely managed to escape")
+                rolled = True
+
+            if user_data["hp"] < 2:
+                messages.append("You should roll")
+                if death_roll(0.5):
+                    messages.append("You died")
+                    user_data["alive"] = False
+                else:
+                    messages.append("You barely managed to escape")
+                rolled = True
+
+    return messages
+
+
+
+def fight_boar(entry, user_data, user):
+    messages = []
+    boar = Boar()
+    escaped = False
+
+    while boar.alive and user_data["alive"] and not escaped:
+        if boar.hp < 1:
+            messages.append("The boar is dead")
+            boar.alive = False
+            remove_from_map(entity_type="boar", coords=get_coords(entry), map_data_dict=mapdb)
+            update_user_data(user=user,
+                             updated_values={
+                                 "action_points": user_data["action_points"] - 1,
+                                 "exp": user_data["exp"] + 1,
+                                 "food": user_data["food"] + 1,
+                                 "hp": user_data["hp"]
+                             },
+                             user_data_dict=usersdb)
+
+        elif user_data["hp"] < 2:
+            if death_roll(boar.kill_chance):
+                messages.append("You died")
+                user_data["alive"] = False
+                update_user_data(user=user,
+                                 updated_values={"alive": user_data["alive"], "hp": user_data["hp"]},
+                                 user_data_dict=usersdb)
+            else:
+                messages.append("You are almost dead but managed to escape")
+                update_user_data(user=user,
+                                 updated_values={"action_points": user_data["action_points"] - 1,
+                                                 "hp": 1},
+                                 user_data_dict=usersdb)
+                escaped = True
+
+        else:
+            boar.hp -= 1
+            messages.append(f"The boar takes 1 damage and is left with {boar.hp} hp")
+
+            boar_dmg_roll = boar.roll_damage()
+            user_data["hp"] -= boar_dmg_roll
+            messages.append(f"You take {boar_dmg_roll} damage and are left with {user_data['hp']} hp")
+
+    return messages
+
+
+def fight(target, target_name, on_tile_map, on_tile_users, user_data, user):
+    messages = []
+
+    for entry in on_tile_map:
+        entry_type = get_values(entry).get("type")
+
+        if target == "boar" and entry_type == "boar":
+            messages.extend(fight_boar(entry, user_data, user))
+        elif target == "player" and entry_type == "player":
+            messages.extend(fight_player(entry, target_name, user_data, usersdb))
+
+    for entry in on_tile_users:
+        entry_type = get_values(entry).get("type")
+        entry_name = get_coords(entry)
+
+        if target == "player" and entry_type == "player" and target_name == entry_name:
+            messages.extend(fight_player(entry, target_name, user_data, usersdb))
+
+    return messages
+
+
+def get_fight_preconditions(user_data):
+    if user_data["action_points"] < 1:
+        return "Not enough action points to slay"
+    if not user_data["alive"]:
+        return "You are dead"
+    return None
+
+
 class FightHandler(BaseHandler):
 
     def get(self):
@@ -175,14 +287,7 @@ class FightHandler(BaseHandler):
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
         on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
 
-        user_data = get_user_data(user, usersdb)
-
-        message = None
-        if user_data["action_points"] < 1:
-            message = "Not enough action points to slay"
-        if not user_data["alive"]:
-            message = "You are dead"
-
+        message = get_fight_preconditions(user_data)
         if message:
             self.render("templates/user_panel.html",
                         user=user,
@@ -192,74 +297,8 @@ class FightHandler(BaseHandler):
                         on_tile_users=on_tile_users,
                         actions=actions,
                         descriptions=descriptions)
-
         else:
-
-            messages = []
-            for entry in on_tile_map:
-                entry_type = get_values(entry).get("type")
-                escaped = False
-
-                if target == "boar" and entry_type == "boar":
-                    boar = Boar()
-
-                    while boar.alive and user_data["alive"] and not escaped:
-                        if boar.hp < 1:
-                            messages.append("The boar is dead")
-                            boar.alive = False
-                            remove_from_map(entity_type="boar", coords=get_coords(entry), map_data_dict=mapdb)
-                            update_user_data(user=user,
-                                             updated_values={
-                                                 "action_points": user_data["action_points"] - 1,
-                                                 "exp": user_data["exp"] + 1,
-                                                 "food": user_data["food"] + 1,
-                                                 "hp": user_data["hp"]
-                                             },
-                                             user_data_dict=usersdb)
-
-                        elif user_data["hp"] < 2:
-                            if death_roll(boar.kill_chance):
-                                messages.append("You died")
-                                user_data["alive"] = False
-                                update_user_data(user=user,
-                                                 updated_values={"alive": user_data["alive"], "hp": user_data["hp"]},
-                                                 user_data_dict=usersdb)
-                            else:
-                                messages.append("You are almost dead but managed to escape")
-                                update_user_data(user=user,
-                                                 updated_values={"action_points": user_data["action_points"] - 1,
-                                                                 "hp": 1},
-                                                 user_data_dict=usersdb)
-                                escaped = True
-
-                        else:
-                            boar.hp -= 1
-                            messages.append(f"The boar takes 1 damage and is left with {boar.hp} hp")
-
-                            boar_dmg_roll = boar.roll_damage()
-                            user_data["hp"] -= boar_dmg_roll
-                            messages.append(f"You take {boar_dmg_roll} damage and are left with {user_data['hp']} hp")
-
-                elif target == "player" and entry_type == "player" and target_name == entry_name:
-                    messages.append(f"You challenged {entry_name}")
-
-                else:
-                    print(entry, "too bad")
-                    pass
-
-            for entry in on_tile_users:
-                entry_type = get_values(entry).get("type")
-                entry_name = get_coords(entry)
-                escaped = False
-
-
-                if target == "player" and entry_type == "player" and target_name == entry_name:
-                    messages.append(f"You challenged {entry_name}")
-
-                else:
-                    print(entry, "too bad")
-                    pass
-
+            messages = fight(target, target_name, on_tile_map, on_tile_users, user_data, user)
             self.render("templates/fight.html", messages=messages)
 
 
