@@ -200,27 +200,25 @@
 
             </div>
 
-            <!-- tile column -->
- <!-- tile column -->
+<!-- tile column -->
 <div class="col-md-6">
     <h4>Current Tile</h4>
 
     <!-- Displaying entities on the tile -->
     {% for entry in on_tile_map %}
     <div class="row"> <!-- Create a new row for each entry -->
-        <div class="col">
+        <div class="col-md-6 pr-md-1">
             <p>Type: {{ list(entry.values())[0].get("type") }}</p>
             <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Icon" class="menu-icon"></p>
             <p>Control: {{ list(entry.values())[0].get("control") }}</p>
-            <p>Actions:</p>
+        </div>
+        <div class="col-md-6 pl-md-1">
+            <p style="text-align: left;">Actions:</p>
             {% for action in actions.get(entry) %}
-                <div class="container p-1">
-                    <a id="btnAct2" class="btn btn-light btn-lg btn-block" href="{{ action['action'] }}" role="button">{{ action['name'] }}</a>
+                <div class="p-1">
+                    <a id="btnAct2" class="btn btn-light btn-lg" href="{{ action['action'] }}" role="button">{{ action['name'] }}</a>
                 </div>
             {% end %}
-        </div>
-        <div class="col">
-            <!-- You can place other content for each entry here -->
         </div>
     </div> <!-- Close the row for each entry -->
     {% end %}
@@ -228,23 +226,23 @@
     <!-- Displaying users on the tile -->
     {% for entry in on_tile_users %}
     <div class="row"> <!-- Create a new row for each entry -->
-        <div class="col">
+        <div class="col-md-6 pr-md-1">
             <p>Name: {{ list(entry.keys())[0] }}</p>
             <p>Type: {{ list(entry.values())[0].get("type") }}</p>
             <p><img src="{{list(entry.values())[0].get('img')}}" alt="Profile Picture" class="profile-pic"></p>
-            <p>Actions:</p>
+        </div>
+        <div class="col-md-6 pl-md-1">
+            <p style="text-align: left;">Actions:</p>
             {% for action in actions.get(entry) %}
-                <div class="container p-1">
-                    <a id="btnAct" class="btn btn-light btn-lg btn-block" href="{{ action['action'] }}" role="button">{{ action['name'] }}</a>
+                <div class="p-1">
+                    <a id="btnAct" class="btn btn-light btn-lg" href="{{ action['action'] }}" role="button">{{ action['name'] }}</a>
                 </div>
             {% end %}
-        </div>
-        <div class="col">
-            <!-- You can place other content for each entry here -->
         </div>
     </div> <!-- Close the row for each entry -->
     {% end %}
 </div>
+
 
 
 
