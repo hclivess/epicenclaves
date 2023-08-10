@@ -15,7 +15,8 @@ import tornado.escape
 from turn_engine import TurnEngine
 import backend
 from backend import build, occupied_by, spawn, get_user_data, move, attempt_rest, \
-    Boar, Tree, death_roll, get_tile, has_item, update_map_data, remove_from_map, get_user, update_user_data, \
+    Boar, Tree, death_roll, get_tile_map, get_tile_users, has_item, update_map_data, remove_from_map, get_user, \
+    update_user_data, \
     remove_from_user, get_surrounding_map_and_user_data
 from auth import auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db
 from sqlite import create_user, load_map_to_memory, load_users_to_memory, create_map_database, create_game_database, \
@@ -53,17 +54,16 @@ class MainHandler(BaseHandler):
             print("usersdb", usersdb)  # debug
             print("data", data)  # debug
             print("user_data", user_data)  # debug
-            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
-            print("on_tile", on_tile)  # debug
-
-            if user_data["action_points"] < 1:
-                message = f"You have action points left for this turn"
-
+            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
+            print("on_tile_map", on_tile_map)
+            print("on_tile_users", on_tile_users)
             self.render("templates/user_panel.html",
                         user=user,
                         file=user_data,
                         message=message,
-                        on_tile=on_tile,
+                        on_tile_map=on_tile_map,
+                        on_tile_users=on_tile_users,
                         actions=actions,
                         descriptions=descriptions)
 
@@ -95,13 +95,15 @@ class BuildHandler(BaseHandler):
         message = build(entity, name, user, mapdb, usersdb=usersdb)
 
         user_data = get_user_data(user, usersdb=usersdb)
-        on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
 
         self.render("templates/user_panel.html",
                     user=user,
                     file=user_data,
                     message=message,
-                    on_tile=on_tile,
+                    on_tile_map=on_tile_map,
+                    on_tile_users=on_tile_users,
                     actions=actions,
                     descriptions=descriptions)
 
@@ -126,16 +128,17 @@ class MoveHandler(BaseHandler):
                 message=message
             )
         else:
-            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
-            self.render(
-                "templates/user_panel.html",
-                user=user,
-                file=user_data,
-                message=message,
-                on_tile=on_tile,
-                actions=actions,
-                descriptions=descriptions
-            )
+            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
+
+            self.render("templates/user_panel.html",
+                        user=user,
+                        file=user_data,
+                        message=message,
+                        on_tile_map=on_tile_map,
+                        on_tile_users=on_tile_users,
+                        actions=actions,
+                        descriptions=descriptions)
 
 
 class RestHandler(BaseHandler):
@@ -148,14 +151,15 @@ class RestHandler(BaseHandler):
 
         user_data = get_user_data(user, usersdb)
 
-        x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
-        on_tile = get_tile(x_pos, y_pos, user, mapdb, usersdb)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
 
         self.render("templates/user_panel.html",
                     user=user,
                     file=user_data,
                     message=message,
-                    on_tile=on_tile,
+                    on_tile_map=on_tile_map,
+                    on_tile_users=on_tile_users,
                     actions=actions,
                     descriptions=descriptions)
 
@@ -167,8 +171,8 @@ class FightHandler(BaseHandler):
         user_data = get_user_data(user, usersdb)
         target = self.get_argument("target")
 
-        on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
-        print("on_tile", on_tile)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
 
         user_data = get_user_data(user, usersdb)
 
@@ -183,13 +187,14 @@ class FightHandler(BaseHandler):
                         user=user,
                         file=user_data,
                         message=message,
-                        on_tile=on_tile,
+                        on_tile_map=on_tile_map,
+                        on_tile_users=on_tile_users,
                         actions=actions,
                         descriptions=descriptions)
 
         else:
-            for entry in on_tile:
-                if target == list(entry.values())[0].get("type") == "boar":
+            for entry in on_tile_map:
+                if target == list(entry.values())[0].get("cls") == "enemy":  # todo change this to cls
 
                     messages = []
 
@@ -242,10 +247,9 @@ class ConquerHandler(BaseHandler):
         user_data = get_user_data(user, usersdb)
         target = self.get_argument("target", default="home")
 
-        on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
-        print("this_tile", on_tile)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
 
-        for entry in on_tile:
+        for entry in on_tile_map:
             print("entry", entry)
             owner = list(entry.values())[0].get("control")
 
@@ -276,13 +280,15 @@ class ConquerHandler(BaseHandler):
 
             user_data = get_user_data(user, usersdb)
 
-            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
+            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
 
             self.render("templates/user_panel.html",
                         user=user,
                         file=user_data,
                         message=message,
-                        on_tile=on_tile,
+                        on_tile_map=on_tile_map,
+                        on_tile_users=on_tile_users,
                         actions=actions,
                         descriptions=descriptions)
 
@@ -321,13 +327,15 @@ class ChopHandler(BaseHandler):
 
         user_data = get_user_data(user, usersdb)
 
-        on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
 
         self.render("templates/user_panel.html",
                     user=user,
                     file=user_data,
                     message=message,
-                    on_tile=on_tile,
+                    on_tile_map=on_tile_map,
+                    on_tile_users=on_tile_users,
                     actions=actions,
                     descriptions=descriptions)
 
@@ -386,12 +394,16 @@ class LoginHandler(BaseHandler):
             self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
             message = f"Welcome, {user}!"
             user_data = get_user_data(user, usersdb)
-            on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
+
+            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
+
             self.render("templates/user_panel.html",
                         user=user,
                         file=user_data,
                         message=message,
-                        on_tile=on_tile,
+                        on_tile_map=on_tile_map,
+                        on_tile_users=on_tile_users,
                         actions=actions,
                         descriptions=descriptions)
 

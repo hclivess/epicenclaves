@@ -199,46 +199,66 @@
 
             </div>
 
-            <!-- tile column -->
-           <div class="col-md-6">
-    <h4>Current Tile</h4>
+<div class="container">
 
-    {% for entry in on_tile %}
-    <!-- instead of conditionals here additional dicts should be passed, one for players, one for entities -->
-    <div class="row"> <!-- Create a new row for each entry -->
+    <!-- First tile column -->
+    <div class="row">
+        <div class="col-md-12">
+            <h4>Current Tile</h4>
 
-        <div class="col">
-            {% if list(entry.values())[0].get("type") == "player" %}
-            <p>Name: {{ list(entry.keys())[0] }}</p>
-            {% end %}
-
-            <p>Type: {{ list(entry.values())[0].get("type") }}</p>
-
-
-            {% if list(entry.values())[0].get("type") != "player" %}
-            <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Icon" class="menu-icon"></p>
-            <p>Control: {{ list(entry.values())[0].get("control") }}</p>
-            {% else %}
-            <p><img src="{{list(entry.values())[0].get('img')}}" alt="Profile Picture" class="profile-pic"></p>
-            {% end %}
-
-            <p>Actions:</p>
-
-            {% for action in actions.get(entry) %}
-                <div class="container p-1">
-                    <a id="btnAct" class="btn btn-light btn-lg btn-block" href="{{ action['action'] }}" role="button">{{ action['name'] }}</a>
+            {% for entry in on_tile_map %}
+            <div class="row">
+                <div class="col">
+                    <p>Type: {{ list(entry.values())[0].get("type") }}</p>
+                    <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Icon" class="menu-icon"></p>
+                    <p>Control: {{ list(entry.values())[0].get("control") }}</p>
+                    <p>Actions:</p>
+                    {% for action in actions.get(entry) %}
+                        <div class="container p-1">
+                            <a id="btnAct2" class="btn btn-light btn-lg btn-block" href="{{ action['action'] }}" role="button">{{ action['name'] }}</a>
+                        </div>
+                    {% end %}
                 </div>
+                <div class="col">
+                    <!-- Additional content for each entry if required -->
+                </div>
+            </div>
             {% end %}
-
-
         </div>
+    </div>
 
-        <div class="col">
-            <!-- You can place other content for each entry here -->
+    <!-- Optional spacer -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <hr>
         </div>
+    </div>
 
-    </div> <!-- Close the row for each entry -->
-    {% end %}
+    <!-- Second tile column -->
+    <div class="row">
+        <div class="col-md-12">
+            <h4>Current Tile</h4>
+
+            {% for entry in on_tile_users %}
+            <div class="row">
+                <div class="col">
+                    <p>Name: {{ list(entry.keys())[0] }}</p>
+                    <p>Type: {{ list(entry.values())[0].get("type") }}</p>
+                    <p><img src="{{list(entry.values())[0].get('img')}}" alt="Profile Picture" class="profile-pic"></p>
+                    <p>Actions:</p>
+                    {% for action in actions.get(entry) %}
+                        <div class="container p-1">
+                            <a id="btnAct" class="btn btn-light btn-lg btn-block" href="{{ action['action'] }}" role="button">{{ action['name'] }}</a>
+                        </div>
+                    {% end %}
+                </div>
+                <div class="col">
+                    <!-- Additional content for each entry if required -->
+                </div>
+            </div>
+            {% end %}
+        </div>
+    </div>
 
 </div>
 

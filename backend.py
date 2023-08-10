@@ -43,31 +43,18 @@ def hashify(data):
     return hashified
 
 
-def get_tile(x, y, user, mapdb, usersdb):
-    print("get_tile", x, y)
-
-    # Use the get_map_data function to retrieve data for the given position
+def get_tile_map(x, y, mapdb):
     map_entities = get_map_at_coords(x_pos=x, y_pos=y, map_data_dict=mapdb)
-    user_entities = get_users_at_coords(x_pos=x, y_pos=y, user=user,  users_dict=usersdb, include_construction=False, include_self=False)
-
-    # If map_entities is not a list (either a single dict or None), convert it into a list
     if not isinstance(map_entities, list):
         map_entities = [map_entities] if map_entities else []
+    return map_entities
 
-    # If user_entities is not a list (either a single dict or None), convert it into a list
+def get_tile_users(x, y, user, usersdb):
+    user_entities = get_users_at_coords(x_pos=x, y_pos=y, user=user, users_dict=usersdb, include_construction=False, include_self=False)
     if not isinstance(user_entities, list):
         user_entities = [user_entities] if user_entities else []
+    return user_entities
 
-    # If no entities are found at the given position, provide a default "empty" entity
-    if not map_entities and not user_entities:
-        combined_entities = []
-    else:
-        combined_entities = map_entities + user_entities
-
-    for entity in combined_entities:
-        print("entity...", entity)
-
-    return combined_entities
 
 
 
@@ -145,7 +132,7 @@ class Tree(Scenery):
 
 def build(entity, name, user, mapdb, usersdb):
     user_data = get_user_data(user, usersdb)
-    on_tile = get_tile(user_data["x_pos"], user_data["y_pos"], user, mapdb, usersdb)
+    on_tile = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
 
     if user_data["action_points"] < 1:
         return "Not enough action points to build"
