@@ -19,7 +19,6 @@ def spawn(entity_class, probability, mapdb, start_x=1, start_y=1, size=101, ever
     entity_instance = entity_class()
 
     additional_entity_data = {
-        "control": "nobody",
         "type": getattr(entity_instance, "type", entity_class.__name__),
         **({"cls": entity_instance.cls} if hasattr(entity_instance, "cls") else {}),
         **({"armor": entity_instance.armor} if hasattr(entity_instance, "armor") else {}),
