@@ -37,12 +37,11 @@
         margin: 2px;
     }
 
-    .profile-pic {
-        max-width: 50px;
-        max-height: 50px;
-        display: block;
-        margin: 0 auto;  /* Center the image when it's in a block */
-    }
+.profile-pic {
+    max-width: 50px;
+    max-height: 50px;
+    padding: 4px;
+}
 
     .btn-up {
         background-color: #007bff;
@@ -55,10 +54,12 @@
         background-color: #0056b3;
     }
 
-    .profile-container {
-        display: flex;
-        align-items: flex-start; /* Align items to the top */
-    }
+.profile-container {
+    display: flex;
+    align-items: flex-start; /* Align items to the top */
+    /* Add the following to ensure alignment */
+    justify-content: flex-start;
+}
 
     .profile-picture {
         margin-right: 20px; /* Add some space between profile picture and user statistics */
