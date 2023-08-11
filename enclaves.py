@@ -389,7 +389,7 @@ class ConquerHandler(BaseHandler):
 
                 message = "Takeover successful"
             else:
-                message = "Cannot acquire an empty tile"
+                message = "Cannot acquire this type of tile"
 
             user_data = get_user_data(user, usersdb)
 
