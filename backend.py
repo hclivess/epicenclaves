@@ -206,10 +206,10 @@ def move(user, entry, axis_limit, user_data, users_dict):
         if not user_data.get("alive"):
             return_message["message"] = "Cannot move while dead"
 
-        elif user_data.get("action_points", 0) > 0:
+        elif user_data.get("action_points", 0) <= 0:
             return_message["message"] = "Out of action points"
 
-        elif 1 <= new_pos <= axis_limit:
+        elif new_pos < 1 or new_pos > axis_limit:
             return_message["message"] = "Out of bounds"
 
         else:
@@ -217,6 +217,7 @@ def move(user, entry, axis_limit, user_data, users_dict):
             update_user_data(user, {axis_key: new_pos, "action_points": user_data["action_points"] - 1}, users_dict)
 
     return return_message
+
 
 
 def attempt_rest(user, user_data, hours_arg, usersdb, mapdb):
