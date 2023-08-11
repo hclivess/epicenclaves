@@ -214,6 +214,8 @@ def move(user, entry, axis_limit, user_data, users_dict):
 
         else:
             return_message["success"] = True
+            return_message["message"] = "Moved successfully"
+
             update_user_data(user, {axis_key: new_pos, "action_points": user_data["action_points"] - 1}, users_dict)
 
     return return_message
