@@ -2,6 +2,7 @@ import asyncio
 import json
 import os.path
 import signal
+import sys
 import webbrowser
 import os
 import re
@@ -14,13 +15,42 @@ import tornado.escape
 
 from turn_engine import TurnEngine
 import backend
-from backend import build, occupied_by, spawn, get_user_data, move, attempt_rest, \
-    Boar, Tree, death_roll, get_tile_map, get_tile_users, has_item, update_map_data, remove_from_map, get_user, \
-    update_user_data, \
-    remove_from_user, get_surrounding_map_and_user_data, get_values
-from auth import auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db
-from sqlite import create_user, load_map_to_memory, load_users_to_memory, create_map_database, create_game_database, \
-    create_users_db
+from backend import (
+    build,
+    occupied_by,
+    spawn,
+    get_user_data,
+    move,
+    attempt_rest,
+    Boar,
+    Tree,
+    death_roll,
+    get_tile_map,
+    get_tile_users,
+    has_item,
+    update_map_data,
+    remove_from_map,
+    get_user,
+    update_user_data,
+    remove_from_user,
+    get_surrounding_map_and_user_data,
+    get_values,
+)
+from auth import (
+    auth_cookie_get,
+    auth_login_validate,
+    auth_add_user,
+    auth_exists_user,
+    auth_check_users_db,
+)
+from sqlite import (
+    create_user,
+    load_map_to_memory,
+    load_users_to_memory,
+    create_map_database,
+    create_game_database,
+    create_users_db,
+)
 
 max_size = 1000000
 
@@ -48,24 +78,30 @@ class MainHandler(BaseHandler):
 
             data = get_user(user, usersdb)
             # Get the user's data
-            username = list(data.keys())[0]  # Get the first (and only) key in the dictionary
+            username = list(data.keys())[
+                0
+            ]  # Get the first (and only) key in the dictionary
             user_data = data[username]  # Get the user's data
 
             print("usersdb", usersdb)  # debug
             print("data", data)  # debug
             print("user_data", user_data)  # debug
             on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
+            on_tile_users = get_tile_users(
+                user_data["x_pos"], user_data["y_pos"], user, usersdb
+            )
             print("on_tile_map", on_tile_map)
             print("on_tile_users", on_tile_users)
-            self.render("templates/user_panel.html",
-                        user=user,
-                        file=user_data,
-                        message=message,
-                        on_tile_map=on_tile_map,
-                        on_tile_users=on_tile_users,
-                        actions=actions,
-                        descriptions=descriptions)
+            self.render(
+                "templates/user_panel.html",
+                user=user,
+                file=user_data,
+                message=message,
+                on_tile_map=on_tile_map,
+                on_tile_users=on_tile_users,
+                actions=actions,
+                descriptions=descriptions,
+            )
 
 
 class LogoutHandler(BaseHandler):
@@ -81,9 +117,7 @@ class MapHandler(BaseHandler):
         data = json.dumps(get_surrounding_map_and_user_data(user, usersdb, mapdb))
 
         print("data", data)  # debug
-        self.render("templates/map.html",
-                    data=data,
-                    ensure_ascii=False)
+        self.render("templates/map.html", data=data, ensure_ascii=False)
 
 
 class BuildHandler(BaseHandler):
@@ -96,16 +130,20 @@ class BuildHandler(BaseHandler):
 
         user_data = get_user_data(user, usersdb=usersdb)
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-        on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
+        on_tile_users = get_tile_users(
+            user_data["x_pos"], user_data["y_pos"], user, usersdb
+        )
 
-        self.render("templates/user_panel.html",
-                    user=user,
-                    file=user_data,
-                    message=message,
-                    on_tile_map=on_tile_map,
-                    on_tile_users=on_tile_users,
-                    actions=actions,
-                    descriptions=descriptions)
+        self.render(
+            "templates/user_panel.html",
+            user=user,
+            file=user_data,
+            message=message,
+            on_tile_map=on_tile_map,
+            on_tile_users=on_tile_users,
+            actions=actions,
+            descriptions=descriptions,
+        )
 
 
 class MoveHandler(BaseHandler):
@@ -124,21 +162,27 @@ class MoveHandler(BaseHandler):
             self.render(
                 "templates/map.html",
                 user=user,
-                data=json.dumps(get_surrounding_map_and_user_data(user, usersdb, mapdb)),
-                message=message
+                data=json.dumps(
+                    get_surrounding_map_and_user_data(user, usersdb, mapdb)
+                ),
+                message=message,
             )
         else:
             on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
+            on_tile_users = get_tile_users(
+                user_data["x_pos"], user_data["y_pos"], user, usersdb
+            )
 
-            self.render("templates/user_panel.html",
-                        user=user,
-                        file=user_data,
-                        message=message,
-                        on_tile_map=on_tile_map,
-                        on_tile_users=on_tile_users,
-                        actions=actions,
-                        descriptions=descriptions)
+            self.render(
+                "templates/user_panel.html",
+                user=user,
+                file=user_data,
+                message=message,
+                on_tile_map=on_tile_map,
+                on_tile_users=on_tile_users,
+                actions=actions,
+                descriptions=descriptions,
+            )
 
 
 class RestHandler(BaseHandler):
@@ -152,16 +196,20 @@ class RestHandler(BaseHandler):
         user_data = get_user_data(user, usersdb)
 
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-        on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
+        on_tile_users = get_tile_users(
+            user_data["x_pos"], user_data["y_pos"], user, usersdb
+        )
 
-        self.render("templates/user_panel.html",
-                    user=user,
-                    file=user_data,
-                    message=message,
-                    on_tile_map=on_tile_map,
-                    on_tile_users=on_tile_users,
-                    actions=actions,
-                    descriptions=descriptions)
+        self.render(
+            "templates/user_panel.html",
+            user=user,
+            file=user_data,
+            message=message,
+            on_tile_map=on_tile_map,
+            on_tile_users=on_tile_users,
+            actions=actions,
+            descriptions=descriptions,
+        )
 
 
 def fight_player(entry, target_name, user_data, user, usersdb):
@@ -178,38 +226,42 @@ def fight_player(entry, target_name, user_data, user, usersdb):
             # Only allow the target to attack if they have more than 0 hp
             if target_data["hp"] > 0:
                 user_data["hp"] -= 1
-                messages.append(f"{entry_name} hits you for 1 damage, you have {user_data['hp']} left")
+                messages.append(
+                    f"{entry_name} hits you for 1 damage, you have {user_data['hp']} left"
+                )
 
             # Only allow the user to attack if they have more than 0 hp
             if user_data["hp"] > 0:
                 target_data["hp"] -= 1
-                messages.append(f"You hit {entry_name} for 1 damage, they have {target_data['hp']} left")
+                messages.append(
+                    f"You hit {entry_name} for 1 damage, they have {target_data['hp']} left"
+                )
 
             # Check if target should roll
             if target_data["hp"] < 1:
                 messages.append(f"{entry_name} rolls the dice of fate")
                 if death_roll(0.5):
                     messages.append("Enemy killed")
-                    update_user_data(user=target_name,
-                                     updated_values={
-                                         "alive": False,
-                                         "hp": 0,
-                                         "action_points": 0
-                                     },
-                                     user_data_dict=usersdb)
+                    update_user_data(
+                        user=target_name,
+                        updated_values={"alive": False, "hp": 0, "action_points": 0},
+                        user_data_dict=usersdb,
+                    )
                 else:
                     messages.append("The enemy barely managed to escape")
-                    update_user_data(user=target_name,
-                                     updated_values={
-                                         "action_points": target_data["action_points"] - 1,
-                                         "hp": 1
-                                     },
-                                     user_data_dict=usersdb)
-                update_user_data(user=user,
-                                 updated_values={
-                                     "exp": user_data["exp"] + 10
-                                 },
-                                 user_data_dict=usersdb)
+                    update_user_data(
+                        user=target_name,
+                        updated_values={
+                            "action_points": target_data["action_points"] - 1,
+                            "hp": 1,
+                        },
+                        user_data_dict=usersdb,
+                    )
+                update_user_data(
+                    user=user,
+                    updated_values={"exp": user_data["exp"] + 10},
+                    user_data_dict=usersdb,
+                )
                 break
 
             # Check if user should roll
@@ -217,32 +269,29 @@ def fight_player(entry, target_name, user_data, user, usersdb):
                 messages.append("You roll the dice of fate")
                 if death_roll(0.5):
                     messages.append("You died")
-                    update_user_data(user=user,
-                                     updated_values={
-                                         "alive": False,
-                                         "hp": 0,
-                                         "action_points": 0
-                                     },
-                                     user_data_dict=usersdb)
+                    update_user_data(
+                        user=user,
+                        updated_values={"alive": False, "hp": 0, "action_points": 0},
+                        user_data_dict=usersdb,
+                    )
                 else:
                     messages.append("You barely managed to escape")
-                    update_user_data(user=user,
-                                     updated_values={
-                                         "action_points": user_data["action_points"] - 1,
-                                         "hp": 1
-                                     },
-                                     user_data_dict=usersdb)
-                update_user_data(user=target_name,
-                                 updated_values={
-                                     "exp": target_data["exp"] + 10
-                                 },
-                                 user_data_dict=usersdb)
+                    update_user_data(
+                        user=user,
+                        updated_values={
+                            "action_points": user_data["action_points"] - 1,
+                            "hp": 1,
+                        },
+                        user_data_dict=usersdb,
+                    )
+                update_user_data(
+                    user=target_name,
+                    updated_values={"exp": target_data["exp"] + 10},
+                    user_data_dict=usersdb,
+                )
                 break
 
     return messages
-
-
-
 
 
 def fight_boar(entry, user_data, user):
@@ -251,35 +300,44 @@ def fight_boar(entry, user_data, user):
     escaped = False
 
     while boar.alive and user_data["alive"] and not escaped:
-
         # Check if the boar should be dead
         if boar.hp < 1:
             messages.append("The boar is dead")
             boar.alive = False
-            remove_from_map(entity_type="boar", coords=get_coords(entry), map_data_dict=mapdb)
-            update_user_data(user=user,
-                             updated_values={
-                                 "action_points": user_data["action_points"] - 1,
-                                 "exp": user_data["exp"] + 1,
-                                 "food": user_data["food"] + 1,
-                                 "hp": user_data["hp"]
-                             },
-                             user_data_dict=usersdb)
+            remove_from_map(
+                entity_type="boar", coords=get_coords(entry), map_data_dict=mapdb
+            )
+            update_user_data(
+                user=user,
+                updated_values={
+                    "action_points": user_data["action_points"] - 1,
+                    "exp": user_data["exp"] + 1,
+                    "food": user_data["food"] + 1,
+                    "hp": user_data["hp"],
+                },
+                user_data_dict=usersdb,
+            )
 
         # Check if the user should be dead or escape
         elif user_data["hp"] < 1:
             if death_roll(boar.kill_chance):
                 messages.append("You died")
                 user_data["alive"] = False
-                update_user_data(user=user,
-                                 updated_values={"alive": user_data["alive"], "hp": 0},
-                                 user_data_dict=usersdb)
+                update_user_data(
+                    user=user,
+                    updated_values={"alive": user_data["alive"], "hp": 0},
+                    user_data_dict=usersdb,
+                )
             else:
                 messages.append("You are almost dead but managed to escape")
-                update_user_data(user=user,
-                                 updated_values={"action_points": user_data["action_points"] - 1,
-                                                 "hp": 1},
-                                 user_data_dict=usersdb)
+                update_user_data(
+                    user=user,
+                    updated_values={
+                        "action_points": user_data["action_points"] - 1,
+                        "hp": 1,
+                    },
+                    user_data_dict=usersdb,
+                )
                 escaped = True
 
         # Attack logic, ensuring entities with 0 hp don't attack
@@ -287,16 +345,19 @@ def fight_boar(entry, user_data, user):
             # User attacks the boar if they have more than 0 hp
             if user_data["hp"] > 0:
                 boar.hp -= 1
-                messages.append(f"The boar takes 1 damage and is left with {boar.hp} hp")
+                messages.append(
+                    f"The boar takes 1 damage and is left with {boar.hp} hp"
+                )
 
             # Boar attacks the user if it has more than 0 hp
             if boar.hp > 0:
                 boar_dmg_roll = boar.roll_damage()
                 user_data["hp"] -= boar_dmg_roll
-                messages.append(f"You take {boar_dmg_roll} damage and are left with {user_data['hp']} hp")
+                messages.append(
+                    f"You take {boar_dmg_roll} damage and are left with {user_data['hp']} hp"
+                )
 
     return messages
-
 
 
 def fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb):
@@ -329,7 +390,6 @@ def get_fight_preconditions(user_data):
 
 
 class FightHandler(BaseHandler):
-
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         user_data = get_user_data(user, usersdb)
@@ -337,20 +397,32 @@ class FightHandler(BaseHandler):
         target_name = self.get_argument("name", default=None)
 
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-        on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
+        on_tile_users = get_tile_users(
+            user_data["x_pos"], user_data["y_pos"], user, usersdb
+        )
 
         message = get_fight_preconditions(user_data)
         if message:
-            self.render("templates/user_panel.html",
-                        user=user,
-                        file=user_data,
-                        message=message,
-                        on_tile_map=on_tile_map,
-                        on_tile_users=on_tile_users,
-                        actions=actions,
-                        descriptions=descriptions)
+            self.render(
+                "templates/user_panel.html",
+                user=user,
+                file=user_data,
+                message=message,
+                on_tile_map=on_tile_map,
+                on_tile_users=on_tile_users,
+                actions=actions,
+                descriptions=descriptions,
+            )
         else:
-            messages = fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb)
+            messages = fight(
+                target,
+                target_name,
+                on_tile_map,
+                on_tile_users,
+                user_data,
+                user,
+                usersdb,
+            )
             self.render("templates/fight.html", messages=messages)
 
 
@@ -372,11 +444,18 @@ class ConquerHandler(BaseHandler):
             if owner == user:
                 message = "You already own this tile"
 
-            elif get_values(entry).get("type") == target and user_data["action_points"] > 0:
-                remove_from_user(owner, {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]}, usersdb)
+            elif (
+                get_values(entry).get("type") == target
+                and user_data["action_points"] > 0
+            ):
+                remove_from_user(
+                    owner,
+                    {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]},
+                    usersdb,
+                )
                 # Update the "control" attribute
                 key = get_coords(entry)
-                entry[key]['control'] = user
+                entry[key]["control"] = user
 
                 # Construct the updated data for the specific position
                 updated_data = entry
@@ -384,10 +463,14 @@ class ConquerHandler(BaseHandler):
                 update_map_data(updated_data, mapdb)
 
                 # Call the update function
-                update_user_data(user=user,
-                                 updated_values={"construction": updated_data,
-                                                 "action_points": user_data["action_points"] - 1},
-                                 user_data_dict=usersdb)
+                update_user_data(
+                    user=user,
+                    updated_values={
+                        "construction": updated_data,
+                        "action_points": user_data["action_points"] - 1,
+                    },
+                    user_data_dict=usersdb,
+                )
 
                 message = "Takeover successful"
             else:
@@ -396,16 +479,20 @@ class ConquerHandler(BaseHandler):
             user_data = get_user_data(user, usersdb)
 
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-        on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
+        on_tile_users = get_tile_users(
+            user_data["x_pos"], user_data["y_pos"], user, usersdb
+        )
 
-        self.render("templates/user_panel.html",
-                    user=user,
-                    file=user_data,
-                    message=message,
-                    on_tile_map=on_tile_map,
-                    on_tile_users=on_tile_users,
-                    actions=actions,
-                    descriptions=descriptions)
+        self.render(
+            "templates/user_panel.html",
+            user=user,
+            file=user_data,
+            message=message,
+            on_tile_map=on_tile_map,
+            on_tile_users=on_tile_users,
+            actions=actions,
+            descriptions=descriptions,
+        )
 
 
 class ChopHandler(BaseHandler):
@@ -414,10 +501,9 @@ class ChopHandler(BaseHandler):
 
         user_data = get_user_data(user, usersdb)
 
-        proper_tile = occupied_by(user_data["x_pos"],
-                                  user_data["y_pos"],
-                                  what="forest",
-                                  mapdb=mapdb)
+        proper_tile = occupied_by(
+            user_data["x_pos"], user_data["y_pos"], what="forest", mapdb=mapdb
+        )
         item = "axe"
 
         if not has_item(user_data, item):
@@ -427,10 +513,11 @@ class ChopHandler(BaseHandler):
             new_wood = user_data["wood"] + 1
             new_ap = user_data["action_points"] - 1
 
-            update_user_data(user=user,
-                             updated_values={"action_points": new_ap,
-                                             "wood": new_wood},
-                             user_data_dict=usersdb)
+            update_user_data(
+                user=user,
+                updated_values={"action_points": new_ap, "wood": new_wood},
+                user_data_dict=usersdb,
+            )
 
             message = "Chopping successful"
 
@@ -443,16 +530,20 @@ class ChopHandler(BaseHandler):
         user_data = get_user_data(user, usersdb)
 
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-        on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
+        on_tile_users = get_tile_users(
+            user_data["x_pos"], user_data["y_pos"], user, usersdb
+        )
 
-        self.render("templates/user_panel.html",
-                    user=user,
-                    file=user_data,
-                    message=message,
-                    on_tile_map=on_tile_map,
-                    on_tile_users=on_tile_users,
-                    actions=actions,
-                    descriptions=descriptions)
+        self.render(
+            "templates/user_panel.html",
+            user=user,
+            file=user_data,
+            message=message,
+            on_tile_map=on_tile_map,
+            on_tile_users=on_tile_users,
+            actions=actions,
+            descriptions=descriptions,
+        )
 
 
 class LoginHandler(BaseHandler):
@@ -461,7 +552,10 @@ class LoginHandler(BaseHandler):
 
         # Sanity check for username
         if not re.match("^[a-zA-Z0-9]*$", user):
-            self.render("templates/denied.html", message="Username should consist of alphanumericals only!")
+            self.render(
+                "templates/denied.html",
+                message="Username should consist of alphanumericals only!",
+            )
             return
 
         password = self.get_argument("password")
@@ -471,24 +565,30 @@ class LoginHandler(BaseHandler):
 
         if uploaded_file:
             uploaded_file = uploaded_file[0]
-            file_size = len(uploaded_file['body'])
+            file_size = len(uploaded_file["body"])
             if file_size > 50 * 1024:
-                self.render("templates/denied.html", message="Profile picture size should be less than 50 KB!")
+                self.render(
+                    "templates/denied.html",
+                    message="Profile picture size should be less than 50 KB!",
+                )
                 return
 
             # Check file extension
-            filename = uploaded_file['filename']
+            filename = uploaded_file["filename"]
             file_extension = os.path.splitext(filename)[-1].lower()
 
-            if file_extension not in ['.jpg', '.jpeg', '.png', '.gif']:
+            if file_extension not in [".jpg", ".jpeg", ".png", ".gif"]:
                 self.render("templates/denied.html", message="Invalid file type!")
                 return
 
             # Attempt to open the image using PIL
             try:
-                Image.open(io.BytesIO(uploaded_file['body']))
+                Image.open(io.BytesIO(uploaded_file["body"]))
             except:
-                self.render("templates/denied.html", message="Uploaded file is not a valid image!")
+                self.render(
+                    "templates/denied.html",
+                    message="Uploaded file is not a valid image!",
+                )
                 return
 
             save_dir = "img/pps/"
@@ -498,7 +598,7 @@ class LoginHandler(BaseHandler):
             save_path = f"img/pps/{user}{file_extension}"
 
             with open(save_path, "wb") as f:
-                f.write(uploaded_file['body'])
+                f.write(uploaded_file["body"])
 
             profile_pic_path = save_path
 
@@ -511,34 +611,40 @@ class LoginHandler(BaseHandler):
             user_data = get_user_data(user, usersdb)
 
             on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
+            on_tile_users = get_tile_users(
+                user_data["x_pos"], user_data["y_pos"], user, usersdb
+            )
 
-            self.render("templates/user_panel.html",
-                        user=user,
-                        file=user_data,
-                        message=message,
-                        on_tile_map=on_tile_map,
-                        on_tile_users=on_tile_users,
-                        actions=actions,
-                        descriptions=descriptions)
+            self.render(
+                "templates/user_panel.html",
+                user=user,
+                file=user_data,
+                message=message,
+                on_tile_map=on_tile_map,
+                on_tile_users=on_tile_users,
+                actions=actions,
+                descriptions=descriptions,
+            )
 
 
 def make_app():
-    return tornado.web.Application([
-        (r"/", MainHandler),
-        (r"/login(.*)", LoginHandler),
-        (r"/logout(.*)", LogoutHandler),
-        (r"/move(.*)", MoveHandler),
-        (r"/chop", ChopHandler),
-        (r"/conquer", ConquerHandler),
-        (r"/fight", FightHandler),
-        (r"/map", MapHandler),
-        (r"/rest(.*)", RestHandler),
-        (r"/build(.*)", BuildHandler),
-        (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),
-        (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),
-        # (r'/(favicon.ico)', tornado.web.StaticFileHandler, {"path": "graphics"}),
-    ])
+    return tornado.web.Application(
+        [
+            (r"/", MainHandler),
+            (r"/login(.*)", LoginHandler),
+            (r"/logout(.*)", LogoutHandler),
+            (r"/move(.*)", MoveHandler),
+            (r"/chop", ChopHandler),
+            (r"/conquer", ConquerHandler),
+            (r"/fight", FightHandler),
+            (r"/map", MapHandler),
+            (r"/rest(.*)", RestHandler),
+            (r"/build(.*)", BuildHandler),
+            (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),
+            (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),
+            # (r'/(favicon.ico)', tornado.web.StaticFileHandler, {"path": "graphics"}),
+        ]
+    )
 
 
 async def main():
@@ -558,6 +664,7 @@ async def main():
         shutdown_event.set()
         turn_engine.stop()
         turn_engine.join()
+        sys.exit(0)
 
     signal.signal(signal.SIGINT, handle_exit)
     signal.signal(signal.SIGTERM, handle_exit)
@@ -581,9 +688,7 @@ def init_databases():
     if not user_exists:
         create_users_db()
 
-    return {
-        'map_exists': map_exists
-    }
+    return {"map_exists": map_exists}
 
 
 def initialize_map_and_users():
@@ -597,13 +702,14 @@ if __name__ == "__main__":
     db_status = init_databases()
     mapdb, usersdb = initialize_map_and_users()
 
-    if not db_status['map_exists']:
-        spawn(mapdb=mapdb,
-              entity_class=Tree,
-              probability=0.5,
-              size=50,
-              every=10,
-              )
+    if not db_status["map_exists"]:
+        spawn(
+            mapdb=mapdb,
+            entity_class=Tree,
+            probability=0.5,
+            size=50,
+            every=10,
+        )
 
     actions = backend.TileActions()
     descriptions = backend.Descriptions()
