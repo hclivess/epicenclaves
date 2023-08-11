@@ -358,10 +358,13 @@ class ConquerHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         user_data = get_user_data(user, usersdb)
-        target = self.get_argument("target", default="home")
+        target = self.get_argument("target", default="")
 
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
 
+        message = "Something unexpected happened"
+        if not on_tile_map:
+            message = "Looks like an empty tile"
         for entry in on_tile_map:
             print("entry", entry)
             owner = get_values(entry).get("control")
@@ -371,7 +374,6 @@ class ConquerHandler(BaseHandler):
 
             elif get_values(entry).get("type") == target and user_data["action_points"] > 0:
                 remove_from_user(owner, {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]}, usersdb)
-
                 # Update the "control" attribute
                 key = get_coords(entry)
                 entry[key]['control'] = user
@@ -393,17 +395,17 @@ class ConquerHandler(BaseHandler):
 
             user_data = get_user_data(user, usersdb)
 
-            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
 
-            self.render("templates/user_panel.html",
-                        user=user,
-                        file=user_data,
-                        message=message,
-                        on_tile_map=on_tile_map,
-                        on_tile_users=on_tile_users,
-                        actions=actions,
-                        descriptions=descriptions)
+        self.render("templates/user_panel.html",
+                    user=user,
+                    file=user_data,
+                    message=message,
+                    on_tile_map=on_tile_map,
+                    on_tile_users=on_tile_users,
+                    actions=actions,
+                    descriptions=descriptions)
 
 
 class ChopHandler(BaseHandler):
