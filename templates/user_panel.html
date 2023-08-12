@@ -57,9 +57,13 @@
 .profile-container {
     display: flex;
     align-items: flex-start; /* Align items to the top */
-    /* Add the following to ensure alignment */
     justify-content: flex-start;
+    background-color: #e9ecef; /* Add a light gray background for distinction */
+    padding: 20px;  /* Add some padding to space out the content */
+    border-radius: 10px;  /* Optional: round the corners a bit for aesthetics */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Optional: add a subtle shadow for depth */
 }
+
 
     .profile-picture {
         margin-right: 20px; /* Add some space between profile picture and user statistics */
@@ -81,30 +85,42 @@
                   </div>
                   <div>
 
-<div class="card mt-3">
+<div class="card mt-6">
   <div class="card-header">
     <h4 class="card-title">Welcome, {{user}}</h4>
   </div>
   <div class="card-body">
-      <p class="card-text">Age: {{file["age"]}}</p>
-      <p class="card-text">Alive: {{file["alive"]}}</p>
-      <p class="card-text">Experience: {{file["exp"]}}</p>
-      <p class="card-text">Health Points: {{file["hp"]}}</p>
-      <p class="card-text">Armor: {{file["armor"]}}</p>
-      <p class="card-text">Population limit: {{file["pop_lim"]}}</p>
-      <p class="card-text">Action points: {{file["action_points"]}}</p>
-      <p class="card-text">Position: ({{file["x_pos"]}}, {{file["y_pos"]}})</p>
+    <div class="row">
+      <!-- First Column -->
+      <div class="col-md-8">
+        <p class="card-text">Age: {{ file.get("age", "N/A") }}</p>
+        <p class="card-text">Alive: {{ file.get("alive", "N/A") }}</p>
+        <p class="card-text">Experience: {{ file.get("exp", "N/A") }}</p>
+        <p class="card-text">Health Points: {{ file.get("hp", "N/A") }}</p>
+        <p class="card-text">Armor: {{ file.get("armor", "N/A") }}</p>
+      </div>
+
+      <!-- Second Column -->
+      <div class="col-md-6">
+        <p class="card-text">Population limit: {{ file.get("pop_lim", "N/A") }}</p>
+        <p class="card-text">Free army: {{ file.get("army_free", "N/A") }}</p>
+        <p class="card-text">Deployed army: {{ file.get("army_deployed", "N/A") }}</p>
+        <p class="card-text">Action points: {{ file.get("action_points", "N/A") }}</p>
+        <p class="card-text">Position: ({{ file.get("x_pos", "N/A") }}, {{ file.get("y_pos", "N/A") }})</p>
+      </div>
+    </div>
   </div>
 </div>
+
 
 
                   </div>
                </div>
             </div>
             <!-- Navigation menu placed next to the compact-stats -->
-            <div class="col-md-6 navigation-menu">
+    <div class="col-md-5 navigation-menu">
 
-<div class="container mt-3">
+<div class="container mt-4">
 
     <!-- First Row for Navigation Buttons -->
     <div class="row justify-content-center">
