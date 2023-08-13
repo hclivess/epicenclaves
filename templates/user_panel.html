@@ -78,21 +78,21 @@
       </div>
       <div class="container">
          <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6"> <!-- whole profile panel -->
                <div class="profile-container">
                   <div class="profile-picture">
                      <img src="{{file['img']}}" alt="Profile Picture" width="100">
                   </div>
                   <div>
 
-<div class="card mt-6">
+<div class="card md-10">
   <div class="card-header">
     <h4 class="card-title">Welcome, {{user}}</h4>
   </div>
   <div class="card-body">
     <div class="row">
       <!-- First Column -->
-      <div class="col-md-8">
+      <div class="col-md-9">
         <p class="card-text">Age: {{ file.get("age", "N/A") }}</p>
         <p class="card-text">Alive: {{ file.get("alive", "N/A") }}</p>
         <p class="card-text">Experience: {{ file.get("exp", "N/A") }}</p>
@@ -101,7 +101,7 @@
       </div>
 
       <!-- Second Column -->
-      <div class="col-md-6">
+      <div class="col-md-9">
         <p class="card-text">Population limit: {{ file.get("pop_lim", "N/A") }}</p>
         <p class="card-text">Free army: {{ file.get("army_free", "N/A") }}</p>
         <p class="card-text">Deployed army: {{ file.get("army_deployed", "N/A") }}</p>
