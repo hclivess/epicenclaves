@@ -271,7 +271,9 @@ def fight_player(entry, target_name, user_data, user, usersdb):
                     messages.append("You died")
                     update_user_data(
                         user=user,
-                        updated_values={"alive": False, "hp": 0, "action_points": 0},
+                        updated_values={"alive": False,
+                                        "hp": 0,
+                                        "action_points": 0},
                         user_data_dict=usersdb,
                     )
                 else:
@@ -286,7 +288,8 @@ def fight_player(entry, target_name, user_data, user, usersdb):
                     )
                 update_user_data(
                     user=target_name,
-                    updated_values={"exp": target_data["exp"] + 10},
+                    updated_values={"exp": target_data["exp"] + 10,
+                                    "hp": target_data["hp"]},
                     user_data_dict=usersdb,
                 )
                 break

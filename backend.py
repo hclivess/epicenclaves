@@ -15,14 +15,14 @@ def death_roll(hit_chance):
 
 
 def spawn(
-    entity_class,
-    probability,
-    mapdb,
-    start_x=1,
-    start_y=1,
-    size=101,
-    every=10,
-    max_entities=None,
+        entity_class,
+        probability,
+        mapdb,
+        start_x=1,
+        start_y=1,
+        size=101,
+        every=10,
+        max_entities=None,
 ):
     generated_count = 0
     entity_instance = entity_class()
@@ -130,14 +130,14 @@ building_costs = {
 
 class Enemy:
     def __init__(
-        self,
-        hp,
-        armor,
-        cls="enemy",
-        min_damage=0,
-        max_damage=2,
-        alive=True,
-        kill_chance=0.01,
+            self,
+            hp,
+            armor,
+            cls="enemy",
+            min_damage=0,
+            max_damage=2,
+            alive=True,
+            kill_chance=0.01,
     ):
         self.hp = hp
         self.armor = armor
@@ -184,7 +184,7 @@ def build(entity, name, user, mapdb, usersdb):
     for entry in on_tile:
         tile_data = entry.get(f"{user_data['x_pos']},{user_data['y_pos']}")
         if tile_data and (
-            tile_data["cls"] == "building" or tile_data["cls"] == "scenery"
+                tile_data["cls"] == "building" or tile_data["cls"] == "scenery"
         ):
             building_or_scenery_exists = True
             break
@@ -451,9 +451,9 @@ def update_user_data(user, updated_values, user_data_dict):
 
     for key, value in updated_values.items():
         if (
-            key == "construction"
-            and "construction" in user_entry
-            and isinstance(value, dict)
+                key == "construction"
+                and "construction" in user_entry
+                and isinstance(value, dict)
         ):
             for coord, construction_info in value.items():
                 user_entry["construction"][coord] = construction_info
@@ -477,7 +477,7 @@ def remove_from_user(user, construction_coordinates, user_data_dict):
 def get_map_data_limit(x_pos, y_pos, map_data_dict, distance=500):
     for coords, data_str in map_data_dict.items():
         x_map, y_map = map(int, coords.split(","))
-        if (x_map - x_pos) ** 2 + (y_map - y_pos) ** 2 <= distance**2:
+        if (x_map - x_pos) ** 2 + (y_map - y_pos) ** 2 <= distance ** 2:
             map_data_dict[coords] = data_str
     return map_data_dict
 
