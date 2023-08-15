@@ -13,6 +13,7 @@ import tornado.ioloop
 import tornado.web
 import tornado.escape
 
+import descriptions
 from turn_engine import TurnEngine
 import backend
 from backend import (
@@ -715,7 +716,7 @@ if __name__ == "__main__":
         )
 
     actions = backend.TileActions()
-    descriptions = backend.Descriptions()
+    descriptions = descriptions.Descriptions()
 
     turn_engine = TurnEngine(usersdb, mapdb)
     turn_engine.start()

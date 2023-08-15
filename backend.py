@@ -2,6 +2,7 @@ import os
 import random
 from hashlib import blake2b
 
+from costs import building_costs
 from sqlite import get_map_at_coords, save_map_data, get_users_at_coords
 
 if not os.path.exists("db"):
@@ -120,14 +121,6 @@ def has_resources(user_data, cost):
     return True
 
 
-# Defining cost structures for entities
-building_costs = {
-    "house": {"wood": 50},
-    "inn": {"wood": 50},
-    # Add more entities and their cost structures here
-}
-
-
 class Enemy:
     def __init__(
             self,
@@ -181,11 +174,10 @@ def build(entity, name, user, mapdb, usersdb):
 
     # Check if a building or scenery already exists on the tile
     building_or_scenery_exists = False
+
     for entry in on_tile:
         tile_data = entry.get(f"{user_data['x_pos']},{user_data['y_pos']}")
-        if tile_data and (
-                tile_data["cls"] == "building" or tile_data["cls"] == "scenery"
-        ):
+        if tile_data and (tile_data["cls"] == "building" or tile_data["cls"] == "scenery"):
             building_or_scenery_exists = True
             break
 
@@ -216,14 +208,7 @@ def build(entity, name, user, mapdb, usersdb):
     update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
 
     # Prepare and update the map data for the entity
-    entity_data = {
-        "type": entity,
-        "name": name,
-        "hp": 100,
-        "size": 1,
-        "control": user,
-        "cls": "building",
-    }
+    entity_data = {"type": entity, "name": name, "hp": 100, "size": 1, "control": user, "cls": "building"}
     data = {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data}
     update_user_data(
         user=user, updated_values={"construction": data}, user_data_dict=usersdb
@@ -327,20 +312,6 @@ class TileActions:
             actions = []
 
         return actions
-
-
-class Descriptions:
-    def get(self, type):
-        if type == "axe":
-            description = "A tool to cut wood with in the forest."
-        elif type == "house":
-            description = "A place for people to live in. Building a house increases your population limit. Cost: 🪵50"
-        elif type == "inn":
-            description = "A place to rest and restore health."
-        else:
-            description = "Description missing."
-
-        return description
 
 
 def has_item(data, item_type):

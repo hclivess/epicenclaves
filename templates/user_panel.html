@@ -103,6 +103,7 @@
       <!-- Second Column -->
       <div class="col-md-9">
         <p class="card-text">Population limit: {{ file.get("pop_lim", "N/A") }}</p>
+        <p class="card-text">Peasants: {{ file.get("peasants", "N/A") }}</p>
         <p class="card-text">Free army: {{ file.get("army_free", "N/A") }}</p>
         <p class="card-text">Deployed army: {{ file.get("army_deployed", "N/A") }}</p>
         <p class="card-text">Action points: {{ file.get("action_points", "N/A") }}</p>
@@ -185,32 +186,38 @@
 
                <div class="row mb-3">
                   <div class="col">
-                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=mine&name=town1">Mine</a>
+                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=mine&name=town1">
+                       <img src="/img/assets/mine.png" alt="Mine Icon" class="menu-icon"> Mine</a>
+
                      <p>{{descriptions.get("mine")}}</p>
                   </div>
                </div>
                <div class="row mb-3">
                   <div class="col">
-                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=farm&name=town1">Farm</a>
+                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=farm&name=town1">
+                       <img src="/img/assets/farm.png" alt="Farm Icon" class="menu-icon"> Farm</a>
+
                      <p>{{descriptions.get("farm")}}</p>
                   </div>
                </div>
                <div class="row mb-3">
                   <div class="col">
-                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=barracks&name=town1">Barracks</a>
+                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=barracks&name=town1">
+                       <img src="/img/assets/barracks.png" alt="Barracks Icon" class="menu-icon"> Barracks</a>
                      <p>{{descriptions.get("barracks")}}</p>
                   </div>
                </div>
                <div class="row mb-3">
                   <div class="col">
-                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=sawmill&name=wc1">Sawmill</a>
+                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=sawmill&name=wc1">
+                       <img src="/img/assets/sawmill.png" alt="Sawmill Icon" class="menu-icon"> Sawmill</a>
                      <p>{{descriptions.get("sawmill")}}</p>
                   </div>
                </div>
                <div class="row mb-3">
                   <div class="col">
                      <a class="btn btn-light btn-lg btn-block" href="/build?entity=inn&name=wc1">
-                      <img src="/img/assets/inn.png" alt="House Icon" class="menu-icon"> Inn</a>
+                      <img src="/img/assets/inn.png" alt="Inn Icon" class="menu-icon"> Inn</a>
                       <p>{{descriptions.get("inn")}}</p>
                   </div>
                </div>
