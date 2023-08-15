@@ -49,3 +49,8 @@ General Features:
 
 - at the end of a fight when you are losing, roll a dice for survival
 - loading of user data should be replaced with an object, with dict updated only at the end through one of the object's functions
+- age of empires
+- automatic training and combinations of units based on building
+- drop from users on death also based on probability
+- Dominion
+- Age of Empires
