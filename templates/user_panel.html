@@ -168,93 +168,128 @@
 
             </div>
          </div>
-      </div>
+
+<!-- Current Tile and Inventory -->
+<div class="container">
+    <div class="row">
+        <!-- Current Tile -->
+        <div class="col-md-4">
+            <h4>Current Tile</h4>
+            {% for entry in on_tile_map %}
+            <div class="row">
+                <div class="col-md-6 pr-md-1">
+                    <p>Type: {{ list(entry.values())[0].get("type") }}</p>
+                    <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Icon" class="menu-icon"></p>
+                    <p>Control: {{ list(entry.values())[0].get("control") }}</p>
+                </div>
+                <div class="col-md-6 pl-md-1">
+                    <p style="text-align: left;">Actions:</p>
+                    {% for action in actions.get(entry) %}
+                    <div class="p-1">
+                        <a id="btnAct2" class="btn btn-light btn-lg" href="{{ action['action'] }}" role="button">{{ action['name'] }}</a>
+                    </div>
+                    {% end %}
+                </div>
+            </div>
+            {% end %}
+        </div>
+
+        <!-- Inventory Column -->
+        <div class="col-md-4">
+            <h4>Inventory</h4>
+            {% for item in file["equipped"] %}
+            <div class="col">
+                <p>Type: {{item["type"]}}</p>
+                <p><img src=/img/assets/{{item["type"]}}.png alt="Item Icon" class="menu-icon"></p>
+                <p>{{descriptions.get(item["type"])}}</p>
+            </div>
+            {% end %}
+        </div>
+    </div>
+</div>
+
+
+
+
 
       <div class="container">
             <hr/>
 
-         <div class="row mb-3 align-items-start">
-            <!-- Construction menu column -->
-            <div class="col-md-6">
-               <h4>Construction Menu</h4>
-               <div class="row mb-3">
-                  <div class="col">
-                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=house&name=town1">
-                        <img src="/img/assets/house.png" alt="House Icon" class="menu-icon"> House
-                     </a>
-                     <p>{{descriptions.get("house")}}</p>
-                  </div>
-               </div>
+          <!-- acquired column -->
+<div class="col-md-6">
+    <h4>Acquired Tiles</h4>
+    <div class="row">  <!-- Add a row div to contain the columns -->
+        {% for coord, building in file["construction"].items() %}
+        <div class="col-md-4"> <!-- Set this to col-md-4 to make 3 columns -->
 
-               <div class="row mb-3">
-                  <div class="col">
-                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=mine&name=town1">
-                       <img src="/img/assets/mine.png" alt="Mine Icon" class="menu-icon"> Mine</a>
+            <p>Type: {{ building.get("type") }}</p>
+            <p><img src="/img/assets/{{building.get('type')}}.png" alt="Item Icon" class="menu-icon"></p>
+            <p>Position: ({{ coord }})</p>
+            <p>Hitpoints: {{ building.get("hp") }}</p>
+        </div>
+        {% end %}
+    </div> <!-- Close the row div -->
+</div>
 
-                     <p>{{descriptions.get("mine")}}</p>
-                  </div>
-               </div>
-               <div class="row mb-3">
-                  <div class="col">
-                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=farm&name=town1">
-                       <img src="/img/assets/farm.png" alt="Farm Icon" class="menu-icon"> Farm</a>
-
-                     <p>{{descriptions.get("farm")}}</p>
-                  </div>
-               </div>
-               <div class="row mb-3">
-                  <div class="col">
-                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=barracks&name=town1">
-                       <img src="/img/assets/barracks.png" alt="Barracks Icon" class="menu-icon"> Barracks</a>
-                     <p>{{descriptions.get("barracks")}}</p>
-                  </div>
-               </div>
-               <div class="row mb-3">
-                  <div class="col">
-                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=sawmill&name=wc1">
-                       <img src="/img/assets/sawmill.png" alt="Sawmill Icon" class="menu-icon"> Sawmill</a>
-                     <p>{{descriptions.get("sawmill")}}</p>
-                  </div>
-               </div>
-               <div class="row mb-3">
-                  <div class="col">
-                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=inn&name=wc1">
-                      <img src="/img/assets/inn.png" alt="Inn Icon" class="menu-icon"> Inn</a>
-                      <p>{{descriptions.get("inn")}}</p>
-                  </div>
-               </div>
-               <div class="row mb-3">
-                  <div class="col">
-                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=inn&name=wc1">
-                      <img src="/img/assets/inn.png" alt="Inn Icon" class="menu-icon"> Inn</a>
-                      <p>{{descriptions.get("inn")}}</p>
-                  </div>
-               </div>
-
+<hr/>
+<div class="row mb-3 align-items-start">
+    <!-- Construction menu column -->
+    <div class="col-md-12">
+        <h4>Construction Menu</h4>
+        <div class="row">
+            <!-- First Row -->
+            <div class="col-md-4">
+                <a class="btn btn-light btn-lg btn-block" href="/build?entity=house&name=town1">
+                    <img src="/img/assets/house.png" alt="House Icon" class="menu-icon"> House
+                </a>
+                <p>{{descriptions.get("house")}}</p>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-light btn-lg btn-block" href="/build?entity=mine&name=town1">
+                    <img src="/img/assets/mine.png" alt="Mine Icon" class="menu-icon"> Mine
+                </a>
+                <p>{{descriptions.get("mine")}}</p>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-light btn-lg btn-block" href="/build?entity=farm&name=town1">
+                    <img src="/img/assets/farm.png" alt="Farm Icon" class="menu-icon"> Farm
+                </a>
+                <p>{{descriptions.get("farm")}}</p>
             </div>
 
-<!-- tile column -->
-<div class="col-md-6">
-    <h4>Current Tile</h4>
+            <!-- Second Row -->
+            <div class="col-md-4">
+                <a class="btn btn-light btn-lg btn-block" href="/build?entity=barracks&name=town1">
+                    <img src="/img/assets/barracks.png" alt="Barracks Icon" class="menu-icon"> Barracks
+                </a>
+                <p>{{descriptions.get("barracks")}}</p>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-light btn-lg btn-block" href="/build?entity=sawmill&name=wc1">
+                    <img src="/img/assets/sawmill.png" alt="Sawmill Icon" class="menu-icon"> Sawmill
+                </a>
+                <p>{{descriptions.get("sawmill")}}</p>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-light btn-lg btn-block" href="/build?entity=inn&name=wc1">
+                    <img src="/img/assets/inn.png" alt="Inn Icon" class="menu-icon"> Inn
+                </a>
+                <p>{{descriptions.get("inn")}}</p>
+            </div>
 
-    <!-- Displaying entities on the tile -->
-    {% for entry in on_tile_map %}
-    <div class="row"> <!-- Create a new row for each entry -->
-        <div class="col-md-6 pr-md-1">
-            <p>Type: {{ list(entry.values())[0].get("type") }}</p>
-            <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Icon" class="menu-icon"></p>
-            <p>Control: {{ list(entry.values())[0].get("control") }}</p>
+            <!-- Third Row -->
+            <div class="col-md-4">
+                <a class="btn btn-light btn-lg btn-block" href="/build?entity=archery_range&name=wc1">
+                    <img src="/img/assets/archery_range.png" alt="Archery Range Icon" class="menu-icon"> Archery Range
+                </a>
+                <p>{{descriptions.get("archery_range")}}</p>
+            </div>
+            <!-- Add more construction options in similar format as needed -->
         </div>
-        <div class="col-md-6 pl-md-1">
-            <p style="text-align: left;">Actions:</p>
-            {% for action in actions.get(entry) %}
-                <div class="p-1">
-                    <a id="btnAct2" class="btn btn-light btn-lg" href="{{ action['action'] }}" role="button">{{ action['name'] }}</a>
-                </div>
-            {% end %}
-        </div>
-    </div> <!-- Close the row for each entry -->
-    {% end %}
+    </div>
+</div>
+
+
 
     <!-- Displaying users on the tile -->
     {% for entry in on_tile_users %}
@@ -278,45 +313,8 @@
 
 
 
-
-            <!-- items column -->
-            <div class="col-md-6">
-               <h4>Inventory</h4>
-
-                  {%for item in file["items"]%}
-               <div class="col">
-                <p>Type: {{item["type"]}}</p>
-                <p><img src=/img/assets/{{item["type"]}}.png alt="Item Icon" class="menu-icon"></p>
-                <p>{{descriptions.get(item["type"])}}</p>
-               </div>
-
-                  {%end%}
-
-
-            </div>
-
-            <!-- buildings column -->
-<div class="col-md-6">
-    <h4>Acquired Tiles</h4>
-    <div class="row">  <!-- Add a row div to contain the columns -->
-        {% for coord, building in file["construction"].items() %}
-        <div class="col-md-4"> <!-- Set this to col-md-4 to make 3 columns -->
-
-            <p>Type: {{ building.get("type") }}</p>
-            <p><img src="/img/assets/{{building.get('type')}}.png" alt="Item Icon" class="menu-icon"></p>
-            <p>Position: ({{ coord }})</p>
-            <p>Hitpoints: {{ building.get("hp") }}</p>
-        </div>
-        {% end %}
-    </div> <!-- Close the row div -->
-</div>
-
-
-
-
          </div>
 
-      </div>
 
       <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.min.js"></script>

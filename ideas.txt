@@ -33,13 +33,7 @@ Personal Items:
 
 Army Constitution:
 - Turns to build units/buildings?
-- Detailed battle simulation (inspired by Warlords III)
-- Imperium Galactica
-- Factorio
-- Dwarf Fortress-like mechanics
-- Travian-like mechanics
-- Red Dragon-like mechanics
-- Diablo-like items with rolled stats
+
 
 General Features:
 - Index map positions to map JSON file based on X, Y (supporting more than 100 players)
@@ -54,3 +48,11 @@ General Features:
 - drop from users on death also based on probability
 - Dominion
 - Age of Empires
+- Detailed battle simulation (inspired by Warlords III)
+- Imperium Galactica
+- Factorio
+- Dwarf Fortress-like mechanics
+- Travian-like mechanics
+- Red Dragon-like mechanics
+- Diablo-like items with rolled stats
+- Rise of Nations

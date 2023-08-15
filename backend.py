@@ -315,7 +315,7 @@ class TileActions:
 
 
 def has_item(data, item_type):
-    items = data.get("items", [])
+    items = data.get("equipped", [])
 
     for item in items:
         if item.get("type") == item_type:
