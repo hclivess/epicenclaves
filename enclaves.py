@@ -36,6 +36,7 @@ from backend import (
     remove_from_user,
     get_surrounding_map_and_user_data,
     get_values,
+    owned_by
 )
 from auth import (
     auth_cookie_get,
@@ -548,8 +549,12 @@ class ChopHandler(BaseHandler):
         )
         item = "axe"
 
+        under_control = owned_by(user_data["x_pos"], user_data["y_pos"], control=user, mapdb=mapdb)
+
         if not has_item(user_data, item):
             message = f"You have no {item} at hand"
+        elif not under_control:
+            message = "You do not own this forrest"
 
         elif proper_tile and user_data["action_points"] > 0:
             new_wood = user_data["wood"] + 1

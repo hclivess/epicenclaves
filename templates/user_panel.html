@@ -196,8 +196,19 @@
 
         <!-- Inventory Column -->
         <div class="col-md-4">
-            <h4>Inventory</h4>
+            <h4>Equipped</h4>
             {% for item in file["equipped"] %}
+            <div class="col">
+                <p>Type: {{item["type"]}}</p>
+                <p><img src=/img/assets/{{item["type"]}}.png alt="Item Icon" class="menu-icon"></p>
+                <p>{{descriptions.get(item["type"])}}</p>
+            </div>
+            {% end %}
+        </div>
+
+                <div class="col-md-4">
+            <h4>Inventory</h4>
+            {% for item in file["unequipped"] %}
             <div class="col">
                 <p>Type: {{item["type"]}}</p>
                 <p><img src=/img/assets/{{item["type"]}}.png alt="Item Icon" class="menu-icon"></p>

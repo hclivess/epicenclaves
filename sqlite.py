@@ -167,7 +167,7 @@ def create_user(user_data_dict, user, x_pos=1, y_pos=1, profile_pic=""):
         "food": 500,
         "bismuth": 500,
         "equipped": [{"type": "axe", "damage": 1, "durability": 100, "cls": "melee"}],
-        "unequipped": [{"type": "fist", "damage": 1, "durability": 100, "cls": "melee"}],
+        "unequipped": [{"type": "dagger", "damage": 2, "durability": 100, "cls": "melee"}],
         "pop_lim": 0,
         "alive": True,
         "online": True,
