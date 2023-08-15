@@ -88,6 +88,9 @@
 <div class="card md-10">
   <div class="card-header">
     <h4 class="card-title">Welcome, {{user}}</h4>
+      {% if not file.get("alive", "N/A") and file.get("action_points", "N/A") > 5000 %}
+      <a class="btn btn-light btn-lg btn-block" href="/revive"> 💀 Revive 💀 </a>
+      {% end %}
   </div>
   <div class="card-body">
     <div class="row">
@@ -104,8 +107,7 @@
       <div class="col-md-9">
         <p class="card-text">Population limit: {{ file.get("pop_lim", "N/A") }}</p>
         <p class="card-text">Peasants: {{ file.get("peasants", "N/A") }}</p>
-        <p class="card-text">Free army: {{ file.get("army_free", "N/A") }}</p>
-        <p class="card-text">Deployed army: {{ file.get("army_deployed", "N/A") }}</p>
+        <p class="card-text">Army: {{ file.get("army_free", "N/A") }} / {{ file.get("army_deployed", "N/A") }}</p>
         <p class="card-text">Action points: {{ file.get("action_points", "N/A") }}</p>
         <p class="card-text">Position: ({{ file.get("x_pos", "N/A") }}, {{ file.get("y_pos", "N/A") }})</p>
       </div>
@@ -212,6 +214,13 @@
                      <a class="btn btn-light btn-lg btn-block" href="/build?entity=sawmill&name=wc1">
                        <img src="/img/assets/sawmill.png" alt="Sawmill Icon" class="menu-icon"> Sawmill</a>
                      <p>{{descriptions.get("sawmill")}}</p>
+                  </div>
+               </div>
+               <div class="row mb-3">
+                  <div class="col">
+                     <a class="btn btn-light btn-lg btn-block" href="/build?entity=inn&name=wc1">
+                      <img src="/img/assets/inn.png" alt="Inn Icon" class="menu-icon"> Inn</a>
+                      <p>{{descriptions.get("inn")}}</p>
                   </div>
                </div>
                <div class="row mb-3">

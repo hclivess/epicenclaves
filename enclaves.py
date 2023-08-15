@@ -186,6 +186,44 @@ class MoveHandler(BaseHandler):
             )
 
 
+class ReviveHandler(BaseHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        user_data = get_user_data(user, usersdb)
+
+        if user_data.get("action_points") > 5000:
+            new_ap = user_data["action_points"] - 5000
+
+            update_user_data(
+                user=user,
+                updated_values={"alive": True,
+                                "hp": 100,
+                                "action_points": new_ap},
+                user_data_dict=usersdb,
+            )
+            message = "You awaken from the dead"
+        else:
+            message = "There is no way to revive you"
+
+        user_data = get_user_data(user, usersdb)
+
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile_users = get_tile_users(
+            user_data["x_pos"], user_data["y_pos"], user, usersdb
+        )
+
+        self.render(
+            "templates/user_panel.html",
+            user=user,
+            file=user_data,
+            message=message,
+            on_tile_map=on_tile_map,
+            on_tile_users=on_tile_users,
+            actions=actions,
+            descriptions=descriptions,
+        )
+
+
 class RestHandler(BaseHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
@@ -449,8 +487,8 @@ class ConquerHandler(BaseHandler):
                 message = "You already own this tile"
 
             elif (
-                get_values(entry).get("type") == target
-                and user_data["action_points"] > 0
+                    get_values(entry).get("type") == target
+                    and user_data["action_points"] > 0
             ):
                 remove_from_user(
                     owner,
@@ -644,6 +682,7 @@ def make_app():
             (r"/map", MapHandler),
             (r"/rest(.*)", RestHandler),
             (r"/build(.*)", BuildHandler),
+            (r"/revive", ReviveHandler),
             (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),
             (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),
             # (r'/(favicon.ico)', tornado.web.StaticFileHandler, {"path": "graphics"}),
