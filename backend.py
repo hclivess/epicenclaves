@@ -457,6 +457,10 @@ def get_values(entry):
     return list(entry.values())[0]
 
 
+def get_buildings(user_data):
+    return list(user_data.get("construction").values())
+
+
 def get_surrounding_map_and_user_data(user, user_data_dict, map_data_dict):
     # Check if the specified user is in the user_data_dict
     if user not in user_data_dict:
