@@ -9,7 +9,7 @@ class Descriptions:
         elif type == "farm":
             description = "Generates food and peasants if housing is available."
         elif type == "barracks":
-            description = "Two turn peasants into soldiers for food and additional housing."
+            description = "Two turn peasants into soldiers for 2 food per turn and additional housing."
         elif type == "sawmill":
             description = "Collects wood on its own."
         elif type == "mine":

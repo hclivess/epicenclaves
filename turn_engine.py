@@ -49,18 +49,31 @@ class TurnEngine(threading.Thread):
 
                 food = user_data["food"]
 
-                # Count farms and barracks, and update peasants
+                # Count farms and barracks
                 farms = sum(1 for entry in get_buildings(user_data) if entry.get("type") == "farm")
                 barracks = sum(1 for entry in get_buildings(user_data) if entry.get("type") == "barracks")
 
-                updated_values["peasants"] = user_data["peasants"] + min(farms, user_data["pop_lim"])
+                # Calculate potential army and peasants addition while respecting the pop_lim
+                potential_army_free = min(food, user_data["peasants"], barracks)
+                potential_peasants_addition = min(farms,
+                                                  user_data["pop_lim"] - (user_data["peasants"] + potential_army_free))
 
-                # Calculate the maximum number of free_armies that can be produced considering food, peasants, and barracks
-                potential_free_army = min(food, updated_values["peasants"], barracks)
+                updated_values["army_free"] = user_data.get("army_free", 0) + potential_army_free
+                updated_values["peasants"] = user_data["peasants"] + potential_peasants_addition
 
-                updated_values["free_army"] = user_data.get("free_army", 0) + potential_free_army
-                updated_values["food"] = food - potential_free_army
-                updated_values["peasants"] -= potential_free_army
+                updated_values["food"] = food - 2 * potential_army_free
+
+                # Ensure the sum of army and peasants does not exceed pop_lim
+                total_population = updated_values["peasants"] + updated_values["army_free"]
+                while total_population > user_data["pop_lim"]:
+                    if potential_army_free > 0:
+                        potential_army_free -= 1
+                        updated_values["army_free"] -= 1
+                        total_population -= 1
+                    else:
+                        potential_peasants_addition -= 1
+                        updated_values["peasants"] -= 1
+                        total_population -= 1
 
                 # Increase food by one for every leftover peasant
                 updated_values["food"] += updated_values["peasants"]
