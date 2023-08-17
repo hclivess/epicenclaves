@@ -196,7 +196,7 @@ def build(entity, name, user, mapdb, usersdb):
 
     # Conditionally increase the pop_lim based on the entity
     if entity == "house":
-        user_data["pop_lim"] += 10
+        user_data["pop_lim"] += 10  # todo remove points on takeover
 
     # Update user's data
     updated_values = {
@@ -208,7 +208,13 @@ def build(entity, name, user, mapdb, usersdb):
     update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
 
     # Prepare and update the map data for the entity
-    entity_data = {"type": entity, "name": name, "hp": 100, "size": 1, "control": user, "cls": "building"}
+    entity_data = {"type": entity,
+                   "name": name,
+                   "size": 1,
+                   "control": user,
+                   "cls": "building",
+                   "soldiers": 0}
+
     data = {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data}
     update_user_data(
         user=user, updated_values={"construction": data}, user_data_dict=usersdb
@@ -278,40 +284,6 @@ def attempt_rest(user, user_data, hours_arg, usersdb, mapdb):
         user_data_dict=usersdb,
     )
     return "You feel more rested"
-
-
-class TileActions:
-    def get(self, entry):
-        type = list(entry.values())[0].get("type")
-        if type == "player":
-            name = list(entry.keys())[0]
-            print("name", name)
-        else:
-            name = None
-
-        if type == "inn":
-            actions = [
-                {"name": "sleep 10 hours", "action": "/rest?hours=10"},
-                {"name": "sleep 20 hours", "action": "/rest?hours=20"},
-                {"name": "conquer", "action": f"/conquer?target={type}"},
-            ]
-        elif type == "forest":
-            actions = [
-                {"name": "chop", "action": "/chop"},
-                {"name": "conquer", "action": f"/conquer?target={type}"},
-            ]
-        elif type == "house":
-            actions = [{"name": "conquer", "action": f"/conquer?target={type}"}]
-        elif type == "boar":
-            actions = [{"name": "fight", "action": f"/fight?target={type}"}]
-        elif type == "player":
-            actions = [
-                {"name": "challenge", "action": f"/fight?target={type}&name={name}"}
-            ]
-        else:
-            actions = []
-
-        return actions
 
 
 def has_item(data, item_type):

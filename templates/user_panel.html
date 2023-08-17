@@ -181,6 +181,7 @@
                     <p>Type: {{ list(entry.values())[0].get("type") }}</p>
                     <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Icon" class="menu-icon"></p>
                     <p>Control: {{ list(entry.values())[0].get("control") }}</p>
+                    <p>Soldiers: {{ list(entry.values())[0].get("soldiers") }}</p>
                 </div>
                 <div class="col-md-6 pl-md-1">
                     <p style="text-align: left;">Actions:</p>
@@ -236,7 +237,7 @@
             <p>Type: {{ building.get("type") }}</p>
             <p><img src="/img/assets/{{building.get('type')}}.png" alt="Item Icon" class="menu-icon"></p>
             <p>Position: ({{ coord }})</p>
-            <p>Hitpoints: {{ building.get("hp") }}</p>
+            <p>Soldiers: {{ building.get("soldiers") }}</p>
         </div>
         {% end %}
     </div> <!-- Close the row div -->

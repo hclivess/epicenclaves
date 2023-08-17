@@ -13,6 +13,7 @@ import tornado.ioloop
 import tornado.web
 import tornado.escape
 
+import actions
 import descriptions
 from turn_engine import TurnEngine
 import backend
@@ -759,7 +760,7 @@ if __name__ == "__main__":
             every=10,
         )
 
-    actions = backend.TileActions()
+    actions = actions.TileActions()
     descriptions = descriptions.Descriptions()
 
     turn_engine = TurnEngine(usersdb, mapdb)
