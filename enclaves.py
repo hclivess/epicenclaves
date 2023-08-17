@@ -131,7 +131,7 @@ class DeployArmyHandler(BaseHandler):
             user_data["x_pos"], user_data["y_pos"], user, usersdb
         )
 
-        deploy_army(user, on_tile_map, usersdb, mapdb, user_data)
+        message = deploy_army(user, on_tile_map, usersdb, mapdb, user_data)
 
         self.render(
             "templates/user_panel.html",
