@@ -20,6 +20,11 @@ class TileActions:
                 {"name": "conquer", "action": f"/conquer?target={type}"},
                 {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},
             ]
+        elif type == "farm":
+            actions = [
+                {"name": "conquer", "action": f"/conquer?target={type}"},
+                {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},
+            ]
         elif type == "house":
             actions = [{"name": "conquer", "action": f"/conquer?target={type}"},
                        {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},

@@ -1,4 +1,5 @@
 from backend import get_values, remove_from_user, update_map_data, update_user_data, get_coords
+import random
 
 
 def attack_success(attacker, defender):
@@ -28,8 +29,11 @@ def conquer(user, target, on_tile_map, usersdb, mapdb, user_data):
         if owner == user:
             return "You already own this tile"
 
-        if get_values(entry).get("type") != target or user_data["action_points"] <= 0:
+        if get_values(entry).get("type") != target:
             return "Cannot acquire this type of tile"
+
+        if user_data["action_points"] < 10:
+            return "You need at least 10 action points to attack"
 
         your_army = user_data.get("army_free")
         enemy_army = get_values(entry).get("soldiers")
@@ -37,6 +41,10 @@ def conquer(user, target, on_tile_map, usersdb, mapdb, user_data):
         conquered = attack_success(attacker=your_army, defender=enemy_army)
 
         if not conquered:
+            update_user_data(user=user, updated_values={
+                "action_points": user_data["action_points"] - 10,
+                "army_free": 0
+            }, user_data_dict=usersdb)
             return "Your army was defeated in battle!"
 
         # Subtract enemy army from user army, but not less than 0
