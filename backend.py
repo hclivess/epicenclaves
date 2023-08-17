@@ -452,3 +452,7 @@ def get_surrounding_map_and_user_data(user, user_data_dict, map_data_dict):
     }
 
     return result
+
+
+def get_coords(entry):
+    return list(entry.keys())[0]

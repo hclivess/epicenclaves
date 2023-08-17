@@ -15,6 +15,7 @@ import tornado.escape
 
 import actions
 import descriptions
+from conquer import conquer
 from turn_engine import TurnEngine
 from backend import (
     build,
@@ -33,10 +34,9 @@ from backend import (
     remove_from_map,
     get_user,
     update_user_data,
-    remove_from_user,
     get_surrounding_map_and_user_data,
     get_values,
-    owned_by
+    owned_by, get_coords
 )
 from auth import (
     auth_cookie_get,
@@ -55,10 +55,6 @@ from sqlite import (
 )
 
 max_size = 1000000
-
-
-def get_coords(entry):
-    return list(entry.keys())[0]
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -537,49 +533,7 @@ class ConquerHandler(BaseHandler):
 
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
 
-        message = "Something unexpected happened"
-        if not on_tile_map:
-            message = "Looks like an empty tile"
-        for entry in on_tile_map:
-            print("entry", entry)
-            owner = get_values(entry).get("control")
-
-            if owner == user:
-                message = "You already own this tile"
-
-            elif (
-                    get_values(entry).get("type") == target
-                    and user_data["action_points"] > 0
-            ):
-                remove_from_user(
-                    owner,
-                    {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]},
-                    usersdb,
-                )
-                # Update the "control" attribute
-                key = get_coords(entry)
-                entry[key]["control"] = user
-
-                # Construct the updated data for the specific position
-                updated_data = entry
-
-                update_map_data(updated_data, mapdb)
-
-                # Call the update function
-                update_user_data(
-                    user=user,
-                    updated_values={
-                        "construction": updated_data,
-                        "action_points": user_data["action_points"] - 1,
-                    },
-                    user_data_dict=usersdb,
-                )
-
-                message = "Takeover successful"
-            else:
-                message = "Cannot acquire this type of tile"
-
-            user_data = get_user_data(user, usersdb)
+        message = conquer(user, target, on_tile_map, usersdb, mapdb, user_data)
 
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
         on_tile_users = get_tile_users(
