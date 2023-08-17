@@ -16,7 +16,6 @@ import tornado.escape
 import actions
 import descriptions
 from turn_engine import TurnEngine
-import backend
 from backend import (
     build,
     occupied_by,
@@ -121,6 +120,65 @@ class MapHandler(BaseHandler):
 
         print("data", data)  # debug
         self.render("templates/map.html", data=data, ensure_ascii=False)
+
+
+class DeployArmyHandler(BaseHandler):
+    def get(self, data):
+        type = self.get_argument("type")
+        user = tornado.escape.xhtml_escape(self.current_user)
+
+        # message = build(entity, name, user, mapdb, usersdb=usersdb)
+
+        user_data = get_user_data(user, usersdb=usersdb)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile_users = get_tile_users(
+            user_data["x_pos"], user_data["y_pos"], user, usersdb
+        )
+
+        under_control = owned_by(user_data["x_pos"], user_data["y_pos"], control=user, mapdb=mapdb)
+
+        if not under_control:
+            message = "This building needs to be conquered first"
+
+        elif user_data["action_points"] < 1:
+            message = "Not enough action points to build"
+
+        elif not user_data.get("army_free") > 0:
+            message = "Not enough free army available"
+        else:
+
+            for entry in on_tile_map:
+                entry_cls = get_values(entry).get("cls")
+                if entry_cls == "building":
+
+                    print(on_tile_map)
+                    message = "Soldiers deployed"
+
+                    update_user_data(user,
+                                     updated_values={"army_free": user_data.get("army_free") - 1,
+                                                     "action_points": user_data.get("action_points") - 1},
+                                     user_data_dict=usersdb)
+
+                    # Update map
+                    key = get_coords(entry)
+                    entry[key]["soldiers"] += 1
+                    updated_data = entry
+
+                    update_map_data(updated_data, mapdb)
+
+                else:
+                    message = "Army must be stationed on a building"
+
+        self.render(
+            "templates/user_panel.html",
+            user=user,
+            file=user_data,
+            message=message,
+            on_tile_map=on_tile_map,
+            on_tile_users=on_tile_users,
+            actions=actions,
+            descriptions=descriptions,
+        )
 
 
 class BuildHandler(BaseHandler):
@@ -689,6 +747,7 @@ def make_app():
             (r"/rest(.*)", RestHandler),
             (r"/build(.*)", BuildHandler),
             (r"/revive", ReviveHandler),
+            (r"/deploy(.*)", DeployArmyHandler),
             (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),
             (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),
             # (r'/(favicon.ico)', tornado.web.StaticFileHandler, {"path": "graphics"}),
