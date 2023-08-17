@@ -430,7 +430,15 @@ def get_values(entry):
 
 
 def get_buildings(user_data):
-    return list(user_data.get("construction").values())
+    if user_data is None:
+        return []
+
+    construction = user_data.get("construction")
+
+    if construction is None:
+        return []
+
+    return list(construction.values())
 
 
 def get_surrounding_map_and_user_data(user, user_data_dict, map_data_dict):

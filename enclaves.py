@@ -16,6 +16,7 @@ import tornado.escape
 import actions
 import descriptions
 from conquer import conquer
+from deploy_army import deploy_army
 from turn_engine import TurnEngine
 from backend import (
     build,
@@ -30,7 +31,6 @@ from backend import (
     get_tile_map,
     get_tile_users,
     has_item,
-    update_map_data,
     remove_from_map,
     get_user,
     update_user_data,
@@ -131,40 +131,7 @@ class DeployArmyHandler(BaseHandler):
             user_data["x_pos"], user_data["y_pos"], user, usersdb
         )
 
-        under_control = owned_by(user_data["x_pos"], user_data["y_pos"], control=user, mapdb=mapdb)
-
-        if not under_control:
-            message = "This building needs to be conquered first"
-
-        elif user_data["action_points"] < 1:
-            message = "Not enough action points to build"
-
-        elif not user_data.get("army_free") > 0:
-            message = "Not enough free army available"
-        else:
-
-            for entry in on_tile_map:
-                """loop because only one structure is allowed per tile"""
-                entry_cls = get_values(entry).get("cls")
-                if entry_cls == "building":
-
-                    print(on_tile_map)
-                    message = "Soldiers deployed"
-
-                    update_user_data(user,
-                                     updated_values={"army_free": user_data.get("army_free") - 1,
-                                                     "action_points": user_data.get("action_points") - 1},
-                                     user_data_dict=usersdb)
-
-                    # Update map
-                    key = get_coords(entry)
-                    entry[key]["soldiers"] += 1
-                    updated_data = entry
-
-                    update_map_data(updated_data, mapdb)
-
-                else:
-                    message = "Army must be stationed on a building"
+        deploy_army(user, on_tile_map, usersdb, mapdb, user_data)
 
         self.render(
             "templates/user_panel.html",
