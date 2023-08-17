@@ -148,6 +148,7 @@ class DeployArmyHandler(BaseHandler):
         else:
 
             for entry in on_tile_map:
+                """loop because only one structure is allowed per tile"""
                 entry_cls = get_values(entry).get("cls")
                 if entry_cls == "building":
 
