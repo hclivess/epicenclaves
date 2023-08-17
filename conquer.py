@@ -2,12 +2,17 @@ from backend import get_values, remove_from_user, update_map_data, update_user_d
 import random
 
 
+import random
+
 def attack_success(attacker, defender):
     total = attacker + defender
 
     # Ensure there's no division by zero
     if total == 0:
-        return False
+        return {
+            'success': False,
+            'chance': 0
+        }
 
     # Calculate the proportional chance for the attacker
     chance = (attacker / total) * 100
@@ -15,7 +20,13 @@ def attack_success(attacker, defender):
     # Roll a random number between 0 and 100
     roll = random.uniform(0, 100)
 
-    return roll <= chance
+    success = roll <= chance
+
+    return {
+        'success': success,
+        'chance': chance
+    }
+
 
 
 def conquer(user, target, on_tile_map, usersdb, mapdb, user_data):
@@ -40,12 +51,15 @@ def conquer(user, target, on_tile_map, usersdb, mapdb, user_data):
 
         conquered = attack_success(attacker=your_army, defender=enemy_army)
 
-        if not conquered:
+        if not conquered["success"]:
             update_user_data(user=user, updated_values={
                 "action_points": user_data["action_points"] - 10,
+                "hp": 1,
                 "army_free": 0
             }, user_data_dict=usersdb)
-            return "Your army was defeated in battle!"
+
+            return (f"Your army was crushed in battle, the chance of success was {conquered['chance']}! You were "
+                    f"seriously hurt.")
 
         # Subtract enemy army from user army, but not less than 0
         remaining_army = max(your_army - enemy_army, 0)
@@ -68,6 +82,6 @@ def conquer(user, target, on_tile_map, usersdb, mapdb, user_data):
             "army_free": remaining_army
         }, user_data_dict=usersdb)
 
-        return "Takeover successful"
+        return f"Takeover successful. The chance was {conquered['chance']}"
 
     return "Something unexpected happened"

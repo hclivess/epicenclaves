@@ -502,6 +502,7 @@ class ConquerHandler(BaseHandler):
 
         message = conquer(user, target, on_tile_map, usersdb, mapdb, user_data)
 
+        user_data = get_user_data(user, usersdb) # update
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
         on_tile_users = get_tile_users(
             user_data["x_pos"], user_data["y_pos"], user, usersdb
