@@ -41,14 +41,19 @@ def fight_player(entry, target_name, user_data, user, usersdb):
             messages.append(f"{entry_name} is already dead!")
             return messages
 
+        if target_data["exp"] < 50:
+            messages.append(f"{entry_name} is too inexperienced to challenge!")
+            return messages
+
         messages.append(f"You challenged {entry_name}")
 
         while target_data["alive"] and user_data["alive"]:
+
             player_attack(target_data, user_data, entry_name, messages)
             player_attack(user_data, target_data, "You", messages)
 
             if 10 > target_data["hp"] > 0:
-                messages.append(f"{entry_name} has ran for his life!")
+                messages.append(f"{entry_name} has run seeing they stand no chance against you!")
                 break
 
             defeated_entity = None
