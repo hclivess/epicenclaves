@@ -31,14 +31,10 @@ class TileActions:
                        ]
 
         elif type == "boar":
-            actions = [{"name": "fight", "action": f"/fight?target={type}"},
-                       {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},
-                       ]
+            actions = [{"name": "fight", "action": f"/fight?target={type}"}]
         elif type == "player":
             actions = [
-                {"name": "challenge", "action": f"/fight?target={type}&name={name}"},
-                {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},
-            ]
+                {"name": "challenge", "action": f"/fight?target={type}&name={name}"}]
         else:
             actions = []
 

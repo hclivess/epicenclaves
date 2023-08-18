@@ -200,7 +200,7 @@
             <h4>Equipped</h4>
             {% for item in file["equipped"] %}
             <div class="col">
-                <p>Type: {{item["type"]}}</p>
+                <p>Type: {{item.get("type")}}</p>
                 <p><img src=/img/assets/{{item["type"]}}.png alt="Item Icon" class="menu-icon"></p>
                 <p>{{descriptions.get(item["type"])}}</p>
             </div>
@@ -309,6 +309,7 @@
         <div class="col-md-6 pr-md-1">
             <p>Name: {{ list(entry.keys())[0] }}</p>
             <p>Type: {{ list(entry.values())[0].get("type") }}</p>
+            <p>HP: {{ list(entry.values())[0].get("hp") }}</p>
             <p><img src="{{list(entry.values())[0].get('img')}}" alt="Profile Picture" class="profile-pic"></p>
         </div>
         <div class="col-md-6 pl-md-1">

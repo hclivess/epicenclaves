@@ -443,6 +443,10 @@ class LoginHandler(BaseHandler):
                 actions=actions,
                 descriptions=descriptions,
             )
+        else:
+            self.render(
+                "templates/denied.html",
+                message="Wrong password")
 
 
 def make_app():
