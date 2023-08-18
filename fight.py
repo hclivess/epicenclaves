@@ -1,85 +1,73 @@
 from backend import get_coords, death_roll, update_user_data, Boar, remove_from_map, get_values
 
+
+def player_attack(attacker, defender, attacker_name, messages):
+    if attacker["hp"] > 0:
+        defender["hp"] -= 1
+        if attacker_name == "You":
+            messages.append(f"You hit for 1 damage, they have {defender['hp']} left")
+        else:
+            messages.append(f"{attacker_name} hits you for 1 damage, you have {defender['hp']} left")
+
+
+def defeat_outcome(entity, entity_name, chance, usersdb):
+    """Handles the outcome when an entity's HP drops to 0 or below."""
+    messages = []
+    if death_roll(chance):
+        messages.append(f"{entity_name} is defeated.")
+        new_data = {
+            "alive": False,
+            "hp": 0,
+            "action_points": 0
+        }
+    else:
+        messages.append(f"{entity_name} barely managed to escape.")
+        new_data = {
+            "action_points": entity["action_points"] - 1,
+            "hp": 1
+        }
+
+    update_user_data(user=entity_name, updated_values=new_data, user_data_dict=usersdb)
+    return messages
+
+
 def fight_player(entry, target_name, user_data, user, usersdb):
     messages = []
     entry_name = get_coords(entry)
-
-    # Make the entry's data more easily accessible
     target_data = entry[entry_name]
 
     if target_name == entry_name:
+        if target_data["hp"] == 0:
+            messages.append(f"{entry_name} is already dead!")
+            return messages
+
         messages.append(f"You challenged {entry_name}")
 
         while target_data["alive"] and user_data["alive"]:
-            # Only allow the target to attack if they have more than 0 hp
-            if target_data["hp"] > 0:
-                user_data["hp"] -= 1
-                messages.append(
-                    f"{entry_name} hits you for 1 damage, you have {user_data['hp']} left"
-                )
+            player_attack(target_data, user_data, entry_name, messages)
+            player_attack(user_data, target_data, "You", messages)
 
-            # Only allow the user to attack if they have more than 0 hp
-            if user_data["hp"] > 0:
-                target_data["hp"] -= 1
-                messages.append(
-                    f"You hit {entry_name} for 1 damage, they have {target_data['hp']} left"
-                )
-
-            # Check if target should roll
-            if target_data["hp"] < 1:
-                messages.append(f"{entry_name} rolls the dice of fate")
-                if death_roll(0.5):
-                    messages.append("Enemy killed")
-                    update_user_data(
-                        user=target_name,
-                        updated_values={"alive": False, "hp": 0, "action_points": 0},
-                        user_data_dict=usersdb,
-                    )
-                else:
-                    messages.append("The enemy barely managed to escape")
-                    update_user_data(
-                        user=target_name,
-                        updated_values={
-                            "action_points": target_data["action_points"] - 1,
-                            "hp": 1,
-                        },
-                        user_data_dict=usersdb,
-                    )
-                update_user_data(
-                    user=user,
-                    updated_values={"exp": user_data["exp"] + target_data["exp"] / 10},
-                    user_data_dict=usersdb,
-                )
+            if 10 > target_data["hp"] > 0:
+                messages.append(f"{entry_name} has ran for his life!")
                 break
 
-            # Check if user should roll
-            if user_data["hp"] < 1:
-                messages.append("You roll the dice of fate")
-                if death_roll(0.5):
-                    messages.append("You died")
-                    update_user_data(
-                        user=user,
-                        updated_values={"alive": False,
-                                        "hp": 0,
-                                        "action_points": 0},
-                        user_data_dict=usersdb,
-                    )
-                else:
-                    messages.append("You barely managed to escape")
-                    update_user_data(
-                        user=user,
-                        updated_values={
-                            "action_points": user_data["action_points"] - 1,
-                            "hp": 1,
-                        },
-                        user_data_dict=usersdb,
-                    )
-                update_user_data(
-                    user=target_name,
-                    updated_values={"exp": target_data["exp"] + 10,
-                                    "hp": target_data["hp"]},
-                    user_data_dict=usersdb,
-                )
+            defeated_entity = None
+            defeated_name = None
+
+            if target_data["hp"] <= 0:
+                defeated_entity = target_data
+                defeated_name = entry_name
+                exp_gain = user_data["exp"] + target_data["exp"] / 10
+                update_user_data(user=user, updated_values={"exp": exp_gain}, user_data_dict=usersdb)
+
+            elif user_data["hp"] <= 0:
+                defeated_entity = user_data
+                defeated_name = user
+                update_user_data(user=target_name, updated_values={"exp": target_data["exp"] + 10},
+                                 user_data_dict=usersdb)
+
+            if defeated_entity:
+                messages.extend(defeat_outcome(defeated_entity, defeated_name, 0.5, usersdb))
                 break
 
     return messages
