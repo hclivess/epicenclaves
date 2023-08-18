@@ -15,12 +15,12 @@ import tornado.escape
 
 import actions
 import descriptions
+from chop import chop_forest
 from conquer import conquer
 from deploy_army import deploy_army
 from turn_engine import TurnEngine
 from backend import (
     build,
-    occupied_by,
     spawn,
     get_user_data,
     move,
@@ -30,13 +30,12 @@ from backend import (
     death_roll,
     get_tile_map,
     get_tile_users,
-    has_item,
     remove_from_map,
     get_user,
     update_user_data,
     get_surrounding_map_and_user_data,
     get_values,
-    owned_by, get_coords
+    get_coords
 )
 from auth import (
     auth_cookie_get,
@@ -526,35 +525,7 @@ class ChopHandler(BaseHandler):
 
         user_data = get_user_data(user, usersdb)
 
-        proper_tile = occupied_by(
-            user_data["x_pos"], user_data["y_pos"], what="forest", mapdb=mapdb
-        )
-        item = "axe"
-
-        under_control = owned_by(user_data["x_pos"], user_data["y_pos"], control=user, mapdb=mapdb)
-
-        if not has_item(user_data, item):
-            message = f"You have no {item} at hand"
-        elif not under_control:
-            message = "You do not own this forrest"
-
-        elif proper_tile and user_data["action_points"] > 0:
-            new_wood = user_data["wood"] + 1
-            new_ap = user_data["action_points"] - 1
-
-            update_user_data(
-                user=user,
-                updated_values={"action_points": new_ap, "wood": new_wood},
-                user_data_dict=usersdb,
-            )
-
-            message = "Chopping successful"
-
-        elif not proper_tile:
-            message = "Not on a forest tile"
-
-        else:
-            message = "Out of action points to chop"
+        message = chop_forest(user, user_data, usersdb, mapdb)
 
         user_data = get_user_data(user, usersdb)
 
