@@ -47,6 +47,8 @@ from sqlite import (
     create_map_database,
     create_game_database,
     create_users_db,
+    save_users_from_memory,
+    save_map_from_memory
 )
 
 max_size = 1000000
@@ -423,6 +425,10 @@ class LoginHandler(BaseHandler):
         if not auth_exists_user(user):
             auth_add_user(user, password)
             create_user(user_data_dict=usersdb, user=user, profile_pic=profile_pic_path)
+
+            save_users_from_memory(usersdb)
+            save_map_from_memory(mapdb)
+
         if auth_login_validate(user, password):
             self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
             message = f"Welcome, {user}!"
