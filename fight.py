@@ -47,7 +47,7 @@ def fight_player(entry, target_name, user_data, user, usersdb):
                     )
                 update_user_data(
                     user=user,
-                    updated_values={"exp": user_data["exp"] + 10},
+                    updated_values={"exp": user_data["exp"] + target_data["exp"] / 10},
                     user_data_dict=usersdb,
                 )
                 break
