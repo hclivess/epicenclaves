@@ -18,7 +18,6 @@ class TileActions:
             actions = [
                 {"name": "chop", "action": "/chop"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
-                {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},
             ]
         elif type == "farm":
             actions = [
