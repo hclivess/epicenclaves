@@ -386,7 +386,6 @@ def get_user(user, user_data_dict, get_construction=True):
 
     return user_data
 
-
 def update_user_data(user, updated_values, user_data_dict):
     print("update_user_data", user, updated_values)
 

@@ -4,6 +4,7 @@ from backend import (
     update_map_data,
     update_user_data,
     get_coords,
+
 )
 import random
 
@@ -50,30 +51,68 @@ def process_attack_failure(user, user_data, usersdb, chance):
 
 # Handle the case when attack is successful.
 def process_attack_success(
-    entry, user, usersdb, mapdb, user_data, enemy_army, your_army, chance
+        entry, user, usersdb, mapdb, user_data, enemy_army, your_army, chance
 ):
     remaining_army = max(your_army - enemy_army, 0)
     user_data["army_free"] = remaining_army
 
     owner = get_values(entry).get("control")
-    remove_from_user(
-        owner, {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]}, usersdb
+    type = get_values(entry).get("type")
+
+    if type == "house":
+        adjust_population_limit(owner, user, usersdb)
+
+    remove_entry_from_owner(owner, user_data, usersdb)
+
+    assign_entry_to_user(entry, user, user_data, mapdb, usersdb, remaining_army)
+
+    return f"Takeover successful. The chance was {chance}"
+
+
+def adjust_population_limit(owner, new_owner, usersdb):
+    pop_delta = 10
+
+    # Fetch user data directly from usersdb without default values
+    owner_data = usersdb[owner]
+    new_owner_data = usersdb[new_owner]
+
+    # Update population limit for both users
+    update_user_data(
+        user=owner,
+        updated_values={"pop_lim": owner_data["pop_lim"] - pop_delta},
+        user_data_dict=usersdb,
+    )
+    update_user_data(
+        user=new_owner,
+        updated_values={"pop_lim": new_owner_data["pop_lim"] + pop_delta},
+        user_data_dict=usersdb,
     )
 
+
+def remove_entry_from_owner(owner, user_data, usersdb):
+    coords = {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]}
+    remove_from_user(owner, coords, usersdb)
+
+
+def assign_entry_to_user(entry, user, user_data, mapdb, usersdb, remaining_army):
     key = get_coords(entry)
     entry[key]["control"] = user
 
+    # TODO: remove previously stationed army?
+
     update_map_data(entry, mapdb)
+    action_points = user_data.get("action_points", 0) # Provide a default value of 0 if the key doesn't exist
     update_user_data(
         user=user,
         updated_values={
             "construction": entry,
-            "action_points": user_data["action_points"] - 1,
+            "action_points": action_points - 1,
             "army_free": remaining_army,
         },
         user_data_dict=usersdb,
     )
-    return f"Takeover successful. The chance was {chance}"
+
+
 
 
 # Main function to handle tile conquest.
