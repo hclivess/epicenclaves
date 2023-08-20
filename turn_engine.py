@@ -1,9 +1,20 @@
 import asyncio
+import random
+
 import blockchain
 import threading
 import time
 from sqlite import update_turn, save_map_from_memory, save_users_from_memory
-from backend import spawn, update_user_data, Boar, get_buildings
+from backend import spawn, update_user_data, Boar, get_buildings, hashify
+import string
+
+TEST = True
+
+
+def fake_hash():
+    return "".join(
+        random.choice(string.ascii_uppercase + string.digits) for _ in range(36)
+    )
 
 
 def interruptible_sleep(seconds, interval=1, stop_condition=None):
@@ -30,7 +41,11 @@ class TurnEngine(threading.Thread):
         save_users_from_memory(self.usersdb)
 
     def check_for_updates(self):
-        self.latest_block = blockchain.last_bis_hash()
+        if TEST:
+            self.latest_block = hashify(fake_hash())
+        else:
+            self.latest_block = blockchain.last_bis_hash()
+
         if self.compare_block != self.latest_block:
             self.save_databases()
             self.turn += 1
@@ -50,21 +65,38 @@ class TurnEngine(threading.Thread):
                 food = user_data["food"]
 
                 # Count farms and barracks
-                farms = sum(1 for entry in get_buildings(user_data) if entry.get("type") == "farm")
-                barracks = sum(1 for entry in get_buildings(user_data) if entry.get("type") == "barracks")
+                farms = sum(
+                    1
+                    for entry in get_buildings(user_data)
+                    if entry.get("type") == "farm"
+                )
+                barracks = sum(
+                    1
+                    for entry in get_buildings(user_data)
+                    if entry.get("type") == "barracks"
+                )
 
                 # Calculate potential army and peasants addition while respecting the pop_lim
                 potential_army_free = min(food, user_data["peasants"], barracks)
-                potential_peasants_addition = min(farms,
-                                                  user_data["pop_lim"] - (user_data["peasants"] + potential_army_free))
+                potential_peasants_addition = min(
+                    farms,
+                    user_data["pop_lim"]
+                    - (user_data["peasants"] + potential_army_free),
+                )
 
-                updated_values["army_free"] = user_data.get("army_free", 0) + potential_army_free
-                updated_values["peasants"] = user_data["peasants"] + potential_peasants_addition
+                updated_values["army_free"] = (
+                    user_data.get("army_free", 0) + potential_army_free
+                )
+                updated_values["peasants"] = (
+                    user_data["peasants"] + potential_peasants_addition
+                )
 
                 updated_values["food"] = food - 2 * potential_army_free
 
                 # Ensure the sum of army and peasants does not exceed pop_lim
-                total_population = updated_values["peasants"] + updated_values["army_free"]
+                total_population = (
+                    updated_values["peasants"] + updated_values["army_free"]
+                )
                 while total_population > user_data["pop_lim"]:
                     if potential_army_free > 0:
                         potential_army_free -= 1
@@ -79,25 +111,33 @@ class TurnEngine(threading.Thread):
                 updated_values["food"] += updated_values["peasants"]
 
                 # Update the user data once, instead of multiple times
-                update_user_data(user=username, updated_values=updated_values, user_data_dict=self.usersdb)
+                update_user_data(
+                    user=username,
+                    updated_values=updated_values,
+                    user_data_dict=self.usersdb,
+                )
 
                 # Print buildings
                 print("buildings", get_buildings(user_data))
 
-            spawn(mapdb=self.mapdb,
-                  entity_class=Boar,
-                  probability=0.25,
-                  size=25,
-                  every=5,
-                  max_entities=1
-                  )
+            spawn(
+                mapdb=self.mapdb,
+                entity_class=Boar,
+                probability=0.25,
+                size=25,
+                every=5,
+                max_entities=1,
+            )
 
         print(f"Current turn: {self.turn}")
 
     def run(self):
         while self.running:
             self.check_for_updates()
-            interruptible_sleep(30, stop_condition=lambda: not self.running)
+            if TEST:
+                interruptible_sleep(1, stop_condition=lambda: not self.running)
+            else:
+                interruptible_sleep(30, stop_condition=lambda: not self.running)
 
     def stop(self):  # Add this method to stop the thread gracefully
         self.running = False

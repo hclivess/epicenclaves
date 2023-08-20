@@ -25,7 +25,7 @@ def deploy_army(user, on_tile_map, usersdb, mapdb, user_data):
                 user,
                 updated_values={
                     "army_free": user_data.get("army_free") - 1,
-                    "deployed_army": user_data.get("deployed_army") + 1,
+                    "army_deployed": user_data.get("army_deployed") + 1,
                     "action_points": user_data.get("action_points") - 1,
                 },
                 user_data_dict=usersdb,
