@@ -120,8 +120,6 @@ class DeployArmyHandler(BaseHandler):
         type = self.get_argument("type")
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        # message = build(entity, name, user, mapdb, usersdb=usersdb)
-
         user_data = get_user_data(user, usersdb=usersdb)
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
         on_tile_users = get_tile_users(

@@ -2,7 +2,9 @@ from backend import owned_by, get_values, update_user_data, get_coords, update_m
 
 
 def deploy_army(user, on_tile_map, usersdb, mapdb, user_data):
-    under_control = owned_by(user_data["x_pos"], user_data["y_pos"], control=user, mapdb=mapdb)
+    under_control = owned_by(
+        user_data["x_pos"], user_data["y_pos"], control=user, mapdb=mapdb
+    )
 
     if not under_control:
         return "You do not own this tile"
@@ -19,10 +21,15 @@ def deploy_army(user, on_tile_map, usersdb, mapdb, user_data):
         if entry_cls == "building":
             print(on_tile_map)
 
-            update_user_data(user,
-                             updated_values={"army_free": user_data.get("army_free") - 1,
-                                             "action_points": user_data.get("action_points") - 1},
-                             user_data_dict=usersdb)
+            update_user_data(
+                user,
+                updated_values={
+                    "army_free": user_data.get("army_free") - 1,
+                    "deployed_army": user_data.get("action_points") + 1,
+                    "action_points": user_data.get("action_points") - 1,
+                },
+                user_data_dict=usersdb,
+            )
 
             # Update map
             key = get_coords(entry)
