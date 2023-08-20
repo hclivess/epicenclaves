@@ -16,7 +16,7 @@ import tornado.escape
 import actions
 import descriptions
 from chop import chop_forest
-from conquer import conquer
+from conquer import attempt_conquer
 from deploy_army import deploy_army
 from fight import fight, get_fight_preconditions
 from turn_engine import TurnEngine
@@ -31,7 +31,7 @@ from backend import (
     get_tile_users,
     get_user,
     update_user_data,
-    get_surrounding_map_and_user_data
+    get_surrounding_map_and_user_data,
 )
 from auth import (
     auth_cookie_get,
@@ -48,7 +48,7 @@ from sqlite import (
     create_game_database,
     create_users_db,
     save_users_from_memory,
-    save_map_from_memory
+    save_map_from_memory,
 )
 
 max_size = 1000000
@@ -217,9 +217,7 @@ class ReviveHandler(BaseHandler):
 
             update_user_data(
                 user=user,
-                updated_values={"alive": True,
-                                "hp": 100,
-                                "action_points": new_ap},
+                updated_values={"alive": True, "hp": 100, "action_points": new_ap},
                 user_data_dict=usersdb,
             )
             message = "You awaken from the dead"
@@ -306,7 +304,7 @@ class FightHandler(BaseHandler):
                 user_data,
                 user,
                 usersdb,
-                mapdb
+                mapdb,
             )
             self.render("templates/fight.html", messages=messages)
 
@@ -319,9 +317,9 @@ class ConquerHandler(BaseHandler):
 
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
 
-        message = conquer(user, target, on_tile_map, usersdb, mapdb, user_data)
+        message = attempt_conquer(user, target, on_tile_map, usersdb, mapdb, user_data)
 
-        user_data = get_user_data(user, usersdb) # update
+        user_data = get_user_data(user, usersdb)  # update
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
         on_tile_users = get_tile_users(
             user_data["x_pos"], user_data["y_pos"], user, usersdb
@@ -450,9 +448,7 @@ class LoginHandler(BaseHandler):
                 descriptions=descriptions,
             )
         else:
-            self.render(
-                "templates/denied.html",
-                message="Wrong password")
+            self.render("templates/denied.html", message="Wrong password")
 
 
 def make_app():
