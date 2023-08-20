@@ -25,16 +25,23 @@ class TileActions:
                 {"name": "conquer", "action": f"/conquer?target={type}"},
                 {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},
             ]
+        elif type == "barracks":
+            actions = [
+                {"name": "conquer", "action": f"/conquer?target={type}"},
+                {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},
+            ]
         elif type == "house":
-            actions = [{"name": "conquer", "action": f"/conquer?target={type}"},
-                       {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},
-                       ]
+            actions = [
+                {"name": "conquer", "action": f"/conquer?target={type}"},
+                {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},
+            ]
 
         elif type == "boar":
             actions = [{"name": "fight", "action": f"/fight?target={type}"}]
         elif type == "player":
             actions = [
-                {"name": "challenge", "action": f"/fight?target={type}&name={name}"}]
+                {"name": "challenge", "action": f"/fight?target={type}&name={name}"}
+            ]
         else:
             actions = []
 

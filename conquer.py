@@ -89,8 +89,9 @@ def attempt_conquer(user, target, on_tile_map, usersdb, mapdb, user_data):
         if not has_sufficient_action_points(user_data):
             return "You need at least 10 action points to attack"
 
-        your_army = user_data.get("army_free")
-        enemy_army = get_values(entry).get("soldiers")
+        your_army = user_data.get("army_free", 0)
+        enemy_army = get_values(entry).get("soldiers", 0)
+
         conquered = attack_success(attacker=your_army, defender=enemy_army)
 
         if not conquered["success"]:
