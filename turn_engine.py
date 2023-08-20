@@ -41,95 +41,87 @@ class TurnEngine(threading.Thread):
         save_users_from_memory(self.usersdb)
 
     def check_for_updates(self):
+        self.update_block()
+
+        if self.compare_block != self.latest_block:
+            self.perform_turn_updates()
+
+            for username, user_data in self.usersdb.items():
+                self.process_user_turn_updates(username, user_data)
+
+            self.spawn_entities()
+
+        print(f"Current turn: {self.turn}")
+
+    def update_block(self):
         if TEST:
             self.latest_block = hashify(fake_hash())
         else:
             self.latest_block = blockchain.last_bis_hash()
 
-        if self.compare_block != self.latest_block:
-            self.save_databases()
-            self.turn += 1
-            self.compare_block = self.latest_block
-            update_turn(self.turn)
+    def perform_turn_updates(self):
+        self.save_databases()
+        self.turn += 1
+        self.compare_block = self.latest_block
+        update_turn(self.turn)
 
-            for username, user_data in self.usersdb.items():
-                print("user (turn engine)", username, user_data)
+    def process_user_turn_updates(self, username, user_data):
+        print("user (turn engine)", username, user_data)
+        updated_values = self.calculate_user_updates(user_data)
 
-                updated_values = {}
+        # Update the user data once
+        update_user_data(
+            user=username,
+            updated_values=updated_values,
+            user_data_dict=self.usersdb,
+        )
 
-                # Update action_points and age if "action_points" exists
-                if "action_points" in user_data:
-                    updated_values["action_points"] = user_data["action_points"] + 5
-                    updated_values["age"] = user_data["age"] + 1
+        # Print buildings
+        print("buildings", get_buildings(user_data))
 
-                food = user_data["food"]
+    def calculate_user_updates(self, user_data):
+        updated_values = {}
 
-                # Count farms and barracks
-                farms = sum(
-                    1
-                    for entry in get_buildings(user_data)
-                    if entry.get("type") == "farm"
-                )
-                barracks = sum(
-                    1
-                    for entry in get_buildings(user_data)
-                    if entry.get("type") == "barracks"
-                )
+        if "action_points" in user_data:
+            updated_values["action_points"] = user_data["action_points"] + 5
+            updated_values["age"] = user_data["age"] + 1
 
-                # Calculate potential army and peasants addition while respecting the pop_lim
-                potential_army_free = min(food, user_data["peasants"], barracks)
-                potential_peasants_addition = min(
-                    farms,
-                    user_data["pop_lim"]
-                    - (user_data["peasants"] + potential_army_free),
-                )
+        army_deployed = user_data.get("army_deployed", 0)
+        food = user_data["food"]
 
-                updated_values["army_free"] = (
-                    user_data.get("army_free", 0) + potential_army_free
-                )
-                updated_values["peasants"] = (
-                    user_data["peasants"] + potential_peasants_addition
-                )
+        farms, barracks = self.count_farms_and_barracks(user_data)
+        potential_army_free = self.calculate_potential_army_free(food, user_data, barracks, army_deployed)
+        potential_peasants_addition = self.calculate_potential_peasants_addition(farms, user_data, potential_army_free,
+                                                                                 army_deployed)
 
-                updated_values["food"] = food - 2 * potential_army_free
+        updated_values.update({
+            "army_free": user_data.get("army_free", 0) + potential_army_free,
+            "peasants": user_data["peasants"] + potential_peasants_addition,
+            "food": food - 2 * (potential_army_free + army_deployed) + potential_peasants_addition
+        })
 
-                # Ensure the sum of army and peasants does not exceed pop_lim
-                total_population = (
-                    updated_values["peasants"] + updated_values["army_free"]
-                )
-                while total_population > user_data["pop_lim"]:
-                    if potential_army_free > 0:
-                        potential_army_free -= 1
-                        updated_values["army_free"] -= 1
-                        total_population -= 1
-                    else:
-                        potential_peasants_addition -= 1
-                        updated_values["peasants"] -= 1
-                        total_population -= 1
+        return updated_values
 
-                # Increase food by one for every leftover peasant
-                updated_values["food"] += updated_values["peasants"]
+    def count_farms_and_barracks(self, user_data):
+        farms = sum(1 for entry in get_buildings(user_data) if entry.get("type") == "farm")
+        barracks = sum(1 for entry in get_buildings(user_data) if entry.get("type") == "barracks")
+        return farms, barracks
 
-                # Update the user data once, instead of multiple times
-                update_user_data(
-                    user=username,
-                    updated_values=updated_values,
-                    user_data_dict=self.usersdb,
-                )
+    def calculate_potential_army_free(self, food, user_data, barracks, army_deployed):
+        return min(food, user_data["peasants"], barracks) - army_deployed
 
-                # Print buildings
-                print("buildings", get_buildings(user_data))
+    def calculate_potential_peasants_addition(self, farms, user_data, potential_army_free, army_deployed):
+        return min(farms, user_data["pop_lim"] - (user_data["peasants"] + potential_army_free + army_deployed))
 
-            spawn(
-                mapdb=self.mapdb,
-                entity_class=Boar,
-                probability=0.25,
-                size=25,
-                every=5,
-                max_entities=1,
-            )
-
-        print(f"Current turn: {self.turn}")
+    def spawn_entities(self):
+        spawn(
+            mapdb=self.mapdb,
+            entity_class=Boar,
+            probability=0.25,
+            size=25,
+            every=5,
+            max_entities=1,
+        )
 
     def run(self):
         while self.running:

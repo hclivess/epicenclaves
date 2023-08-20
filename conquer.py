@@ -66,7 +66,7 @@ def process_attack_success(
 
     assign_entry_to_user(entry, user, user_data, mapdb, usersdb, remaining_army)
 
-    return f"Takeover successful. The chance was {chance}"
+    return f"Takeover successful. The chance was {chance}%."
 
 
 def adjust_population_limit(owner, new_owner, usersdb):
