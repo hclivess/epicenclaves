@@ -19,7 +19,7 @@ def deploy_army(user, on_tile_map, usersdb, mapdb, user_data):
         """loop because only one structure is allowed per tile"""
         entry_cls = get_values(entry).get("cls")
         if entry_cls == "building":
-            print(on_tile_map)
+            print("entry", entry)
 
             update_user_data(
                 user,
@@ -30,6 +30,17 @@ def deploy_army(user, on_tile_map, usersdb, mapdb, user_data):
                 },
                 user_data_dict=usersdb,
             )
+
+            # update garrison in acquired tiles
+            player_pos = f"{user_data['x_pos']},{user_data['y_pos']}"
+            old_tile = user_data["construction"][player_pos]
+            old_tile["soldiers"] += 1
+            update_user_data(
+                user,
+                updated_values={"construction": {player_pos: old_tile}},
+                user_data_dict=usersdb,
+            )
+            # / update garrison in acquired tiles
 
             # Update map
             key = get_coords(entry)
