@@ -79,6 +79,8 @@ class MainHandler(BaseHandler):
             user_data = data[username]  # Get the user's data
 
             print("usersdb", usersdb)  # debug
+            print("mapdb", mapdb)  # debug
+
             print("data", data)  # debug
             print("user_data", user_data)  # debug
             on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
