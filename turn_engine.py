@@ -8,7 +8,7 @@ from sqlite import update_turn, save_map_from_memory, save_users_from_memory
 from backend import spawn, update_user_data, Boar, get_buildings, hashify
 import string
 
-TEST = 0
+TEST = 1
 
 
 def fake_hash():
@@ -94,7 +94,7 @@ class TurnEngine(threading.Thread):
 
                 # Ensure the sum of army and peasants does not exceed pop_lim
                 total_population = (
-                        updated_values["peasants"] + updated_values["army_free"]
+                        updated_values["peasants"] + updated_values["army_free"] + user_data["army_deployed"]
                 )
                 while total_population > user_data["pop_lim"]:
                     if potential_army_free > 0:
