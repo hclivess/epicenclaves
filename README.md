@@ -72,3 +72,9 @@ mapdb:
    }
 }
 ```
+
+user_data.db
+x_pos, y_pos, data
+
+map_data.db
+x_pos, y_pos, data
