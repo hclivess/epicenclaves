@@ -11,7 +11,7 @@ A turn-based strategy game with strong RPG elements, where all graphics are hand
 
 Structure:
 
-There are two dictionaries and two main databases, structured as follows. usersdb includes positions and all information about players. mapdb includes all information that is displayed on the map (except users). There are two dictionaries because player display is meant to be more detailed while mapdb is supposed to be compact and even limited to a certain number of tiles around the player.
+There are two dictionaries and two main databases, structured as follows. usersdb includes positions and all information about players and even their constructed buildings and owned tiles to be displayed in the user panel without minimal performance impact. mapdb includes all information that is displayed on the map (except users). There are two dictionaries because player display is meant to be more detailed while mapdb is supposed to be compact and even limited to a certain number of tiles around the player.
 
 usersdb:
 ```
