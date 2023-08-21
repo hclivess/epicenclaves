@@ -400,10 +400,10 @@ class LoginHandler(BaseHandler):
             # Attempt to open the image using PIL
             try:
                 Image.open(io.BytesIO(uploaded_file["body"]))
-            except:
+            except Exception as e:
                 self.render(
                     "templates/denied.html",
-                    message="Uploaded file is not a valid image!",
+                    message=f"Uploaded file is not a valid image: {e}!",
                 )
                 return
 
