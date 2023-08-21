@@ -43,11 +43,12 @@ def deploy_army(user, on_tile_map, usersdb, mapdb, user_data):
             # / update garrison in acquired tiles
 
             # Update map
-            key = get_coords(entry)
-            entry[key]["soldiers"] += 1
+            #key = get_coords(entry)
+            #entry[key]["soldiers"] += 1
             updated_data = entry
 
             update_map_data(updated_data, mapdb)
+            # / Update map
 
             return "Soldiers deployed"
 
