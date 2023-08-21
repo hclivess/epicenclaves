@@ -142,8 +142,7 @@ def create_users_db():
                         username TEXT PRIMARY KEY,
                         x_pos INTEGER,
                         y_pos INTEGER,
-                        data TEXT,
-                        construction TEXT
+                        data TEXT
                       )''')
 
     # Commit changes and close the connection

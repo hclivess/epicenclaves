@@ -13,7 +13,7 @@ Structure:
 
 There are two dictionaries and two main databases, structured as follows. usersdb includes positions and all information about players and even their constructed buildings and owned tiles to be displayed in the user panel without minimal performance impact. mapdb includes all information that is displayed on the map (except users). There are two dictionaries because player display is meant to be more detailed while mapdb is supposed to be compact and even limited to a certain number of tiles around the player.
 
-usersdb:
+usersdb - data indexed by username:
 ```
 {
    "users":{
@@ -57,7 +57,7 @@ usersdb:
 ```
 
 
-mapdb:
+mapdb - data indexed by x,y:
 ```
 {
    "1,1":{
