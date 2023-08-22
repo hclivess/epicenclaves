@@ -202,6 +202,7 @@
             <div class="col">
                 <p>Type: {{item.get("type")}}</p>
                 <p>Damage: {{item.get("damage", "N/A")}}</p>
+                <p>Placement: {{item.get("cls", "N/A")}}</p>
                 <p><img src=/img/assets/{{item["type"]}}.png alt="Item Icon" class="menu-icon"></p>
                 <p>{{descriptions.get(item["type"])}}</p>
             </div>
@@ -214,6 +215,7 @@
             <div class="col">
                 <p>Type: {{item.get("type")}}</p>
                 <p>Damage: {{item.get("damage", "N/A")}}</p>
+                <p>Placement: {{item.get("cls", "N/A")}}</p>
                 <p><img src=/img/assets/{{item["type"]}}.png alt="Item Icon" class="menu-icon"></p>
                 <p>{{descriptions.get(item["type"])}}</p>
                 <a class="btn btn-light btn-lg btn-block" href='/equip?id={{item["id"]}}'>equip {{item["type"]}}</a>
