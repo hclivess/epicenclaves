@@ -18,6 +18,7 @@ import descriptions
 from chop import chop_forest
 from conquer import attempt_conquer
 from deploy_army import deploy_army
+from equip import equip_item
 from fight import fight, get_fight_preconditions
 from turn_engine import TurnEngine
 from backend import (
@@ -115,6 +116,31 @@ class MapHandler(BaseHandler):
 
         print("data", data)  # debug
         self.render("templates/map.html", data=data, ensure_ascii=False)
+
+
+class EquipHandler(BaseHandler):
+    def get(self):
+        id = self.get_argument("id")
+        user = tornado.escape.xhtml_escape(self.current_user)
+
+        user_data = get_user_data(user, usersdb=usersdb)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile_users = get_tile_users(
+            user_data["x_pos"], user_data["y_pos"], user, usersdb
+        )
+
+        message = equip_item(usersdb, user, id)
+
+        self.render(
+            "templates/user_panel.html",
+            user=user,
+            file=user_data,
+            message=message,
+            on_tile_map=on_tile_map,
+            on_tile_users=on_tile_users,
+            actions=actions,
+            descriptions=descriptions,
+        )
 
 
 class DeployArmyHandler(BaseHandler):
@@ -465,6 +491,7 @@ def make_app():
             (r"/rest(.*)", RestHandler),
             (r"/build(.*)", BuildHandler),
             (r"/revive", ReviveHandler),
+            (r"/equip", EquipHandler),
             (r"/deploy(.*)", DeployArmyHandler),
             (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),
             (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),
