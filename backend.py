@@ -290,7 +290,7 @@ def attempt_rest(user, user_data, hours_arg, usersdb, mapdb):
     return "You feel more rested"
 
 
-def has_item(data, item_type):
+def has_item_equipped(data, item_type):
     items = data.get("equipped", [])
 
     for item in items:

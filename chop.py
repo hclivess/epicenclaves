@@ -1,4 +1,4 @@
-from backend import occupied_by, owned_by, has_item, update_user_data
+from backend import occupied_by, owned_by, has_item_equipped, update_user_data
 
 
 def chop_forest(user, user_data, usersdb, mapdb):
@@ -11,7 +11,7 @@ def chop_forest(user, user_data, usersdb, mapdb):
         user_data["x_pos"], user_data["y_pos"], control=user, mapdb=mapdb
     )
 
-    if not has_item(user_data, item):
+    if not has_item_equipped(user_data, item):
         return f"You have no {item} at hand"
 
     if not under_control:
