@@ -1,4 +1,3 @@
-import asyncio
 import random
 
 import blockchain
@@ -8,7 +7,7 @@ from sqlite import update_turn, save_map_from_memory, save_users_from_memory
 from backend import spawn, update_user_data, Boar, get_buildings, hashify
 import string
 
-TEST = 1
+TEST = 0
 
 
 def fake_hash():

@@ -97,8 +97,7 @@ def remove_entry_from_owner(owner, user_data, usersdb):
 def assign_entry_to_user(entry, user, user_data, mapdb, usersdb, remaining_army):
     key = get_coords(entry)
     entry[key]["control"] = user
-
-    # TODO: remove previously stationed army?
+    entry[key]["soldiers"] = 0
 
     update_map_data(entry, mapdb)
     action_points = user_data.get("action_points", 0) # Provide a default value of 0 if the key doesn't exist
