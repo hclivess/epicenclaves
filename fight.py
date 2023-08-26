@@ -1,4 +1,6 @@
 from backend import get_coords, death_roll, update_user_data, Boar, remove_from_map, get_values
+from weapon_generator import generate_weapon
+import random
 
 
 def player_attack(attacker, defender, attacker_name, messages):
@@ -78,6 +80,8 @@ def fight_player(entry, target_name, user_data, user, usersdb):
     return messages
 
 
+import random
+
 def fight_boar(entry, user_data, user, usersdb, mapdb):
     messages = []
     boar = Boar()
@@ -88,6 +92,12 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
         if boar.hp < 1:
             messages.append("The boar is dead")
             boar.alive = False
+
+            if random.random() < 1:  # 10% chance of dropping a weapon
+                new_weapon = generate_weapon()
+                messages.append(f"You found a {new_weapon['type']}!")
+                user_data["unequipped"].append(new_weapon)
+
             remove_from_map(
                 entity_type="boar", coords=get_coords(entry), map_data_dict=mapdb
             )
@@ -98,6 +108,7 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
                     "exp": user_data["exp"] + 1,
                     "food": user_data["food"] + 1,
                     "hp": user_data["hp"],
+                    "unequipped": user_data["unequipped"]
                 },
                 user_data_dict=usersdb,
             )
@@ -142,6 +153,7 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
                 )
 
     return messages
+
 
 
 def fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb, mapdb):

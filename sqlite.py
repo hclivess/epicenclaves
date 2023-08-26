@@ -1,9 +1,9 @@
 import json
 import os
-import random
 import sqlite3
-import string
 from hashlib import blake2b
+
+from weapon_generator import id_generator
 
 if not os.path.exists("db"):
     os.mkdir("db")
@@ -170,8 +170,8 @@ def create_user(user_data_dict, user, x_pos=1, y_pos=1, profile_pic=""):
         "wood": 500,
         "food": 500,
         "bismuth": 500,
-        "equipped": [{"type": "axe", "damage": 1, "durability": 100, "cls": "right hand", "id": id_generator()}],
-        "unequipped": [{"type": "dagger", "damage": 2, "durability": 100, "cls": "right hand", "id": id_generator()}],
+        "equipped": [{"type": "axe", "min_damage": 1, "max_damage": 1, "durability": 100, "cls": "right hand", "id": id_generator()}],
+        "unequipped": [{"type": "dagger", "min_damage": 1, "max_damage": 2, "durability": 100, "cls": "right hand", "id": id_generator()}],
         "pop_lim": 0,
         "alive": True,
         "online": True,
@@ -293,7 +293,3 @@ def load_users_to_memory():
     return user_data_dict
 
 
-def id_generator(length=10):
-    """Generate a random alphanumeric string of given length."""
-    characters = string.ascii_letters + string.digits
-    return ''.join(random.choice(characters) for _ in range(length))

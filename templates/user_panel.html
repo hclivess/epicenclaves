@@ -201,7 +201,7 @@
             {% for item in file["equipped"] %}
             <div class="col">
                 <p>Type: {{item.get("type")}}</p>
-                <p>Damage: {{item.get("damage", "N/A")}}</p>
+                <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
                 <p>Placement: {{item.get("cls", "N/A")}}</p>
                 <p><img src=/img/assets/{{item["type"]}}.png alt="Item Icon" class="menu-icon"></p>
                 <p>{{descriptions.get(item["type"])}}</p>
@@ -214,7 +214,7 @@
             {% for item in file["unequipped"] %}
             <div class="col">
                 <p>Type: {{item.get("type")}}</p>
-                <p>Damage: {{item.get("damage", "N/A")}}</p>
+                <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
                 <p>Placement: {{item.get("cls", "N/A")}}</p>
                 <p><img src=/img/assets/{{item["type"]}}.png alt="Item Icon" class="menu-icon"></p>
                 <p>{{descriptions.get(item["type"])}}</p>

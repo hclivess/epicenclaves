@@ -155,6 +155,7 @@ class DeployArmyHandler(BaseHandler):
         )
 
         message = deploy_army(user, on_tile_map, usersdb, mapdb, user_data)
+        user_data = get_user_data(user, usersdb=usersdb) #refresh
 
         self.render(
             "templates/user_panel.html",
