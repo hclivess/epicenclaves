@@ -33,7 +33,7 @@ def generate_weapon():
         "type": selected_weapon,
         "min_damage": min_damage,
         "max_damage": max_damage,
-        "cls": "right hand",
+        "cls": "right_hand",
         "id": id_generator(),
     }
 

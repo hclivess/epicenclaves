@@ -82,6 +82,8 @@ def fight_player(entry, target_name, user_data, user, usersdb):
 
 import random
 
+import random
+
 def fight_boar(entry, user_data, user, usersdb, mapdb):
     messages = []
     boar = Boar()
@@ -93,7 +95,7 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
             messages.append("The boar is dead")
             boar.alive = False
 
-            if random.random() < 1:  # 10% chance of dropping a weapon
+            if random.random() < 0.1:  # 10% chance of dropping a weapon
                 new_weapon = generate_weapon()
                 messages.append(f"You found a {new_weapon['type']}!")
                 user_data["unequipped"].append(new_weapon)
@@ -139,9 +141,17 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
         else:
             # User attacks the boar if they have more than 0 hp
             if user_data["hp"] > 0:
-                boar.hp -= 1
+                damage = 1
+                for weapon in user_data.get("equipped", {}):
+                    if weapon.get("cls") == "right_hand":
+                        min_dmg = weapon.get("min_damage", 1)
+                        max_dmg = weapon.get("max_damage", 1)
+                        damage = random.randint(min_dmg, max_dmg)
+                        break
+
+                boar.hp -= damage
                 messages.append(
-                    f"The boar takes 1 damage and is left with {boar.hp} hp"
+                    f"The boar takes {damage} damage and is left with {boar.hp} hp"
                 )
 
             # Boar attacks the user if it has more than 0 hp
@@ -153,6 +163,7 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
                 )
 
     return messages
+
 
 
 
