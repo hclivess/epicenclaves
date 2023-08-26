@@ -307,24 +307,14 @@ def has_item_equipped(data, item_type):
 
 def update_map_data(update_data, map_data_dict):
     with map_lock:
-        print("update_map_data", update_data)
-
-        # Get coordinates and data from the provided input
         coords = list(update_data.keys())[0]
         tile_data = update_data[coords]
-
-        # Split the coords into x and y positions
-        x, y = map(int, coords.split(","))
-
-        # Create a key using the coordinates
-        key = f"{x},{y}"
-
-        # Check if the key exists in the map_data_dict
-        if key in map_data_dict:
-            # Update only the 'control' key
-            map_data_dict[key]["control"] = tile_data["control"]
+        if coords in map_data_dict:
+            for key, value in tile_data.items():
+                map_data_dict[coords][key] = value
         else:
-            print(f"No data found at the given coordinates {x, y}.")
+            raise KeyError(f"No data found at the given coordinates {coords}.")
+
 
 
 def remove_from_map(coords, entity_type, map_data_dict):
