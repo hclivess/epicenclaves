@@ -21,6 +21,7 @@ def deploy_army(user, on_tile_map, usersdb, mapdb, user_data):
         if entry_cls == "building":
             print("entry", entry)
 
+            # update garrison in user db
             update_user_data(
                 user,
                 updated_values={
@@ -30,6 +31,7 @@ def deploy_army(user, on_tile_map, usersdb, mapdb, user_data):
                 },
                 user_data_dict=usersdb,
             )
+            # /update garrison in user db
 
             # update garrison in acquired tiles
             player_pos = f"{user_data['x_pos']},{user_data['y_pos']}"
@@ -40,7 +42,7 @@ def deploy_army(user, on_tile_map, usersdb, mapdb, user_data):
                 updated_values={"construction": {player_pos: old_tile}},
                 user_data_dict=usersdb,
             )
-            # / update garrison in acquired tiles
+            # /update garrison in acquired tiles
 
             # Update map
             key = get_coords(entry)

@@ -7,7 +7,7 @@ from sqlite import update_turn, save_map_from_memory, save_users_from_memory
 from backend import spawn, update_user_data, Boar, get_buildings, hashify
 import string
 
-TEST = 0
+TEST = 1
 
 
 def fake_hash():
