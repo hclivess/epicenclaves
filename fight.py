@@ -1,5 +1,7 @@
+import math
+
 from backend import get_coords, death_roll, update_user_data, Boar, remove_from_map, get_values
-from weapon_generator import generate_weapon, get_damage
+from weapon_generator import generate_weapon
 import random
 
 
@@ -78,12 +80,6 @@ def fight_player(entry, target_name, user_data, user, usersdb):
                 break
 
     return messages
-
-
-import random
-
-import random
-
 
 def fight_boar(entry, user_data, user, usersdb, mapdb):
     messages = []
@@ -193,3 +189,18 @@ def get_fight_preconditions(user_data):
     if not user_data["alive"]:
         return "You are dead"
     return None
+
+
+def exp_bonus(value, base=10):
+    lower = 1
+    upper = 10
+    log_lower = math.log(lower, base)
+    log_upper = math.log(upper, base)
+    log_value = math.log(value, base)
+
+    scaled_value = int(log_lower + (log_upper - log_lower) * ((log_value - log_lower) / (log_upper - log_lower)))
+    return scaled_value
+
+
+def get_damage(min_dmg, max_dmg):
+    int(min_dmg + (max_dmg - min_dmg) * random.betavariate(2, 5))
