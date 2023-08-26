@@ -24,7 +24,7 @@ def deploy_army(user, on_tile_map, usersdb, mapdb, user_data):
             update_user_data(user, updated_user_values, usersdb)
 
             key = get_coords(entry)
-            entry[key]["soldiers"] += 1
+            entry[key]["soldiers"] = user_data["construction"][player_pos]["soldiers"]
             update_map_data(entry, mapdb)
 
             return "Soldiers deployed"
