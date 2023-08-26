@@ -2,6 +2,8 @@ import json
 import random
 import string
 
+def get_damage(min_dmg, max_dmg):
+    int(min_dmg + (max_dmg - min_dmg) * random.betavariate(2, 5))
 def id_generator(length=10):
     """Generate a random alphanumeric string of given length."""
     characters = string.ascii_letters + string.digits

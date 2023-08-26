@@ -1,5 +1,5 @@
 from backend import get_coords, death_roll, update_user_data, Boar, remove_from_map, get_values
-from weapon_generator import generate_weapon
+from weapon_generator import generate_weapon, get_damage
 import random
 
 
@@ -84,6 +84,7 @@ import random
 
 import random
 
+
 def fight_boar(entry, user_data, user, usersdb, mapdb):
     messages = []
     boar = Boar()
@@ -146,7 +147,7 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
                     if weapon.get("cls") == "right_hand":
                         min_dmg = weapon.get("min_damage", 1)
                         max_dmg = weapon.get("max_damage", 1)
-                        damage = random.randint(min_dmg, max_dmg)
+                        damage = get_damage(min_dmg, max_dmg)
                         break
 
                 boar.hp -= damage
@@ -163,8 +164,6 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
                 )
 
     return messages
-
-
 
 
 def fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb, mapdb):
