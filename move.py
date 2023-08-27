@@ -17,6 +17,10 @@ def move(user, entry, axis_limit, user_data, users_dict, map_dict):
         other_axis_value = user_data.get(other_axis_key, 0)
 
         coord_key = f"{new_pos},{other_axis_value}" if axis_key == "x_pos" else f"{other_axis_value},{new_pos}"
+        current_coord_key = f"{user_data.get(axis_key, 0)},{other_axis_value}" if axis_key == "x_pos" else f"{other_axis_value},{user_data.get(axis_key, 0)}"
+
+        current_control = map_dict.get(current_coord_key, {}).get("control")
+        new_spot_control = map_dict.get(coord_key, {}).get("control")
 
         if not user_data.get("alive"):
             return_message["message"] = "Cannot move while dead"
@@ -29,6 +33,9 @@ def move(user, entry, axis_limit, user_data, users_dict, map_dict):
 
         elif map_dict.get(coord_key, {}).get("type") == "wall":
             return_message["message"] = "Cannot move into a wall"
+
+        elif current_control and current_control != user and new_spot_control:
+            return_message["message"] = "Must move to a spot not controlled by anyone else"
 
         else:
             return_message["success"] = True
