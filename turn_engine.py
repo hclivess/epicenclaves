@@ -9,7 +9,7 @@ from map import get_buildings
 from entities import Boar, spawn
 import string
 
-TEST = 0
+TEST = 1
 
 
 def fake_hash():
@@ -57,6 +57,21 @@ class TurnEngine(threading.Thread):
                 print("user (turn engine)", username, user_data)
 
                 updated_values = {}
+
+                sawmills = 0
+                forests = 0
+
+                # Check if the user has "sawmill" and "forest" in the construction section
+                for building_data in user_data.get("construction", {}).values():
+                    if building_data["type"] == "sawmill":
+                        sawmills += 1
+                    elif building_data["type"] == "forest":
+                        forests += 1
+
+                # Limit wood production by the number of forests, and ensure each sawmill produces at most 1 wood
+                if sawmills > 0 and forests > 0:
+                    wood_increment = min(sawmills, forests)  # Limited by the smaller of the two
+                    updated_values["wood"] = user_data["wood"] + wood_increment
 
                 # Update action_points and age if "action_points" exists
                 if "action_points" in user_data:
