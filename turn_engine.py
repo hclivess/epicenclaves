@@ -9,7 +9,7 @@ from map import get_buildings
 from entities import Boar, spawn
 import string
 
-TEST = 1
+TEST = 0
 
 
 def fake_hash():
