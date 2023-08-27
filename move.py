@@ -1,7 +1,7 @@
 from backend import update_user_data
 
 
-def move(user, entry, axis_limit, user_data, users_dict):
+def move(user, entry, axis_limit, user_data, users_dict, map_dict):
     return_message = {"success": False, "message": None}
     move_map = {
         "left": (-1, "x_pos"),
@@ -13,6 +13,10 @@ def move(user, entry, axis_limit, user_data, users_dict):
     if entry in move_map:
         direction, axis_key = move_map[entry]
         new_pos = user_data.get(axis_key, 0) + direction
+        other_axis_key = "y_pos" if axis_key == "x_pos" else "x_pos"
+        other_axis_value = user_data.get(other_axis_key, 0)
+
+        coord_key = f"{new_pos},{other_axis_value}" if axis_key == "x_pos" else f"{other_axis_value},{new_pos}"
 
         if not user_data.get("alive"):
             return_message["message"] = "Cannot move while dead"
@@ -22,6 +26,9 @@ def move(user, entry, axis_limit, user_data, users_dict):
 
         elif new_pos < 1 or new_pos > axis_limit:
             return_message["message"] = "Out of bounds"
+
+        elif map_dict.get(coord_key, {}).get("type") == "wall":
+            return_message["message"] = "Cannot move into a wall"
 
         else:
             return_message["success"] = True

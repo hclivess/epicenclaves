@@ -26,13 +26,22 @@ class Boar(Enemy):
 class Scenery:
     def __init__(self, hp):
         self.hp = hp
-        self.type = "forest"
+        self.type = "scenery"
         self.role = "scenery"
-
 
 class Tree(Scenery):
     def __init__(self):
         super().__init__(hp=100)
+        self.type = "forest"
+        self.role = "scenery"
+
+class Wall(Scenery):
+    def __init__(self):
+        super().__init__(hp=200)
+        self.type = "wall"
+        self.role = "obstacle"
+
+
 
 
 def spawn(entity_class, probability, mapdb, start_x=1, start_y=1, size=101, every=10, max_entities=None):

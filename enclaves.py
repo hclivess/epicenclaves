@@ -48,7 +48,8 @@ from sqlite import (
     save_map_from_memory,
 )
 
-from wall_generator import spawn_wall, Wall
+from wall_generator import spawn_wall
+from entities import Wall
 
 
 max_size = 1000000
@@ -201,7 +202,7 @@ class MoveHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
 
         user_data = get_user_data(user, usersdb=usersdb)
-        moved = move(user, entry, max_size, user_data, users_dict=usersdb)
+        moved = move(user, entry, max_size, user_data, users_dict=usersdb, map_dict=mapdb)
         user_data = get_user_data(user, usersdb=usersdb)  # update
 
         message = moved["message"]
