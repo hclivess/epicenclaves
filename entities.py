@@ -1,6 +1,6 @@
 import random
 
-from sqlite import save_map_data
+from map import save_map_data
 
 
 class Enemy:
@@ -35,16 +35,7 @@ class Tree(Scenery):
         super().__init__(hp=100)
 
 
-def spawn(
-    entity_class,
-    probability,
-    mapdb,
-    start_x=1,
-    start_y=1,
-    size=101,
-    every=10,
-    max_entities=None,
-):
+def spawn(entity_class, probability, mapdb, start_x=1, start_y=1, size=101, every=10, max_entities=None):
     generated_count = 0
     entity_instance = entity_class()
 

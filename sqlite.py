@@ -75,12 +75,6 @@ def create_map_database():
     conn.close()
 
 
-def save_map_data(map_data_dict, x_pos, y_pos, data):
-    # Use a string coordinate key like 'x,y'
-    coord_key = f"{x_pos},{y_pos}"
-    map_data_dict[coord_key] = data
-
-
 class SQLiteConnectionPool:
     def __init__(self, db_name):
         self.db_name = db_name

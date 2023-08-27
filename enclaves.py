@@ -48,6 +48,9 @@ from sqlite import (
     save_map_from_memory,
 )
 
+from wall_generator import spawn_wall, Wall
+
+
 max_size = 1000000
 
 
@@ -560,6 +563,10 @@ if __name__ == "__main__":
             size=50,
             every=10,
         )
+
+
+        spawn_wall(Wall, 0.5, mapdb, max_entities=20)
+
 
     actions = actions.TileActions()
     descriptions = descriptions.Descriptions()
