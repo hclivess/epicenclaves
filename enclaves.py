@@ -46,7 +46,6 @@ from user import create_users_db, create_user, save_users_from_memory, load_user
 from wall_generator import spawn_wall
 from entities import Wall
 
-
 max_size = 1000000
 
 
@@ -150,7 +149,7 @@ class DeployArmyHandler(BaseHandler):
         )
 
         message = deploy_army(user, on_tile_map, usersdb, mapdb, user_data)
-        user_data = get_user_data(user, usersdb=usersdb) #refresh
+        user_data = get_user_data(user, usersdb=usersdb)  # refresh
 
         self.render(
             "templates/user_panel.html",
@@ -560,9 +559,7 @@ if __name__ == "__main__":
             every=10,
         )
 
-
-        spawn_wall(Wall, 0.5, mapdb, max_entities=20)
-
+        spawn_wall(Wall, 0.5, mapdb, max_entities=25, wall_length=50)
 
     actions = actions.TileActions()
     descriptions = descriptions.Descriptions()
