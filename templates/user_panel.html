@@ -146,13 +146,6 @@
 
 </div>
 
-
-
-
-
-
-
-
                 <div class="card mt-3">
 
 
@@ -163,6 +156,7 @@
       <p class="card-text">🪵Wood: {{file["wood"]}}</p>
       <p class="card-text">🥩Food: {{file["food"]}}</p>
       <p class="card-text">🪨Bismuth: {{file["bismuth"]}}</p>
+      <p class="card-text">🧪Research: {{file["research"]}}</p>
     </div>
   </div>
 
@@ -301,6 +295,13 @@
                     <img src="/img/assets/archery_range.png" alt="Archery Range Icon" class="menu-icon"> Archery Range
                 </a>
                 <p>{{descriptions.get("archery_range")}}</p>
+            </div>
+
+            <div class="col-md-4">
+                <a class="btn btn-light btn-lg btn-block" href="/build?entity=archery_range&name=wc1">
+                    <img src="/img/assets/laboratory.png" alt="Laboratory Icon" class="menu-icon"> Laboratory
+                </a>
+                <p>{{descriptions.get("laboratory")}}</p>
             </div>
             <!-- Add more construction options in similar format as needed -->
         </div>

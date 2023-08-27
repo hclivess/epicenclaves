@@ -161,6 +161,7 @@ def create_user(user_data_dict, user, x_pos=1, y_pos=1, profile_pic=""):
         "age": 0,
         "img": profile_pic,
         "exp": 0,
+        "research": 0,
         "hp": 100,
         "armor": 0,
         "action_points": 200,

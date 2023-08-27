@@ -9,6 +9,7 @@ class Descriptions:
             "sawmill": "One sawmill and one owned forrest tile produce 🪵1 per turn.",
             "mine": "Generates additional resources.",
             "archery_range": "Turns peasants into archers for additional wood and housing.",
+            "laboratory": "Turns peasants into researchers to generate research points.",
         }
 
     def get(self, type):
