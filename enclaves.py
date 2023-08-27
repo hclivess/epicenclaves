@@ -25,7 +25,8 @@ from backend import (
     get_user,
     update_user_data,
 )
-from map import get_tile_map, get_tile_users, get_user_data, get_surrounding_map_and_user_data
+from map import get_tile_map, get_tile_users, get_user_data, get_surrounding_map_and_user_data, create_map_database, \
+    save_map_from_memory, load_map_to_memory
 from rest import attempt_rest
 from move import move
 from build import build
@@ -38,15 +39,9 @@ from auth import (
     auth_check_users_db,
 )
 from sqlite import (
-    create_user,
-    load_map_to_memory,
-    load_users_to_memory,
-    create_map_database,
     create_game_database,
-    create_users_db,
-    save_users_from_memory,
-    save_map_from_memory,
 )
+from user import create_users_db, create_user, save_users_from_memory, load_users_to_memory
 
 from wall_generator import spawn_wall
 from entities import Wall

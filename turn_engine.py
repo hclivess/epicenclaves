@@ -3,9 +3,10 @@ import random
 import blockchain
 import threading
 import time
-from sqlite import update_turn, save_map_from_memory, save_users_from_memory
+from sqlite import update_turn
+from user import save_users_from_memory
 from backend import update_user_data, hashify
-from map import get_buildings
+from map import get_buildings, save_map_from_memory
 from entities import Boar, spawn
 import string
 

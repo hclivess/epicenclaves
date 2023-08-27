@@ -1,5 +1,8 @@
+import json
+import sqlite3
+
 from backend import get_user, map_lock
-from sqlite import get_map_at_coords, get_users_at_coords
+from user import get_users_at_coords
 
 
 def get_tile_map(x, y, mapdb):
@@ -153,3 +156,85 @@ def save_map_data(map_data_dict, x_pos, y_pos, data):
     # Use a string coordinate key like 'x,y'
     coord_key = f"{x_pos},{y_pos}"
     map_data_dict[coord_key] = data
+
+
+def create_map_database():
+    # Connect to the database or create one if it doesn't exist
+    conn = sqlite3.connect("db/map_data.db")
+    cursor = conn.cursor()
+
+    # Create a table for the map data with columns: x_pos, y_pos, data
+    cursor.execute('''CREATE TABLE IF NOT EXISTS map_data (
+                        x_pos INTEGER,
+                        y_pos INTEGER,
+                        data TEXT,
+                        PRIMARY KEY (x_pos, y_pos)
+                      )''')
+
+    # Commit changes and close the connection
+    conn.commit()
+    conn.close()
+
+
+def get_map_at_coords(x_pos, y_pos, map_data_dict):
+    """returns map data at a specific coordinate"""
+    key = f"{x_pos},{y_pos}"
+
+    # Check if the key exists in the map_data_dict
+    if key in map_data_dict:
+        return {key: map_data_dict[key]}
+
+    # Return None if no data was found for the given coordinates
+    return None
+
+
+def save_map_from_memory(map_data_dict):
+    print("saving map to drive")
+    # Connect to the database and get a cursor
+    conn_map = sqlite3.connect("db/map_data.db")
+    cursor_map = conn_map.cursor()
+
+    # Iterate over the map data dictionary and save the data to the SQLite database
+    for key, data in map_data_dict.items():
+        x_map, y_map = map(int, key.split(','))
+        data_str = json.dumps(data)
+
+        # Check if the entry exists
+        cursor_map.execute("SELECT 1 FROM map_data WHERE x_pos = ? AND y_pos = ?", (x_map, y_map))
+        exists = cursor_map.fetchone()
+
+        # Update the existing entry if it exists, else insert a new entry
+        if exists:
+            cursor_map.execute("UPDATE map_data SET data = ? WHERE x_pos = ? AND y_pos = ?", (data_str, x_map, y_map))
+        else:
+            cursor_map.execute("INSERT INTO map_data (x_pos, y_pos, data) VALUES (?, ?, ?)", (x_map, y_map, data_str))
+
+    # Commit the changes and close the database connection
+    conn_map.commit()
+    conn_map.close()
+
+
+def load_map_to_memory():
+    # Connect to the database and get a cursor
+    conn_map = sqlite3.connect("db/map_data.db")
+    cursor_map = conn_map.cursor()
+
+    # Execute a query to fetch all records from the map_data table
+    cursor_map.execute("SELECT x_pos, y_pos, data FROM map_data")
+
+    # Fetch all results
+    results_map = cursor_map.fetchall()
+
+    # Close the database connection
+    conn_map.close()
+
+    # Convert the results to a dictionary
+    map_data_dict = {}
+    for result_map in results_map:
+        x_map, y_map, data_str = result_map
+        data = json.loads(data_str)
+
+        key = f"{x_map},{y_map}"
+        map_data_dict[key] = data
+
+    return map_data_dict

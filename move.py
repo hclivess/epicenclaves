@@ -1,5 +1,7 @@
 from backend import update_user_data
 
+from backend import update_user_data
+
 
 def move(user, entry, axis_limit, user_data, users_dict, map_dict):
     return_message = {"success": False, "message": None}
@@ -34,8 +36,8 @@ def move(user, entry, axis_limit, user_data, users_dict, map_dict):
         elif map_dict.get(coord_key, {}).get("type") == "wall":
             return_message["message"] = "Cannot move into a wall"
 
-        elif current_control and current_control != user and new_spot_control:
-            return_message["message"] = "Must move to a spot not controlled by anyone else"
+        elif current_control and current_control != user and new_spot_control and new_spot_control != user:
+            return_message["message"] = "Cannot move deeper into enemy territory"
 
         else:
             return_message["success"] = True
@@ -48,3 +50,4 @@ def move(user, entry, axis_limit, user_data, users_dict, map_dict):
             )
 
     return return_message
+
