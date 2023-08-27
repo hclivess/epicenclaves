@@ -203,4 +203,4 @@ def exp_bonus(value, base=10):
 
 
 def get_damage(min_dmg, max_dmg):
-    int(min_dmg + (max_dmg - min_dmg) * random.betavariate(2, 5))
+    return int(min_dmg + (max_dmg - min_dmg) * random.betavariate(2, 5))
