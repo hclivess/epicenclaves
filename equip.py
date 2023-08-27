@@ -15,7 +15,7 @@ def equip_item(usersdb, username, item_id):
     # Check if an item with the same class is currently equipped
     item_to_unequip = None
     for equipped_item in player['equipped']:
-        if equipped_item['cls'] == item_to_equip['cls']:
+        if equipped_item['role'] == item_to_equip['role']:
             item_to_unequip = equipped_item
             break
 

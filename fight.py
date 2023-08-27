@@ -141,7 +141,7 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
             if user_data["hp"] > 0:
                 damage = 1
                 for weapon in user_data.get("equipped", {}):
-                    if weapon.get("cls") == "right_hand":
+                    if weapon.get("role") == "right_hand":
                         min_dmg = weapon.get("min_damage", 1)
                         max_dmg = weapon.get("max_damage", 1)
                         damage = get_damage(min_dmg, max_dmg) + exp_bonus(value=user_data["exp"])

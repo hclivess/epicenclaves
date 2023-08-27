@@ -25,7 +25,7 @@ usersdb - data indexed by username:
                "type":"axe",
                "damage":1,
                "durability":100,
-               "cls":"melee"
+               "role":"melee"
             }
          ],
          "unequipped":[
@@ -33,7 +33,7 @@ usersdb - data indexed by username:
                "type":"dagger",
                "damage":2,
                "durability":100,
-               "cls":"melee"
+               "role":"melee"
             }
          ],
          "pop_lim":0,
@@ -44,13 +44,13 @@ usersdb - data indexed by username:
    "construction":{
       "1,1":{
          "type":"boar",
-         "cls":"enemy",
+         "role":"enemy",
          "armor":0,
          "max_damage":1
       },
       "1,11":{
          "type":"forest",
-         "cls":"scenery"
+         "role":"scenery"
       }
    }
 }
@@ -62,13 +62,13 @@ mapdb - data indexed by x,y:
 {
    "1,1":{
       "type":"boar",
-      "cls":"enemy",
+      "role":"enemy",
       "armor":0,
       "max_damage":1
    },
    "1,21":{
       "type":"forest",
-      "cls":"scenery"
+      "role":"scenery"
    }
 }
 ```

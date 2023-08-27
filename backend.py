@@ -35,7 +35,7 @@ def spawn(
 
     additional_entity_data = {
         "type": getattr(entity_instance, "type", entity_class.__name__),
-        **({"cls": entity_instance.cls} if hasattr(entity_instance, "cls") else {}),
+        **({"role": entity_instance.role} if hasattr(entity_instance, "role") else {}),
         **(
             {"armor": entity_instance.armor}
             if hasattr(entity_instance, "armor")
@@ -139,7 +139,7 @@ def build(entity, name, user, mapdb, usersdb):
     for entry in on_tile:
         tile_data = entry.get(f"{user_data['x_pos']},{user_data['y_pos']}")
         if tile_data and (
-            tile_data["cls"] == "building" or tile_data["cls"] == "scenery"
+            tile_data["role"] == "building" or tile_data["role"] == "scenery"
         ):
             building_or_scenery_exists = True
             break
@@ -176,7 +176,7 @@ def build(entity, name, user, mapdb, usersdb):
         "name": name,
         "size": 1,
         "control": user,
-        "cls": "building",
+        "role": "building",
         "soldiers": 0,
     }
 

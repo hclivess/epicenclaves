@@ -10,7 +10,7 @@ def deploy_army(user, on_tile_map, usersdb, mapdb, user_data):
         return "Not enough free army available"
 
     for entry in on_tile_map:
-        if get_values(entry).get("cls") == "building":
+        if get_values(entry).get("role") == "building":
             updated_user_values = {
                 "army_free": user_data["army_free"] - 1,
                 "army_deployed": user_data["army_deployed"] + 1,

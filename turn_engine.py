@@ -8,7 +8,7 @@ from backend import spawn, update_user_data, get_buildings, hashify
 from entities import Boar
 import string
 
-TEST = 1
+TEST = 0
 
 
 def fake_hash():
