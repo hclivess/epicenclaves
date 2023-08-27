@@ -4,7 +4,8 @@ import blockchain
 import threading
 import time
 from sqlite import update_turn, save_map_from_memory, save_users_from_memory
-from backend import spawn, update_user_data, Boar, get_buildings, hashify
+from backend import spawn, update_user_data, get_buildings, hashify
+from entities import Boar
 import string
 
 TEST = 1

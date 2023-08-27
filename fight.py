@@ -1,6 +1,7 @@
 import math
 
-from backend import get_coords, death_roll, update_user_data, Boar, remove_from_map, get_values
+from backend import get_coords, death_roll, update_user_data, remove_from_map, get_values
+from entities import Boar
 from weapon_generator import generate_weapon
 import random
 
@@ -143,7 +144,7 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
                     if weapon.get("cls") == "right_hand":
                         min_dmg = weapon.get("min_damage", 1)
                         max_dmg = weapon.get("max_damage", 1)
-                        damage = get_damage(min_dmg, max_dmg)
+                        damage = get_damage(min_dmg, max_dmg) + exp_bonus(value=user_data["exp"])
                         break
 
                 boar.hp -= damage
@@ -192,6 +193,9 @@ def get_fight_preconditions(user_data):
 
 
 def exp_bonus(value, base=10):
+    if value <= 0:
+        return 0
+
     lower = 1
     upper = 10
     log_lower = math.log(lower, base)

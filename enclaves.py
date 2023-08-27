@@ -27,13 +27,13 @@ from backend import (
     get_user_data,
     move,
     attempt_rest,
-    Tree,
     get_tile_map,
     get_tile_users,
     get_user,
     update_user_data,
     get_surrounding_map_and_user_data,
 )
+from entities import Tree
 from auth import (
     auth_cookie_get,
     auth_login_validate,
