@@ -6,7 +6,7 @@ class Descriptions:
             "inn": "Restores health",
             "farm": "Generates food and peasants if housing is available.",
             "barracks": "Turns peasants into soldiers for 2 food per turn and additional housing.",
-            "sawmill": "1 sawmill produces a maximum of 🪵1 per turn. 1 forrest can also produce a maximum of 🪵1.",
+            "sawmill": "One sawmill and one owned forrest tile produce 🪵1 per turn.",
             "mine": "Generates additional resources.",
             "archery_range": "Turns peasants into archers for additional wood and housing.",
         }
