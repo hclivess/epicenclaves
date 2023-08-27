@@ -1,5 +1,4 @@
 import math
-
 from backend import update_user_data, get_values
 from map import remove_from_map, get_coords
 from entities import Boar
@@ -9,15 +8,22 @@ import random
 
 def player_attack(attacker, defender, attacker_name, messages):
     if attacker["hp"] > 0:
-        defender["hp"] -= 1
+        damage = 1  # Default damage
+        for weapon in attacker.get("equipped", {}):
+            if weapon.get("role") == "right_hand":
+                min_dmg = weapon.get("min_damage", 1)
+                max_dmg = weapon.get("max_damage", 1)
+                damage = get_damage(min_dmg, max_dmg) + exp_bonus(value=attacker["exp"])
+                break
+
+        defender["hp"] -= damage
         if attacker_name == "You":
-            messages.append(f"You hit for 1 damage, they have {defender['hp']} left")
+            messages.append(f"You hit for {damage} damage, they have {defender['hp']} left")
         else:
-            messages.append(f"{attacker_name} hits you for 1 damage, you have {defender['hp']} left")
+            messages.append(f"{attacker_name} hits you for {damage} damage, you have {defender['hp']} left")
 
 
 def defeat_outcome(entity, entity_name, chance, usersdb):
-    """Handles the outcome when an entity's HP drops to 0 or below."""
     messages = []
     if death_roll(chance):
         messages.append(f"{entity_name} is defeated.")
@@ -32,7 +38,6 @@ def defeat_outcome(entity, entity_name, chance, usersdb):
             "action_points": entity["action_points"] - 1,
             "hp": 1
         }
-
     update_user_data(user=entity_name, updated_values=new_data, user_data_dict=usersdb)
     return messages
 
@@ -54,7 +59,6 @@ def fight_player(entry, target_name, user_data, user, usersdb):
         messages.append(f"You challenged {entry_name}")
 
         while target_data["alive"] and user_data["alive"]:
-
             player_attack(target_data, user_data, entry_name, messages)
             player_attack(user_data, target_data, "You", messages)
 
