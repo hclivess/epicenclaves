@@ -22,18 +22,14 @@ from equip import equip_item
 from fight import fight, get_fight_preconditions
 from turn_engine import TurnEngine
 from backend import (
-    build,
-    spawn,
-    get_user_data,
-    move,
-    attempt_rest,
-    get_tile_map,
-    get_tile_users,
     get_user,
     update_user_data,
-    get_surrounding_map_and_user_data,
 )
-from entities import Tree
+from map import get_tile_map, get_tile_users, get_user_data, get_surrounding_map_and_user_data
+from rest import attempt_rest
+from move import move
+from build import build
+from entities import Tree, spawn
 from auth import (
     auth_cookie_get,
     auth_login_validate,

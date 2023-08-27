@@ -1,11 +1,9 @@
 from backend import (
     get_values,
     remove_from_user,
-    update_map_data,
     update_user_data,
-    get_coords,
-
 )
+from map import update_map_data, get_coords
 import random
 
 

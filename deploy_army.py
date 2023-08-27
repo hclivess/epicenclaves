@@ -1,4 +1,5 @@
-from backend import owned_by, get_values, update_user_data, get_coords, update_map_data
+from backend import get_values, update_user_data
+from map import owned_by, update_map_data, get_coords
 
 
 def deploy_army(user, on_tile_map, usersdb, mapdb, user_data):

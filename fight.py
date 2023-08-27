@@ -1,6 +1,7 @@
 import math
 
-from backend import get_coords, death_roll, update_user_data, remove_from_map, get_values
+from backend import update_user_data, get_values
+from map import remove_from_map, get_coords
 from entities import Boar
 from weapon_generator import generate_weapon
 import random
@@ -208,3 +209,9 @@ def exp_bonus(value, base=10):
 
 def get_damage(min_dmg, max_dmg):
     return int(min_dmg + (max_dmg - min_dmg) * random.betavariate(2, 5))
+
+
+def death_roll(hit_chance):
+    if hit_chance < 0 or hit_chance > 1:
+        raise ValueError("Hit chance should be between 0 and 1 inclusive.")
+    return random.random() < hit_chance

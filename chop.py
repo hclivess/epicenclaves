@@ -1,4 +1,5 @@
-from backend import occupied_by, owned_by, has_item_equipped, update_user_data
+from backend import has_item_equipped, update_user_data
+from map import occupied_by, owned_by
 
 
 def chop_forest(user, user_data, usersdb, mapdb):
