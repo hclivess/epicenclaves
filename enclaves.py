@@ -43,7 +43,7 @@ from sqlite import (
 )
 from user import create_users_db, create_user, save_users_from_memory, load_users_to_memory
 
-from wall_generator import spawn_wall
+from wall_generator import update_mapdb_with_maze, generate_maze
 from entities import Wall
 
 max_size = 1000000
@@ -559,7 +559,8 @@ if __name__ == "__main__":
             every=10,
         )
 
-        spawn_wall(Wall, 0.5, mapdb, max_entities=25, wall_length=50)
+        maze = generate_maze(20, 20)
+        update_mapdb_with_maze(mapdb, maze=maze, offset_x=10, offset_y=10)
 
     actions = actions.TileActions()
     descriptions = descriptions.Descriptions()
