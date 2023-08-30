@@ -7,6 +7,7 @@ def id_generator(length=10):
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for _ in range(length))
 
+
 def generate_weapon():
     weapon_types = ["sword", "axe", "bow", "spear", "dagger", "mace"]
     weapon_damage = {
@@ -16,6 +17,15 @@ def generate_weapon():
         "spear": (6, 11),
         "dagger": (3, 7),
         "mace": (8, 13)
+    }
+
+    weapon_ranges = {
+        "sword": "melee",
+        "axe": "melee",
+        "bow": "ranged",
+        "spear": "melee",
+        "dagger": "melee",
+        "mace": "melee"
     }
 
     selected_weapon = random.choice(weapon_types)
@@ -31,10 +41,11 @@ def generate_weapon():
 
     weapon_dict = {
         "type": selected_weapon,
+        "range": weapon_ranges[selected_weapon],  # Added this line
         "min_damage": min_damage,
         "max_damage": max_damage,
         "role": "right_hand",
-        "id": id_generator(),
+        "id": id_generator()  # Assuming you have a function called id_generator
     }
 
     return weapon_dict
@@ -43,5 +54,3 @@ def generate_weapon():
 if __name__ == "__main__":
     weapon_json = generate_weapon()
     print(weapon_json)
-
-
