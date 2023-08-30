@@ -30,7 +30,8 @@ from map import get_tile_map, get_tile_users, get_user_data, get_surrounding_map
 from rest import attempt_rest
 from move import move
 from build import build
-from entities import Tree, spawn
+from entities import Tree
+from entity_generator import spawn_entity
 from auth import (
     auth_cookie_get,
     auth_login_validate,
@@ -43,7 +44,7 @@ from sqlite import (
 )
 from user import create_users_db, create_user, save_users_from_memory, load_users_to_memory
 
-from wall_generator import update_mapdb_with_maze, generate_maze
+from wall_generator import generate_multiple_mazes
 from entities import Wall
 
 max_size = 1000000
@@ -551,7 +552,7 @@ if __name__ == "__main__":
     mapdb, usersdb = initialize_map_and_users()
 
     if not db_status["map_exists"]:
-        spawn(
+        spawn_entity(
             mapdb=mapdb,
             entity_class=Tree,
             probability=0.5,
@@ -559,8 +560,7 @@ if __name__ == "__main__":
             every=10,
         )
 
-        maze = generate_maze(20, 20)
-        update_mapdb_with_maze(mapdb, maze=maze, offset_x=10, offset_y=10)
+        generate_multiple_mazes(mapdb, 20, 20, 100, 100, 0.5, 70, 70, total_max_mazes=5)
 
     actions = actions.TileActions()
     descriptions = descriptions.Descriptions()

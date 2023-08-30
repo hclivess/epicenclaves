@@ -1,91 +1,47 @@
-from PIL import Image, ImageDraw
 import random
 
-def generate_maze(width, height):
-    maze = [['wall' for _ in range(width)] for _ in range(height)]
+def generate_maze(width, height, offset_x, offset_y, spawn_prob, spawn_every_x_tiles, spawn_every_y_tiles, entity_count):
+    maze = {}
+    local_entity_count = 0
 
-    # Generate maze using binary tree algorithm
-    for y in range(1, height, 2):
-        for x in range(1, width, 2):
-            maze[y][x] = 'path'
+    for y in range(offset_y, offset_y + height, 2):
+        for x in range(offset_x, offset_x + width, 2):
+            key = f'{x},{y}'
+            maze[key] = {'type': 'wall'}
 
-            if y > 1 and x < width - 2:
+            if x % spawn_every_x_tiles == 0 and y % spawn_every_y_tiles == 0 and random.random() < spawn_prob:
+                maze[key] = {'type': 'spawn', 'entity_id': entity_count}
+                entity_count += 1
+                local_entity_count += 1
+
+            neighbor_x = x + 1 if x < offset_x + width - 2 else None
+            neighbor_y = y - 1 if y > offset_y + 1 else None
+
+            if neighbor_x and neighbor_y:
                 if random.choice([True, False]):
-                    maze[y - 1][x] = 'path'
+                    maze[f'{x},{neighbor_y}'] = {'type': 'wall'}
                 else:
-                    maze[y][x + 1] = 'path'
-            elif y > 1:
-                maze[y - 1][x] = 'path'
-            elif x < width - 2:
-                maze[y][x + 1] = 'path'
+                    maze[f'{neighbor_x},{y}'] = {'type': 'wall'}
+            elif neighbor_y:
+                maze[f'{x},{neighbor_y}'] = {'type': 'wall'}
+            elif neighbor_x:
+                maze[f'{neighbor_x},{y}'] = {'type': 'wall'}
 
-    return maze
+    return maze, local_entity_count, entity_count
 
-def maze_to_image(maze, offset_x, offset_y):
-    cell_size = 10  # Size of each maze cell in pixels
+def generate_multiple_mazes(mapdb, width, height, initial_offset_x, initial_offset_y, spawn_prob, spawn_every_x_tiles, spawn_every_y_tiles, total_max_mazes):
+    offset_x = initial_offset_x
+    offset_y = initial_offset_y
+    total_entity_count = 0
+    total_maze_count = 0
 
-    width = len(maze[0])
-    height = len(maze)
+    while total_maze_count < total_max_mazes:
+        maze, local_entity_count, total_entity_count = generate_maze(width, height, offset_x, offset_y, spawn_prob, spawn_every_x_tiles, spawn_every_y_tiles, total_entity_count)
+        mapdb.update(maze)
 
-    image_width = width * cell_size
-    image_height = height * cell_size
+        total_maze_count += 1
+        offset_x += width + 2
+        offset_y += height + 2
 
-    # Adjust image dimensions to account for offset
-    image_width += offset_x
-    image_height += offset_y
-
-    image = Image.new('RGB', (image_width, image_height), 'white')
-    draw = ImageDraw.Draw(image)
-
-    for y in range(height):
-        for x in range(width - 1):
-            if maze[y][x] == 'path' and maze[y][x + 1] == 'path':
-                draw_line(draw, x, y, x + 1, y, cell_size, offset_x, offset_y)
-
-    for x in range(width):
-        for y in range(height - 1):
-            if maze[y][x] == 'path' and maze[y + 1][x] == 'path':
-                draw_line(draw, x, y, x, y + 1, cell_size, offset_x, offset_y)
-
-    return image
-
-def draw_line(draw, x1, y1, x2, y2, cell_size, offset_x, offset_y):
-    x1 = x1 * cell_size + offset_x
-    y1 = y1 * cell_size + offset_y
-    x2 = x2 * cell_size + offset_x
-    y2 = y2 * cell_size + offset_y
-    dx = abs(x2 - x1)
-    dy = abs(y2 - y1)
-    sx = 1 if x1 < x2 else -1
-    sy = 1 if y1 < y2 else -1
-    err = dx - dy
-
-    while True:
-        draw.point((x1, y1), fill='black')
-        if x1 == x2 and y1 == y2:
-            break
-        e2 = 2 * err
-        if e2 > -dy:
-            err -= dy
-            x1 += sx
-        if e2 < dx:
-            err += dx
-            y1 += sy
-
-def update_mapdb_with_maze(mapdb, maze, offset_x, offset_y):
-    for y, row in enumerate(maze):
-        for x, cell_type in enumerate(row):
-            if cell_type == 'wall':
-                mapdb[f'{x + offset_x},{y + offset_y}'] = {'type': 'wall'}
-
-# Example usage
-if __name__ == "__main__":
-    mapdb = {}
-    maze = generate_maze(20, 20)  # Adjust width and height as needed
-    offset_x = 50  # Adjust the offset values as needed
-    offset_y = 50
-    update_mapdb_with_maze(mapdb, maze, offset_x, offset_y)
-    print(mapdb)
-
-    maze_image = maze_to_image(maze, offset_x, offset_y)
-    maze_image.save('maze_with_offset.png')
+mapdb = {}
+generate_multiple_mazes(mapdb, 10, 10, 50, 50, 0.5, 100, 100, 3)
