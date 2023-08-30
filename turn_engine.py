@@ -145,7 +145,7 @@ class TurnEngine(threading.Thread):
                 mapdb=self.mapdb,
                 entity_class=Boar,
                 probability=0.25,
-                size=25,
+                size=200,
                 every=5,
                 max_entities=1,
             )

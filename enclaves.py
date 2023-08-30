@@ -556,7 +556,7 @@ if __name__ == "__main__":
             mapdb=mapdb,
             entity_class=Tree,
             probability=0.5,
-            size=50,
+            size=200,
             every=10,
         )
 
