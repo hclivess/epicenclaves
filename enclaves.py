@@ -560,7 +560,7 @@ if __name__ == "__main__":
             every=10,
         )
 
-        generate_multiple_mazes(mapdb, 20, 20, 100, 100, 0.5, 70, 70, total_max_mazes=5)
+        generate_multiple_mazes(mapdb, 20, 20, 20, 20, 0.25, 40, 40, total_max_mazes=10)
 
     actions = actions.TileActions()
     descriptions = descriptions.Descriptions()

@@ -9,10 +9,11 @@ def generate_maze(width, height, offset_x, offset_y, spawn_prob, spawn_every_x_t
             key = f'{x},{y}'
             maze[key] = {'type': 'wall'}
 
-            if x % spawn_every_x_tiles == 0 and y % spawn_every_y_tiles == 0 and random.random() < spawn_prob:
-                maze[key] = {'type': 'spawn', 'entity_id': entity_count}
-                entity_count += 1
-                local_entity_count += 1
+            if x % spawn_every_x_tiles == 0 and y % spawn_every_y_tiles == 0:
+                if random.random() < spawn_prob:
+                    maze[key] = {'type': 'spawn', 'entity_id': entity_count}
+                    entity_count += 1
+                    local_entity_count += 1
 
             neighbor_x = x + 1 if x < offset_x + width - 2 else None
             neighbor_y = y - 1 if y > offset_y + 1 else None
@@ -40,8 +41,10 @@ def generate_multiple_mazes(mapdb, width, height, initial_offset_x, initial_offs
         mapdb.update(maze)
 
         total_maze_count += 1
-        offset_x += width + 2
-        offset_y += height + 2
+        offset_x += width + initial_offset_x
+        if total_maze_count % 2 == 0:
+            offset_y += height + initial_offset_y
+            offset_x = initial_offset_x
 
 mapdb = {}
-generate_multiple_mazes(mapdb, 10, 10, 50, 50, 0.5, 100, 100, 3)
+generate_multiple_mazes(mapdb, 10, 10, 5, 5, 0.5, 100, 100, 6)
