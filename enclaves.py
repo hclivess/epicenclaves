@@ -443,7 +443,7 @@ class LoginHandler(BaseHandler):
 
         if not auth_exists_user(user):
             auth_add_user(user, password)
-            create_user(user_data_dict=usersdb, user=user, profile_pic=profile_pic_path)
+            create_user(user_data_dict=usersdb, user=user, profile_pic=profile_pic_path, mapdb=mapdb)
 
             save_users_from_memory(usersdb)
             save_map_from_memory(mapdb)

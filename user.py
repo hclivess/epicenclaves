@@ -1,6 +1,6 @@
 import json
 import sqlite3
-
+import random
 from weapon_generator import id_generator
 
 
@@ -42,7 +42,28 @@ def create_users_db():
     conn.close()
 
 
-def create_user(user_data_dict, user, x_pos=1, y_pos=1, profile_pic=""):
+def find_open_space(mapdb):
+    while True:
+        x = random.randint(0, 100)
+        y = random.randint(0, 100)
+        open_space = True
+
+        for dx in range(-5, 6):
+            for dy in range(-5, 6):
+                check_x, check_y = x + dx, y + dy
+                if f"{check_x},{check_y}" in mapdb:
+                    open_space = False
+                    break
+            if not open_space:
+                break
+
+        if open_space:
+            return x, y
+
+
+def create_user(user_data_dict, user, mapdb, profile_pic=""):
+    x_pos, y_pos = find_open_space(mapdb)
+
     # Prepare the data dictionary
     data = {
         "x_pos": x_pos,
@@ -61,8 +82,11 @@ def create_user(user_data_dict, user, x_pos=1, y_pos=1, profile_pic=""):
         "wood": 500,
         "food": 500,
         "bismuth": 500,
-        "equipped": [{"type": "axe", "min_damage": 1, "max_damage": 1, "durability": 100, "range": "melee", "role": "right_hand", "id": id_generator()}],
-        "unequipped": [{"type": "dagger", "min_damage": 1, "max_damage": 2, "durability": 100, "range": "melee", "role": "right_hand", "id": id_generator()}],
+        "equipped": [
+            {"type": "axe", "min_damage": 1, "max_damage": 1, "durability": 100, "range": "melee", "role": "right_hand",
+             "id": id_generator()}],
+        "unequipped": [{"type": "dagger", "min_damage": 1, "max_damage": 2, "durability": 100, "range": "melee",
+                        "role": "right_hand", "id": id_generator()}],
         "pop_lim": 0,
         "alive": True,
         "online": True,
