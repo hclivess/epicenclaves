@@ -75,7 +75,7 @@ def create_user(user_data_dict, user, mapdb, profile_pic=""):
         "research": 0,
         "hp": 100,
         "armor": 0,
-        "action_points": 200,
+        "action_points": 500,
         "army_deployed": 0,
         "army_free": 0,
         "peasants": 0,
