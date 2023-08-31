@@ -54,7 +54,7 @@ def fight_player(entry, target_name, user_data, user, usersdb):
             messages.append(f"{entry_name} is already dead!")
             return messages
 
-        if target_data["exp"] < 50:
+        if target_data["exp"] < 10:
             messages.append(f"{entry_name} is too inexperienced to challenge!")
             return messages
 
@@ -74,7 +74,7 @@ def fight_player(entry, target_name, user_data, user, usersdb):
             if target_data["hp"] <= 0:
                 defeated_entity = target_data
                 defeated_name = entry_name
-                exp_gain = user_data["exp"] + target_data["exp"] / 10
+                exp_gain = user_data["exp"] + 10 + target_data["exp"] / 10
                 update_user_data(user=user, updated_values={"exp": exp_gain}, user_data_dict=usersdb)
 
             elif user_data["hp"] <= 0:

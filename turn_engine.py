@@ -128,6 +128,10 @@ class TurnEngine(threading.Thread):
                 if updated_values["army_free"] < 0:
                     updated_values["army_free"] = 0
 
+                # Ensure peasants don't go negative
+                if updated_values["peasants"] < 0:
+                    updated_values["peasants"] = 0
+
                 # Increase food by one for every leftover peasant
                 updated_values["food"] += updated_values["peasants"]
 
