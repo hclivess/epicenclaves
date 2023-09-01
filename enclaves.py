@@ -110,7 +110,7 @@ class MapHandler(BaseHandler):
         data = json.dumps(get_surrounding_map_and_user_data(user, usersdb, mapdb))
 
         print("data", data)  # debug
-        self.render("templates/map.html", data=data, ensure_ascii=False)
+        self.render("templates/map.html", data=data, ensure_ascii=False, user=user)
 
 
 class EquipHandler(BaseHandler):

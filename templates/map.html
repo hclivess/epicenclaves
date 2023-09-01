@@ -353,6 +353,37 @@ function createMap(data) {
       });
     }
   });
+
+
+
+
+
+  //centering start
+  var userKey = '{{ user }}'; // Replace this with the actual key or username
+  var userToCenter = data.users[userKey];
+
+    if (userToCenter) {
+    // Calculate the offset needed to center the user in the viewport
+    var viewportWidth = window.innerWidth;
+    var viewportHeight = window.innerHeight;
+    var userX = (userToCenter.x_pos - 1) * gridSize + gridSize / 2; // Center of user's tile
+    var userY = (userToCenter.y_pos - 1) * gridSize + gridSize / 2; // Center of user's tile
+    var offsetX = userX - viewportWidth / 2;
+    var offsetY = userY - viewportHeight / 2;
+
+    // Apply the offset to the map container
+    var mapContainer = document.getElementById("map");
+    mapContainer.style.position = "relative";
+    mapContainer.style.left = -offsetX + "px";
+    mapContainer.style.top = -offsetY + "px";
+  }
+    //centering end
+
+
+
+
+
+
 }
 
 createMap(jsonData);
@@ -360,49 +391,41 @@ createMap(jsonData);
 
      <script>
 document.addEventListener("DOMContentLoaded", function(event) {
-    // When the page is loaded, get the scroll position from localStorage
-    var scrollX = localStorage.getItem('scrollX') || 0;
-    var scrollY = localStorage.getItem('scrollY') || 0;
+  document.addEventListener("keydown", function(event) {
+    var scrollAmount = 125;
+    var direction = null;
 
-    // Set the scroll position to the saved values
-    window.scrollTo(scrollX, scrollY);
+    switch (event.key) {
+      case "ArrowLeft":
+        direction = "left";
+        window.scrollBy(-scrollAmount, 0);
+        break;
+      case "ArrowRight":
+        direction = "right";
+        window.scrollBy(scrollAmount, 0);
+        break;
+      case "ArrowUp":
+        direction = "up";
+        window.scrollBy(0, -scrollAmount);
+        break;
+      case "ArrowDown":
+        direction = "down";
+        window.scrollBy(0, scrollAmount);
+        break;
+    }
 
-    document.addEventListener("keydown", function(event) {
-        var scrollAmount = 125; // Change this value to adjust the amount of scrolling
-        var direction = null;
+    localStorage.setItem('scrollX', window.scrollX);
+    localStorage.setItem('scrollY', window.scrollY);
 
-        switch (event.key) {
-            case "ArrowLeft":
-                direction = "left";
-                window.scrollBy(-scrollAmount, 0);
-                break;
-            case "ArrowRight":
-                direction = "right";
-                window.scrollBy(scrollAmount, 0);
-                break;
-            case "ArrowUp":
-                direction = "up";
-                window.scrollBy(0, -scrollAmount);
-                break;
-            case "ArrowDown":
-                direction = "down";
-                window.scrollBy(0, scrollAmount);
-                break;
-        }
-
-        // After scrolling, save the scroll position to localStorage
-        localStorage.setItem('scrollX', window.scrollX);
-        localStorage.setItem('scrollY', window.scrollY);
-
-        if (direction) {
-            // Simulate the click on the corresponding button
-            var button = document.getElementById('btn' + direction.charAt(0).toUpperCase() + direction.slice(1));
-            if (button) {
-                button.click();
-            }
-        }
-    });
+    if (direction) {
+      var button = document.getElementById('btn' + direction.charAt(0).toUpperCase() + direction.slice(1));
+      if (button) {
+        button.click();
+      }
+    }
+  });
 });
+
 </script>
 
 
