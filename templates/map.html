@@ -14,8 +14,26 @@ body {
 }
 
 .map {
-  position: relative;
-  margin-top: 50px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+  gap: 1px;
+  padding: 1px;
+  overflow: hidden; /* Remove the inner scrollbars */
+  height: 100vh;
+  overscroll-behavior: contain; /* Improve scrolling behavior */
+}
+
+.map-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  height: max-content;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .navigation-container {
@@ -203,8 +221,10 @@ body {
 </div>
 </div>
 
+<div class="wrapper" id="wrapper">
+  <div class="map" id="map"></div>
+</div>
 
-<div class="map" id="map"></div>
 <script>
 
 const jsonData = {% raw data %};  // Your JSON data
@@ -359,24 +379,20 @@ function createMap(data) {
 
 
   //centering start
-  var userKey = '{{ user }}'; // Replace this with the actual key or username
-  var userToCenter = data.users[userKey];
+// Add this script to adjust the centering and scrolling
+var userKey = '{{ user }}'; // Replace this with the actual key or username
+var userToCenter = jsonData.users[userKey];
 
-    if (userToCenter) {
-    // Calculate the offset needed to center the user in the viewport
-    var viewportWidth = window.innerWidth;
-    var viewportHeight = window.innerHeight;
-    var userX = (userToCenter.x_pos - 1) * gridSize + gridSize / 2; // Center of user's tile
-    var userY = (userToCenter.y_pos - 1) * gridSize + gridSize / 2; // Center of user's tile
-    var offsetX = userX - viewportWidth / 2;
-    var offsetY = userY - viewportHeight / 2;
+if (userToCenter) {
+  var userX = (userToCenter.x_pos - 1) * gridSize + gridSize / 2; // Center of user's tile
+  var userY = (userToCenter.y_pos - 1) * gridSize + gridSize / 2; // Center of user's tile
 
-    // Apply the offset to the map container
-    var mapContainer = document.getElementById("map");
-    mapContainer.style.position = "relative";
-    mapContainer.style.left = -offsetX + "px";
-    mapContainer.style.top = -offsetY + "px";
-  }
+  var offsetX = Math.max(0, userX - window.innerWidth / 2);
+  var offsetY = Math.max(0, userY - window.innerHeight / 2);
+
+  // Scroll the window to the centered user position
+  window.scrollTo(offsetX, offsetY);
+}
     //centering end
 
 
