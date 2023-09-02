@@ -1,5 +1,6 @@
 import json
 import sqlite3
+import threading
 
 from backend import get_user, map_lock
 from user import get_users_at_coords
@@ -189,29 +190,31 @@ def get_map_at_coords(x_pos, y_pos, map_data_dict):
 
 
 def save_map_from_memory(map_data_dict):
-    print("saving map to drive")
-    # Connect to the database and get a cursor
-    conn_map = sqlite3.connect("db/map_data.db")
-    cursor_map = conn_map.cursor()
+    sql_lock = threading.Lock
+    with sql_lock:
+        print("saving map to drive")
+        # Connect to the database and get a cursor
+        conn_map = sqlite3.connect("db/map_data.db")
+        cursor_map = conn_map.cursor()
 
-    # Iterate over the map data dictionary and save the data to the SQLite database
-    for key, data in map_data_dict.items():
-        x_map, y_map = map(int, key.split(','))
-        data_str = json.dumps(data)
+        # Iterate over the map data dictionary and save the data to the SQLite database
+        for key, data in map_data_dict.items():
+            x_map, y_map = map(int, key.split(','))
+            data_str = json.dumps(data)
 
-        # Check if the entry exists
-        cursor_map.execute("SELECT 1 FROM map_data WHERE x_pos = ? AND y_pos = ?", (x_map, y_map))
-        exists = cursor_map.fetchone()
+            # Check if the entry exists
+            cursor_map.execute("SELECT 1 FROM map_data WHERE x_pos = ? AND y_pos = ?", (x_map, y_map))
+            exists = cursor_map.fetchone()
 
-        # Update the existing entry if it exists, else insert a new entry
-        if exists:
-            cursor_map.execute("UPDATE map_data SET data = ? WHERE x_pos = ? AND y_pos = ?", (data_str, x_map, y_map))
-        else:
-            cursor_map.execute("INSERT INTO map_data (x_pos, y_pos, data) VALUES (?, ?, ?)", (x_map, y_map, data_str))
+            # Update the existing entry if it exists, else insert a new entry
+            if exists:
+                cursor_map.execute("UPDATE map_data SET data = ? WHERE x_pos = ? AND y_pos = ?", (data_str, x_map, y_map))
+            else:
+                cursor_map.execute("INSERT INTO map_data (x_pos, y_pos, data) VALUES (?, ?, ?)", (x_map, y_map, data_str))
 
-    # Commit the changes and close the database connection
-    conn_map.commit()
-    conn_map.close()
+        # Commit the changes and close the database connection
+        conn_map.commit()
+        conn_map.close()
 
 
 def load_map_to_memory():
