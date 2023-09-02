@@ -2,7 +2,7 @@ import json
 import sqlite3
 import random
 from weapon_generator import id_generator
-
+import threading
 
 def get_users_at_coords(x_pos, y_pos, user, users_dict, include_construction=True, include_self=True):
     """Returns a list of user data at a specific coordinate"""
@@ -24,23 +24,15 @@ def get_users_at_coords(x_pos, y_pos, user, users_dict, include_construction=Tru
     return users_at_coords
 
 
+user_lock = threading.Lock()
+
 def create_users_db():
-    # Connect to the database
-    conn = sqlite3.connect("db/user_data.db")
-    cursor = conn.cursor()
-
-    # Create the table if it doesn't exist
-    cursor.execute('''CREATE TABLE IF NOT EXISTS user_data (
-                        username TEXT PRIMARY KEY,
-                        x_pos INTEGER,
-                        y_pos INTEGER,
-                        data TEXT
-                      )''')
-
-    # Commit changes and close the connection
-    conn.commit()
-    conn.close()
-
+    with user_lock:
+        conn = sqlite3.connect("db/user_data.db")
+        cursor = conn.cursor()
+        cursor.execute("CREATE TABLE IF NOT EXISTS user_data (username TEXT PRIMARY KEY, x_pos INTEGER, y_pos INTEGER, data TEXT)")
+        conn.commit()
+        conn.close()
 
 def find_open_space(mapdb):
     while True:
