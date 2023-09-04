@@ -34,14 +34,16 @@ def create_users_db():
         conn.commit()
         conn.close()
 
+
 def find_open_space(mapdb):
+    x = random.randint(0, 100)
+    y = random.randint(0, 100)
+
     while True:
-        x = random.randint(0, 100)
-        y = random.randint(0, 100)
         open_space = True
 
-        for dx in range(-5, 6):
-            for dy in range(-5, 6):
+        for dx in range(-1, 2):  # Check within a 3x3 square
+            for dy in range(-1, 2):
                 check_x, check_y = x + dx, y + dy
                 if f"{check_x},{check_y}" in mapdb:
                     open_space = False
@@ -52,8 +54,18 @@ def find_open_space(mapdb):
         if open_space:
             return x, y
 
+        # Increment coordinates
+        y += 1
+        if y > 2 ** 31:
+            x += 1
+            y = 1
+            if x > 2 ** 31:
+                raise Exception("No open space found within available range.")
+
+
 
 def create_user(user_data_dict, user, mapdb, profile_pic=""):
+    print(f"Creating {user}")
     x_pos, y_pos = find_open_space(mapdb)
 
     # Prepare the data dictionary
@@ -76,9 +88,9 @@ def create_user(user_data_dict, user, mapdb, profile_pic=""):
         "bismuth": 500,
         "equipped": [
             {"type": "axe", "min_damage": 1, "max_damage": 1, "durability": 100, "range": "melee", "role": "right_hand",
-             "id": id_generator()}],
+             "id": "id_generator()"}],
         "unequipped": [{"type": "dagger", "min_damage": 1, "max_damage": 2, "durability": 100, "range": "melee",
-                        "role": "right_hand", "id": id_generator()}],
+                        "role": "right_hand", "id": "id_generator()"}],
         "pop_lim": 0,
         "alive": True,
         "online": True,
@@ -86,6 +98,7 @@ def create_user(user_data_dict, user, mapdb, profile_pic=""):
 
     # Insert or update user data in the passed dictionary
     user_data_dict[user] = data
+    print("User created")
 
 
 def save_users_from_memory(user_data_dict):
