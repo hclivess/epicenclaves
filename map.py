@@ -108,7 +108,8 @@ def insert_map_data(existing_data, new_data):
                 existing_data[coord] = construction_info
 
 
-def get_map_data_limit(x_pos, y_pos, map_data_dict, distance=50):
+def get_map_data_limit(x_pos, y_pos, map_data_dict, distance=5):
+    """players are excluded"""
     filtered_data = {}
     for coords, data in map_data_dict.items():
         x_map, y_map = map(int, coords.split(","))
