@@ -1,41 +1,72 @@
 import os
-import random
-import string
-
-from sqlite import users_db_cursor, hash_password, users_db
+import sqlite3
+from hashlib import blake2b
 
 
-def auth_cookie_get():
-    filename = "cookie_secret"
-    if not os.path.exists(filename):
-        cookie_secret = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(30))
-        with open(filename, "w") as infile:
-            infile.write(cookie_secret)
-    else:
-        with open(filename) as infile:
-            cookie_secret = infile.read()
-    return cookie_secret
+def create_directory_if_not_exists(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 
-def auth_login_validate(user, password):
-    users_db_cursor.execute("SELECT * FROM users WHERE username = ? AND passhash = ?", (user, hash_password(password)))
-    result = users_db_cursor.fetchall()
+create_directory_if_not_exists("db")
 
-    return bool(result)
-
-
-def auth_add_user(user, password):
-    users_db.execute("INSERT OR IGNORE INTO users VALUES (?,?)", (user, hash_password(password)))
-    users_db.commit()
+with sqlite3.connect("db/auth.db") as users_db:
+    users_db_cursor = users_db.cursor()
 
 
-def auth_exists_user(user):
-    users_db_cursor.execute("SELECT * FROM users WHERE username = ?", (user,))
-    result = users_db_cursor.fetchall()
+def create_game_database():
+    # Create the 'db' directory if it doesn't exist
+    create_directory_if_not_exists('db')
 
-    return bool(result)
+    # Connect to the SQLite database
+    db_path = os.path.join('db', 'game_data.db')
+
+    with sqlite3.connect(db_path) as conn:
+        cursor = conn.cursor()
+
+        # Create the 'game' table with 'turn' column and insert default value
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS game (
+                turn INTEGER DEFAULT 0
+            )
+        ''')
 
 
-def auth_check_users_db():
-    users_db.execute("CREATE TABLE IF NOT EXISTS users (username STRING PRIMARY KEY, passhash STRING)")
-    users_db.commit()
+def update_turn(turn_value):
+    # Connect to the SQLite database
+    db_path = os.path.join('db', 'game_data.db')
+
+    with sqlite3.connect(db_path) as conn:
+        cursor = conn.cursor()
+
+        # Update the 'turn' value in the 'game' table
+        cursor.execute('''
+            UPDATE game
+            SET turn = ?
+        ''', (turn_value,))
+
+
+def hash_password(password):
+    salt = "vGY13MMUH4khKGscQOOg"
+    passhash = blake2b(digest_size=30)
+    passhash.update((password + salt).encode())
+    return passhash.hexdigest()
+
+
+class SQLiteConnectionPool:
+    def __init__(self, db_name):
+        self.db_name = db_name
+        self.pool = []
+
+    def get_connection(self):
+        if self.pool:
+            return self.pool.pop()
+        else:
+            return sqlite3.connect(self.db_name)
+
+    def return_connection(self, conn):
+        self.pool.append(conn)
+
+
+# Initialize a connection pool
+conn_pool = SQLiteConnectionPool("db/map_data.db")
