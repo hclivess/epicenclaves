@@ -19,7 +19,7 @@ class Boar(Enemy):
     type = "boar"
 
     def __init__(self):
-        super().__init__(hp=100, max_damage=1, armor=0)
+        super().__init__(hp=20, max_damage=1, armor=0)
 
 
 class Scenery:
