@@ -58,29 +58,40 @@ class TurnEngine(threading.Thread):
     def update_users_data(self):
         for username, user_data in self.usersdb.items():
             updated_values = self.calculate_updated_values(user_data)
+
+            # Update action_points and age if "action_points" exists
+            if "action_points" in user_data:
+                updated_values["action_points"] = user_data["action_points"] + 5
+                updated_values["age"] = user_data["age"] + 1
+
             update_user_data(user=username, updated_values=updated_values, user_data_dict=self.usersdb)
 
     def calculate_updated_values(self, user_data):
         building_counts = self.count_buildings(user_data)
         updated_values = {}
 
-        wood_increment = min(building_counts['sawmills'], building_counts['forests'])
+        wood_increment = min(building_counts['sawmill'], building_counts['forest'])
         updated_values["wood"] = user_data["wood"] + wood_increment
 
         potential_army_free = min(user_data["food"] // 2, user_data["peasants"], building_counts['barracks'])
         updated_values["army_free"] = user_data.get("army_free", 0) + potential_army_free
         updated_values["food"] = user_data["food"] - 2 * potential_army_free
 
-        potential_peasants_addition = min(
-            building_counts['farms'], user_data["pop_lim"] - (user_data["peasants"] + potential_army_free))
+        current_population = user_data["peasants"] + user_data.get("army_free", 0) + user_data.get("army_deployed", 0)
+        available_pop_space = user_data["pop_lim"] - current_population
+
+        potential_peasants_addition = min(building_counts['farm'], available_pop_space)
         updated_values["peasants"] = user_data["peasants"] + potential_peasants_addition
 
         return updated_values
 
     def count_buildings(self, user_data):
-        counts = {'sawmills': 0, 'forests': 0, 'barracks': 0, 'farms': 0}
+        counts = {'sawmill': 0, 'forest': 0, 'barracks': 0, 'farm': 0, 'house': 0}
         for building_data in user_data.get("construction", {}).values():
-            counts[building_data['type']] += building_data.get('size', 1)
+            building_type = building_data['type']
+            if building_type not in counts:
+                counts[building_type] = 0
+            counts[building_type] += building_data.get('size', 1)
 
         return counts
 
