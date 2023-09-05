@@ -6,8 +6,6 @@ import sys
 import webbrowser
 import os
 import re
-import io
-from PIL import Image
 
 import tornado.ioloop
 import tornado.web
@@ -20,6 +18,7 @@ from conquer import attempt_conquer
 from deploy_army import deploy_army
 from equip import equip_item
 from fight import fight, get_fight_preconditions
+from login import login
 from turn_engine import TurnEngine
 from backend import (
     get_user,
@@ -441,87 +440,22 @@ class LoginHandler(BaseHandler):
     def post(self, data):
         user = self.get_argument("name")[:16]
 
-        # Sanity check for username
         if not re.match("^[a-zA-Z0-9]*$", user):
-            self.render(
-                "templates/denied.html",
-                message="Username should consist of alphanumericals only!",
-            )
+            self.render("templates/denied.html", message="Username should consist of alphanumericals only!")
             return
 
         password = self.get_argument("password")
-
         uploaded_file = self.request.files.get("profile_picture", None)
-        profile_pic_path = "img/pps/default.png"
 
-        if uploaded_file:
-            uploaded_file = uploaded_file[0]
-            file_size = len(uploaded_file["body"])
-            if file_size > 50 * 1024:
-                self.render(
-                    "templates/denied.html",
-                    message="Profile picture size should be less than 50 KB!",
-                )
-                return
+        message, context = login(password, uploaded_file, auth_exists_user, auth_add_user, create_user,
+                                 save_users_from_memory, save_map_from_memory, auth_login_validate, get_user_data,
+                                 get_tile_map, get_tile_users, actions, descriptions, usersdb, mapdb, user)
 
-            # Check file extension
-            filename = uploaded_file["filename"]
-            file_extension = os.path.splitext(filename)[-1].lower()
-
-            if file_extension not in [".jpg", ".jpeg", ".png", ".gif"]:
-                self.render("templates/denied.html", message="Invalid file type!")
-                return
-
-            # Attempt to open the image using PIL
-            try:
-                Image.open(io.BytesIO(uploaded_file["body"]))
-            except Exception as e:
-                self.render(
-                    "templates/denied.html",
-                    message=f"Uploaded file is not a valid image: {e}!",
-                )
-                return
-
-            save_dir = "img/pps/"
-            if not os.path.exists(save_dir):
-                os.makedirs(save_dir)
-
-            save_path = f"img/pps/{user}{file_extension}"
-
-            with open(save_path, "wb") as f:
-                f.write(uploaded_file["body"])
-
-            profile_pic_path = save_path
-
-        if not auth_exists_user(user):
-            auth_add_user(user, password)
-            create_user(user_data_dict=usersdb, user=user, profile_pic=profile_pic_path, mapdb=mapdb)
-
-            save_users_from_memory(usersdb)
-            save_map_from_memory(mapdb)
-
-        if auth_login_validate(user, password):
+        if context:
             self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
-            message = f"Welcome, {user}!"
-            user_data = get_user_data(user, usersdb)
-
-            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-            on_tile_users = get_tile_users(
-                user_data["x_pos"], user_data["y_pos"], user, usersdb
-            )
-
-            self.render(
-                "templates/user_panel.html",
-                user=user,
-                file=user_data,
-                message=message,
-                on_tile_map=on_tile_map,
-                on_tile_users=on_tile_users,
-                actions=actions,
-                descriptions=descriptions,
-            )
+            self.render("templates/user_panel.html", **context)
         else:
-            self.render("templates/denied.html", message="Wrong password")
+            self.render("templates/denied.html", message=message)
 
 
 def make_app():
