@@ -20,9 +20,6 @@ def upgrade(user, mapdb, usersdb):
             right_entity = tile_data
             break
 
-    if right_entity and right_entity["size"] >= 20:  # Change the condition to >=
-        return "Maximum size reached"
-
     if right_entity and right_entity["control"] != user:
         return "You do not own this tile"
 
