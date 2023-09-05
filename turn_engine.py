@@ -8,10 +8,10 @@ from user import save_users_from_memory
 from backend import update_user_data, hashify
 from map import get_buildings, save_map_from_memory
 from entities import Boar
-from entity_generator import spawn_entity
+from entity_generator import spawn_herd
 import string
 
-TEST = 0
+TEST =1
 
 
 def fake_hash():
@@ -145,13 +145,12 @@ class TurnEngine(threading.Thread):
                 # Print buildings
                 print("buildings", get_buildings(user_data))
 
-            spawn_entity(
+            spawn_herd(
                 mapdb=self.mapdb,
                 entity_class=Boar,
                 probability=0.25,
-                size=200,
-                every=5,
-                max_entities=1,
+                herd_size=5,
+                max_entities=25,
             )
 
         print(f"Current turn: {self.turn}")
