@@ -55,25 +55,31 @@ class TurnEngine(threading.Thread):
             for username, user_data in self.usersdb.items():
                 updated_values = {}
 
-                farm_sizes = []
-                sawmill_sizes = []
-                barracks_sizes = []
+                sawmills = 0
+                forests = 0
+                barracks = 0
+                farms = 0
 
                 for building_data in user_data.get("construction", {}).values():
-                    if building_data["type"] == "farm":
-                        farm_sizes.append(building_data.get("size", 1))
-                    elif building_data["type"] == "sawmill":
-                        sawmill_sizes.append(building_data.get("size", 1))
+                    if building_data["type"] == "sawmill":
+                        sawmills += building_data.get("size", 1)
+                    elif building_data["type"] == "forest":
+                        forests += building_data.get("size", 1)
                     elif building_data["type"] == "barracks":
-                        barracks_sizes.append(building_data.get("size", 1))
+                        barracks += building_data.get("size", 1)
+                    elif building_data["type"] == "farm":
+                        farms += building_data.get("size", 1)
 
-                potential_peasants_addition = min(sum(farm_sizes), user_data["pop_lim"] - user_data["peasants"])
-                updated_values["peasants"] = user_data["peasants"] + potential_peasants_addition
+                wood_increment = min(sawmills, forests)
+                updated_values["wood"] = user_data["wood"] + wood_increment
 
-                updated_values["wood"] = user_data["wood"] + sum(sawmill_sizes)
-
-                potential_army_free = min(sum(barracks_sizes), user_data["pop_lim"] - user_data["peasants"])
+                potential_army_free = min(user_data["food"] // 2, user_data["peasants"], barracks)
                 updated_values["army_free"] = user_data.get("army_free", 0) + potential_army_free
+                updated_values["food"] = user_data["food"] - 2 * potential_army_free
+
+                potential_peasants_addition = min(farms,
+                                                  user_data["pop_lim"] - (user_data["peasants"] + potential_army_free))
+                updated_values["peasants"] = user_data["peasants"] + potential_peasants_addition
 
                 update_user_data(user=username, updated_values=updated_values, user_data_dict=self.usersdb)
 
