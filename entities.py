@@ -16,9 +16,10 @@ class Enemy:
 
 
 class Boar(Enemy):
+    type = "boar"
+
     def __init__(self):
         super().__init__(hp=100, max_damage=1, armor=0)
-        self.type = "boar"
 
 
 class Scenery:
@@ -27,18 +28,16 @@ class Scenery:
         self.type = "scenery"
         self.role = "scenery"
 
+
 class Tree(Scenery):
     def __init__(self):
         super().__init__(hp=100)
         self.type = "forest"
         self.role = "scenery"
 
+
 class Wall(Scenery):
     def __init__(self):
         super().__init__(hp=200)
         self.type = "wall"
         self.role = "obstacle"
-
-
-
-

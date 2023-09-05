@@ -148,9 +148,9 @@ class TurnEngine(threading.Thread):
             spawn_herd(
                 mapdb=self.mapdb,
                 entity_class=Boar,
-                probability=0.25,
+                probability=0.5,
                 herd_size=5,
-                max_entities=25,
+                max_entities=50,
             )
 
         print(f"Current turn: {self.turn}")
