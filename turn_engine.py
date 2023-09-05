@@ -11,7 +11,7 @@ from entities import Boar
 from entity_generator import spawn_herd
 import string
 
-TEST =1
+TEST = 0
 
 
 def fake_hash():
