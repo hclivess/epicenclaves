@@ -383,12 +383,13 @@ class ConquerHandler(BaseHandler):
 
 
 class ChopHandler(BaseHandler):
-    def get(self):
+    def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
+        chop_amount = int(self.get_argument("amount", default="1"))
 
         user_data = get_user_data(user, usersdb)
 
-        message = chop_forest(user, user_data, usersdb, mapdb)
+        message = chop_forest(user, chop_amount, user_data, usersdb, mapdb)
 
         user_data = get_user_data(user, usersdb)
 
@@ -503,7 +504,7 @@ def make_app():
             (r"/login(.*)", LoginHandler),
             (r"/logout(.*)", LogoutHandler),
             (r"/move(.*)", MoveHandler),
-            (r"/chop", ChopHandler),
+            (r"/chop(.*)", ChopHandler),
             (r"/conquer", ConquerHandler),
             (r"/fight", FightHandler),
             (r"/map", MapHandler),

@@ -17,7 +17,8 @@ class TileActions:
             ]
         elif type == "forest":
             actions = [
-                {"name": "chop", "action": "/chop"},
+                {"name": "chop", "action": "/chop?amount=1"},
+                {"name": "chop 10", "action": "/chop?amount=10"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
         elif type == "farm":
