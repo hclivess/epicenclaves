@@ -46,6 +46,7 @@ from user import create_users_db, create_user, save_users_from_memory, load_user
 
 from wall_generator import generate_multiple_mazes
 from upgrade import upgrade
+from trash import trash_item
 
 max_size = 1000000
 
@@ -138,6 +139,31 @@ class EquipHandler(BaseHandler):
         )
 
 
+class TrashHandler(BaseHandler):
+    def get(self):
+        id = self.get_argument("id")
+        user = tornado.escape.xhtml_escape(self.current_user)
+
+        user_data = get_user_data(user, usersdb=usersdb)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile_users = get_tile_users(
+            user_data["x_pos"], user_data["y_pos"], user, usersdb
+        )
+
+        message = trash_item(usersdb, user, id)
+
+        self.render(
+            "templates/user_panel.html",
+            user=user,
+            file=user_data,
+            message=message,
+            on_tile_map=on_tile_map,
+            on_tile_users=on_tile_users,
+            actions=actions,
+            descriptions=descriptions,
+        )
+
+
 class DeployArmyHandler(BaseHandler):
     def get(self, data):
         type = self.get_argument("type")
@@ -212,6 +238,7 @@ class UpgradeHandler(BaseHandler):
             actions=actions,
             descriptions=descriptions,
         )
+
 
 class MoveHandler(BaseHandler):
     def get(self, data):
@@ -513,6 +540,7 @@ def make_app():
             (r"/upgrade", UpgradeHandler),
             (r"/revive", ReviveHandler),
             (r"/equip", EquipHandler),
+            (r"/trash", TrashHandler),
             (r"/deploy(.*)", DeployArmyHandler),
             (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),
             (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),

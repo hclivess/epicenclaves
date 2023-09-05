@@ -214,6 +214,7 @@
                 <p><img src=/img/assets/{{item["type"]}}.png alt="Item Icon" class="menu-icon"></p>
                 <p>{{descriptions.get(item["type"])}}</p>
                 <a class="btn btn-light btn-lg btn-block" href='/equip?id={{item["id"]}}'>equip {{item["type"]}}</a>
+                <a class="btn btn-light btn-lg btn-block" href='/trash?id={{item["id"]}}'>trash {{item["type"]}}</a>
 
             </div>
             {% end %}
