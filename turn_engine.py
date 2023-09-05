@@ -56,15 +56,24 @@ class TurnEngine(threading.Thread):
                 updated_values = {}
 
                 farm_sizes = []
+                sawmill_sizes = []
+                barracks_sizes = []
 
                 for building_data in user_data.get("construction", {}).values():
                     if building_data["type"] == "farm":
                         farm_sizes.append(building_data.get("size", 1))
+                    elif building_data["type"] == "sawmill":
+                        sawmill_sizes.append(building_data.get("size", 1))
+                    elif building_data["type"] == "barracks":
+                        barracks_sizes.append(building_data.get("size", 1))
 
-                # Calculate potential peasants addition while respecting the pop_lim
                 potential_peasants_addition = min(sum(farm_sizes), user_data["pop_lim"] - user_data["peasants"])
-
                 updated_values["peasants"] = user_data["peasants"] + potential_peasants_addition
+
+                updated_values["wood"] = user_data["wood"] + sum(sawmill_sizes)
+
+                potential_army_free = min(sum(barracks_sizes), user_data["pop_lim"] - user_data["peasants"])
+                updated_values["army_free"] = user_data.get("army_free", 0) + potential_army_free
 
                 update_user_data(user=username, updated_values=updated_values, user_data_dict=self.usersdb)
 
