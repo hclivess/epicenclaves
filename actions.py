@@ -13,6 +13,7 @@ class TileActions:
                 {"name": "sleep 20 hours", "action": "/rest?hours=20"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
                 {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},
+                {"name": "upgrade", "action": f"/upgrade"},
             ]
         elif type == "forest":
             actions = [
@@ -23,16 +24,26 @@ class TileActions:
             actions = [
                 {"name": "conquer", "action": f"/conquer?target={type}"},
                 {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},
+                {"name": "upgrade", "action": f"/upgrade"},
             ]
         elif type == "barracks":
             actions = [
                 {"name": "conquer", "action": f"/conquer?target={type}"},
                 {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},
+                {"name": "upgrade", "action": f"/upgrade"},
             ]
         elif type == "house":
             actions = [
                 {"name": "conquer", "action": f"/conquer?target={type}"},
                 {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},
+                {"name": "upgrade", "action": f"/upgrade"},
+            ]
+
+        elif type == "sawmill":
+            actions = [
+                {"name": "conquer", "action": f"/conquer?target={type}"},
+                {"name": "deploy soldiers", "action": f"/deploy?type=soldiers"},
+                {"name": "upgrade", "action": f"/upgrade"},
             ]
 
         elif type == "boar":

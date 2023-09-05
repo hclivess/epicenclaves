@@ -45,7 +45,7 @@ from sqlite import (
 from user import create_users_db, create_user, save_users_from_memory, load_users_to_memory
 
 from wall_generator import generate_multiple_mazes
-from entities import Wall
+from upgrade import upgrade
 
 max_size = 1000000
 
@@ -189,6 +189,29 @@ class BuildHandler(BaseHandler):
             descriptions=descriptions,
         )
 
+
+class UpgradeHandler(BaseHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+
+        message = upgrade(user, mapdb, usersdb=usersdb)
+
+        user_data = get_user_data(user, usersdb=usersdb)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile_users = get_tile_users(
+            user_data["x_pos"], user_data["y_pos"], user, usersdb
+        )
+
+        self.render(
+            "templates/user_panel.html",
+            user=user,
+            file=user_data,
+            message=message,
+            on_tile_map=on_tile_map,
+            on_tile_users=on_tile_users,
+            actions=actions,
+            descriptions=descriptions,
+        )
 
 class MoveHandler(BaseHandler):
     def get(self, data):
@@ -486,6 +509,7 @@ def make_app():
             (r"/map", MapHandler),
             (r"/rest(.*)", RestHandler),
             (r"/build(.*)", BuildHandler),
+            (r"/upgrade", UpgradeHandler),
             (r"/revive", ReviveHandler),
             (r"/equip", EquipHandler),
             (r"/deploy(.*)", DeployArmyHandler),
@@ -498,9 +522,9 @@ def make_app():
 
 async def main():
     app = make_app()
+    app.settings["cookie_secret"] = auth_cookie_get()
     port = 8888
     app.listen(port)
-    app.settings["cookie_secret"] = auth_cookie_get()
     auth_check_users_db()
     webbrowser.open(f"http://127.0.0.1:{port}")
     print("app starting")

@@ -9,7 +9,6 @@ def create_directory_if_not_exists(directory):
 
 def auth_cookie_get():
     filename = "cookie_secret"
-    create_directory_if_not_exists(filename)
 
     if not os.path.exists(filename):
         cookie_secret = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(30))
@@ -20,6 +19,7 @@ def auth_cookie_get():
             cookie_secret = infile.read()
 
     return cookie_secret
+
 
 def auth_login_validate(user, password):
     with users_db:
