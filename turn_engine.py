@@ -5,7 +5,7 @@ import time
 from sqlite import update_turn
 from user import save_users_from_memory
 from backend import update_user_data, hashify
-from map import get_buildings, save_map_from_memory
+from map import save_map_from_memory
 from entities import Boar
 from entity_generator import spawn_herd
 import string
@@ -71,17 +71,23 @@ class TurnEngine(threading.Thread):
         updated_values = {}
 
         wood_increment = min(building_counts['sawmill'], building_counts['forest'])
-        updated_values["wood"] = user_data["wood"] + wood_increment
-
-        potential_army_free = min(user_data["food"] // 2, user_data["peasants"], building_counts['barracks'])
-        updated_values["army_free"] = user_data.get("army_free", 0) + potential_army_free
-        updated_values["food"] = user_data["food"] - 2 * potential_army_free
+        updated_values["wood"] = max(0, user_data["wood"] + wood_increment)
 
         current_population = user_data["peasants"] + user_data.get("army_free", 0) + user_data.get("army_deployed", 0)
-        available_pop_space = user_data["pop_lim"] - current_population
+        available_pop_space = max(0, user_data["pop_lim"] - current_population)
+
+        # Calculate the potential new army
+        potential_army_free = min(user_data["food"] // 2, user_data["peasants"], building_counts['barracks'],
+                                  available_pop_space)
+        updated_values["army_free"] = max(0, user_data.get("army_free", 0) + potential_army_free)
+        updated_values["food"] = max(0, user_data["food"] - 2 * potential_army_free)
+
+        # Update available population space after army calculations
+        current_population = user_data["peasants"] + updated_values["army_free"] + user_data.get("army_deployed", 0)
+        available_pop_space = max(0, user_data["pop_lim"] - current_population)
 
         potential_peasants_addition = min(building_counts['farm'], available_pop_space)
-        updated_values["peasants"] = user_data["peasants"] + potential_peasants_addition
+        updated_values["peasants"] = max(0, user_data["peasants"] + potential_peasants_addition)
 
         return updated_values
 
