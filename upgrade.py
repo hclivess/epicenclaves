@@ -56,7 +56,6 @@ def upgrade(user, mapdb, usersdb):
             "size": right_entity["size"],  # Update the size
             "control": user,
             "role": "building",
-            "soldiers": 0,
         }
 
         data = {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data}
