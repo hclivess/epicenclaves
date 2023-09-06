@@ -548,9 +548,9 @@ if __name__ == "__main__":
         spawn_entity(
             mapdb=mapdb,
             entity_class=Tree,
-            probability=0.5,
+            probability=1,
             size=200,
-            every=10,
+            max_entities=250
         )
 
         generate_multiple_mazes(mapdb, 20, 20, 10, 10, 0.1, 25, 200)

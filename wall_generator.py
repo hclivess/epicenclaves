@@ -22,6 +22,7 @@ def generate_maze(width, height, offset_x, offset_y):
     return maze
 
 def generate_multiple_mazes(mapdb, width, height, initial_offset_x, initial_offset_y, spawn_prob, total_max_mazes, size):
+    print("generating maze")
     offset_x = initial_offset_x
     offset_y = initial_offset_y
     total_maze_count = 0

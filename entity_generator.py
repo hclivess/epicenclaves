@@ -60,7 +60,7 @@ def spawn_herd(entity_class, probability, mapdb, size=101, max_entities=50, herd
                         total_entities += 1
 
 
-def spawn_entity(entity_class, probability, mapdb, start_x=1, start_y=1, size=101, every=10, max_entities=None):
+def spawn_entity(entity_class, probability, mapdb, size=101, max_entities=None):
     generated_count = 0
     entity_instance = entity_class()
 
@@ -79,18 +79,20 @@ def spawn_entity(entity_class, probability, mapdb, start_x=1, start_y=1, size=10
         ),
     }
 
-    for x_pos in range(start_x, size, every):
-        for y_pos in range(start_y, size, every):
-            if max_entities is not None and generated_count >= max_entities:
-                return
+    while True:
+        if max_entities is not None and generated_count >= max_entities:
+            return
 
-            coord_key = f"{x_pos},{y_pos}"
-            if coord_key in mapdb:
-                continue
+        x_pos = random.randint(1, size)
+        y_pos = random.randint(1, size)
 
-            if random.random() <= probability:
-                data = {"type": entity_class.__name__}
-                data.update(additional_entity_data)
-                print(f"Generating {data} on {x_pos}, {y_pos}")
-                save_map_data(x_pos=x_pos, y_pos=y_pos, data=data, map_data_dict=mapdb)
-                generated_count += 1
+        coord_key = f"{x_pos},{y_pos}"
+        if coord_key in mapdb:
+            continue
+
+        if random.random() <= probability:
+            data = {"type": entity_class.__name__}
+            data.update(additional_entity_data)
+            print(f"Generating {data} on {x_pos}, {y_pos}")
+            save_map_data(x_pos=x_pos, y_pos=y_pos, data=data, map_data_dict=mapdb)
+            generated_count += 1
