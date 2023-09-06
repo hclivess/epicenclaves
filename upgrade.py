@@ -11,7 +11,6 @@ def upgrade(user, mapdb, usersdb):
     if user_data["action_points"] < 1:
         return "Not enough action points to upgrade"
 
-    # Check if a building already exists on the tile
     right_entity = None
 
     for entry in on_tile:
@@ -27,43 +26,40 @@ def upgrade(user, mapdb, usersdb):
         return f"Not enough resources to upgrade {right_entity['type']}"
 
     if right_entity:
-        # Deduct resources
         for resource, amount in building_costs[right_entity["type"]].items():
             user_data[resource] -= int(amount / 2)
-
-        # Increase the size of the building
         right_entity["size"] += 1
-
-        # Conditionally increase the pop_lim based on the entity
         if right_entity["type"] == "house":
-            user_data["pop_lim"] += 10  # todo remove points on takeover
+            user_data["pop_lim"] += 10
 
-    # Update user's data
     updated_values = {
         "action_points": user_data["action_points"] - 1,
         "wood": user_data["wood"],
-        "pop_lim": user_data.get("pop_lim", None)
+        "pop_lim": user_data.get("pop_lim", 0),
     }
+
+    # Filter out None values
+    updated_values = {k: v for k, v in updated_values.items() if v is not None}
+
     print("updated_values", updated_values)
     update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
-    name = right_entity["type"] if right_entity else "building"  # Update name conditionally
+    name = right_entity["type"] if right_entity else "building"
 
     if right_entity:
-        # Prepare and update the map data for the entity
         entity_data = {
             "type": right_entity["type"],
             "name": name,
-            "size": right_entity["size"],  # Update the size
+            "size": right_entity["size"],
             "control": user,
             "role": "building",
+            "soldiers": right_entity.get("soldiers", 0)
         }
-
         data = {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data}
         update_user_data(
             user=user, updated_values={"construction": data}, user_data_dict=usersdb
         )
         insert_map_data(mapdb, data)
-
         return f"Successfully upgraded {right_entity['type']}"
     else:
         return "No building found to upgrade"
+

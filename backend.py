@@ -74,6 +74,9 @@ def update_user_data(user, updated_values, user_data_dict):
         user_entry = user_data_dict[user]
 
         for key, value in updated_values.items():
+            if value is None:
+                continue  # Skip keys with None value to preserve existing data
+
             if (
                 key == "construction"
                 and "construction" in user_entry
