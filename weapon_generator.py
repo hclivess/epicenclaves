@@ -1,12 +1,9 @@
 import random
 import string
 
-
 def id_generator(length=10):
-    """Generate a random alphanumeric string of given length."""
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for _ in range(length))
-
 
 def generate_weapon():
     weapon_types = ["sword", "axe", "bow", "spear", "dagger", "mace"]
@@ -30,26 +27,31 @@ def generate_weapon():
 
     selected_weapon = random.choice(weapon_types)
     base_min_damage, base_max_damage = weapon_damage[selected_weapon]
-
-    # Adding variance: +/- up to 20% of the base damage value
     min_damage = int(base_min_damage * random.uniform(0.8, 1.2))
     max_damage = int(base_max_damage * random.uniform(0.8, 1.2))
 
-    # Ensure that max_damage is at least one point higher than min_damage
     if max_damage <= min_damage:
         max_damage = min_damage + 1
 
     weapon_dict = {
         "type": selected_weapon,
-        "range": weapon_ranges[selected_weapon],  # Added this line
+        "range": weapon_ranges[selected_weapon],
         "min_damage": min_damage,
         "max_damage": max_damage,
         "role": "right_hand",
-        "id": id_generator()  # Assuming you have a function called id_generator
+        "id": id_generator()
     }
 
-    return weapon_dict
+    if weapon_dict["range"] == "ranged":
+        weapon_dict["miss_chance"] = 50
+        weapon_dict["crit_dmg_pct"] = 200 #percentual
+        weapon_dict["crit_chance"] = 100
+    else:
+        weapon_dict["miss_chance"] = random.randint(1, 20)
+        weapon_dict["crit_dmg_pct"] = random.randint(100, 400)
+        weapon_dict["crit_chance"] = random.randint(1, 10)
 
+    return weapon_dict
 
 if __name__ == "__main__":
     weapon_json = generate_weapon()
