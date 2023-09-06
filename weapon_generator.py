@@ -1,9 +1,11 @@
 import random
 import string
 
+
 def id_generator(length=10):
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for _ in range(length))
+
 
 def generate_weapon():
     weapon_types = ["sword", "axe", "bow", "spear", "dagger", "mace"]
@@ -44,7 +46,7 @@ def generate_weapon():
 
     if weapon_dict["range"] == "ranged":
         weapon_dict["miss_chance"] = 50
-        weapon_dict["crit_dmg_pct"] = 200 #percentual
+        weapon_dict["crit_dmg_pct"] = 200  # percentual
         weapon_dict["crit_chance"] = 100
     else:
         weapon_dict["miss_chance"] = random.randint(1, 20)
@@ -52,6 +54,7 @@ def generate_weapon():
         weapon_dict["crit_chance"] = random.randint(1, 10)
 
     return weapon_dict
+
 
 if __name__ == "__main__":
     weapon_json = generate_weapon()
