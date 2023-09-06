@@ -15,7 +15,7 @@ import actions
 import descriptions
 from chop import chop_forest
 from conquer import attempt_conquer
-from deploy_army import deploy_army
+from deploy_army import deploy_army, remove_army
 from equip import equip_item
 from fight import fight, get_fight_preconditions
 from login import login
@@ -166,6 +166,7 @@ class TrashHandler(BaseHandler):
 class DeployArmyHandler(BaseHandler):
     def get(self, data):
         type = self.get_argument("type")
+        action = self.get_argument("action")
         user = tornado.escape.xhtml_escape(self.current_user)
 
         user_data = get_user_data(user, usersdb=usersdb)
@@ -174,7 +175,12 @@ class DeployArmyHandler(BaseHandler):
             user_data["x_pos"], user_data["y_pos"], user, usersdb
         )
 
-        message = deploy_army(user, on_tile_map, usersdb, mapdb, user_data)
+        if action == "add":
+            message = deploy_army(user, on_tile_map, usersdb, mapdb, user_data)
+        elif action == "remove":
+            message = remove_army(user, on_tile_map, usersdb, mapdb, user_data)
+        else:
+            message = "No action specified."
         user_data = get_user_data(user, usersdb=usersdb)  # refresh
 
         self.render(
