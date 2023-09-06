@@ -1,3 +1,4 @@
+import os.path
 import random
 import blockchain
 import threading
@@ -10,7 +11,10 @@ from entities import Boar
 from entity_generator import spawn_herd
 import string
 
-TEST = 0
+if os.path.exists("test"):
+    TEST = 1
+else:
+    TEST = 0
 
 def fake_hash():
     return "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(36))
