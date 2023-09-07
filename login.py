@@ -1,5 +1,5 @@
 import io
-
+import os
 from PIL import Image
 
 
@@ -10,8 +10,8 @@ def login(password, uploaded_file, auth_exists_user, auth_add_user, create_user,
 
     if uploaded_file:
         uploaded_file = uploaded_file[0]
-        if len(uploaded_file["body"]) > 50 * 1024:
-            return "Profile picture size should be less than 50 KB!", None
+        if len(uploaded_file["body"]) > 500 * 1024:
+            return "Profile picture size should be less than 500 KB!", None
 
         file_extension = os.path.splitext(uploaded_file["filename"])[-1].lower()
         if file_extension not in [".jpg", ".jpeg", ".png", ".gif"]:
