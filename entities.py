@@ -13,7 +13,8 @@ class Enemy:
                  alive=True,
                  kill_chance=0.01,
                  exp_gain=1,
-                 regular_drop=None):
+                 regular_drop=None,
+                 drop_chance=0.1):
 
         if regular_drop is None:
             regular_drop = {}
@@ -29,6 +30,7 @@ class Enemy:
         self.role = role
         self.exp_gain = exp_gain
         self.regular_drop = regular_drop
+        self.drop_chance = drop_chance
 
     def roll_damage(self):
         return random.randint(self.min_damage, self.max_damage)
@@ -45,6 +47,7 @@ class Boar(Enemy):
                          crit_damage=3,
                          armor=0,
                          exp_gain=1,
+                         drop_chance=0.1,
                          regular_drop={"food": 1})
 
 

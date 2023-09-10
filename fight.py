@@ -86,37 +86,37 @@ def fight_player(entry, target_name, user_data, user, usersdb):
                 messages.extend(defeat_outcome(defeated_entity, defeated_name, 0.5, usersdb))
                 break
 
+
     return messages
 
-def fight_boar(entry, user_data, user, usersdb, mapdb):
+def fight_npc(entry, user_data, user, usersdb, mapdb, npc_class):
     messages = []
-    boar = Boar()
+    npc = npc_class()
     escaped = False
 
-    while boar.alive and user_data["alive"] and not escaped:
-        # Check if the boar should be dead
-        if boar.hp < 1:
-            messages.append("The boar is dead")
-            boar.alive = False
+    while npc.alive and user_data["alive"] and not escaped:
+        if npc.hp < 1:
+            messages.append(f"The {npc.__class__.__name__.lower()} is dead")
+            npc.alive = False
 
-            if random.random() < 0.1:  # 10% chance of dropping a weapon
+            if random.random() < 0.1:
                 new_weapon = generate_weapon()
                 messages.append(f"You found a {new_weapon['type']}!")
                 user_data["unequipped"].append(new_weapon)
 
             remove_from_map(
-                entity_type="boar",
+                entity_type=npc.__class__.__name__.lower(),
                 coords=get_coords(entry),
                 map_data_dict=mapdb)
 
             updated_values = {
                 "action_points": user_data["action_points"] - 1,
-                "exp": user_data["exp"] + boar.exp_gain,
+                "exp": user_data["exp"] + npc.exp_gain,
                 "hp": user_data["hp"],
                 "unequipped": user_data["unequipped"],
             }
 
-            for key, value in boar.regular_drop.items():
+            for key, value in npc.regular_drop.items():
                 if key in user_data:
                     updated_values[key] = user_data[key] + value
                 else:
@@ -128,9 +128,8 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
                 user_data_dict=usersdb,
             )
 
-        # Check if the user should be dead or escape
         elif user_data["hp"] < 1:
-            if death_roll(boar.kill_chance):
+            if death_roll(npc.kill_chance):
                 messages.append("You died")
                 user_data["alive"] = False
                 update_user_data(
@@ -150,9 +149,7 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
                 )
                 escaped = True
 
-        # Attack logic, ensuring entities with 0 hp don't attack
         else:
-            # User attacks the boar if they have more than 0 hp
             if user_data["hp"] > 0:
                 damage = 1
                 for weapon in user_data.get("equipped", {}):
@@ -163,20 +160,20 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
                         damage = get_damage(min_dmg, max_dmg, weapon, exp_bonus=exp_bonus(value=user_data["exp"]))
                         break
 
-                boar.hp -= damage
+                npc.hp -= damage
                 messages.append(
-                    f"The boar takes {damage} damage and is left with {boar.hp} hp"
+                    f"The {npc.__class__.__name__.lower()} takes {damage} damage and is left with {npc.hp} hp"
                 )
 
-            # Boar attacks the user if it has more than 0 hp
-            if boar.hp > 0:
-                boar_dmg_roll = boar.roll_damage()
-                user_data["hp"] -= boar_dmg_roll
+            if npc.hp > 0:
+                npc_dmg_roll = npc.roll_damage()
+                user_data["hp"] -= npc_dmg_roll
                 messages.append(
-                    f"You take {boar_dmg_roll} damage and are left with {user_data['hp']} hp"
+                    f"You take {npc_dmg_roll} damage and are left with {user_data['hp']} hp"
                 )
 
     return messages
+
 
 
 def fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb, mapdb):
@@ -186,7 +183,7 @@ def fight(target, target_name, on_tile_map, on_tile_users, user_data, user, user
         entry_type = get_values(entry).get("type")
 
         if target == "boar" and entry_type == "boar":
-            messages.extend(fight_boar(entry, user_data, user, usersdb, mapdb))
+            messages.extend(fight_npc(entry, user_data, user, usersdb, mapdb, Boar))
         elif target == "player" and entry_type == "player":
             messages.extend(fight_player(entry, target_name, user_data, user, usersdb))
 
