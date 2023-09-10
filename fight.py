@@ -13,9 +13,7 @@ def player_attack(attacker, defender, attacker_name, messages):
             if weapon.get("role") == "right_hand":
                 min_dmg = weapon.get("min_damage", 1)
                 max_dmg = weapon.get("max_damage", 1)
-                weapon_type = weapon.get("range", "melee")  # Defaulting to "melee" if the type is not specified
-                damage_dict = get_damage(min_dmg, max_dmg, weapon_type)
-                damage = damage_dict["damage"] + exp_bonus(value=attacker["exp"])
+                damage = get_damage(min_dmg, max_dmg, weapon, exp_bonus=exp_bonus(value=attacker["exp"]))
                 break
 
         defender["hp"] -= damage
@@ -151,9 +149,8 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
                     if weapon.get("role") == "right_hand":
                         min_dmg = weapon.get("min_damage", 1)
                         max_dmg = weapon.get("max_damage", 1)
-                        weapon_type = weapon.get("range", "melee")  # Defaulting to "melee" if the type is not specified
-                        damage_dict = get_damage(min_dmg, max_dmg, weapon_type)
-                        damage = damage_dict["damage"] + exp_bonus(value=user_data["exp"])
+
+                        damage = get_damage(min_dmg, max_dmg, weapon, exp_bonus=exp_bonus(value=user_data["exp"]))
                         break
 
                 boar.hp -= damage
@@ -217,25 +214,25 @@ def exp_bonus(value, base=10):
 
 import random
 
-def get_damage(min_dmg, max_dmg, weapon_type):
+def get_damage(min_dmg, max_dmg, weapon, exp_bonus):
     damage_dict = {}
     damage = int(min_dmg + (max_dmg - min_dmg) * random.betavariate(2, 5))
     damage_type = "normal"
 
-    if weapon_type == "ranged":
-        damage_dict["hit_chance"] = 50
-        if random.randint(1, 100) <= 50:
-            damage *= 2
-            damage_type = "double"
-        else:
-            damage = 0
-            damage_type = "missed"
-    elif weapon_type == "melee":
-        damage_dict["hit_chance"] = 100
+    hit_chance = 100 - weapon["miss_chance"]
+    if random.randint(1, 100) > hit_chance:
+        damage_dict["damage"] = 0
+        damage_dict["damage_type"] = "missed"
+    else:
+        if random.randint(1, 100) <= weapon["crit_chance"]:
+            damage = int(damage * (weapon["crit_dmg_pct"] / 100))
+            damage_type = "critical"
+        damage_dict["damage"] = damage
+        damage_dict["damage_type"] = damage_type
 
     damage_dict["damage"] = damage
     damage_dict["damage_type"] = damage_type
-    return damage_dict
+    return damage_dict + exp_bonus
 
 
 def death_roll(hit_chance):
