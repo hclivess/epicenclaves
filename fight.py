@@ -95,7 +95,7 @@ def fight_npc(entry, user_data, user, usersdb, mapdb, npc):
 
     while npc.alive and user_data["alive"] and not escaped:
         if npc.hp < 1:
-            messages.append(f"The {npc.name} is dead")
+            messages.append(f"The {npc.type} is dead")
             npc.alive = False
 
             if random.random() < 0.1:
@@ -104,7 +104,7 @@ def fight_npc(entry, user_data, user, usersdb, mapdb, npc):
                 user_data["unequipped"].append(new_weapon)
 
             remove_from_map(
-                entity_type=npc.name.lower(),
+                entity_type=npc.type.lower(),
                 coords=get_coords(entry),
                 map_data_dict=mapdb)
 
@@ -161,7 +161,7 @@ def fight_npc(entry, user_data, user, usersdb, mapdb, npc):
 
                 npc.hp -= damage
                 messages.append(
-                    f"The {npc.name} takes {damage} damage and is left with {npc.hp} hp"
+                    f"The {npc.type} takes {damage} damage and is left with {npc.hp} hp"
                 )
 
             if npc.hp > 0:
