@@ -107,15 +107,23 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
             remove_from_map(
                 entity_type="boar", coords=get_coords(entry), map_data_dict=mapdb
             )
+
+            updated_values = {
+                "action_points": user_data["action_points"] - 1,
+                "exp": user_data["exp"] + boar.exp_gain,
+                "hp": user_data["hp"],
+                "unequipped": user_data["unequipped"],
+            }
+
+            for key, value in boar.regular_drop.items():
+                if key in user_data:
+                    updated_values[key] = user_data[key] + value
+                else:
+                    updated_values[key] = value
+
             update_user_data(
                 user=user,
-                updated_values={
-                    "action_points": user_data["action_points"] - 1,
-                    "exp": user_data["exp"] + boar.exp_gain,
-                    "food": user_data["food"] + 1,
-                    "hp": user_data["hp"],
-                    "unequipped": user_data["unequipped"]
-                },
+                updated_values=updated_values,
                 user_data_dict=usersdb,
             )
 
@@ -215,25 +223,20 @@ def exp_bonus(value, base=10):
 
 import random
 
-def get_damage(min_dmg, max_dmg, weapon, exp_bonus):
-    damage_dict = {}
-    damage = int(min_dmg + (max_dmg - min_dmg) * random.betavariate(2, 5))
-    damage_type = "normal"
+import random
 
+
+def get_damage(min_dmg, max_dmg, weapon, exp_bonus):
+    damage = int(min_dmg + (max_dmg - min_dmg) * random.betavariate(2, 5))
     hit_chance = 100 - weapon["miss_chance"]
+
     if random.randint(1, 100) > hit_chance:
-        damage_dict["damage"] = 0
-        damage_dict["damage_type"] = "missed"
+        return 0
     else:
         if random.randint(1, 100) <= weapon["crit_chance"]:
             damage = int(damage * (weapon["crit_dmg_pct"] / 100))
-            damage_type = "critical"
-        damage_dict["damage"] = damage
-        damage_dict["damage_type"] = damage_type
 
-    damage_dict["damage"] = damage
-    damage_dict["damage_type"] = damage_type
-    return damage_dict + exp_bonus
+        return damage + exp_bonus
 
 
 def death_roll(hit_chance):

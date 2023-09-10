@@ -12,7 +12,11 @@ class Enemy:
                  crit_damage=0,
                  alive=True,
                  kill_chance=0.01,
-                 exp_gain=1):
+                 exp_gain=1,
+                 regular_drop=None):
+
+        if regular_drop is None:
+            regular_drop = {}
 
         self.hp = hp
         self.armor = armor
@@ -24,6 +28,7 @@ class Enemy:
         self.crit_damage = crit_damage
         self.role = role
         self.exp_gain = exp_gain
+        self.regular_drop = regular_drop
 
     def roll_damage(self):
         return random.randint(self.min_damage, self.max_damage)
