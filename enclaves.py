@@ -539,7 +539,6 @@ def initialize_map_and_users():
 
     return mapdb, usersdb
 
-
 if __name__ == "__main__":
     db_status = init_databases()
     mapdb, usersdb = initialize_map_and_users()

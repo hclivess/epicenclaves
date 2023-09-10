@@ -42,11 +42,13 @@ def generate_multiple_mazes(mapdb, width, height, initial_offset_x, initial_offs
 
         total_maze_count += 1
 
-# Initialize an empty map database
-mapdb = {}
 
-# Generate mazes with a 50% probability each within a 100x100 area
-generate_multiple_mazes(mapdb, 10, 10, 5, 5, 0.5, 20, 100)
+if __name__ == "__main__":
+    # Initialize an empty map database
+    mapdb = {}
 
-# Print the map database to see what was generated
+    # Generate mazes with a 50% probability each within a 100x100 area
+    generate_multiple_mazes(mapdb, 10, 10, 5, 5, 0.5, 20, 100)
+
+    # Print the map database to see what was generated
 print(mapdb)
