@@ -78,7 +78,8 @@ def fight_player(entry, target_name, user_data, user, usersdb):
             elif user_data["hp"] <= 0:
                 defeated_entity = user_data
                 defeated_name = user
-                update_user_data(user=target_name, updated_values={"exp": target_data["exp"] + 10},
+                exp_gain = target_data["exp"] + 10 + user_data["exp"] / 10
+                update_user_data(user=target_name, updated_values={"exp": exp_gain},
                                  user_data_dict=usersdb)
 
             if defeated_entity:

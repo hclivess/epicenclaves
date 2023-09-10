@@ -11,7 +11,8 @@ class Enemy:
                  crit_chance=0.0,
                  crit_damage=0,
                  alive=True,
-                 kill_chance=0.01):
+                 kill_chance=0.01,
+                 exp_gain=1):
 
         self.hp = hp
         self.armor = armor
@@ -22,6 +23,7 @@ class Enemy:
         self.crit_chance = crit_chance
         self.crit_damage = crit_damage
         self.role = role
+        self.exp_gain = exp_gain
 
     def roll_damage(self):
         return random.randint(self.min_damage, self.max_damage)
@@ -36,7 +38,8 @@ class Boar(Enemy):
                          max_damage=1,
                          crit_chance=0.1,
                          crit_damage=3,
-                         armor=0)
+                         armor=0,
+                         exp_gain=1)
 
 
 class Scenery:
