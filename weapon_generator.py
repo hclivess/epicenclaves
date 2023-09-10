@@ -45,11 +45,11 @@ def generate_weapon():
     }
 
     if weapon_dict["range"] == "ranged":
-        weapon_dict["miss_chance"] = 50
+        weapon_dict["accuracy"] = 50
         weapon_dict["crit_dmg_pct"] = 200  # percentual
         weapon_dict["crit_chance"] = 100
     else:
-        weapon_dict["miss_chance"] = random.randint(1, 20)
+        weapon_dict["accuracy"] = random.randint(80, 100)
         weapon_dict["crit_dmg_pct"] = random.randint(100, 400)
         weapon_dict["crit_chance"] = random.randint(1, 10)
 

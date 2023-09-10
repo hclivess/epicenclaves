@@ -226,9 +226,8 @@ import random
 
 def get_damage(min_dmg, max_dmg, weapon, exp_bonus):
     damage = int(min_dmg + (max_dmg - min_dmg) * random.betavariate(2, 5))
-    hit_chance = 100 - weapon["miss_chance"]
 
-    if random.randint(1, 100) > hit_chance:
+    if random.randint(1, 100) > weapon["accuracy"]:
         return 0
     else:
         if random.randint(1, 100) <= weapon["crit_chance"]:
