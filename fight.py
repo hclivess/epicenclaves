@@ -89,14 +89,13 @@ def fight_player(entry, target_name, user_data, user, usersdb):
 
     return messages
 
-def fight_npc(entry, user_data, user, usersdb, mapdb, npc_class):
+def fight_npc(entry, user_data, user, usersdb, mapdb, npc):
     messages = []
-    npc = npc_class()
     escaped = False
 
     while npc.alive and user_data["alive"] and not escaped:
         if npc.hp < 1:
-            messages.append(f"The {npc.__class__.__name__.lower()} is dead")
+            messages.append(f"The {npc.name} is dead")
             npc.alive = False
 
             if random.random() < 0.1:
@@ -105,7 +104,7 @@ def fight_npc(entry, user_data, user, usersdb, mapdb, npc_class):
                 user_data["unequipped"].append(new_weapon)
 
             remove_from_map(
-                entity_type=npc.__class__.__name__.lower(),
+                entity_type=npc.name.lower(),
                 coords=get_coords(entry),
                 map_data_dict=mapdb)
 
@@ -162,7 +161,7 @@ def fight_npc(entry, user_data, user, usersdb, mapdb, npc_class):
 
                 npc.hp -= damage
                 messages.append(
-                    f"The {npc.__class__.__name__.lower()} takes {damage} damage and is left with {npc.hp} hp"
+                    f"The {npc.name} takes {damage} damage and is left with {npc.hp} hp"
                 )
 
             if npc.hp > 0:
@@ -176,6 +175,7 @@ def fight_npc(entry, user_data, user, usersdb, mapdb, npc_class):
 
 
 
+
 def fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb, mapdb):
     messages = []
 
@@ -183,7 +183,7 @@ def fight(target, target_name, on_tile_map, on_tile_users, user_data, user, user
         entry_type = get_values(entry).get("type")
 
         if target == "boar" and entry_type == "boar":
-            messages.extend(fight_npc(entry, user_data, user, usersdb, mapdb, Boar))
+            messages.extend(fight_npc(entry, user_data, user, usersdb, mapdb, Boar()))
         elif target == "player" and entry_type == "player":
             messages.extend(fight_player(entry, target_name, user_data, user, usersdb))
 
