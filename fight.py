@@ -1,7 +1,7 @@
 import math
 from backend import update_user_data, get_values
 from map import remove_from_map, get_coords
-from entities import Boar
+from entities import Boar, Wolf
 from weapon_generator import generate_weapon
 import random
 
@@ -182,8 +182,10 @@ def fight(target, target_name, on_tile_map, on_tile_users, user_data, user, user
     for entry in on_tile_map:
         entry_type = get_values(entry).get("type")
 
-        if target == "boar" and entry_type == "boar":
+        if target == "boar":
             messages.extend(fight_npc(entry, user_data, user, usersdb, mapdb, Boar()))
+        elif target == "wolf":
+            messages.extend(fight_npc(entry, user_data, user, usersdb, mapdb, Wolf()))
         elif target == "player" and entry_type == "player":
             messages.extend(fight_player(entry, target_name, user_data, user, usersdb))
 

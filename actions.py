@@ -54,6 +54,8 @@ class TileActions:
 
         elif type == "boar":
             actions = [{"name": "fight", "action": f"/fight?target={type}"}]
+        elif type == "wolf":
+            actions = [{"name": "fight", "action": f"/fight?target={type}"}]
         elif type == "player":
             actions = [
                 {"name": "challenge", "action": f"/fight?target={type}&name={name}"}
