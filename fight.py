@@ -105,8 +105,9 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
                 user_data["unequipped"].append(new_weapon)
 
             remove_from_map(
-                entity_type="boar", coords=get_coords(entry), map_data_dict=mapdb
-            )
+                entity_type="boar",
+                coords=get_coords(entry),
+                map_data_dict=mapdb)
 
             updated_values = {
                 "action_points": user_data["action_points"] - 1,

@@ -44,7 +44,8 @@ class Boar(Enemy):
                          crit_chance=0.1,
                          crit_damage=3,
                          armor=0,
-                         exp_gain=1)
+                         exp_gain=1,
+                         regular_drop={"food": 1})
 
 
 class Scenery:
