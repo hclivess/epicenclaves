@@ -2,13 +2,25 @@ import random
 
 
 class Enemy:
-    def __init__(self, hp, armor, role="enemy", min_damage=0, max_damage=2, alive=True, kill_chance=0.01):
+    def __init__(self,
+                 hp,
+                 armor,
+                 role="enemy",
+                 min_damage=0,
+                 max_damage=2,
+                 crit_chance=0.0,
+                 crit_damage=0,
+                 alive=True,
+                 kill_chance=0.01):
+
         self.hp = hp
         self.armor = armor
         self.alive = alive
         self.kill_chance = kill_chance
         self.min_damage = min_damage
         self.max_damage = max_damage
+        self.crit_chance = crit_chance
+        self.crit_damage = crit_damage
         self.role = role
 
     def roll_damage(self):
@@ -19,7 +31,12 @@ class Boar(Enemy):
     type = "boar"
 
     def __init__(self):
-        super().__init__(hp=20, max_damage=1, armor=0)
+        super().__init__(hp=20,
+                         min_damage=1,
+                         max_damage=1,
+                         crit_chance=0.1,
+                         crit_damage=3,
+                         armor=0)
 
 
 class Scenery:

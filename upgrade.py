@@ -2,7 +2,7 @@ import time
 
 from backend import has_resources, update_user_data
 from map import get_tile_map, get_user_data, insert_map_data
-from costs import building_costs
+from costs import upgrade_costs
 
 def upgrade(user, mapdb, usersdb):
     user_data = get_user_data(user, usersdb)
@@ -22,12 +22,12 @@ def upgrade(user, mapdb, usersdb):
     if right_entity and right_entity["control"] != user:
         return "You do not own this tile"
 
-    if right_entity and not has_resources(user_data, building_costs[right_entity["type"]]):
+    if right_entity and not has_resources(user_data, upgrade_costs[right_entity["type"]]):
         return f"Not enough resources to upgrade {right_entity['type']}"
 
     if right_entity:
-        for resource, amount in building_costs[right_entity["type"]].items():
-            user_data[resource] -= int(amount / 2)
+        for resource, amount in upgrade_costs[right_entity["type"]].items():
+            user_data[resource] -= amount
         right_entity["size"] += 1
         if right_entity["type"] == "house":
             user_data["pop_lim"] += 10
