@@ -111,7 +111,7 @@ def fight_boar(entry, user_data, user, usersdb, mapdb):
                 user=user,
                 updated_values={
                     "action_points": user_data["action_points"] - 1,
-                    "exp": user_data["exp"] + 1,
+                    "exp": user_data["exp"] + boar.exp_gain,
                     "food": user_data["food"] + 1,
                     "hp": user_data["hp"],
                     "unequipped": user_data["unequipped"]
