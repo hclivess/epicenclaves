@@ -7,7 +7,7 @@ from sqlite import update_turn
 from user import save_users_from_memory
 from backend import update_user_data, hashify
 from map import save_map_from_memory
-from entities import Boar
+from entities import Boar, Wolf
 from entity_generator import spawn_herd
 import string
 
@@ -111,6 +111,14 @@ class TurnEngine(threading.Thread):
             entity_class=Boar,
             probability=0.5,
             herd_size=5,
+            max_entities=50,
+        )
+
+        spawn_herd(
+            mapdb=self.mapdb,
+            entity_class=Wolf,
+            probability=0.4,
+            herd_size=7,
             max_entities=50,
         )
 

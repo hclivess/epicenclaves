@@ -15,7 +15,6 @@ class Enemy:
                  exp_gain=1,
                  regular_drop=None,
                  drop_chance=0.1):
-
         if regular_drop is None:
             regular_drop = {}
 
@@ -33,7 +32,12 @@ class Enemy:
         self.drop_chance = drop_chance
 
     def roll_damage(self):
-        return random.randint(self.min_damage, self.max_damage)
+        damage = random.randint(self.min_damage, self.max_damage)
+        message = "normal hit"
+        if random.random() < self.crit_chance:
+            damage = self.crit_damage
+            message = "critical hit"
+        return {"damage": damage, "message": message}
 
 
 class Boar(Enemy):
@@ -48,6 +52,21 @@ class Boar(Enemy):
                          armor=0,
                          exp_gain=1,
                          drop_chance=0.1,
+                         regular_drop={"food": 1})
+
+
+class Wolf(Enemy):
+    type = "wolf"
+
+    def __init__(self):
+        super().__init__(hp=40,
+                         min_damage=1,
+                         max_damage=3,
+                         crit_chance=0.25,
+                         crit_damage=5,
+                         armor=0,
+                         exp_gain=2,
+                         drop_chance=0.15,
                          regular_drop={"food": 1})
 
 

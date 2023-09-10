@@ -51,4 +51,4 @@ if __name__ == "__main__":
     generate_multiple_mazes(mapdb, 10, 10, 5, 5, 0.5, 20, 100)
 
     # Print the map database to see what was generated
-print(mapdb)
+    print(mapdb)

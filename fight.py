@@ -13,14 +13,14 @@ def player_attack(attacker, defender, attacker_name, messages):
             if weapon.get("role") == "right_hand":
                 min_dmg = weapon.get("min_damage", 1)
                 max_dmg = weapon.get("max_damage", 1)
-                damage = get_damage(min_dmg, max_dmg, weapon, exp_bonus=exp_bonus(value=attacker["exp"]))
+                damage_dict = get_damage(min_dmg, max_dmg, weapon, exp_bonus=exp_bonus(value=attacker["exp"]))["damage"]
                 break
 
         defender["hp"] -= damage
         if attacker_name == "You":
-            messages.append(f"You hit for {damage} damage, they have {defender['hp']} left")
+            messages.append(f"You {damage_dict['message']} for {damage_dict['damage']} damage, they have {defender['hp']} left")
         else:
-            messages.append(f"{attacker_name} hits you for {damage} damage, you have {defender['hp']} left")
+            messages.append(f"{attacker_name} hits you for {damage_dict['damage']} {damage_dict['message']} damage, you have {defender['hp']} left")
 
 
 def defeat_outcome(entity, entity_name, chance, usersdb):
@@ -156,19 +156,19 @@ def fight_npc(entry, user_data, user, usersdb, mapdb, npc):
                         min_dmg = weapon.get("min_damage", 1)
                         max_dmg = weapon.get("max_damage", 1)
 
-                        damage = get_damage(min_dmg, max_dmg, weapon, exp_bonus=exp_bonus(value=user_data["exp"]))
+                        user_dmg = get_damage(min_dmg, max_dmg, weapon, exp_bonus=exp_bonus(value=user_data["exp"]))
                         break
 
                 npc.hp -= damage
                 messages.append(
-                    f"The {npc.type} takes {damage} damage and is left with {npc.hp} hp"
+                    f"The {npc.type} takes {user_dmg['damage']} {user_dmg['message']} damage and is left with {npc.hp} hp"
                 )
 
             if npc.hp > 0:
-                npc_dmg_roll = npc.roll_damage()
-                user_data["hp"] -= npc_dmg_roll
+                npc_dmg = npc.roll_damage()
+                user_data["hp"] -= npc_dmg["damage"]
                 messages.append(
-                    f"You take {npc_dmg_roll} damage and are left with {user_data['hp']} hp"
+                    f"You take {npc_dmg['damage']} {npc_dmg['message']} and are left with {user_data['hp']} hp"
                 )
 
     return messages
@@ -227,13 +227,22 @@ import random
 def get_damage(min_dmg, max_dmg, weapon, exp_bonus):
     damage = int(min_dmg + (max_dmg - min_dmg) * random.betavariate(2, 5))
 
+    result = {
+        "damage": 0,
+        "message": "miss"
+    }
+
     if random.randint(1, 100) > weapon["accuracy"]:
-        return 0
+        return result
     else:
         if random.randint(1, 100) <= weapon["crit_chance"]:
             damage = int(damage * (weapon["crit_dmg_pct"] / 100))
+            result["message"] = "critical hit"
 
-        return damage + exp_bonus
+        result["damage"] = damage + exp_bonus
+        if result["message"] != "critical hit":
+            result["message"] = "hit"
+        return result
 
 
 def death_roll(hit_chance):
