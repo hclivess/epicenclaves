@@ -117,6 +117,14 @@ def get_map_data_limit(x_pos, y_pos, map_data_dict, distance=50):
             filtered_data[coords] = data
     return filtered_data
 
+def get_users_data_limit(x_pos, y_pos, usersdb, distance=50):
+    filtered_data = {}
+    for username, data in usersdb.items():
+        x_map = data['x_pos']
+        y_map = data['y_pos']
+        if (x_map - x_pos) ** 2 + (y_map - y_pos) ** 2 <= distance**2:
+            filtered_data[username] = data
+    return filtered_data
 
 
 
@@ -133,21 +141,21 @@ def get_buildings(user_data):
 
 
 def get_surrounding_map_and_user_data(user, user_data_dict, map_data_dict):
-    # Check if the specified user is in the user_data_dict
     if user not in user_data_dict:
         return {"error": "User not found."}
 
-    # Fetch the map data for the specified user and transform it into a dictionary indexed by "x:y"
+    user_x_pos = user_data_dict[user]["x_pos"]
+    user_y_pos = user_data_dict[user]["y_pos"]
+
     user_map_data_dict = get_map_data_limit(
-        user_data_dict[user]["x_pos"],
-        user_data_dict[user]["y_pos"],
+        user_x_pos,
+        user_y_pos,
         map_data_dict=map_data_dict,
     )
 
-    # Prepare the final result as a dictionary with two keys
     result = {
-        "users": user_data_dict,  # Include all users' data
-        "construction": user_map_data_dict,  # This is now a dictionary indexed by "x:y"
+        "users": get_users_data_limit(user_x_pos, user_y_pos, user_data_dict),
+        "construction": user_map_data_dict,
     }
 
     return result
