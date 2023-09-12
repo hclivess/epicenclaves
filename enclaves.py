@@ -107,11 +107,20 @@ class MapHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        data = json.dumps(get_surrounding_map_and_user_data(user, usersdb, mapdb))
+        data = json.dumps(get_surrounding_map_and_user_data(user, usersdb, mapdb, 50))
 
         print("data", data)  # debug
         self.render("templates/map.html", data=data, ensure_ascii=False, user=user)
 
+
+class ScoreboardHandler(BaseHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+
+        data = json.dumps(get_surrounding_map_and_user_data(user, usersdb, mapdb, 50))
+
+        print("data", data)  # debug
+        self.render("templates/scoreboard.html", data=data, ensure_ascii=False, user=user)
 
 class EquipHandler(BaseHandler):
     def get(self):
@@ -262,7 +271,7 @@ class MoveHandler(BaseHandler):
                 "templates/map.html",
                 user=user,
                 data=json.dumps(
-                    get_surrounding_map_and_user_data(user, usersdb, mapdb)
+                    get_surrounding_map_and_user_data(user, usersdb, mapdb, 50)
                 ),
                 message=message,
             )
