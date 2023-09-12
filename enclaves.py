@@ -116,10 +116,8 @@ class MapHandler(BaseHandler):
 class ScoreboardHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-        data = get_surrounding_map_and_user_data(user, usersdb, mapdb, distance=None)
 
-        print("surrounding_data", data)  # debug
-        self.render("templates/scoreboard.html", data=data, ensure_ascii=False, user=user)
+        self.render("templates/scoreboard.html", mapdb=mapdb, usersdb=usersdb, ensure_ascii=False, user=user)
 
 class EquipHandler(BaseHandler):
     def get(self):

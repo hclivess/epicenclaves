@@ -1,82 +1,80 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.8em' font-size='80'>🏰</text></svg>">
+
+   <title>Epic Enclaves - Scoreboard</title>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-    }
-    .container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    .scoreboard {
-        margin-bottom: 20px;
-    }
-    .scoreboard table, .map-overview table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    .scoreboard table th, .scoreboard table td, .map-overview table th, .map-overview table td {
-        border: 1px solid #000;
-        padding: 8px;
-        text-align: left;
-    }
-    .scoreboard table th, .map-overview table th {
-        background-color: #f4f4f4;
-    }
-    .map-overview {
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 10px;
-    }
-    .map-overview div {
-        border: 1px solid #000;
-        padding: 10px;
-    }
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+}
+.container {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+.map, .users {
+    margin: 20px;
+    border: 1px solid #000;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: 45%; /* Add this line to control the width of the columns */
+}
+
+.map div, .users div {
+    display: inline-block; /* Change this line to control the display type */
+    width: 45%; /* Add this line to control the width of the entries */
+    margin: 0 2% 20px 2%; /* Add this line to control the margin around the entries */
+    vertical-align: top; /* Add this line to align the entries to the top */
+}
+
+h2 {
+    font-size: 24px;
+    margin-bottom: 16px;
+}
+h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+p {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+img {
+    border-radius: 50%;
+}
 </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="scoreboard">
-        <h2>Scoreboard</h2>
-        <table>
-            <tr>
-                <th>Player</th>
-                <th>Age</th>
-                <th>HP</th>
-                <th>EXP</th>
-                <th>Action Points</th>
-                <th>Wood</th>
-                <th>Food</th>
-                <th>Bismuth</th>
-            </tr>
-            {% for user in data['users'].values() %}
-            <tr>
-                <td><img src="{{ user['img'] }}" alt="player image" width="50" height="50"></td>
-                <td>{{ user['age'] }}</td>
-                <td>{{ user['hp'] }}</td>
-                <td>{{ user['exp'] }}</td>
-                <td>{{ user['action_points'] }}</td>
-                <td>{{ user['wood'] }}</td>
-                <td>{{ user['food'] }}</td>
-                <td>{{ user['bismuth'] }}</td>
-            </tr>
-            {% end %}
-        </table>
+    <div class="users">
+        <h2>Users</h2>
+        {% for user_id, user_info in usersdb.items() %}
+        <div>
+            <p><img src="{{ user_info['img'] }}" alt="User Image" style="max-width: 80px;"></p>
+            <h3>User ID: {{ user_id }}</h3>
+            <p>Position: ({{ user_info['x_pos'] }}, {{ user_info['y_pos'] }})</p>
+            <p>Type: {{ user_info['type'] }}</p>
+            <p>Age: {{ user_info['age'] }}</p>
+            <p>Experience: {{ user_info['exp'] }}</p>
+        </div>
+        {% end %}
     </div>
 
-    <div class="map-overview">
-        <h2>Map Overview</h2>
-        {% for location, info in data['construction'].items() %}
+    <div class="map">
+        <h2>Map</h2>
+        {% for position, terrain_info in mapdb.items() %}
         <div>
-            <strong>Location: </strong> {{ location }} <br>
-            <strong>Type: </strong> {{ info.get("type") }} <br>
-            <strong>Role: </strong> {{ info.get("role") }}
+            <h3>Position: {{ position }}</h3>
+            <p>Type: {{ terrain_info.get('type') }}</p>
+            <p>Role: {{ terrain_info.get('role') }}</p>
         </div>
         {% end %}
     </div>
