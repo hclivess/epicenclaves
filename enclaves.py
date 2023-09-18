@@ -25,7 +25,7 @@ from backend import (
     update_user_data,
 )
 from map import get_tile_map, get_tile_users, get_user_data, get_surrounding_map_and_user_data, create_map_database, \
-    save_map_from_memory, load_map_to_memory
+    save_map_from_memory, load_map_to_memory, strip_usersdb
 from rest import attempt_rest
 from move import move
 from build import build
@@ -107,7 +107,9 @@ class MapHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
 
-        data = json.dumps(get_surrounding_map_and_user_data(user, usersdb, mapdb, 50))
+
+
+        data = json.dumps(get_surrounding_map_and_user_data(user, strip_usersdb(usersdb), mapdb, 50))
 
         print("data", data)  # debug
         self.render("templates/map.html", data=data, ensure_ascii=False, user=user)
@@ -268,7 +270,7 @@ class MoveHandler(BaseHandler):
                 "templates/map.html",
                 user=user,
                 data=json.dumps(
-                    get_surrounding_map_and_user_data(user, usersdb, mapdb, 50)
+                    get_surrounding_map_and_user_data(user, strip_usersdb(usersdb), mapdb, 50)
                 ),
                 message=message,
             )

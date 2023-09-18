@@ -248,3 +248,13 @@ def load_map_to_memory():
         map_data_dict[key] = data
 
     return map_data_dict
+
+
+def strip_usersdb(usersdb):
+    # strip usersdb of non-displayed data
+    keys_to_keep = ['x_pos', 'y_pos', 'exp', 'hp', 'armor', 'img', 'online', 'type']
+    new_usersdb = {}
+    for username, user_data in usersdb.items():
+        new_usersdb[username] = {k: v for k, v in user_data.items() if k in keys_to_keep}
+    return new_usersdb
+    # strip usersdb of non-displayed data
