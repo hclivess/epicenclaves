@@ -52,7 +52,13 @@ def process_attack_success(
         entry, user, usersdb, mapdb, user_data, enemy_army, your_army, chance
 ):
     remaining_army = max(your_army - enemy_army, 0)
-    user_data["army_free"] = remaining_army
+
+    update_user_data(
+        user=user,
+        updated_values={"army_free": remaining_army,
+                        "exp": user_data["exp"] + int(enemy_army / 10)},
+        user_data_dict=usersdb,
+    )
 
     owner = get_values(entry).get("control")
     type = get_values(entry).get("type")
