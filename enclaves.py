@@ -553,7 +553,7 @@ if __name__ == "__main__":
     if not db_status["map_exists"]:
         spawn_entity(
             mapdb=mapdb,
-            entity_class=Tree,
+            entity_instance=Tree(),
             probability=1,
             size=200,
             max_entities=250

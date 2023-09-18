@@ -71,6 +71,7 @@ class Wolf(Enemy):
 
 
 class Scenery:
+    type = "Tree"
     def __init__(self, hp):
         self.hp = hp
         self.type = "scenery"
