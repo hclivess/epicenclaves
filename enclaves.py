@@ -14,6 +14,7 @@ import tornado.escape
 import actions
 import descriptions
 from chop import chop_forest
+from mine import mine_mountain
 from conquer import attempt_conquer
 from deploy_army import deploy_army, remove_army
 from equip import equip_item
@@ -421,6 +422,33 @@ class ConquerHandler(BaseHandler):
             descriptions=descriptions,
         )
 
+class MineHandler(BaseHandler):
+    def get(self, parameters):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        chop_amount = int(self.get_argument("amount", default="1"))
+
+        user_data = get_user_data(user, usersdb)
+
+        message = mine_mountain(user, chop_amount, user_data, usersdb, mapdb)
+
+        user_data = get_user_data(user, usersdb)
+
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile_users = get_tile_users(
+            user_data["x_pos"], user_data["y_pos"], user, usersdb
+        )
+
+        self.render(
+            "templates/user_panel.html",
+            user=user,
+            file=user_data,
+            message=message,
+            on_tile_map=on_tile_map,
+            on_tile_users=on_tile_users,
+            actions=actions,
+            descriptions=descriptions,
+        )
+
 
 class ChopHandler(BaseHandler):
     def get(self, parameters):
@@ -480,6 +508,7 @@ def make_app():
             (r"/logout(.*)", LogoutHandler),
             (r"/move(.*)", MoveHandler),
             (r"/chop(.*)", ChopHandler),
+            (r"/mine(.*)", MineHandler),
             (r"/conquer", ConquerHandler),
             (r"/fight", FightHandler),
             (r"/map", MapHandler),
