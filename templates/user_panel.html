@@ -177,7 +177,7 @@
                     <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Icon" class="menu-icon"></p>
                     <p>Control: {{ list(entry.values())[0].get("control") }}</p>
                     <p>Garrison: {{ list(entry.values())[0].get("soldiers") }}</p>
-                    <p>Size: {{ list(entry.values())[0].get("size") }}</p>
+                    <p>Level: {{ list(entry.values())[0].get("level") }}</p>
                 </div>
                 <div class="col-md-6 pl-md-1">
                     <p style="text-align: left;">Actions:</p>
@@ -241,7 +241,7 @@
             <p><img src="/img/assets/{{building.get('type')}}.png" alt="Item Icon" class="menu-icon"></p>
             <p>Position: ({{ coord }})</p>
             <p>Garrison: {{ building.get("soldiers") }}</p>
-            <p>Size: {{ building.get("size") }}</p>
+            <p>Level: {{ building.get("level") }}</p>
         </div>
         {% end %}
     </div> <!-- Close the row div -->

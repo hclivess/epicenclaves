@@ -105,7 +105,7 @@ class TurnEngine(threading.Thread):
             building_type = building_data['type']
             if building_type not in counts:
                 counts[building_type] = 0
-            counts[building_type] += building_data.get('size', 1)
+            counts[building_type] += building_data.get('level', 1)
 
         return counts
 

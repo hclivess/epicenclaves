@@ -28,7 +28,7 @@ def upgrade(user, mapdb, usersdb):
     if right_entity:
         for resource, amount in upgrade_costs[right_entity["type"]].items():
             user_data[resource] -= amount
-        right_entity["size"] += 1
+        right_entity["level"] += 1
         if right_entity["type"] == "house":
             user_data["pop_lim"] += 10
 
@@ -49,7 +49,7 @@ def upgrade(user, mapdb, usersdb):
         entity_data = {
             "type": right_entity["type"],
             "name": name,
-            "size": right_entity["size"],
+            "size": right_entity["level"],
             "control": user,
             "role": "building",
             "soldiers": right_entity.get("soldiers", 0)

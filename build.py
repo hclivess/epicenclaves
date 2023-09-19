@@ -52,7 +52,7 @@ def build(entity, name, user, mapdb, usersdb):
     entity_data = {
         "type": entity,
         "name": name,
-        "size": 1,
+        "level": 1,
         "control": user,
         "role": "building",
         "soldiers": 0,
