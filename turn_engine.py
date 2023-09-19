@@ -77,6 +77,9 @@ class TurnEngine(threading.Thread):
         wood_increment = min(building_counts['sawmill'], building_counts['forest'])
         updated_values["wood"] = max(0, user_data["wood"] + wood_increment)
 
+        bis_increment = min(building_counts['mine'], building_counts['mountain'])
+        updated_values["bismuth"] = max(0, user_data["bismuth"] + bis_increment)
+
         current_population = user_data["peasants"] + user_data.get("army_free", 0) + user_data.get("army_deployed", 0)
         available_pop_space = max(0, user_data["pop_lim"] - current_population)
 
@@ -96,7 +99,8 @@ class TurnEngine(threading.Thread):
         return updated_values
 
     def count_buildings(self, user_data):
-        counts = {'sawmill': 0, 'forest': 0, 'barracks': 0, 'farm': 0, 'house': 0}
+        counts = {'sawmill': 0, 'forest': 0, 'barracks': 0, 'farm': 0, 'house': 0, 'mine': 0}
+
         for building_data in user_data.get("construction", {}).values():
             building_type = building_data['type']
             if building_type not in counts:
