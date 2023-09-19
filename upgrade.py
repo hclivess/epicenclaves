@@ -49,7 +49,7 @@ def upgrade(user, mapdb, usersdb):
         entity_data = {
             "type": right_entity["type"],
             "name": name,
-            "size": right_entity["level"],
+            "level": right_entity["level"],
             "control": user,
             "role": "building",
             "soldiers": right_entity.get("soldiers", 0)
