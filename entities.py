@@ -71,19 +71,25 @@ class Wolf(Enemy):
 
 
 class Scenery:
-    type = "Tree"
+    type = "Forest"
     def __init__(self, hp):
         self.hp = hp
         self.type = "scenery"
         self.role = "scenery"
 
 
-class Tree(Scenery):
+class Forest(Scenery):
     def __init__(self):
         super().__init__(hp=100)
         self.type = "forest"
         self.role = "scenery"
 
+
+class Mountain(Scenery):
+    def __init__(self):
+        super().__init__(hp=100)
+        self.type = "mountain"
+        self.role = "scenery"
 
 class Wall(Scenery):
     def __init__(self):

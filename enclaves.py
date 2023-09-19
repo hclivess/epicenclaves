@@ -29,7 +29,7 @@ from map import get_tile_map, get_tile_users, get_user_data, get_surrounding_map
 from rest import attempt_rest
 from move import move
 from build import build
-from entities import Tree
+from entities import Forest
 from entity_generator import spawn_entity
 from auth import (
     auth_cookie_get,
@@ -555,7 +555,7 @@ if __name__ == "__main__":
     if not db_status["map_exists"]:
         spawn_entity(
             mapdb=mapdb,
-            entity_instance=Tree(),
+            entity_instance=Forest(),
             probability=1,
             size=200,
             max_entities=250
