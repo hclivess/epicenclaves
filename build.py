@@ -30,7 +30,7 @@ def build(entity, name, user, mapdb, usersdb):
         return "Cannot build here"
 
     if entity not in building_costs:
-        return "Building procedure not yet defined"
+        return "Building procedure not defined"
 
     if not has_resources(user_data, building_costs[entity]):
         return f"Not enough resources to build {entity}"
@@ -55,7 +55,7 @@ def build(entity, name, user, mapdb, usersdb):
         "level": 1,
         "control": user,
         "role": "building",
-        "soldiers": 0,
+        "army": 0,
     }
 
     data = {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data}

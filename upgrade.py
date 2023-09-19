@@ -22,6 +22,9 @@ def upgrade(user, mapdb, usersdb):
     if right_entity and right_entity["control"] != user:
         return "You do not own this tile"
 
+    if not upgrade_costs.get(right_entity["type"]):
+        return "Upgrade procedure not defined"
+
     if right_entity and not has_resources(user_data, upgrade_costs[right_entity["type"]]):
         return f"Not enough resources to upgrade {right_entity['type']}"
 
@@ -52,7 +55,7 @@ def upgrade(user, mapdb, usersdb):
             "level": right_entity["level"],
             "control": user,
             "role": "building",
-            "soldiers": right_entity.get("soldiers", 0)
+            "army": right_entity.get("army", 0)
         }
         data = {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data}
         update_user_data(

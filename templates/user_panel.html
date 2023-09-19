@@ -176,7 +176,7 @@
                     <p>Type: {{ list(entry.values())[0].get("type") }}</p>
                     <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Icon" class="menu-icon"></p>
                     <p>Control: {{ list(entry.values())[0].get("control") }}</p>
-                    <p>Garrison: {{ list(entry.values())[0].get("soldiers") }}</p>
+                    <p>Army: {{ list(entry.values())[0].get("army") }}</p>
                     <p>Level: {{ list(entry.values())[0].get("level") }}</p>
                 </div>
                 <div class="col-md-6 pl-md-1">
@@ -240,7 +240,7 @@
             <p>Type: {{ building.get("type") }}</p>
             <p><img src="/img/assets/{{building.get('type')}}.png" alt="Item Icon" class="menu-icon"></p>
             <p>Position: ({{ coord }})</p>
-            <p>Garrison: {{ building.get("soldiers") }}</p>
+            <p>Army: {{ building.get("army") }}</p>
             <p>Level: {{ building.get("level") }}</p>
         </div>
         {% end %}

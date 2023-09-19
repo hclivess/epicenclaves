@@ -101,7 +101,7 @@ def remove_entry_from_owner(owner, user_data, usersdb):
 def assign_entry_to_user(entry, user, user_data, mapdb, usersdb, remaining_army):
     key = get_coords(entry)
     entry[key]["control"] = user
-    entry[key]["soldiers"] = 0
+    entry[key]["army"] = 0
 
     update_map_data(entry, mapdb)
     action_points = user_data.get("action_points", 0) # Provide a default value of 0 if the key doesn't exist
@@ -132,7 +132,7 @@ def attempt_conquer(user, target, on_tile_map, usersdb, mapdb, user_data):
             return "You need at least 10 action points to attack"
 
         your_army = user_data.get("army_free", 0)
-        enemy_army = get_values(entry).get("soldiers", 0)
+        enemy_army = get_values(entry).get("army", 0)
 
         conquered = attack_success(attacker=your_army, defender=enemy_army)
 

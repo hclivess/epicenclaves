@@ -19,13 +19,13 @@ def deploy_army(user, on_tile_map, usersdb, mapdb, user_data):
             }
 
             player_pos = f"{user_data['x_pos']},{user_data['y_pos']}"
-            user_data["construction"][player_pos]["soldiers"] += 1
+            user_data["construction"][player_pos]["army"] += 1
             updated_user_values["construction"] = {player_pos: user_data["construction"][player_pos]}
 
             update_user_data(user, updated_user_values, usersdb)
 
             key = get_coords(entry)
-            entry[key]["soldiers"] = user_data["construction"][player_pos]["soldiers"]
+            entry[key]["army"] = user_data["construction"][player_pos]["army"]
             update_map_data(entry, mapdb)
 
             return "Soldiers deployed"
@@ -39,7 +39,7 @@ def remove_army(user, on_tile_map, usersdb, mapdb, user_data):
         return "Not enough action points to remove"
 
     player_pos = f"{user_data['x_pos']},{user_data['y_pos']}"
-    if user_data["construction"][player_pos]["soldiers"] <= 0:
+    if user_data["construction"][player_pos]["army"] <= 0:
         return "No army to remove"
 
     for entry in on_tile_map:
@@ -50,13 +50,13 @@ def remove_army(user, on_tile_map, usersdb, mapdb, user_data):
                 "action_points": user_data["action_points"] - 1,
             }
 
-            user_data["construction"][player_pos]["soldiers"] -= 1
+            user_data["construction"][player_pos]["army"] -= 1
             updated_user_values["construction"] = {player_pos: user_data["construction"][player_pos]}
 
             update_user_data(user, updated_user_values, usersdb)
 
             key = get_coords(entry)
-            entry[key]["soldiers"] = user_data["construction"][player_pos]["soldiers"]
+            entry[key]["army"] = user_data["construction"][player_pos]["army"]
             update_map_data(entry, mapdb)
 
             return "Soldiers removed"

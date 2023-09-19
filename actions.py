@@ -11,8 +11,8 @@ class TileActions:
             actions = [
                 {"name": "sleep 10 hours", "action": "/rest?hours=10"},
                 {"name": "sleep 20 hours", "action": "/rest?hours=20"},
-                {"name": "deploy soldiers", "action": f"/deploy?type=soldiers&action=add"},
-                {"name": "free soldiers", "action": f"/deploy?type=soldiers&action=remove"},
+                {"name": "deploy army", "action": f"/deploy?type=soldiers&action=add"},
+                {"name": "free army", "action": f"/deploy?type=soldiers&action=remove"},
                 {"name": "upgrade", "action": f"/upgrade"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
@@ -26,7 +26,6 @@ class TileActions:
             actions = [
                 {"name": "train 1 archer", "action": "/train?type=archer&amount=1"},
                 {"name": "train 10 archers", "action": "/train?type=archer&amount=1"},
-                {"name": "upgrade", "action": f"/upgrade"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
         elif type == "mountain":
@@ -37,30 +36,30 @@ class TileActions:
             ]
         elif type == "farm":
             actions = [
-                {"name": "deploy soldiers", "action": f"/deploy?type=soldiers&action=add"},
-                {"name": "free soldiers", "action": f"/deploy?type=soldiers&action=remove"},
+                {"name": "deploy army", "action": f"/deploy?type=soldiers&action=add"},
+                {"name": "free army", "action": f"/deploy?type=soldiers&action=remove"},
                 {"name": "upgrade", "action": f"/upgrade"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
         elif type == "barracks":
             actions = [
-                {"name": "deploy soldiers", "action": f"/deploy?type=soldiers&action=add"},
-                {"name": "free soldiers", "action": f"/deploy?type=soldiers&action=remove"},
+                {"name": "deploy army", "action": f"/deploy?type=soldiers&action=add"},
+                {"name": "free army", "action": f"/deploy?type=soldiers&action=remove"},
                 {"name": "upgrade", "action": f"/upgrade"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
         elif type == "house":
             actions = [
-                {"name": "deploy soldiers", "action": f"/deploy?type=soldiers&action=add"},
-                {"name": "free soldiers", "action": f"/deploy?type=soldiers&action=remove"},
+                {"name": "deploy army", "action": f"/deploy?type=soldiers&action=add"},
+                {"name": "free army", "action": f"/deploy?type=soldiers&action=remove"},
                 {"name": "upgrade", "action": f"/upgrade"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
 
         elif type == "sawmill":
             actions = [
-                {"name": "deploy soldiers", "action": f"/deploy?type=soldiers&action=add"},
-                {"name": "free soldiers", "action": f"/deploy?type=soldiers&action=remove"},
+                {"name": "deploy army", "action": f"/deploy?type=soldiers&action=add"},
+                {"name": "free army", "action": f"/deploy?type=soldiers&action=remove"},
                 {"name": "upgrade", "action": f"/upgrade"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]

@@ -17,6 +17,4 @@ upgrade_costs = {
     "barracks": {"wood": 25},
     "sawmill": {"wood": 25},
     "mine": {"wood": 25},
-    "archery_range": {"wood": 25},
-
 }
