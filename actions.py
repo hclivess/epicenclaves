@@ -11,15 +11,22 @@ class TileActions:
             actions = [
                 {"name": "sleep 10 hours", "action": "/rest?hours=10"},
                 {"name": "sleep 20 hours", "action": "/rest?hours=20"},
-                {"name": "conquer", "action": f"/conquer?target={type}"},
                 {"name": "deploy soldiers", "action": f"/deploy?type=soldiers&action=add"},
                 {"name": "free soldiers", "action": f"/deploy?type=soldiers&action=remove"},
                 {"name": "upgrade", "action": f"/upgrade"},
+                {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
         elif type == "forest":
             actions = [
                 {"name": "chop", "action": "/chop?amount=1"},
                 {"name": "chop 10", "action": "/chop?amount=10"},
+                {"name": "conquer", "action": f"/conquer?target={type}"},
+            ]
+        elif type == "archery_range":
+            actions = [
+                {"name": "train 1 archer", "action": "/train?type=archer&amount=1"},
+                {"name": "train 10 archers", "action": "/train?type=archer&amount=1"},
+                {"name": "upgrade", "action": f"/upgrade"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
         elif type == "mountain":
