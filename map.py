@@ -138,6 +138,14 @@ def get_buildings(user_data):
 
     return list(construction.values())
 
+def is_surrounded_by(x, y, entity_type, mapdb, diameter=1):
+    for i in range(x - diameter, x + diameter + 1):
+        for j in range(y - diameter, y + diameter + 1):
+            if i == x and j == y:
+                continue
+            if f"{i},{j}" in mapdb and mapdb[f"{i},{j}"]['type'] == entity_type:
+                return True
+    return False
 
 def get_surrounding_map_and_user_data(user, user_data_dict, map_data_dict, distance):
     if user not in user_data_dict:
