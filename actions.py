@@ -22,6 +22,12 @@ class TileActions:
                 {"name": "chop 10", "action": "/chop?amount=10"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
+        elif type == "mountain":
+            actions = [
+                {"name": "mine", "action": "/mine?amount=1"},
+                {"name": "mine 10", "action": "/mine?amount=10"},
+                {"name": "conquer", "action": f"/conquer?target={type}"},
+            ]
         elif type == "farm":
             actions = [
                 {"name": "conquer", "action": f"/conquer?target={type}"},
