@@ -555,11 +555,11 @@ async def main():
     app = make_app()
     app.settings["cookie_secret"] = auth_cookie_get()
 
-    app.listen(8888, ssl_options=ssl_options)
+    app.listen(443, ssl_options=ssl_options)
     app_redirect.listen(80)
 
     auth_check_users_db()
-    webbrowser.open(f"http://127.0.0.1:8888")
+    webbrowser.open(f"http://127.0.0.1:443")
     print("app starting")
 
     # Instead of await asyncio.Event().wait(), create an event to listen for shutdown
