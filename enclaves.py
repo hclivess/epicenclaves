@@ -108,8 +108,6 @@ class MapHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
 
-
-
         data = json.dumps(get_surrounding_map_and_user_data(user, strip_usersdb(usersdb), mapdb, 50))
 
         print("data", data)  # debug
@@ -121,6 +119,7 @@ class ScoreboardHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
 
         self.render("templates/scoreboard.html", mapdb=mapdb, usersdb=usersdb, ensure_ascii=False, user=user)
+
 
 class EquipHandler(BaseHandler):
     def get(self):
@@ -422,6 +421,7 @@ class ConquerHandler(BaseHandler):
             descriptions=descriptions,
         )
 
+
 class MineHandler(BaseHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
@@ -478,6 +478,11 @@ class ChopHandler(BaseHandler):
         )
 
 
+class RedirectToHTTPSHandler(tornado.web.RequestHandler):
+    def get(self, parameters):
+        self.redirect(self.request.full_url().replace('http://', 'https://'), permanent=True)
+
+
 class LoginHandler(BaseHandler):
     def post(self, data):
         user = self.get_argument("name")[:16]
@@ -528,12 +533,33 @@ def make_app():
 
 
 async def main():
+    with open("config_enclaves.json") as certlocfile:
+        contents = json.load(certlocfile)
+        certfile = contents["certfile"]
+        keyfile = contents["keyfile"]
+
+    if os.path.exists(certfile):
+        ssl_options = {
+            "certfile": certfile,
+            "keyfile": keyfile,
+        }
+    else:
+        ssl_options = None
+
+    app_redirect = tornado.web.Application(
+        [
+            (r"/(.*)", RedirectToHTTPSHandler),
+        ]
+    )
+
     app = make_app()
     app.settings["cookie_secret"] = auth_cookie_get()
-    port = 8888
-    app.listen(port)
+
+    app.listen(8888, ssl_options=ssl_options)
+    app_redirect.listen(80)
+
     auth_check_users_db()
-    webbrowser.open(f"http://127.0.0.1:{port}")
+    webbrowser.open(f"http://127.0.0.1:8888")
     print("app starting")
 
     # Instead of await asyncio.Event().wait(), create an event to listen for shutdown
@@ -576,6 +602,7 @@ def initialize_map_and_users():
     usersdb = load_users_to_memory()
 
     return mapdb, usersdb
+
 
 if __name__ == "__main__":
     db_status = init_databases()
