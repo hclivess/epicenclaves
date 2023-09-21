@@ -74,6 +74,9 @@ class TurnEngine(threading.Thread):
         building_counts = self.count_buildings(user_data)
         updated_values = {}
 
+        research_increment = building_counts['laboratory']
+        updated_values["research"] = max(0, user_data["research"] + research_increment)
+
         wood_increment = min(building_counts['sawmill'], building_counts['forest'])
         updated_values["wood"] = max(0, user_data["wood"] + wood_increment)
 
@@ -99,7 +102,7 @@ class TurnEngine(threading.Thread):
         return updated_values
 
     def count_buildings(self, user_data):
-        counts = {'sawmill': 0, 'forest': 0, 'barracks': 0, 'farm': 0, 'house': 0, 'mine': 0, 'mountain': 0}
+        counts = {'sawmill': 0, 'forest': 0, 'barracks': 0, 'farm': 0, 'house': 0, 'mine': 0, 'mountain': 0, 'laboratory': 0}
 
         for building_data in user_data.get("construction", {}).values():
             building_type = building_data['type']
