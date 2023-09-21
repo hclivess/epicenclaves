@@ -64,6 +64,14 @@ class TileActions:
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
 
+        elif type == "laboratory":
+            actions = [
+                {"name": "deploy army", "action": f"/deploy?type=army&action=add"},
+                {"name": "remove army", "action": f"/deploy?type=army&action=remove"},
+                {"name": "upgrade", "action": f"/upgrade"},
+                {"name": "conquer", "action": f"/conquer?target={type}"},
+            ]
+
         elif type == "boar":
             actions = [{"name": "fight", "action": f"/fight?target={type}"}]
         elif type == "wolf":

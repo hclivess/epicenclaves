@@ -6,6 +6,7 @@ building_costs = {
     "sawmill": {"wood": 50},
     "mine": {"wood": 50},
     "archery_range": {"wood": 50},
+    "laboratory": {"wood": 50},
 
     # Add more entities and their cost structures here
 }
@@ -17,4 +18,5 @@ upgrade_costs = {
     "barracks": {"wood": 25},
     "sawmill": {"wood": 25},
     "mine": {"wood": 25},
+    "laboratory": {"wood": 25},
 }
