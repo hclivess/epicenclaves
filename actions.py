@@ -12,7 +12,7 @@ class TileActions:
                 {"name": "sleep 10 hours", "action": "/rest?hours=10"},
                 {"name": "sleep 20 hours", "action": "/rest?hours=20"},
                 {"name": "deploy army", "action": f"/deploy?type=soldiers&action=add"},
-                {"name": "free army", "action": f"/deploy?type=soldiers&action=remove"},
+                {"name": "remove army", "action": f"/deploy?type=soldiers&action=remove"},
                 {"name": "upgrade", "action": f"/upgrade"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
@@ -37,21 +37,21 @@ class TileActions:
         elif type == "farm":
             actions = [
                 {"name": "deploy army", "action": f"/deploy?type=soldiers&action=add"},
-                {"name": "free army", "action": f"/deploy?type=soldiers&action=remove"},
+                {"name": "remove army", "action": f"/deploy?type=soldiers&action=remove"},
                 {"name": "upgrade", "action": f"/upgrade"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
         elif type == "barracks":
             actions = [
                 {"name": "deploy army", "action": f"/deploy?type=soldiers&action=add"},
-                {"name": "free army", "action": f"/deploy?type=soldiers&action=remove"},
+                {"name": "remove army", "action": f"/deploy?type=soldiers&action=remove"},
                 {"name": "upgrade", "action": f"/upgrade"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
         elif type == "house":
             actions = [
                 {"name": "deploy army", "action": f"/deploy?type=soldiers&action=add"},
-                {"name": "free army", "action": f"/deploy?type=soldiers&action=remove"},
+                {"name": "remove army", "action": f"/deploy?type=soldiers&action=remove"},
                 {"name": "upgrade", "action": f"/upgrade"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
@@ -59,7 +59,7 @@ class TileActions:
         elif type == "sawmill":
             actions = [
                 {"name": "deploy army", "action": f"/deploy?type=soldiers&action=add"},
-                {"name": "free army", "action": f"/deploy?type=soldiers&action=remove"},
+                {"name": "remove army", "action": f"/deploy?type=soldiers&action=remove"},
                 {"name": "upgrade", "action": f"/upgrade"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
