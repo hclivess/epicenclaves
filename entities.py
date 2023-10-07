@@ -6,6 +6,7 @@ class Enemy:
                  hp,
                  armor,
                  role="enemy",
+                 level=1,
                  min_damage=0,
                  max_damage=2,
                  crit_chance=0.0,
@@ -21,6 +22,7 @@ class Enemy:
         self.hp = hp
         self.armor = armor
         self.alive = alive
+        self.level = level
         self.kill_chance = kill_chance
         self.min_damage = min_damage
         self.max_damage = max_damage
@@ -50,6 +52,7 @@ class Boar(Enemy):
                          crit_chance=0.1,
                          crit_damage=3,
                          armor=0,
+                         level=1,
                          exp_gain=1,
                          drop_chance=0.1,
                          regular_drop={"food": 1})
@@ -65,6 +68,7 @@ class Wolf(Enemy):
                          crit_chance=0.25,
                          crit_damage=5,
                          armor=0,
+                         level=1,
                          exp_gain=2,
                          drop_chance=0.15,
                          regular_drop={"food": 1})

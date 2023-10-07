@@ -178,7 +178,6 @@ def save_map_data(map_data_dict, x_pos, y_pos, data):
     coord_key = f"{x_pos},{y_pos}"
     map_data_dict[coord_key] = data
 
-
 def create_map_database():
     # Connect to the database or create one if it doesn't exist
     conn = sqlite3.connect("db/map_data.db")
