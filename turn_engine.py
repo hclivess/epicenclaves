@@ -113,20 +113,26 @@ class TurnEngine(threading.Thread):
         return counts
 
     def spawn_entities(self):
+        random_level = random.randint(1, 10)
         spawn_herd(
             mapdb=self.mapdb,
-            entity_class=Boar,
+            entity_instance=Boar(),
             probability=0.5,
             herd_size=5,
             max_entities=50,
+            level=random_level
+
         )
 
+        random_level = random.randint(1, 20)
         spawn_herd(
             mapdb=self.mapdb,
-            entity_class=Wolf,
+            entity_instance=Wolf(),
             probability=0.4,
             herd_size=7,
             max_entities=50,
+            level=random_level
+
         )
 
     def run(self):

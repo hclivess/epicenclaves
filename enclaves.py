@@ -614,15 +614,17 @@ if __name__ == "__main__":
             entity_instance=Forest(),
             probability=1,
             size=200,
-            max_entities=250
+            max_entities=250,
+            level=1
         )
 
         spawn_entity(
             mapdb=mapdb,
-            entity_instance=Mountain(),
+            entity_instance=Mountain,
             probability=1,
             size=200,
-            max_entities=250
+            max_entities=250,
+            level=1
         )
 
         generate_multiple_mazes(mapdb, 20, 20, 10, 10, 0.1, 25, 200)

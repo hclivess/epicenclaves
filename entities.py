@@ -13,7 +13,7 @@ class Enemy:
                  crit_damage=0,
                  alive=True,
                  kill_chance=0.01,
-                 exp_gain=1,
+                 experience=1,
                  regular_drop=None,
                  drop_chance=0.1):
         if regular_drop is None:
@@ -29,7 +29,7 @@ class Enemy:
         self.crit_chance = crit_chance
         self.crit_damage = crit_damage
         self.role = role
-        self.exp_gain = exp_gain
+        self.experience = experience
         self.regular_drop = regular_drop
         self.drop_chance = drop_chance
 
@@ -53,7 +53,7 @@ class Boar(Enemy):
                          crit_damage=3,
                          armor=0,
                          level=1,
-                         exp_gain=1,
+                         experience=1,
                          drop_chance=0.1,
                          regular_drop={"food": 1})
 
@@ -69,7 +69,7 @@ class Wolf(Enemy):
                          crit_damage=5,
                          armor=0,
                          level=1,
-                         exp_gain=2,
+                         experience=2,
                          drop_chance=0.15,
                          regular_drop={"food": 1})
 
@@ -92,7 +92,7 @@ class Forest(Scenery):
 
 
 class Mountain(Scenery):
-    type = "Mountain"
+    type = "mountain"
 
     def __init__(self):
         super().__init__(hp=100)
