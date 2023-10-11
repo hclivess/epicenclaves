@@ -31,7 +31,7 @@ from rest import attempt_rest
 from move import move
 from build import build
 from entities import Forest, Mountain
-from entity_generator import spawn_entity
+from entity_generator import generate_and_save_entities
 from auth import (
     auth_cookie_get,
     auth_login_validate,
@@ -609,22 +609,24 @@ if __name__ == "__main__":
     mapdb, usersdb = initialize_map_and_users()
 
     if not db_status["map_exists"]:
-        spawn_entity(
+        generate_and_save_entities(
             mapdb=mapdb,
             entity_instance=Forest(),
             probability=1,
             size=200,
             max_entities=250,
-            level=1
+            level=1,
+            herd_probability=0
         )
 
-        spawn_entity(
+        generate_and_save_entities(
             mapdb=mapdb,
             entity_instance=Mountain,
             probability=1,
             size=200,
             max_entities=250,
-            level=1
+            level=1,
+            herd_probability=0
         )
 
         generate_multiple_mazes(mapdb, 20, 20, 10, 10, 0.1, 25, 200)

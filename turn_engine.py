@@ -8,7 +8,7 @@ from user import save_users_from_memory
 from backend import update_user_data, hashify
 from map import save_map_from_memory
 from entities import Boar, Wolf
-from entity_generator import spawn_herd
+from entity_generator import generate_and_save_entities
 import string
 
 if os.path.exists("test"):
@@ -114,24 +114,26 @@ class TurnEngine(threading.Thread):
 
     def spawn_entities(self):
         random_level = random.randint(1, 10)
-        spawn_herd(
+        generate_and_save_entities(
             mapdb=self.mapdb,
             entity_instance=Boar(),
             probability=0.5,
             herd_size=5,
             max_entities=50,
-            level=random_level
+            level=random_level,
+            herd_probability=1
 
         )
 
         random_level = random.randint(1, 20)
-        spawn_herd(
+        generate_and_save_entities(
             mapdb=self.mapdb,
             entity_instance=Wolf(),
             probability=0.4,
             herd_size=7,
             max_entities=50,
-            level=random_level
+            level=random_level,
+            herd_probability=1
 
         )
 

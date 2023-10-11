@@ -41,7 +41,20 @@ class Enemy:
             message = "critical hit"
         return {"damage": damage, "message": message}
 
+class Valenthis(Enemy):
+    type = "valenthis"
 
+    def __init__(self):
+        super().__init__(hp=350,
+                         min_damage=25,
+                         max_damage=25,
+                         crit_chance=0.4,
+                         crit_damage=300,
+                         armor=0,
+                         level=5,
+                         experience=100,
+                         drop_chance=0.4,
+                         regular_drop={"bismuth": 50})
 class Boar(Enemy):
     type = "boar"
 
