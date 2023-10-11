@@ -117,7 +117,7 @@ class TurnEngine(threading.Thread):
         spawn(
             mapdb=self.mapdb,
             entity_instance=Boar(),
-            probability=0.5,
+            probability=0.05,
             herd_size=5,
             max_entities=50,
             level=random_level,
@@ -129,7 +129,7 @@ class TurnEngine(threading.Thread):
         spawn(
             mapdb=self.mapdb,
             entity_instance=Wolf(),
-            probability=0.4,
+            probability=0.05,
             herd_size=7,
             max_entities=50,
             level=random_level,
@@ -140,7 +140,7 @@ class TurnEngine(threading.Thread):
         spawn(
             mapdb=self.mapdb,
             entity_instance=Valenthis(),
-            probability=1,
+            probability=0.001,
             size=200,
             max_entities=1,
             level=1,

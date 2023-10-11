@@ -30,7 +30,7 @@ from map import get_tile_map, get_tile_users, get_user_data, get_surrounding_map
 from rest import attempt_rest
 from move import move
 from build import build
-from entities import Forest, Mountain, Valenthis
+from entities import Forest, Mountain, Boar
 from entity_generator import spawn
 from auth import (
     auth_cookie_get,
@@ -627,6 +627,17 @@ if __name__ == "__main__":
             max_entities=250,
             level=1,
             herd_probability=0
+        )
+
+        spawn(
+            mapdb=mapdb,
+            entity_instance=Boar(),
+            probability=1,
+            herd_size=15,
+            max_entities=50,
+            level=1,
+            herd_probability=1
+
         )
 
         generate_multiple_mazes(mapdb, 20, 20, 10, 10, 0.1, 25, 200)
