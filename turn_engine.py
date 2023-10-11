@@ -7,7 +7,7 @@ from sqlite import update_turn
 from user import save_users_from_memory
 from backend import update_user_data, hashify
 from map import save_map_from_memory
-from entities import Boar, Wolf
+from entities import Boar, Wolf, Valenthis
 from entity_generator import spawn
 import string
 
@@ -135,6 +135,16 @@ class TurnEngine(threading.Thread):
             level=random_level,
             herd_probability=1
 
+        )
+
+        spawn(
+            mapdb=self.mapdb,
+            entity_instance=Valenthis(),
+            probability=1,
+            size=200,
+            max_entities=1,
+            level=1,
+            herd_probability=1
         )
 
     def run(self):

@@ -30,7 +30,7 @@ from map import get_tile_map, get_tile_users, get_user_data, get_surrounding_map
 from rest import attempt_rest
 from move import move
 from build import build
-from entities import Forest, Mountain
+from entities import Forest, Mountain, Valenthis
 from entity_generator import spawn
 from auth import (
     auth_cookie_get,

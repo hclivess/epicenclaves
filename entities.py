@@ -51,7 +51,7 @@ class Valenthis(Enemy):
                          crit_chance=0.4,
                          crit_damage=300,
                          armor=0,
-                         level=5,
+                         level=1,
                          experience=100,
                          drop_chance=0.4,
                          regular_drop={"bismuth": 50})
