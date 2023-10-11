@@ -99,8 +99,9 @@ def fight_npc(entry, user_data, user, usersdb, mapdb, npc):
             npc.alive = False
 
             if random.random() < 0.1:
-                new_weapon = generate_weapon()
-                messages.append(f"You found a {new_weapon['type']}!")
+                level = get_values(entry).get("level")
+                new_weapon = generate_weapon(level=level)
+                messages.append(f"You found a level {level} weapon {new_weapon['type']}!")
                 user_data["unequipped"].append(new_weapon)
 
             remove_from_map(

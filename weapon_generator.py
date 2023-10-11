@@ -1,13 +1,11 @@
 import random
 import string
 
-
 def id_generator(length=10):
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for _ in range(length))
 
-
-def generate_weapon():
+def generate_weapon(level=1):
     weapon_types = ["sword", "axe", "bow", "spear", "dagger", "mace"]
     weapon_damage = {
         "sword": (7, 12),
@@ -29,8 +27,8 @@ def generate_weapon():
 
     selected_weapon = random.choice(weapon_types)
     base_min_damage, base_max_damage = weapon_damage[selected_weapon]
-    min_damage = int(base_min_damage * random.uniform(0.8, 1.2))
-    max_damage = int(base_max_damage * random.uniform(0.8, 1.2))
+    min_damage = int(base_min_damage * random.uniform(0.8, 1.2) * level)
+    max_damage = int(base_max_damage * random.uniform(0.8, 1.2) * level)
 
     if max_damage <= min_damage:
         max_damage = min_damage + 1
@@ -41,7 +39,8 @@ def generate_weapon():
         "min_damage": min_damage,
         "max_damage": max_damage,
         "role": "right_hand",
-        "id": id_generator()
+        "id": id_generator(),
+        "level": level
     }
 
     if weapon_dict["range"] == "ranged":
@@ -55,7 +54,6 @@ def generate_weapon():
 
     return weapon_dict
 
-
 if __name__ == "__main__":
-    weapon_json = generate_weapon()
+    weapon_json = generate_weapon(level=2)
     print(weapon_json)
