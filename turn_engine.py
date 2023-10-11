@@ -151,6 +151,7 @@ class TurnEngine(threading.Thread):
         while self.running:
             self.check_for_updates()
             sleep_time = 1 if TEST else 30
+            print("Cycle closed")
             interruptible_sleep(sleep_time, stop_condition=lambda: not self.running)
 
     def stop(self):

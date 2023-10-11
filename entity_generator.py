@@ -6,9 +6,14 @@ def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=Non
           herd_radius=5, herd_probability=0.5):
     total_entities = 0
     additional_entity_data = generate_additional_entity_data(entity_instance, level)
+    total_tiles = size * size
 
     while True:
         if max_entities is not None and total_entities >= max_entities:
+            return
+
+        if len(mapdb) >= total_tiles:
+            print("No more empty tiles available.")
             return
 
         x_pos = random.randint(1, size)
