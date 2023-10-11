@@ -72,14 +72,14 @@ def fight_player(entry, target_name, user_data, user, usersdb):
             if target_data["hp"] <= 0:
                 defeated_entity = target_data
                 defeated_name = entry_name
-                exp_gain = user_data["exp"] + 10 + target_data["exp"] / 10
-                update_user_data(user=user, updated_values={"exp": exp_gain}, user_data_dict=usersdb)
+                experience = user_data["exp"] + 10 + target_data["exp"] / 10
+                update_user_data(user=user, updated_values={"exp": experience}, user_data_dict=usersdb)
 
             elif user_data["hp"] <= 0:
                 defeated_entity = user_data
                 defeated_name = user
-                exp_gain = target_data["exp"] + 10 + user_data["exp"] / 10
-                update_user_data(user=target_name, updated_values={"exp": exp_gain},
+                experience = target_data["exp"] + 10 + user_data["exp"] / 10
+                update_user_data(user=target_name, updated_values={"exp": experience},
                                  user_data_dict=usersdb)
 
             if defeated_entity:
@@ -111,7 +111,7 @@ def fight_npc(entry, user_data, user, usersdb, mapdb, npc):
 
             updated_values = {
                 "action_points": user_data["action_points"] - 1,
-                "exp": user_data["exp"] + npc.exp_gain,
+                "exp": user_data["exp"] + npc.experience,
                 "hp": user_data["hp"],
                 "unequipped": user_data["unequipped"],
             }
