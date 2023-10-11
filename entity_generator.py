@@ -2,8 +2,8 @@ from map import save_map_data
 import random
 
 
-def generate_and_save_entities(entity_instance, probability, mapdb, level, size=101, max_entities=None, herd_size=15,
-                               herd_radius=5, herd_probability=0.5):
+def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=None, herd_size=15,
+          herd_radius=5, herd_probability=0.5):
     total_entities = 0
     additional_entity_data = generate_additional_entity_data(entity_instance, level)
 
