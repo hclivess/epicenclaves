@@ -621,7 +621,7 @@ if __name__ == "__main__":
 
         spawn(
             mapdb=mapdb,
-            entity_instance=Mountain,
+            entity_instance=Mountain(),
             probability=1,
             size=200,
             max_entities=250,
