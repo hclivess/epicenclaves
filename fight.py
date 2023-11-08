@@ -98,7 +98,7 @@ def fight_npc(entry, user_data, user, usersdb, mapdb, npc):
             messages.append(f"The {npc.type} is dead")
             npc.alive = False
 
-            if random.random() < 0.1:
+            if random.random() < npc.drop_chance:
                 level = get_values(entry).get("level")
                 new_weapon = generate_weapon(level=level)
                 messages.append(f"You found a level {level} weapon {new_weapon['type']}!")
