@@ -8,12 +8,13 @@ from entities import Boar, Wolf, Enemy
 from weapon_generator import generate_weapon, generate_armor
 
 
+
 def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[str]) -> Tuple[int, int]:
     armor_protection = 0
     is_player = defender.get('name', 'You') == 'You'
 
     for armor in defender.get("equipped", []):
-        if armor.get("role") == "armor":
+        if armor.get("role") == "armor" and armor.get("type") != "empty":
             protection = armor.get("protection", 0) * (armor.get("efficiency", 100) / 100)
             armor_protection += protection
 
@@ -33,10 +34,11 @@ def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[s
                 else:
                     messages.append(
                         f"{defender['name']}'s {armor['type']} has broken and no longer provides protection!")
-                defender["equipped"].remove(armor)
+                armor["type"] = "empty"
+                armor["protection"] = 0
 
     final_damage = max(1, initial_damage - armor_protection)
-    absorbed_damage = initial_damage - final_damage
+    absorbed_damage = math.floor(initial_damage - final_damage)
 
     if absorbed_damage > 0:
         if is_player:

@@ -12,20 +12,32 @@ def equip_item(usersdb, username, item_id):
     if item_to_equip is None:
         return "Item not found in unequipped inventory."
 
-    # Check if an item with the same class is currently equipped
-    item_to_unequip = None
-    for equipped_item in player['equipped']:
-        if equipped_item['role'] == item_to_equip['role']:
-            item_to_unequip = equipped_item
-            break
+    # Check if the item is armor
+    if item_to_equip.get('role') == 'armor':
+        slot = item_to_equip['slot']
+        # Find the currently equipped item in this slot
+        for i, equipped_item in enumerate(player['equipped']):
+            if equipped_item['role'] == 'armor' and equipped_item['slot'] == slot:
+                # If the slot is not empty, move the current item to unequipped
+                if equipped_item['type'] != 'empty':
+                    player['unequipped'].append(equipped_item)
+                # Replace the item in the equipped list
+                player['equipped'][i] = item_to_equip
+                player['unequipped'].remove(item_to_equip)
+                return f"Equipped {item_to_equip['type']} in {slot} slot."
+    else:
+        # For non-armor items, use the existing logic
+        item_to_unequip = None
+        for equipped_item in player['equipped']:
+            if equipped_item['role'] == item_to_equip['role']:
+                item_to_unequip = equipped_item
+                break
 
-    # If an item with the same class is equipped, move it to the unequipped list
-    if item_to_unequip is not None:
-        player['equipped'].remove(item_to_unequip)
-        player['unequipped'].append(item_to_unequip)
+        if item_to_unequip is not None:
+            player['equipped'].remove(item_to_unequip)
+            player['unequipped'].append(item_to_unequip)
 
-    # Equip the new item and remove it from the unequipped list
-    player['equipped'].append(item_to_equip)
-    player['unequipped'].remove(item_to_equip)
+        player['equipped'].append(item_to_equip)
+        player['unequipped'].remove(item_to_equip)
 
     return f"Equipped item with ID: {item_id}, Type: {item_to_equip['type']}"

@@ -18,6 +18,7 @@ from mine import mine_mountain
 from conquer import attempt_conquer
 from deploy_army import deploy_army, remove_army
 from equip import equip_item
+from unequip import unequip_item
 from fight import fight, get_fight_preconditions
 from login import login
 from turn_engine import TurnEngine
@@ -421,6 +422,31 @@ class ConquerHandler(BaseHandler):
             descriptions=descriptions,
         )
 
+class UnequipHandler(BaseHandler):
+    def get(self):
+        id = self.get_argument("id")
+        user = tornado.escape.xhtml_escape(self.current_user)
+
+        user_data = get_user_data(user, usersdb=usersdb)
+        message = unequip_item(usersdb, user, id)
+
+        # Refresh user data and on-tile information
+        user_data = get_user_data(user, usersdb=usersdb)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile_users = get_tile_users(
+            user_data["x_pos"], user_data["y_pos"], user, usersdb
+        )
+
+        self.render(
+            "templates/user_panel.html",
+            user=user,
+            file=user_data,
+            message=message,
+            on_tile_map=on_tile_map,
+            on_tile_users=on_tile_users,
+            actions=actions,
+            descriptions=descriptions,
+        )
 
 class MineHandler(BaseHandler):
     def get(self, parameters):
@@ -523,6 +549,7 @@ def make_app():
             (r"/scoreboard", ScoreboardHandler),
             (r"/revive", ReviveHandler),
             (r"/equip", EquipHandler),
+            (r"/unequip", UnequipHandler),
             (r"/trash", TrashHandler),
             (r"/deploy(.*)", DeployArmyHandler),
             (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),

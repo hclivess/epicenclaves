@@ -193,26 +193,57 @@
         </div>
 
         <!-- Equipped Column -->
-        <div class="col-md-4">
-            <h4>Equipped</h4>
+<div class="col-md-4">
+    <h4>Equipped Items</h4>
+
+    <!-- Weapons Section -->
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5>Weapons</h5>
+        </div>
+        <div class="card-body">
             {% for item in file["equipped"] %}
-            <div class="col">
-                <p>Type: {{item.get("type")}}</p>
-                <p>Level: {{item.get("level", "N/A")}}</p>
-                {% if item.get("role") == "armor" %}
-                    <p>Protection: {{item.get("protection")}}</p>
-                    <p>Durability: {{item.get("durability")}}</p>
-                    <p>Efficiency: {{item.get("efficiency")}}%</p>
-                {% else %}
-                    <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
+                {% if item.get("role") != "armor" %}
+                    <div class="equipped-item">
+                        <img src="/img/assets/{{item['type']}}.png" alt="{{item['type']}}" class="menu-icon">
+                        <p><strong>{{item.get("type").capitalize()}}</strong> (Level {{item.get("level", "N/A")}})</p>
+                        <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
+                        <p>{{descriptions.get(item["type"])}}</p>
+                        <a href="/unequip?id={{item['id']}}" class="btn btn-secondary btn-sm">Unequip</a>
+                    </div>
                 {% end %}
-                <p>Placement: {{item.get("role", "N/A")}}</p>
-                <p><img src=/img/assets/{{item["type"]}}.png alt="Item Icon" class="menu-icon"></p>
-                <p>{{descriptions.get(item["type"])}}</p>
-            </div>
             {% end %}
         </div>
+    </div>
 
+    <!-- Armor Section -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Armor</h5>
+        </div>
+        <div class="card-body">
+            {% for slot in ["head", "body", "arms", "legs", "feet"] %}
+                <div class="armor-slot mb-3">
+                    <h6>{{slot.capitalize()}}</h6>
+                    {% set armor_item = next((item for item in file["equipped"] if item.get("role") == "armor" and item.get("slot") == slot), None) %}
+                    {% if armor_item and armor_item.get("type") != "empty" %}
+                        <div class="equipped-item">
+                            <img src="/img/assets/{{armor_item['type']}}.png" alt="{{armor_item['type']}}" class="menu-icon">
+                            <p><strong>{{armor_item.get("type").capitalize()}}</strong> (Level {{armor_item.get("level", "N/A")}})</p>
+                            <p>Protection: {{armor_item.get("protection")}}</p>
+                            <p>Durability: {{armor_item.get("durability")}}/{{armor_item.get("max_durability", 100)}}</p>
+                            <p>Efficiency: {{armor_item.get("efficiency")}}%</p>
+                            <p>{{descriptions.get(armor_item["type"])}}</p>
+                            <a href="/unequip?id={{armor_item['id']}}" class="btn btn-secondary btn-sm">Unequip</a>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Empty slot</p>
+                    {% end %}
+                </div>
+            {% end %}
+        </div>
+    </div>
+</div>
         <!-- Inventory Column -->
         <div class="col-md-4">
             <h4>Inventory</h4>

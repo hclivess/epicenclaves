@@ -1,8 +1,9 @@
 import json
 import sqlite3
 import random
-from weapon_generator import id_generator, generate_armor
+from weapon_generator import id_generator, generate_armor, generate_weapon
 import threading
+
 
 def get_users_at_coords(x_pos, y_pos, user, users_dict, include_construction=True, include_self=True):
     """Returns a list of user data at a specific coordinate"""
@@ -26,11 +27,13 @@ def get_users_at_coords(x_pos, y_pos, user, users_dict, include_construction=Tru
 
 user_lock = threading.Lock()
 
+
 def create_users_db():
     with user_lock:
         conn = sqlite3.connect("db/user_data.db")
         cursor = conn.cursor()
-        cursor.execute("CREATE TABLE IF NOT EXISTS user_data (username TEXT PRIMARY KEY, x_pos INTEGER, y_pos INTEGER, data TEXT)")
+        cursor.execute(
+            "CREATE TABLE IF NOT EXISTS user_data (username TEXT PRIMARY KEY, x_pos INTEGER, y_pos INTEGER, data TEXT)")
         conn.commit()
         conn.close()
 
@@ -67,6 +70,10 @@ def create_user(user_data_dict, user, mapdb, profile_pic=""):
     print(f"Creating {user}")
     x_pos, y_pos = find_open_space(mapdb)
 
+    # Generate initial weak armor for each slot
+    armor_slots = ["head", "body", "arms", "legs", "feet"]
+    initial_armor = [generate_armor(level=1, slot=slot) for slot in armor_slots]
+
     # Prepare the data dictionary
     data = {
         "x_pos": x_pos,
@@ -78,7 +85,7 @@ def create_user(user_data_dict, user, mapdb, profile_pic=""):
         "units": [],
         "research": 0,
         "hp": 100,
-        "armor": 0,
+        "armor": sum(armor["protection"] for armor in initial_armor),  # Total initial armor value
         "action_points": 500,
         "army_deployed": 0,
         "army_free": 0,
@@ -88,29 +95,11 @@ def create_user(user_data_dict, user, mapdb, profile_pic=""):
         "bismuth": 500,
 
         "equipped": [
-            {"id": id_generator(),
-             "type": "axe",
-             "min_damage": 1,
-             "max_damage": 1,
-             "crit_chance": 0,
-             "durability": 100,
-             "accuracy": 100,
-             "range": "melee",
-             "role": "right_hand",
-             "attack_speed": 1},
-            generate_armor(level=1)  # Add initial armor
+            generate_weapon(level=1),  # Generate a level 1 weapon
+            *initial_armor  # Unpack the initial armor into the equipped list
         ],
 
-        "unequipped": [{"id": id_generator(),
-                        "type": "dagger",
-                        "min_damage": 1,
-                        "max_damage": 2,
-                        "crit_chance": 0,
-                        "durability": 100,
-                        "accuracy": 100,
-                        "range": "melee",
-                        "role": "right_hand",
-                        "attack_speed": 1}],
+        "unequipped": [generate_weapon(level=1)],  # Generate another level 1 weapon for the unequipped slot
         "pop_lim": 0,
         "alive": True,
         "online": True,

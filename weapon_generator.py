@@ -57,23 +57,29 @@ def generate_weapon(level=1):
     return weapon_dict
 
 
-def generate_armor(level=1):
-    armor_types = ["helmet", "chestplate", "leggings", "boots"]
-    armor_base_protection = {
-        "helmet": 5,
-        "chestplate": 8,
-        "leggings": 7,
-        "boots": 4
+def generate_armor(level=1, slot=None):
+    armor_types = {
+        "head": {"type": "helmet", "base_protection": 2},
+        "body": {"type": "chestplate", "base_protection": 3},
+        "arms": {"type": "gauntlets", "base_protection": 1},
+        "legs": {"type": "leggings", "base_protection": 2},
+        "feet": {"type": "boots", "base_protection": 1}
     }
 
-    selected_armor = random.choice(armor_types)
-    base_protection = armor_base_protection[selected_armor]
+    if slot not in armor_types:
+        slot = random.choice(list(armor_types.keys()))
+
+    armor_info = armor_types[slot]
+
+    base_protection = armor_info["base_protection"]
     protection = int(base_protection * random.uniform(0.8, 1.2) * level)
 
     armor_dict = {
-        "type": selected_armor,
+        "type": armor_info["type"],
+        "slot": slot,
         "protection": protection,
-        "durability": random.randint(50, 100) * level,
+        "durability": random.randint(30, 50) * level,
+        "max_durability": random.randint(30, 50) * level,
         "efficiency": random.randint(80, 100),
         "role": "armor",
         "id": id_generator(),
