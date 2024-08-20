@@ -1,419 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.8em' font-size='80'>🏰</text></svg>">
-
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
-      <title>Epic Enclaves</title>
-<style>
-    hr {
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        border: 0;
-        border-top: 10px solid rgba(0, 0, 0, 0.1);
-    }
-
-    /* Custom CSS to adjust the layout */
-    body {
-        background-color: #f0f0f0;
-    }
-
-    .container p {
-        margin: 0px; /* Reduce spacing between lines */
-    }
-    .row.mb-3 .col {
-        margin-bottom: 10px;
-    }
-    .system-message {
-        background-color: #cce5ff;
-        padding: 10px;
-        border-radius: 5px;
-        font-weight: bold;
-    }
-
-    .btn-group {
-        margin: 2px;
-    }
-
-.profile-pic {
-    max-width: 50px;
-    max-height: 50px;
-    padding: 4px;
-}
-
-    .btn-up {
-        background-color: #007bff;
-        border-color: #b0b0b0 !important;  /* Light gray border with !important to override other styles */
-        margin: 2px; /* Normal spacing between navigation buttons */
-        max-width: 100px;
-    }
-
-    .btn-up:hover {
-        background-color: #0056b3;
-    }
-
-.profile-container {
-    display: flex;
-    align-items: flex-start; /* Align items to the top */
-    justify-content: flex-start;
-    background-color: #e9ecef; /* Add a light gray background for distinction */
-    padding: 20px;  /* Add some padding to space out the content */
-    border-radius: 10px;  /* Optional: round the corners a bit for aesthetics */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Optional: add a subtle shadow for depth */
-}
-
-
-    .profile-picture {
-        margin-right: 20px; /* Add some space between profile picture and user statistics */
-        margin-top: 20px;
-    }
-</style>
-
-   </head>
-   <body>
-      <div class="container system-message">
-         <p>System message: {{message}}</p>
-      </div>
-      <div class="container">
-         <div class="row">
-            <div class="col-md-6"> <!-- whole profile panel -->
-               <div class="profile-container">
-                  <div class="profile-picture">
-                     <img src="{{file['img']}}" alt="Profile Picture" width="100">
-                  </div>
-                  <div>
-
-<div class="card md-10">
-  <div class="card-header">
-    <h4 class="card-title">Welcome, {{user}}</h4>
-      {% if not file.get("alive", "N/A") and file.get("action_points", "N/A") > 5000 %}
-      <a class="btn btn-light btn-lg btn-block" href="/revive"> 💀 Revive 💀 </a>
-      {% end %}
-  </div>
-  <div class="card-body">
-    <div class="row">
-      <!-- First Column -->
-      <div class="col-md-9">
-        <p class="card-text">Age: {{ file.get("age", "N/A") }}</p>
-        <p class="card-text">Alive: {{ file.get("alive", "N/A") }}</p>
-        <p class="card-text">Experience: {{ file.get("exp", "N/A") }}</p>
-        <p class="card-text">Research Points: {{ file.get("research", "N/A") }}</p>
-        <p class="card-text">Health Points: {{ file.get("hp", "N/A") }}</p>
-        <p class="card-text">Armor: {{ file.get("armor", "N/A") }}</p>
-      </div>
-
-      <!-- Second Column -->
-      <div class="col-md-9">
-        <p class="card-text">Population limit: {{ file.get("pop_lim", "N/A") }}</p>
-        <p class="card-text">Peasants: {{ file.get("peasants", "N/A") }}</p>
-        <p class="card-text">Army: {{ file.get("army_free", "N/A") }} / {{ file.get("army_deployed", "N/A") }}</p>
-        <p class="card-text">Action points: {{ file.get("action_points", "N/A") }}</p>
-        <p class="card-text">Position: ({{ file.get("x_pos", "N/A") }}, {{ file.get("y_pos", "N/A") }})</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-                  </div>
-               </div>
-            </div>
-            <!-- Navigation menu placed next to the compact-stats -->
-    <div class="col-md-5 navigation-menu">
-
-<div class="container mt-4">
-
-    <!-- First Row for Navigation Buttons -->
-    <div class="row justify-content-center">
-        <div class="btn-group" role="group">
-            <a id="btnUp" class="btn btn-lg active btn-up" href="/move?direction=up" role="button">Up<br>🔼</a>
-            <a id="btnLeft" class="btn btn-lg active btn-up" href="/move?direction=left" role="button">Left<br>◀️</a>
-            <a id="btnDown" class="btn btn-lg active btn-up" href="/move?direction=down" role="button">Down<br>🔽</a>
-            <a id="btnRight" class="btn btn-lg active btn-up" href="/move?direction=right" role="button">Right<br>▶️</a>
-        </div>
-    </div>
-
-    <!-- Second Row for Other Actions -->
-    <div class="row justify-content-center mt-1">
-        <div class="btn-group" role="group">
-            <a class="btn btn-lg active btn-up" href="/map" role="button">Map<br>🗺️</a>
-            <a class="btn btn-lg active btn-up" href="/" role="button">Refresh<br>🔄</a>
-            <a class="btn btn-lg active btn-up" href="/scoreboard" role="button">Scores<br>🏆</a>
-            <a class="btn btn-lg active btn-up" href="/logout" role="button">Logout<br>🌙</a>
-        </div>
-    </div>
-
-</div>
-
-                <div class="card mt-3">
-
-
-    <div class="card-header">
-      <h4 class="card-title">Available Resources</h4>
-    </div>
-    <div class="card-body">
-      <p class="card-text">🪵Wood: {{file.get("wood", "N/A")}}</p>
-      <p class="card-text">🥩Food: {{file.get("food", "N/A")}}</p>
-      <p class="card-text">🪨Bismuth: {{file.get("bismuth", "N/A")}}</p>
-      <p class="card-text">🧪Research: {{file.get("research", "N/A")}}</p>
-    </div>
-  </div>
-
-            </div>
-         </div>
-
-<!-- Current Tile and Inventory -->
-<div class="container">
-    <div class="row">
-        <!-- Current Tile -->
-        <div class="col-md-4">
-            <h4>Current Tile</h4>
-            {% for entry in on_tile_map %}
-            <div class="row">
-                <div class="col-md-6 pr-md-1">
-                    <p>Type: {{ list(entry.values())[0].get("type") }}</p>
-                    <p><img src=/img/assets/{{list(entry.values())[0].get("type")}}.png alt="Icon" class="menu-icon"></p>
-                    <p>Control: {{ list(entry.values())[0].get("control") }}</p>
-                    <p>Army: {{ list(entry.values())[0].get("army") }}</p>
-                    <p>Level: {{ list(entry.values())[0].get("level") }}</p>
-                </div>
-                <div class="col-md-6 pl-md-1">
-                    <p style="text-align: left;">Actions:</p>
-                    {% for action in actions.get(entry) %}
-                    <div class="p-1">
-                        <a id="btnAct2" class="btn btn-light btn-lg" href="{{ action['action'] }}" role="button">{{ action['name'] }}</a>
-                    </div>
-                    {% end %}
-                </div>
-            </div>
-            {% end %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epic Enclaves - User Panel</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f0f0; }
+        .card { margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .card-header { background-color: #007bff; color: white; }
+        .menu-icon, .profile-pic { width: 100px; height: 100px; object-fit: contain; }
+        .item-card { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+        .item-card img { float: left; margin-right: 10px; }
+        .item-card p { margin-bottom: 5px; }
+        .btn-group-vertical { width: 100%; }
+        .btn-group-vertical .btn { margin-bottom: 5px; }
+        .navigation-submenu { background-color: #f8f9fa; padding: 10px 0; margin-bottom: 20px; }
+        .navigation-submenu .btn { margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="system-message alert alert-info">
+            System message: {{message}}
         </div>
 
-        <!-- Equipped Column -->
-<div class="col-md-4">
-    <h4>Equipped Items</h4>
-
-    <!-- Weapons Section -->
-    <div class="card mb-3">
-        <div class="card-header">
-            <h5>Weapons</h5>
+        <!-- Navigation Submenu -->
+        <div class="navigation-submenu text-center">
+            <a href="/move?direction=up" class="btn btn-primary">🔼 Up</a>
+            <a href="/move?direction=down" class="btn btn-primary">🔽 Down</a>
+            <a href="/move?direction=left" class="btn btn-primary">◀️ Left</a>
+            <a href="/move?direction=right" class="btn btn-primary">▶️ Right</a>
+            <a href="/map" class="btn btn-secondary">🗺️ Map</a>
+            <a href="/" class="btn btn-secondary">🔄 Refresh</a>
+            <a href="/scoreboard" class="btn btn-secondary">🏆 Scores</a>
+            <a href="/logout" class="btn btn-danger">🌙 Logout</a>
         </div>
-        <div class="card-body">
-            {% for item in file["equipped"] %}
-                {% if item.get("role") != "armor" %}
-                    <div class="equipped-item">
-                        <img src="/img/assets/{{item['type']}}.png" alt="{{item['type']}}" class="menu-icon">
-                        <p><strong>{{item.get("type").capitalize()}}</strong> (Level {{item.get("level", "N/A")}})</p>
-                        <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
-                        <p>{{descriptions.get(item["type"])}}</p>
-                        <a href="/unequip?id={{item['id']}}" class="btn btn-secondary btn-sm">Unequip</a>
-                    </div>
-                {% end %}
-            {% end %}
-        </div>
-    </div>
 
-    <!-- Armor Section -->
-    <div class="card">
-        <div class="card-header">
-            <h5>Armor</h5>
-        </div>
-        <div class="card-body">
-            {% for slot in ["head", "body", "arms", "legs", "feet"] %}
-                <div class="armor-slot mb-3">
-                    <h6>{{slot.capitalize()}}</h6>
-                    {% set armor_item = next((item for item in file["equipped"] if item.get("role") == "armor" and item.get("slot") == slot), None) %}
-                    {% if armor_item and armor_item.get("type") != "empty" %}
-                        <div class="equipped-item">
-                            <img src="/img/assets/{{armor_item['type']}}.png" alt="{{armor_item['type']}}" class="menu-icon">
-                            <p><strong>{{armor_item.get("type").capitalize()}}</strong> (Level {{armor_item.get("level", "N/A")}})</p>
-                            <p>Protection: {{armor_item.get("protection")}}</p>
-                            <p>Durability: {{armor_item.get("durability")}}/{{armor_item.get("max_durability", 100)}}</p>
-                            <p>Efficiency: {{armor_item.get("efficiency")}}%</p>
-                            <p>{{descriptions.get(armor_item["type"])}}</p>
-                            <a href="/unequip?id={{armor_item['id']}}" class="btn btn-secondary btn-sm">Unequip</a>
-                        </div>
-                    {% else %}
-                        <p class="text-muted">Empty slot</p>
-                    {% end %}
-                </div>
-            {% end %}
-        </div>
-    </div>
-</div>
-        <!-- Inventory Column -->
-        <div class="col-md-4">
-            <h4>Inventory</h4>
-            {% for item in file["unequipped"] %}
-            <div class="col">
-                <p>Type: {{item.get("type")}}</p>
-                <p>Level: {{item.get("level", "N/A")}}</p>
-                {% if item.get("role") == "armor" %}
-                    <p>Protection: {{item.get("protection")}}</p>
-                    <p>Durability: {{item.get("durability")}}</p>
-                    <p>Efficiency: {{item.get("efficiency")}}%</p>
-                {% else %}
-                    <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
-                {% end %}
-                <p>Placement: {{item.get("role", "N/A")}}</p>
-                <p><img src=/img/assets/{{item["type"]}}.png alt="Item Icon" class="menu-icon"></p>
-                <p>{{descriptions.get(item["type"])}}</p>
-                <a class="btn btn-light btn-lg btn-block" href='/equip?id={{item["id"]}}'>equip {{item["type"]}}</a>
-                <a class="btn btn-light btn-lg btn-block" href='/trash?id={{item["id"]}}'>trash {{item["type"]}}</a>
-            </div>
-            {% end %}
-        </div>
-    </div>
-</div>
-
-
-
-
-
-      <div class="container">
-            <hr/>
-
-          <!-- acquired column -->
-<div class="col-md-6">
-    <h4>Acquired Tiles</h4>
-    <div class="row">  <!-- Add a row div to contain the columns -->
-        {% for coord, building in file["construction"].items() %}
-        <div class="col-md-4"> <!-- Set this to col-md-4 to make 3 columns -->
-
-            <p>Type: {{ building.get("type") }}</p>
-            <p><img src="/img/assets/{{building.get('type')}}.png" alt="Item Icon" class="menu-icon"></p>
-            <p>Position: ({{ coord }})</p>
-            <p>Army: {{ building.get("army") }}</p>
-            <p>Level: {{ building.get("level") }}</p>
-        </div>
-        {% end %}
-    </div> <!-- Close the row div -->
-</div>
-
-<hr/>
-<div class="row mb-3 align-items-start">
-    <!-- Construction menu column -->
-    <div class="col-md-12">
-        <h4>Construction Menu</h4>
         <div class="row">
-            <!-- First Row -->
             <div class="col-md-4">
-                <a class="btn btn-light btn-lg btn-block" href="/build?entity=house&name=town1">
-                    <img src="/img/assets/house.png" alt="House Icon" class="menu-icon"> House
-                </a>
-                <p>{{descriptions.get("house")}}</p>
-            </div>
-            <div class="col-md-4">
-                <a class="btn btn-light btn-lg btn-block" href="/build?entity=mine&name=town1">
-                    <img src="/img/assets/mine.png" alt="Mine Icon" class="menu-icon"> Mine
-                </a>
-                <p>{{descriptions.get("mine")}}</p>
-            </div>
-            <div class="col-md-4">
-                <a class="btn btn-light btn-lg btn-block" href="/build?entity=farm&name=town1">
-                    <img src="/img/assets/farm.png" alt="Farm Icon" class="menu-icon"> Farm
-                </a>
-                <p>{{descriptions.get("farm")}}</p>
-            </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Welcome, {{user}}</h4>
+                    </div>
+                    <div class="card-body">
+                        <img src="{{file['img']}}" alt="Profile Picture" class="profile-pic mb-3">
+                        <p>Age: {{ file.get("age", "N/A") }}</p>
+                        <p>Alive: {{ file.get("alive", "N/A") }}</p>
+                        <p>Experience: {{ file.get("exp", "N/A") }}</p>
+                        <p>Research Points: {{ file.get("research", "N/A") }}</p>
+                        <p>Health Points: {{ file.get("hp", "N/A") }}</p>
+                        <p>Armor: {{ file.get("armor", "N/A") }}</p>
+                        <p>Population limit: {{ file.get("pop_lim", "N/A") }}</p>
+                        <p>Peasants: {{ file.get("peasants", "N/A") }}</p>
+                        <p>Army: {{ file.get("army_free", "N/A") }} / {{ file.get("army_deployed", "N/A") }}</p>
+                        <p>Action points: {{ file.get("action_points", "N/A") }}</p>
+                        <p>Position: ({{ file.get("x_pos", "N/A") }}, {{ file.get("y_pos", "N/A") }})</p>
 
-            <!-- Second Row -->
-            <div class="col-md-4">
-                <a class="btn btn-light btn-lg btn-block" href="/build?entity=barracks&name=town1">
-                    <img src="/img/assets/barracks.png" alt="Barracks Icon" class="menu-icon"> Barracks
-                </a>
-                <p>{{descriptions.get("barracks")}}</p>
-            </div>
-            <div class="col-md-4">
-                <a class="btn btn-light btn-lg btn-block" href="/build?entity=sawmill&name=wc1">
-                    <img src="/img/assets/sawmill.png" alt="Sawmill Icon" class="menu-icon"> Sawmill
-                </a>
-                <p>{{descriptions.get("sawmill")}}</p>
-            </div>
-            <div class="col-md-4">
-                <a class="btn btn-light btn-lg btn-block" href="/build?entity=inn&name=wc1">
-                    <img src="/img/assets/inn.png" alt="Inn Icon" class="menu-icon"> Inn
-                </a>
-                <p>{{descriptions.get("inn")}}</p>
-            </div>
-
-            <!-- Third Row -->
-            <div class="col-md-4">
-                <a class="btn btn-light btn-lg btn-block" href="/build?entity=archery_range&name=wc1">
-                    <img src="/img/assets/archery_range.png" alt="Archery Range Icon" class="menu-icon"> Archery Range
-                </a>
-                <p>{{descriptions.get("archery_range")}}</p>
-            </div>
-
-            <div class="col-md-4">
-                <a class="btn btn-light btn-lg btn-block" href="/build?entity=laboratory&name=wc1">
-                    <img src="/img/assets/laboratory.png" alt="Laboratory Icon" class="menu-icon"> Laboratory
-                </a>
-                <p>{{descriptions.get("laboratory")}}</p>
-            </div>
-            <!-- Add more construction options in similar format as needed -->
-        </div>
-    </div>
-</div>
-
-
-
-    <!-- Displaying users on the tile -->
-    {% for entry in on_tile_users %}
-    <div class="row"> <!-- Create a new row for each entry -->
-        <div class="col-md-6 pr-md-1">
-            <p>Name: {{ list(entry.keys())[0] }}</p>
-            <p>Type: {{ list(entry.values())[0].get("type") }}</p>
-            <p>HP: {{ list(entry.values())[0].get("hp") }}</p>
-            <p><img src="{{list(entry.values())[0].get('img')}}" alt="Profile Picture" class="profile-pic"></p>
-        </div>
-        <div class="col-md-6 pl-md-1">
-            <p style="text-align: left;">Actions:</p>
-            {% for action in actions.get(entry) %}
-                <div class="p-1">
-                    <a id="btnAct" class="btn btn-light btn-lg" href="{{ action['action'] }}" role="button">{{ action['name'] }}</a>
+                        {% if not file.get("alive", "N/A") and file.get("action_points", "N/A") > 5000 %}
+                            <a href="/revive" class="btn btn-danger btn-block">💀 Revive 💀</a>
+                        {% end %}
+                    </div>
                 </div>
-            {% end %}
+
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Available Resources</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>🪵 Wood: {{file.get("wood", "N/A")}}</p>
+                        <p>🥩 Food: {{file.get("food", "N/A")}}</p>
+                        <p>🪨 Bismuth: {{file.get("bismuth", "N/A")}}</p>
+                        <p>🧪 Research: {{file.get("research", "N/A")}}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Current Tile</h4>
+                    </div>
+                    <div class="card-body">
+                        {% for entry in on_tile_map %}
+                            <div class="item-card">
+                                <img src="/img/assets/{{list(entry.values())[0].get('type')}}.png" alt="Icon" class="menu-icon">
+                                <p><strong>Type:</strong> {{ list(entry.values())[0].get("type") }}</p>
+                                <p><strong>Control:</strong> {{ list(entry.values())[0].get("control") }}</p>
+                                <p><strong>Army:</strong> {{ list(entry.values())[0].get("army") }}</p>
+                                <p><strong>Level:</strong> {{ list(entry.values())[0].get("level") }}</p>
+                                <div class="btn-group-vertical">
+                                    {% for action in actions.get(entry) %}
+                                        <a href="{{ action['action'] }}" class="btn btn-secondary">{{ action['name'] }}</a>
+                                    {% end %}
+                                </div>
+                            </div>
+                        {% end %}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Equipped Items</h4>
+                    </div>
+                    <div class="card-body">
+                        {% for item in file["equipped"] %}
+                            <div class="item-card">
+                                <img src="/img/assets/{{item['type']}}.png" alt="Item Icon" class="menu-icon">
+                                <p><strong>Type:</strong> {{item.get("type")}}</p>
+                                <p><strong>Level:</strong> {{item.get("level", "N/A")}}</p>
+                                {% if item.get("role") == "armor" %}
+                                    <p><strong>Protection:</strong> {{item.get("protection")}}</p>
+                                    <p><strong>Durability:</strong> {{item.get("durability")}}</p>
+                                    <p><strong>Efficiency:</strong> {{item.get("efficiency")}}%</p>
+                                {% else %}
+                                    <p><strong>Damage:</strong> {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
+                                {% end %}
+                                <p><strong>Placement:</strong> {{item.get("role", "N/A")}}</p>
+                                <p>{{descriptions.get(item["type"])}}</p>
+                                {% if item.get('id') %}
+                                    <a href="/unequip?id={{item['id']}}" class="btn btn-warning btn-sm">Unequip</a>
+                                {% end %}
+                            </div>
+                        {% end %}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Inventory</h4>
+                    </div>
+                    <div class="card-body">
+                        {% for item in file["unequipped"] %}
+                            <div class="item-card">
+                                <img src="/img/assets/{{item['type']}}.png" alt="Item Icon" class="menu-icon">
+                                <p><strong>Type:</strong> {{item.get("type")}}</p>
+                                <p><strong>Level:</strong> {{item.get("level", "N/A")}}</p>
+                                {% if item.get("role") == "armor" %}
+                                    <p><strong>Protection:</strong> {{item.get("protection")}}</p>
+                                    <p><strong>Durability:</strong> {{item.get("durability")}}</p>
+                                    <p><strong>Efficiency:</strong> {{item.get("efficiency")}}%</p>
+                                {% else %}
+                                    <p><strong>Damage:</strong> {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
+                                {% end %}
+                                <p><strong>Placement:</strong> {{item.get("role", "N/A")}}</p>
+                                <p>{{descriptions.get(item["type"])}}</p>
+                                {% if item.get('id') %}
+                                    <a href="/equip?id={{item['id']}}" class="btn btn-primary btn-sm">Equip</a>
+                                    <a href="/trash?id={{item['id']}}" class="btn btn-danger btn-sm">Trash</a>
+                                {% end %}
+                            </div>
+                        {% end %}
+                    </div>
+                </div>
+            </div>
         </div>
-    </div> <!-- Close the row for each entry -->
-    {% end %}
-</div>
 
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Acquired Tiles</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for coord, building in file["construction"].items() %}
+                                <div class="col-md-3 mb-3">
+                                    <div class="item-card">
+                                        <img src="/img/assets/{{building.get('type')}}.png" alt="Building Icon" class="menu-icon">
+                                        <p><strong>Type:</strong> {{ building.get("type") }}</p>
+                                        <p><strong>Position:</strong> ({{ coord }})</p>
+                                        <p><strong>Army:</strong> {{ building.get("army") }}</p>
+                                        <p><strong>Level:</strong> {{ building.get("level") }}</p>
+                                    </div>
+                                </div>
+                            {% end %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Construction Menu</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for building in ["house", "mine", "farm", "barracks", "sawmill", "inn", "archery_range", "laboratory"] %}
+                                <div class="col-md-3 mb-3">
+                                    <div class="item-card">
+                                        <img src="/img/assets/{{building}}.png" alt="{{building}} Icon" class="menu-icon">
+                                        <h5>{{building.capitalize()}}</h5>
+                                        <p>{{descriptions.get(building)}}</p>
+                                        <a href="/build?entity={{building}}&name=town1" class="btn btn-success btn-sm">Build</a>
+                                    </div>
+                                </div>
+                            {% end %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-         </div>
+        {% for entry in on_tile_users %}
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0">Other Users on Tile</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="item-card">
+                                <img src="{{list(entry.values())[0].get('img')}}" alt="Profile Picture" class="menu-icon">
+                                <p><strong>Name:</strong> {{ list(entry.keys())[0] }}</p>
+                                <p><strong>Type:</strong> {{ list(entry.values())[0].get("type") }}</p>
+                                <p><strong>HP:</strong> {{ list(entry.values())[0].get("hp") }}</p>
+                                <div class="btn-group-vertical">
+                                    {% for action in actions.get(entry) %}
+                                        <a href="{{ action['action'] }}" class="btn btn-secondary">{{ action['name'] }}</a>
+                                    {% end %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% end %}
+    </div>
 
-
-      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.min.js"></script>
-      <script>
-         document.addEventListener("keydown", function(event) {
-             var direction = null;
-             switch (event.key) {
-                 case "ArrowLeft":
-                     direction = "left";
-                     break;
-                 case "ArrowRight":
-                     direction = "right";
-                     break;
-                 case "ArrowUp":
-                     direction = "up";
-                     break;
-                 case "ArrowDown":
-                     direction = "down";
-                     break;
-             }
-
-             if (direction) {
-                 // Simulate the click on the corresponding button
-                 var button = document.getElementById('btn' + direction.charAt(0).toUpperCase() + direction.slice(1));
-                 if (button) {
-                     button.click();
-                 }
-             }
-         });
-      </script>
-   </body>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
 </html>

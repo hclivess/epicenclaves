@@ -18,6 +18,15 @@ def unequip_item(usersdb, username, item_id):
 
     # If it's an armor item, update the player's total armor value
     if item_to_unequip.get('role') == 'armor':
-        player['armor'] -= item_to_unequip.get('protection', 0)
+        player['armor'] = max(0, player['armor'] - item_to_unequip.get('protection', 0))
+
+        # Replace with an empty slot
+        empty_slot = {
+            "type": "empty",
+            "slot": item_to_unequip['slot'],
+            "role": "armor",
+            "protection": 0
+        }
+        player['equipped'].append(empty_slot)
 
     return f"Unequipped item with ID: {item_id}, Type: {item_to_unequip['type']}"

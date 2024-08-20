@@ -1,3 +1,6 @@
+from weapon_generator import id_generator
+
+
 def equip_item(usersdb, username, item_id):
     player = usersdb[username]
 
@@ -16,28 +19,47 @@ def equip_item(usersdb, username, item_id):
     if item_to_equip.get('role') == 'armor':
         slot = item_to_equip['slot']
         # Find the currently equipped item in this slot
-        for i, equipped_item in enumerate(player['equipped']):
-            if equipped_item['role'] == 'armor' and equipped_item['slot'] == slot:
-                # If the slot is not empty, move the current item to unequipped
-                if equipped_item['type'] != 'empty':
-                    player['unequipped'].append(equipped_item)
-                # Replace the item in the equipped list
-                player['equipped'][i] = item_to_equip
-                player['unequipped'].remove(item_to_equip)
-                return f"Equipped {item_to_equip['type']} in {slot} slot."
-    else:
-        # For non-armor items, use the existing logic
         item_to_unequip = None
-        for equipped_item in player['equipped']:
-            if equipped_item['role'] == item_to_equip['role']:
+        for i, equipped_item in enumerate(player['equipped']):
+            if equipped_item.get('role') == 'armor' and equipped_item.get('slot') == slot:
                 item_to_unequip = equipped_item
+                player['equipped'][i] = item_to_equip
                 break
 
-        if item_to_unequip is not None:
-            player['equipped'].remove(item_to_unequip)
+        if item_to_unequip:
+            if item_to_unequip.get('type') != 'empty':
+                player['unequipped'].append(item_to_unequip)
+            player['armor'] -= item_to_unequip.get('protection', 0)
+
+        player['unequipped'].remove(item_to_equip)
+        player['armor'] += item_to_equip.get('protection', 0)
+    else:
+        # For non-armor items (weapons), use the existing logic
+        item_to_unequip = None
+        for i, equipped_item in enumerate(player['equipped']):
+            if equipped_item.get('role') == item_to_equip.get('role'):
+                item_to_unequip = equipped_item
+                player['equipped'][i] = item_to_equip
+                break
+
+        if item_to_unequip:
             player['unequipped'].append(item_to_unequip)
 
-        player['equipped'].append(item_to_equip)
         player['unequipped'].remove(item_to_equip)
 
     return f"Equipped item with ID: {item_id}, Type: {item_to_equip['type']}"
+
+
+def create_empty_slot(slot):
+    return {
+        "id": id_generator(),
+        "type": "empty",
+        "slot": slot,
+        "role": "armor",
+        "protection": 0
+    }
+
+
+# Initialize empty slots for a new user
+def initialize_empty_slots():
+    return [create_empty_slot(slot) for slot in ["head", "body", "arms", "legs", "feet"]]

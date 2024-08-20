@@ -71,8 +71,10 @@ def create_user(user_data_dict, user, mapdb, profile_pic=""):
     x_pos, y_pos = find_open_space(mapdb)
 
     # Generate initial weak armor for each slot
-    armor_slots = ["head", "body", "arms", "legs", "feet"]
-    initial_armor = [generate_armor(level=1, slot=slot) for slot in armor_slots]
+    initial_armor = [generate_armor(level=1, slot=slot) for slot in ["head", "body", "arms", "legs", "feet"]]
+
+    # Generate an axe as the starting weapon
+    starting_axe = generate_weapon(level=1, weapon_type="axe")
 
     # Prepare the data dictionary
     data = {
@@ -95,7 +97,7 @@ def create_user(user_data_dict, user, mapdb, profile_pic=""):
         "bismuth": 500,
 
         "equipped": [
-            generate_weapon(level=1),  # Generate a level 1 weapon
+            starting_axe,  # Start with an axe equipped
             *initial_armor  # Unpack the initial armor into the equipped list
         ],
 
@@ -104,6 +106,12 @@ def create_user(user_data_dict, user, mapdb, profile_pic=""):
         "alive": True,
         "online": True,
     }
+
+    # Ensure all equipped slots have an item (even if it's an empty slot)
+    armor_slots = ["head", "body", "arms", "legs", "feet"]
+    for slot in armor_slots:
+        if not any(item.get('slot') == slot for item in data['equipped'] if item.get('role') == 'armor'):
+            data['equipped'].append(create_empty_slot(slot))
 
     # Insert or update user data in the passed dictionary
     user_data_dict[user] = data

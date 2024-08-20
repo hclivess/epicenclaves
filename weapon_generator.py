@@ -7,7 +7,7 @@ def id_generator(length=10):
     return ''.join(random.choice(characters) for _ in range(length))
 
 
-def generate_weapon(level=1):
+def generate_weapon(level=1, weapon_type=None):
     weapon_types = ["sword", "axe", "bow", "spear", "dagger", "mace"]
     weapon_damage = {
         "sword": (7, 12),
@@ -27,7 +27,11 @@ def generate_weapon(level=1):
         "mace": "melee"
     }
 
-    selected_weapon = random.choice(weapon_types)
+    if weapon_type and weapon_type in weapon_types:
+        selected_weapon = weapon_type
+    else:
+        selected_weapon = random.choice(weapon_types)
+
     base_min_damage, base_max_damage = weapon_damage[selected_weapon]
     min_damage = int(base_min_damage * random.uniform(0.8, 1.2) * level)
     max_damage = int(base_max_damage * random.uniform(0.8, 1.2) * level)
