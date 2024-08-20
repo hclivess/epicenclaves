@@ -11,8 +11,17 @@
         .card { margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         .card-header { background-color: #007bff; color: white; }
         .menu-icon, .profile-pic { width: 100px; height: 100px; object-fit: contain; }
-        .item-card { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px; height: 100%; }
-        .item-card img { margin-right: 10px; align-self: flex-start; }
+        .item-card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            height: 100%;
+            display: flex;
+            align-items: flex-start;
+        }
+        .item-card img { margin-right: 10px; }
+        .item-details { flex-grow: 1; }
         .item-card p { margin-bottom: 5px; font-size: 0.9rem; }
         .btn-group-vertical { width: 100%; }
         .btn-group-vertical .btn { margin-bottom: 5px; }
@@ -20,7 +29,7 @@
         .navigation-submenu .btn { margin-right: 10px; }
         .tile-actions { display: flex; flex-wrap: wrap; gap: 5px; }
         .tile-actions .btn { font-size: 0.8rem; padding: 0.2rem 0.5rem; }
-        .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+        .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
     </style>
 </head>
 <body>
@@ -88,7 +97,7 @@
                         {% for entry in on_tile_map %}
                             <div class="item-card">
                                 <img src="/img/assets/{{list(entry.values())[0].get('type')}}.png" alt="Icon" class="menu-icon">
-                                <div>
+                                <div class="item-details">
                                     <p><strong>Type:</strong> {{ list(entry.values())[0].get("type") }}</p>
                                     <p><strong>Control:</strong> {{ list(entry.values())[0].get("control") }}</p>
                                     <p><strong>Army:</strong> {{ list(entry.values())[0].get("army") }}</p>
@@ -113,18 +122,21 @@
                             {% for item in file["equipped"] %}
                                 <div class="item-card">
                                     <img src="/img/assets/{{item['type']}}.png" alt="Item Icon" class="menu-icon">
-                                    <p><strong>{{item.get("type")}}</strong> (Lvl {{item.get("level", "N/A")}})</p>
-                                    {% if item.get("role") == "armor" %}
-                                        <p>Protection: {{item.get("protection")}}</p>
-                                        <p>Durability: {{item.get("durability")}}</p>
-                                        <p>Slot: {{item.get("slot", "N/A")}}</p>
-                                    {% else %}
-                                        <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
-                                        <p>Role: {{item.get("role", "N/A")}}</p>
-                                    {% end %}
-                                    {% if item.get('id') %}
-                                        <a href="/unequip?id={{item['id']}}" class="btn btn-warning btn-sm">Unequip</a>
-                                    {% end %}
+                                    <div class="item-details">
+                                        <p><strong>{{item.get("type")}}</strong> (Lvl {{item.get("level", "N/A")}})</p>
+                                        {% if item.get("role") == "armor" %}
+                                            <p>Protection: {{item.get("protection")}}</p>
+                                            <p>Durability: {{item.get("durability")}}</p>
+                                            <p>Slot: {{item.get("slot", "N/A")}}</p>
+                                        {% else %}
+                                            <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
+                                            <p>Role: {{item.get("role", "N/A")}}</p>
+                                        {% end %}
+                                        <p>{{descriptions.get(item["type"])}}</p>
+                                        {% if item.get('id') %}
+                                            <a href="/unequip?id={{item['id']}}" class="btn btn-warning btn-sm">Unequip</a>
+                                        {% end %}
+                                    </div>
                                 </div>
                             {% end %}
                         </div>
@@ -140,19 +152,22 @@
                             {% for item in file["unequipped"] %}
                                 <div class="item-card">
                                     <img src="/img/assets/{{item['type']}}.png" alt="Item Icon" class="menu-icon">
-                                    <p><strong>{{item.get("type")}}</strong> (Lvl {{item.get("level", "N/A")}})</p>
-                                    {% if item.get("role") == "armor" %}
-                                        <p>Protection: {{item.get("protection")}}</p>
-                                        <p>Durability: {{item.get("durability")}}</p>
-                                        <p>Slot: {{item.get("slot", "N/A")}}</p>
-                                    {% else %}
-                                        <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
-                                        <p>Role: {{item.get("role", "N/A")}}</p>
-                                    {% end %}
-                                    {% if item.get('id') %}
-                                        <a href="/equip?id={{item['id']}}" class="btn btn-primary btn-sm">Equip</a>
-                                        <a href="/trash?id={{item['id']}}" class="btn btn-danger btn-sm">Trash</a>
-                                    {% end %}
+                                    <div class="item-details">
+                                        <p><strong>{{item.get("type")}}</strong> (Lvl {{item.get("level", "N/A")}})</p>
+                                        {% if item.get("role") == "armor" %}
+                                            <p>Protection: {{item.get("protection")}}</p>
+                                            <p>Durability: {{item.get("durability")}}</p>
+                                            <p>Slot: {{item.get("slot", "N/A")}}</p>
+                                        {% else %}
+                                            <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
+                                            <p>Role: {{item.get("role", "N/A")}}</p>
+                                        {% end %}
+                                        <p>{{descriptions.get(item["type"])}}</p>
+                                        {% if item.get('id') %}
+                                            <a href="/equip?id={{item['id']}}" class="btn btn-primary btn-sm">Equip</a>
+                                            <a href="/trash?id={{item['id']}}" class="btn btn-danger btn-sm">Trash</a>
+                                        {% end %}
+                                    </div>
                                 </div>
                             {% end %}
                         </div>
@@ -172,10 +187,12 @@
                             {% for coord, building in file["construction"].items() %}
                                 <div class="item-card">
                                     <img src="/img/assets/{{building.get('type')}}.png" alt="Building Icon" class="menu-icon">
-                                    <p><strong>Type:</strong> {{ building.get("type") }}</p>
-                                    <p><strong>Position:</strong> ({{ coord }})</p>
-                                    <p><strong>Army:</strong> {{ building.get("army") }}</p>
-                                    <p><strong>Level:</strong> {{ building.get("level") }}</p>
+                                    <div class="item-details">
+                                        <p><strong>Type:</strong> {{ building.get("type") }}</p>
+                                        <p><strong>Position:</strong> ({{ coord }})</p>
+                                        <p><strong>Army:</strong> {{ building.get("army") }}</p>
+                                        <p><strong>Level:</strong> {{ building.get("level") }}</p>
+                                    </div>
                                 </div>
                             {% end %}
                         </div>
@@ -195,9 +212,11 @@
                             {% for building in ["house", "mine", "farm", "barracks", "sawmill", "inn", "archery_range", "laboratory"] %}
                                 <div class="item-card">
                                     <img src="/img/assets/{{building}}.png" alt="{{building}} Icon" class="menu-icon">
-                                    <h5>{{building.capitalize()}}</h5>
-                                    <p>{{descriptions.get(building)}}</p>
-                                    <a href="/build?entity={{building}}&name=town1" class="btn btn-success btn-sm">Build</a>
+                                    <div class="item-details">
+                                        <h5>{{building.capitalize()}}</h5>
+                                        <p>{{descriptions.get(building)}}</p>
+                                        <a href="/build?entity={{building}}&name=town1" class="btn btn-success btn-sm">Build</a>
+                                    </div>
                                 </div>
                             {% end %}
                         </div>
@@ -216,13 +235,15 @@
                         <div class="card-body">
                             <div class="item-card">
                                 <img src="{{list(entry.values())[0].get('img')}}" alt="Profile Picture" class="menu-icon">
-                                <p><strong>Name:</strong> {{ list(entry.keys())[0] }}</p>
-                                <p><strong>Type:</strong> {{ list(entry.values())[0].get("type") }}</p>
-                                <p><strong>HP:</strong> {{ list(entry.values())[0].get("hp") }}</p>
-                                <div class="tile-actions">
-                                    {% for action in actions.get(entry) %}
-                                        <a href="{{ action['action'] }}" class="btn btn-secondary btn-sm">{{ action['name'] }}</a>
-                                    {% end %}
+                                <div class="item-details">
+                                    <p><strong>Name:</strong> {{ list(entry.keys())[0] }}</p>
+                                    <p><strong>Type:</strong> {{ list(entry.values())[0].get("type") }}</p>
+                                    <p><strong>HP:</strong> {{ list(entry.values())[0].get("hp") }}</p>
+                                    <div class="tile-actions">
+                                        {% for action in actions.get(entry) %}
+                                            <a href="{{ action['action'] }}" class="btn btn-secondary btn-sm">{{ action['name'] }}</a>
+                                        {% end %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
