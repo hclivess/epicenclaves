@@ -25,7 +25,7 @@ class TileActions:
         elif type == "archery_range":
             actions = [
                 {"name": "train 1 archer", "action": "/train?type=archer&amount=1"},
-                {"name": "train 10 archers", "action": "/train?type=archer&amount=1"},
+                {"name": "train 10 archers", "action": "/train?type=archer&amount=10"},
                 {"name": "conquer", "action": f"/conquer?target={type}"},
             ]
         elif type == "mountain":
