@@ -1,9 +1,11 @@
 import random
 import string
 
+
 def id_generator(length=10):
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for _ in range(length))
+
 
 def generate_weapon(level=1):
     weapon_types = ["sword", "axe", "bow", "spear", "dagger", "mace"]
@@ -54,6 +56,36 @@ def generate_weapon(level=1):
 
     return weapon_dict
 
+
+def generate_armor(level=1):
+    armor_types = ["helmet", "chestplate", "leggings", "boots"]
+    armor_base_protection = {
+        "helmet": 5,
+        "chestplate": 8,
+        "leggings": 7,
+        "boots": 4
+    }
+
+    selected_armor = random.choice(armor_types)
+    base_protection = armor_base_protection[selected_armor]
+    protection = int(base_protection * random.uniform(0.8, 1.2) * level)
+
+    armor_dict = {
+        "type": selected_armor,
+        "protection": protection,
+        "durability": random.randint(50, 100) * level,
+        "efficiency": random.randint(80, 100),
+        "role": "armor",
+        "id": id_generator(),
+        "level": level
+    }
+
+    return armor_dict
+
+
 if __name__ == "__main__":
     weapon_json = generate_weapon(level=2)
-    print(weapon_json)
+    print("Generated weapon:", weapon_json)
+
+    armor_json = generate_armor(level=2)
+    print("Generated armor:", armor_json)

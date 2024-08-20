@@ -11,6 +11,14 @@ class Descriptions:
             "archery_range": "Allows you to train army into archers. Cost: 🪵50",
             "laboratory": "Turns peasants into researchers to generate research points. Cost: 🪵50",
             "dagger": "Dagger is a weapon used in combat.",
+            "sword": "A versatile melee weapon with balanced damage.",
+            "bow": "A ranged weapon that allows attacking from a distance.",
+            "spear": "A long melee weapon with good reach.",
+            "mace": "A heavy melee weapon that deals high damage.",
+            "helmet": "Protects your head from damage.",
+            "chestplate": "Provides protection for your torso.",
+            "leggings": "Armor for your legs, offering additional protection.",
+            "boots": "Protects your feet and provides better mobility.",
         }
 
     def get(self, type):

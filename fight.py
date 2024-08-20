@@ -2,7 +2,7 @@ import math
 from backend import update_user_data, get_values
 from map import remove_from_map, get_coords
 from entities import Boar, Wolf
-from weapon_generator import generate_weapon
+from weapon_generator import generate_weapon, generate_armor
 import random
 
 
@@ -13,14 +13,38 @@ def player_attack(attacker, defender, attacker_name, messages):
             if weapon.get("role") == "right_hand":
                 min_dmg = weapon.get("min_damage", 1)
                 max_dmg = weapon.get("max_damage", 1)
-                damage_dict = get_damage(min_dmg, max_dmg, weapon, exp_bonus=exp_bonus(value=attacker["exp"]))["damage"]
+                damage_dict = get_damage(min_dmg, max_dmg, weapon, exp_bonus=exp_bonus(value=attacker["exp"]))
                 break
 
+        # Apply armor protection
+        initial_damage = damage_dict['damage']
+        armor_protection = 0
+        for armor in defender.get("equipped", {}):
+            if armor.get("role") == "armor":
+                armor_protection += armor.get("protection", 0) * (armor.get("efficiency", 100) / 100)
+
+                # Reduce armor durability
+                old_durability = armor["durability"]
+                armor["durability"] -= 1
+                messages.append(
+                    f"{defender['name']}'s {armor['type']} durability reduced from {old_durability} to {armor['durability']}")
+
+                if armor["durability"] <= 0:
+                    messages.append(
+                        f"{defender['name']}'s {armor['type']} has broken and no longer provides protection!")
+                    defender["equipped"].remove(armor)
+
+        damage = max(1, initial_damage - armor_protection)
         defender["hp"] -= damage
+
+        if armor_protection > 0:
+            messages.append(f"{defender['name']}'s armor absorbed {initial_damage - damage} damage")
+
         if attacker_name == "You":
-            messages.append(f"You {damage_dict['message']} for {damage_dict['damage']} damage, they have {defender['hp']} left")
+            messages.append(f"You {damage_dict['message']} for {damage} damage, they have {defender['hp']} HP left")
         else:
-            messages.append(f"{attacker_name} hits you for {damage_dict['damage']} {damage_dict['message']} damage, you have {defender['hp']} left")
+            messages.append(
+                f"{attacker_name} hits you for {damage} {damage_dict['message']} damage, you have {defender['hp']} HP left")
 
 
 def defeat_outcome(entity, entity_name, chance, usersdb):
@@ -86,8 +110,8 @@ def fight_player(entry, target_name, user_data, user, usersdb):
                 messages.extend(defeat_outcome(defeated_entity, defeated_name, 0.5, usersdb))
                 break
 
-
     return messages
+
 
 def fight_npc(entry, user_data, user, usersdb, mapdb, npc):
     messages = []
@@ -100,9 +124,13 @@ def fight_npc(entry, user_data, user, usersdb, mapdb, npc):
 
             if random.random() < npc.drop_chance:
                 level = get_values(entry).get("level")
-                new_weapon = generate_weapon(level=level)
-                messages.append(f"You found a level {level} weapon {new_weapon['type']}!")
-                user_data["unequipped"].append(new_weapon)
+                if random.random() < 0.5:  # 50% chance for weapon or armor
+                    new_item = generate_weapon(level=level)
+                    messages.append(f"You found a level {level} weapon {new_item['type']}!")
+                else:
+                    new_item = generate_armor(level=level)
+                    messages.append(f"You found a level {level} armor {new_item['type']}!")
+                user_data["unequipped"].append(new_item)
 
             remove_from_map(
                 entity_type=npc.type.lower(),
@@ -150,31 +178,53 @@ def fight_npc(entry, user_data, user, usersdb, mapdb, npc):
                 escaped = True
 
         else:
+            # Player attacks NPC
             if user_data["hp"] > 0:
                 damage = 1
                 for weapon in user_data.get("equipped", {}):
                     if weapon.get("role") == "right_hand":
                         min_dmg = weapon.get("min_damage", 1)
                         max_dmg = weapon.get("max_damage", 1)
-
                         user_dmg = get_damage(min_dmg, max_dmg, weapon, exp_bonus=exp_bonus(value=user_data["exp"]))
                         break
 
-                npc.hp -= damage
+                npc.hp -= user_dmg['damage']
                 messages.append(
-                    f"The {npc.type} takes {user_dmg['damage']} {user_dmg['message']} damage and is left with {npc.hp} hp"
+                    f"You {user_dmg['message']} the {npc.type} for {user_dmg['damage']} damage. It has {npc.hp} HP left"
                 )
 
+            # NPC attacks player
             if npc.hp > 0:
                 npc_dmg = npc.roll_damage()
-                user_data["hp"] -= npc_dmg["damage"]
+                initial_damage = npc_dmg["damage"]
+
+                # Apply armor protection
+                armor_protection = 0
+                for armor in user_data.get("equipped", []):
+                    if armor.get("role") == "armor":
+                        armor_protection += armor.get("protection", 0) * (armor.get("efficiency", 100) / 100)
+
+                        # Reduce armor durability
+                        old_durability = armor["durability"]
+                        armor["durability"] -= 1
+                        messages.append(
+                            f"Your {armor['type']} durability reduced from {old_durability} to {armor['durability']}")
+
+                        if armor["durability"] <= 0:
+                            messages.append(f"Your {armor['type']} has broken and no longer provides protection!")
+                            user_data["equipped"].remove(armor)
+
+                final_damage = max(1, initial_damage - armor_protection)
+                user_data["hp"] -= final_damage
+
+                if armor_protection > 0:
+                    messages.append(f"Your armor absorbed {initial_damage - final_damage} damage")
+
                 messages.append(
-                    f"You take {npc_dmg['damage']} {npc_dmg['message']} and are left with {user_data['hp']} hp"
+                    f"The {npc.type} {npc_dmg['message']} you for {final_damage} damage. You have {user_data['hp']} HP left"
                 )
 
     return messages
-
-
 
 
 def fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb, mapdb):
@@ -220,11 +270,6 @@ def exp_bonus(value, base=10):
 
     scaled_value = int(log_lower + (log_upper - log_lower) * ((log_value - log_lower) / (log_upper - log_lower)))
     return scaled_value
-
-
-import random
-
-import random
 
 
 def get_damage(min_dmg, max_dmg, weapon, exp_bonus):

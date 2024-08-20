@@ -1,7 +1,7 @@
 import json
 import sqlite3
 import random
-from weapon_generator import id_generator
+from weapon_generator import id_generator, generate_armor
 import threading
 
 def get_users_at_coords(x_pos, y_pos, user, users_dict, include_construction=True, include_self=True):
@@ -63,7 +63,6 @@ def find_open_space(mapdb):
                 raise Exception("No open space found within available range.")
 
 
-
 def create_user(user_data_dict, user, mapdb, profile_pic=""):
     print(f"Creating {user}")
     x_pos, y_pos = find_open_space(mapdb)
@@ -98,7 +97,9 @@ def create_user(user_data_dict, user, mapdb, profile_pic=""):
              "accuracy": 100,
              "range": "melee",
              "role": "right_hand",
-             "attack_speed": 1}],
+             "attack_speed": 1},
+            generate_armor(level=1)  # Add initial armor
+        ],
 
         "unequipped": [{"id": id_generator(),
                         "type": "dagger",
