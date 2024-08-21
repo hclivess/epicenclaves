@@ -485,10 +485,10 @@ function moveToPosition(x, y) {
       'Content-Type': 'application/json',
     },
   })
-  .then(response => response.json())  // Assume the server returns JSON
+  .then(response => response.json())
   .then(data => {
     // Update the jsonData variable with the new data
-    jsonData = data;
+    Object.assign(jsonData, data);
 
     // Clear the existing map
     const mapContainer = document.getElementById("map");
@@ -499,17 +499,21 @@ function moveToPosition(x, y) {
     centerMapOnUser(jsonData);
 
     // Update any other UI elements as needed
-    // For example, you might want to update the message display:
     if (data.message) {
       // Assuming you have an element to display messages
-      document.getElementById('message-display').textContent = data.message;
+      const messageDisplay = document.getElementById('message-display');
+      if (messageDisplay) {
+        messageDisplay.textContent = data.message;
+      }
     }
+
+    // Redirect to /map after the move is completed
+    window.location.href = '/map';
   })
   .catch((error) => {
     console.error('Error:', error);
   });
 }
-
 ///auto moves
 </script>
 
