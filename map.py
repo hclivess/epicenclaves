@@ -128,7 +128,6 @@ def get_users_data_limit(x_pos, y_pos, usersdb, distance=5):
             filtered_data[username] = data
     return filtered_data
 
-
 def get_buildings(user_data):
     if user_data is None:
         return []

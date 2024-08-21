@@ -108,11 +108,24 @@ class LogoutHandler(BaseHandler):
 class MapHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
+        if not user:
+            self.redirect("/")  # Redirect to login if not authenticated
+            return
 
-        data = json.dumps(get_surrounding_map_and_user_data(user, strip_usersdb(usersdb), mapdb, 50))
+        visible_distance = 5  # This should match the client-side visibleRadius
 
-        print("data", data)  # debug
-        self.render("templates/map.html", data=data, ensure_ascii=False, user=user)
+        data = get_surrounding_map_and_user_data(
+            user=user,
+            user_data_dict=usersdb,
+            map_data_dict=mapdb,
+            distance=visible_distance
+        )
+
+        self.render(
+            "templates/map.html",
+            data=json.dumps(data),
+            user=user
+        )
 
 
 class ScoreboardHandler(BaseHandler):
