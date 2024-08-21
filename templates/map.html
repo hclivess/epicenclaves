@@ -398,12 +398,12 @@ function centerMapOnUser(data) {
 // Call this function whenever the map updates or the user moves
 function updateMap(data) {
   centerMapOnUser(data);
-  // Other map update logic...
 }
 
 
 createMap(jsonData);
 centerMapOnUser(jsonData);
+addClickListenerToMap();
 
 document.addEventListener("keydown", function(event) {
   var direction = null;
@@ -447,6 +447,79 @@ document.querySelectorAll('.btn-move').forEach(button => {
   });
 });
 
+///auto moves
+function addClickListenerToMap() {
+  const mapContainer = document.getElementById("map");
+  mapContainer.addEventListener("click", function(event) {
+    const rect = mapContainer.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const clickY = event.clientY - rect.top;
+
+    // Calculate the tile coordinates
+    const tileX = Math.floor(clickX / gridSize) + 1;
+    const tileY = Math.floor(clickY / gridSize) + 1;
+
+    movePlayerToTile(tileX, tileY);
+  });
+}
+
+function movePlayerToTile(targetX, targetY) {
+  const userKey = '{{ user }}';
+  const player = jsonData.users[userKey];
+  const playerX = player.x_pos;
+  const playerY = player.y_pos;
+
+  if (playerX === targetX && playerY === targetY) {
+    console.log("Already at the target position.");
+    return;
+  }
+
+  const moves = generateMoves(playerX, playerY, targetX, targetY);
+  executeMoves(moves);
+}
+
+function generateMoves(startX, startY, endX, endY) {
+  const moves = [];
+  let currentX = startX;
+  let currentY = startY;
+
+  while (currentX !== endX || currentY !== endY) {
+    if (currentX < endX) {
+      moves.push("right");
+      currentX++;
+    } else if (currentX > endX) {
+      moves.push("left");
+      currentX--;
+    } else if (currentY < endY) {
+      moves.push("down");
+      currentY++;
+    } else if (currentY > endY) {
+      moves.push("up");
+      currentY--;
+    }
+  }
+
+  return moves;
+}
+
+function executeMoves(moves) {
+  let index = 0;
+
+  function executeNextMove() {
+    if (index < moves.length) {
+      const direction = moves[index];
+      const button = document.getElementById('btn' + direction.charAt(0).toUpperCase() + direction.slice(1));
+      if (button) {
+        button.click();
+        setTimeout(executeNextMove, 500); // Wait for 500ms before next move
+      }
+      index++;
+    }
+  }
+
+  executeNextMove();
+}
+///auto moves
 </script>
 
 </body>
