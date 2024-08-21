@@ -474,51 +474,42 @@ function movePlayerToTile(targetX, targetY) {
     return;
   }
 
-  const moves = generateMoves(playerX, playerY, targetX, targetY);
-  executeMoves(moves);
+  // Use move_to function for fast travel
+  moveToPosition(targetX, targetY);
 }
 
-function generateMoves(startX, startY, endX, endY) {
-  const moves = [];
-  let currentX = startX;
-  let currentY = startY;
+function moveToPosition(x, y) {
+  fetch(`/move_to?x=${x}&y=${y}&target=map`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+  .then(response => response.json())  // Assume the server returns JSON
+  .then(data => {
+    // Update the jsonData variable with the new data
+    jsonData = data;
 
-  while (currentX !== endX || currentY !== endY) {
-    if (currentX < endX) {
-      moves.push("right");
-      currentX++;
-    } else if (currentX > endX) {
-      moves.push("left");
-      currentX--;
-    } else if (currentY < endY) {
-      moves.push("down");
-      currentY++;
-    } else if (currentY > endY) {
-      moves.push("up");
-      currentY--;
+    // Clear the existing map
+    const mapContainer = document.getElementById("map");
+    mapContainer.innerHTML = '';
+
+    // Recreate the map with the updated data
+    createMap(jsonData);
+    centerMapOnUser(jsonData);
+
+    // Update any other UI elements as needed
+    // For example, you might want to update the message display:
+    if (data.message) {
+      // Assuming you have an element to display messages
+      document.getElementById('message-display').textContent = data.message;
     }
-  }
-
-  return moves;
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
 }
 
-function executeMoves(moves) {
-  let index = 0;
-
-  function executeNextMove() {
-    if (index < moves.length) {
-      const direction = moves[index];
-      const button = document.getElementById('btn' + direction.charAt(0).toUpperCase() + direction.slice(1));
-      if (button) {
-        button.click();
-        setTimeout(executeNextMove, 500); // Wait for 500ms before next move
-      }
-      index++;
-    }
-  }
-
-  executeNextMove();
-}
 ///auto moves
 </script>
 

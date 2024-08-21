@@ -29,7 +29,7 @@ from backend import (
 from map import get_tile_map, get_tile_users, get_user_data, get_surrounding_map_and_user_data, create_map_database, \
     save_map_from_memory, load_map_to_memory, strip_usersdb, get_map_data_limit, get_users_data_limit
 from rest import attempt_rest
-from move import move
+from move import move, move_to
 from build import build
 from entities import Forest, Mountain, Boar
 from entity_generator import spawn
@@ -266,6 +266,33 @@ class UpgradeHandler(BaseHandler):
             descriptions=descriptions,
         )
 
+class MoveToHandler(BaseHandler):
+    def get(self):
+        target = self.get_argument("target", default="home")
+        x = int(self.get_argument("x"))
+        y = int(self.get_argument("y"))
+        user = tornado.escape.xhtml_escape(self.current_user)
+
+        user_data = get_user_data(user, usersdb=usersdb)
+        moved = move_to(user, x, y, max_size, user_data, users_dict=usersdb, map_dict=mapdb)
+        user_data = get_user_data(user, usersdb=usersdb)  # update
+
+        message = moved["message"]
+
+        visible_distance = 5  # This should match the client-side visibleRadius
+        x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
+
+        visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb, visible_distance)
+        visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb), visible_distance)
+
+        map_data = {
+            "users": visible_users_data,
+            "construction": visible_map_data,
+            "message": message
+        }
+
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps(map_data))
 
 class MoveHandler(BaseHandler):
     def get(self, data):
@@ -557,6 +584,7 @@ def make_app():
     return tornado.web.Application(
         [
             (r"/", MainHandler),
+            (r"/move_to", MoveToHandler),
             (r"/login(.*)", LoginHandler),
             (r"/logout(.*)", LogoutHandler),
             (r"/move(.*)", MoveHandler),
