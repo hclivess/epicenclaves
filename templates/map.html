@@ -374,22 +374,24 @@ function centerMapOnUser(data) {
     const mapContainer = document.getElementById("map");
     const wrapper = document.getElementById("wrapper");
 
+    // Define the centering offset (in tiles)
+    const centerOffsetX = 6.66;
+    const centerOffsetY = 2.66;
+
     // Calculate the user's position in pixels
-    // Add 0.5 to center within the tile
     const userX = (userToCenter.x_pos + 0.5) * gridSize;
     const userY = (userToCenter.y_pos + 0.5) * gridSize;
 
     // Calculate the offset to center the user
-    const offsetX = Math.round(wrapper.clientWidth / 2 - userX - 6.66 * gridSize);
-    const offsetY = Math.round(wrapper.clientHeight / 2 - userY - 2.66 * gridSize);
+    const offsetX = Math.round(wrapper.clientWidth / 2 - userX - centerOffsetX * gridSize);
+    const offsetY = Math.round(wrapper.clientHeight / 2 - userY - centerOffsetY * gridSize);
 
-    // Apply the transformation immediately
+    // Apply the transformation
     mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
 
-    // Update the fog of war with adjusted coordinates
-    const fogX = userToCenter.x_pos -1;
-    const fogY = userToCenter.y_pos -1;
-    updateFogOfWar(fogX, fogY);
+    // Update the fog of war
+    // Adjust by 1 tile to align with the center of the view
+    updateFogOfWar(userToCenter.x_pos - 1, userToCenter.y_pos - 1);
   }
 }
 
