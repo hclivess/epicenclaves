@@ -278,7 +278,6 @@ function createMap(data) {
   mapContainer.appendChild(fragment);
   createFogOfWar(mapContainer, maxX, maxY);
   groupEntitiesAndAddTooltips(mapContainer);
-  centerMapOnUser(data);
 }
 
 function createFogOfWar(mapContainer, maxX, maxY) {
@@ -295,19 +294,14 @@ function createFogOfWar(mapContainer, maxX, maxY) {
 
 function updateFogOfWar(playerX, playerY) {
   var fogTiles = document.querySelectorAll(".fog");
-  var centerX = window.innerWidth / 2;
-  var centerY = window.innerHeight / 2;
 
   fogTiles.forEach(function(tile) {
     var tileX = parseInt(tile.style.left) / gridSize;
     var tileY = parseInt(tile.style.top) / gridSize;
 
-    var screenX = (tileX - playerX) * gridSize + centerX;
-    var screenY = (tileY - playerY) * gridSize + centerY;
+    var distance = Math.sqrt(Math.pow(tileX - playerX, 2) + Math.pow(tileY - playerY, 2));
 
-    var distance = Math.sqrt(Math.pow(screenX - centerX, 2) + Math.pow(screenY - centerY, 2));
-
-    if (distance <= visibleRadius * gridSize) {
+    if (distance <= visibleRadius) {
       tile.classList.add("revealed");
     } else {
       tile.classList.remove("revealed");
@@ -361,28 +355,23 @@ function showTooltip(entityGroup, tooltip) {
 }
 
 function centerMapOnUser(data) {
-var userKey = '{{ user }}';
+  var userKey = '{{ user }}';
   var userToCenter = data.users[userKey];
 
   if (userToCenter) {
-    var userX = (userToCenter.x_pos - 1) * gridSize + gridSize / 2;
-    var userY = (userToCenter.y_pos - 1) * gridSize + gridSize / 2;
+    var userX = userToCenter.x_pos - 1;
+    var userY = userToCenter.y_pos - 1;
 
-    var centerX = window.innerWidth / 2;
-    var centerY = window.innerHeight / 2;
+    var centerX = Math.floor(window.innerWidth / (2 * gridSize));
+    var centerY = Math.floor(window.innerHeight / (2 * gridSize));
 
-    window.scrollTo(userX - centerX, userY - centerY);
+    var offsetX = userX - centerX;
+    var offsetY = userY - centerY;
 
-    updateFogOfWar(userToCenter.x_pos - 1, userToCenter.y_pos - 1);
-  }
-}
+    var mapContainer = document.getElementById("map");
+    mapContainer.style.transform = `translate(${-offsetX * gridSize}px, ${-offsetY * gridSize}px)`;
 
-function updateFogOfWarOnMove() {
-  var userKey = '{{ user }}';
-  var userToCenter = jsonData.users[userKey];
-
-  if (userToCenter) {
-    centerMapOnUser(jsonData);
+    updateFogOfWar(userX, userY);
   }
 }
 
@@ -390,30 +379,22 @@ createMap(jsonData);
 centerMapOnUser(jsonData);
 
 document.addEventListener("keydown", function(event) {
-  var scrollAmount = 125;
   var direction = null;
 
   switch (event.key) {
     case "ArrowLeft":
       direction = "left";
-      window.scrollBy(-scrollAmount, 0);
       break;
     case "ArrowRight":
       direction = "right";
-      window.scrollBy(scrollAmount, 0);
       break;
     case "ArrowUp":
       direction = "up";
-      window.scrollBy(0, -scrollAmount);
       break;
     case "ArrowDown":
       direction = "down";
-      window.scrollBy(0, scrollAmount);
       break;
   }
-
-  localStorage.setItem('scrollX', window.scrollX);
-  localStorage.setItem('scrollY', window.scrollY);
 
   if (direction) {
     var button = document.getElementById('btn' + direction.charAt(0).toUpperCase() + direction.slice(1));
