@@ -366,28 +366,55 @@ function showTooltip(entityGroup, tooltip) {
 }
 
 function centerMapOnUser(data) {
-  var userKey = '{{ user }}';
-  var userToCenter = data.users[userKey];
+    var userKey = '{{ user }}';
+    var userToCenter = data.users[userKey];
 
-  if (userToCenter) {
-    var userX = userToCenter.x_pos - 1;
-    var userY = userToCenter.y_pos - 1;
+    if (userToCenter) {
+        var userX = (userToCenter.x_pos - 1) * gridSize;
+        var userY = (userToCenter.y_pos - 1) * gridSize;
 
-    var mapContainer = document.getElementById("map");
-    var wrapper = document.getElementById("wrapper");
+        var mapContainer = document.getElementById("map");
+        var wrapper = document.getElementById("wrapper");
 
-    var wrapperRect = wrapper.getBoundingClientRect();
-    var userCenterX = (userX + 0.5) * gridSize;
-    var userCenterY = (userY + 0.5) * gridSize;
+        // Calculate the center of the user's position
+        var userCenterX = userX + gridSize / 2;
+        var userCenterY = userY + gridSize / 2;
 
-    var offsetX = wrapperRect.width / 2 - userCenterX;
-    var offsetY = wrapperRect.height / 2 - userCenterY;
+        // Calculate the center of the visible wrapper
+        var wrapperCenterX = wrapper.clientWidth / 2;
+        var wrapperCenterY = wrapper.clientHeight / 2;
 
-    mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+        // Calculate the offset needed to move the map to center the user
+        var offsetX = wrapperCenterX - userCenterX;
+        var offsetY = wrapperCenterY - userCenterY;
 
-    updateFogOfWar(userX, userY);
-  }
+        // Calculate the min and max offset limits to prevent the map from moving out of bounds
+        var minOffsetX = wrapper.clientWidth - mapContainer.clientWidth;
+        var minOffsetY = wrapper.clientHeight - mapContainer.clientHeight;
+
+        // Limit the offset to the map's boundaries
+        offsetX = Math.min(0, Math.max(offsetX, minOffsetX));
+        offsetY = Math.min(0, Math.max(offsetY, minOffsetY));
+
+        // Apply the transformation to the map
+        mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+
+        // Log values for debugging
+        console.log('User X:', userX, 'User Y:', userY);
+        console.log('User Center X:', userCenterX, 'User Center Y:', userCenterY);
+        console.log('Wrapper Center X:', wrapperCenterX, 'Wrapper Center Y:', wrapperCenterY);
+        console.log('Offset X:', offsetX, 'Offset Y:', offsetY);
+
+        // Update the fog of war
+        updateFogOfWar(userX / gridSize, userY / gridSize);
+    }
 }
+
+
+
+
+
+
 
 createMap(jsonData);
 centerMapOnUser(jsonData);
