@@ -12,35 +12,40 @@ def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[s
     armor_protection = 0
     is_player = defender.get('name', 'You') == 'You'
 
-    # Filter out only valid armor pieces
-    valid_armor = [armor for armor in defender.get("equipped", [])
-                   if armor.get("role") == "armor" and armor.get("type") != "empty"]
+    # Get all armor slots, including empty ones
+    all_armor_slots = [armor for armor in defender.get("equipped", []) if armor.get("role") == "armor"]
 
-    if valid_armor:
-        # Randomly select one piece of armor
-        selected_armor = random.choice(valid_armor)
+    if all_armor_slots:
+        # Randomly select one armor slot
+        selected_armor = random.choice(all_armor_slots)
 
-        protection = selected_armor.get("protection", 0) * (selected_armor.get("efficiency", 100) / 100)
-        armor_protection = protection
+        if selected_armor.get("type") != "empty":
+            protection = selected_armor.get("protection", 0) * (selected_armor.get("efficiency", 100) / 100)
+            armor_protection = protection
 
-        old_durability = selected_armor["durability"]
-        selected_armor["durability"] -= 1
+            old_durability = selected_armor["durability"]
+            selected_armor["durability"] -= 1
 
-        if is_player:
-            messages.append(
-                f"Your {selected_armor['type']}'s durability reduced from {old_durability} to {selected_armor['durability']}")
-        else:
-            messages.append(
-                f"{defender['name']}'s {selected_armor['type']} durability reduced from {old_durability} to {selected_armor['durability']}")
-
-        if selected_armor["durability"] <= 0:
             if is_player:
-                messages.append(f"Your {selected_armor['type']} has broken and no longer provides protection!")
+                messages.append(
+                    f"Your {selected_armor['type']}'s durability reduced from {old_durability} to {selected_armor['durability']}")
             else:
                 messages.append(
-                    f"{defender['name']}'s {selected_armor['type']} has broken and no longer provides protection!")
-            selected_armor["type"] = "empty"
-            selected_armor["protection"] = 0
+                    f"{defender['name']}'s {selected_armor['type']} durability reduced from {old_durability} to {selected_armor['durability']}")
+
+            if selected_armor["durability"] <= 0:
+                if is_player:
+                    messages.append(f"Your {selected_armor['type']} has broken and no longer provides protection!")
+                else:
+                    messages.append(
+                        f"{defender['name']}'s {selected_armor['type']} has broken and no longer provides protection!")
+                selected_armor["type"] = "empty"
+                selected_armor["protection"] = 0
+        else:
+            if is_player:
+                messages.append("The attack hit an unprotected area!")
+            else:
+                messages.append(f"The attack hit an unprotected area on {defender['name']}!")
 
     final_damage = math.floor(max(1, initial_damage - armor_protection))
     absorbed_damage = initial_damage - final_damage
