@@ -141,7 +141,8 @@ def process_npc_defeat(npc: Enemy, user_data: Dict, user: str, usersdb: Dict, ma
     npc.alive = False
 
     if random.random() < npc.drop_chance:
-        level = get_values(entry).get("level")
+        max_level = get_values(entry).get("level")
+        level = random.randint(1, max_level)
         new_item = generate_weapon(level=level) if random.random() < 0.5 else generate_armor(level=level)
         messages.append(f"You found a level {level} {new_item['type']}!")
         user_data["unequipped"].append(new_item)
