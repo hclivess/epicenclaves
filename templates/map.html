@@ -447,6 +447,7 @@ document.querySelectorAll('.btn-move').forEach(button => {
   });
 });
 
+
 ///auto moves
 function addClickListenerToMap() {
   const mapContainer = document.getElementById("map");
@@ -466,19 +467,40 @@ function addClickListenerToMap() {
 function movePlayerToTile(targetX, targetY) {
   const userKey = '{{ user }}';
   const player = jsonData.users[userKey];
-  const playerX = player.x_pos;
-  const playerY = player.y_pos;
+  let currentX = player.x_pos;
+  let currentY = player.y_pos;
 
-  if (playerX === targetX && playerY === targetY) {
+  if (currentX === targetX && currentY === targetY) {
     console.log("Already at the target position.");
     return;
   }
 
-  // Use move_to function for fast travel
-  moveToPosition(targetX, targetY);
+  function moveStep() {
+    let nextX = currentX;
+    let nextY = currentY;
+
+    if (currentX < targetX) nextX++;
+    else if (currentX > targetX) nextX--;
+    else if (currentY < targetY) nextY++;
+    else if (currentY > targetY) nextY--;
+
+    moveToPosition(nextX, nextY, function(success) {
+      if (success) {
+        currentX = nextX;
+        currentY = nextY;
+        if (currentX !== targetX || currentY !== targetY) {
+          setTimeout(moveStep, 500); // Wait 500ms before the next step
+        }
+      } else {
+        console.log("Movement blocked, stopping auto-move.");
+      }
+    });
+  }
+
+  moveStep();
 }
 
-function moveToPosition(x, y) {
+function moveToPosition(x, y, callback) {
   fetch(`/move_to?x=${x}&y=${y}&target=map`, {
     method: 'GET',
     headers: {
@@ -507,13 +529,16 @@ function moveToPosition(x, y) {
       }
     }
 
-    // Redirect to /map after the move is completed
-    window.location.href = '/map';
+    // Check if the move was successful
+    const success = data.message === "Moved successfully";
+    callback(success);
   })
   .catch((error) => {
     console.error('Error:', error);
+    callback(false);
   });
 }
+
 ///auto moves
 </script>
 
