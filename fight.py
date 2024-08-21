@@ -7,8 +7,6 @@ from map import remove_from_map, get_coords
 from entities import Boar, Wolf, Enemy
 from weapon_generator import generate_weapon, generate_armor
 
-
-
 def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[str]) -> Tuple[int, int]:
     armor_protection = 0
     is_player = defender.get('name', 'You') == 'You'
@@ -37,8 +35,8 @@ def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[s
                 armor["type"] = "empty"
                 armor["protection"] = 0
 
-    final_damage = max(1, initial_damage - armor_protection)
-    absorbed_damage = math.floor(initial_damage - final_damage)
+    final_damage = math.floor(max(1, initial_damage - armor_protection))
+    absorbed_damage = initial_damage - final_damage
 
     if absorbed_damage > 0:
         if is_player:

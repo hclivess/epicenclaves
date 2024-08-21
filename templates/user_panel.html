@@ -89,27 +89,55 @@
             </div>
 
             <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0">Current Tile</h4>
-                    </div>
-                    <div class="card-body">
-                        {% for entry in on_tile_map %}
-                            <div class="item-card">
-                                <img src="/img/assets/{{list(entry.values())[0].get('type')}}.png" alt="Icon" class="menu-icon">
-                                <div class="item-details">
-                                    <p><strong>Type:</strong> {{ list(entry.values())[0].get("type") }}</p>
-                                    <p><strong>Control:</strong> {{ list(entry.values())[0].get("control") }}</p>
-                                    <p><strong>Army:</strong> {{ list(entry.values())[0].get("army") }}</p>
-                                    <p><strong>Level:</strong> {{ list(entry.values())[0].get("level") }}</p>
-                                    <div class="tile-actions">
-                                        {% for action in actions.get(entry) %}
-                                            <a href="{{ action['action'] }}" class="btn btn-secondary btn-sm">{{ action['name'] }}</a>
-                                        {% end %}
-                                    </div>
-                                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="mb-0">Current Tile</h4>
                             </div>
-                        {% end %}
+                            <div class="card-body">
+                                {% for entry in on_tile_map %}
+                                    <div class="item-card">
+                                        <img src="/img/assets/{{list(entry.values())[0].get('type')}}.png" alt="Icon" class="menu-icon">
+                                        <div class="item-details">
+                                            <p><strong>Type:</strong> {{ list(entry.values())[0].get("type") }}</p>
+                                            <p><strong>Control:</strong> {{ list(entry.values())[0].get("control") }}</p>
+                                            <p><strong>Army:</strong> {{ list(entry.values())[0].get("army") }}</p>
+                                            <p><strong>Level:</strong> {{ list(entry.values())[0].get("level") }}</p>
+                                            <div class="tile-actions">
+                                                {% for action in actions.get(entry) %}
+                                                    <a href="{{ action['action'] }}" class="btn btn-secondary btn-sm">{{ action['name'] }}</a>
+                                                {% end %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% end %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="mb-0">Other Users Here</h4>
+                            </div>
+                            <div class="card-body">
+                                {% for entry in on_tile_users %}
+                                    <div class="item-card">
+                                        <img src="{{list(entry.values())[0].get('img')}}" alt="Profile Picture" class="menu-icon">
+                                        <div class="item-details">
+                                            <p><strong>Name:</strong> {{ list(entry.keys())[0] }}</p>
+                                            <p><strong>Type:</strong> {{ list(entry.values())[0].get("type") }}</p>
+                                            <p><strong>HP:</strong> {{ list(entry.values())[0].get("hp") }}</p>
+                                            <div class="tile-actions">
+                                                {% for action in actions.get(entry) %}
+                                                    <a href="{{ action['action'] }}" class="btn btn-secondary btn-sm">{{ action['name'] }}</a>
+                                                {% end %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% end %}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -134,7 +162,7 @@
                                         {% end %}
                                         <p>{{descriptions.get(item["type"])}}</p>
                                         {% if item.get('id') %}
-                                            <a href="/unequip?id={{item['id']}}" class="btn btn-warning btn-sm">Unequip</a>
+                                            <a href="/unequip?id={{item['id']}}" class="btn btn-warning btn-sm">Stash</a>
                                         {% end %}
                                     </div>
                                 </div>
@@ -224,40 +252,12 @@
                 </div>
             </div>
         </div>
-
-        {% for entry in on_tile_users %}
-            <div class="row mt-4">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="mb-0">Other Users on Tile</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="item-card">
-                                <img src="{{list(entry.values())[0].get('img')}}" alt="Profile Picture" class="menu-icon">
-                                <div class="item-details">
-                                    <p><strong>Name:</strong> {{ list(entry.keys())[0] }}</p>
-                                    <p><strong>Type:</strong> {{ list(entry.values())[0].get("type") }}</p>
-                                    <p><strong>HP:</strong> {{ list(entry.values())[0].get("hp") }}</p>
-                                    <div class="tile-actions">
-                                        {% for action in actions.get(entry) %}
-                                            <a href="{{ action['action'] }}" class="btn btn-secondary btn-sm">{{ action['name'] }}</a>
-                                        {% end %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% end %}
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-    <script>
+<script>
         document.addEventListener('keydown', function(event) {
             const key = event.key;
             let direction;
