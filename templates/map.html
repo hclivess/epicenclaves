@@ -221,7 +221,7 @@ body {
 <script>
 const jsonData = {% raw data %};
 const gridSize = 125;
-const visibleRadius = 5;  // Increased from 3 to 5 for better visibility
+const visibleRadius = 5;
 
 function createMap(data) {
   var mapContainer = document.getElementById("map");
@@ -365,49 +365,52 @@ function showTooltip(entityGroup, tooltip) {
   tooltip.classList.add("visible");
 }
 
+
+
 function centerMapOnUser(data) {
-    var userKey = '{{ user }}';
-    var userToCenter = data.users[userKey];
+  var userKey = '{{ user }}';
+  var userToCenter = data.users[userKey];
 
-    if (userToCenter) {
-        var userX = (userToCenter.x_pos - 1) * gridSize;
-        var userY = (userToCenter.y_pos - 1) * gridSize;
+  if (userToCenter) {
+    var userX = (userToCenter.x_pos - 1) * gridSize;
+    var userY = (userToCenter.y_pos - 1) * gridSize;
 
-        var mapContainer = document.getElementById("map");
-        var wrapper = document.getElementById("wrapper");
+    var mapContainer = document.getElementById("map");
+    var wrapper = document.getElementById("wrapper");
 
-        // Calculate the center of the user's position
-        var userCenterX = userX + gridSize / 2;
-        var userCenterY = userY + gridSize / 2;
+    // Calculate the center of the user's position
+    var userCenterX = userX + gridSize / 2;
+    var userCenterY = userY + gridSize / 2;
 
-        // Calculate the center of the visible wrapper
-        var wrapperCenterX = wrapper.clientWidth / 2;
-        var wrapperCenterY = wrapper.clientHeight / 2;
+    // Get the actual content width and height of the wrapper
+    var wrapperContentWidth = wrapper.clientWidth - wrapper.paddingRight - wrapper.paddingLeft;
+    var wrapperContentHeight = wrapper.clientHeight - wrapper.paddingTop - wrapper.paddingBottom;
 
-        // Calculate the offset needed to move the map to center the user
-        var offsetX = wrapperCenterX - userCenterX;
-        var offsetY = wrapperCenterY - userCenterY;
+    // Calculate the center of the visible wrapper
+    var wrapperCenterX = wrapperContentWidth / 2;
+    var wrapperCenterY = wrapperContentHeight / 2;
 
-        // Calculate the min and max offset limits to prevent the map from moving out of bounds
-        var minOffsetX = wrapper.clientWidth - mapContainer.clientWidth;
-        var minOffsetY = wrapper.clientHeight - mapContainer.clientHeight;
+    // Calculate the offset needed to move the map to center the user
+    var wrapperContentWidth = wrapper.clientWidth - wrapper.paddingRight - wrapper.paddingLeft;
+    var wrapperContentHeight = wrapper.clientHeight - wrapper.paddingTop - wrapper.paddingBottom;
 
-        // Limit the offset to the map's boundaries
-        offsetX = Math.min(0, Math.max(offsetX, minOffsetX));
-        offsetY = Math.min(0, Math.max(offsetY, minOffsetY));
+    var offsetX = wrapperContentWidth / 2 - userCenterX;
+    var offsetY = wrapperContentHeight / 2 - userCenterY;
 
-        // Apply the transformation to the map
-        mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+    // Calculate the min and max offset limits to prevent the map from moving out of bounds
+    var minOffsetX = wrapperContentWidth - mapContainer.clientWidth;
+    var minOffsetY = wrapperContentHeight - mapContainer.clientHeight;
 
-        // Log values for debugging
-        console.log('User X:', userX, 'User Y:', userY);
-        console.log('User Center X:', userCenterX, 'User Center Y:', userCenterY);
-        console.log('Wrapper Center X:', wrapperCenterX, 'Wrapper Center Y:', wrapperCenterY);
-        console.log('Offset X:', offsetX, 'Offset Y:', offsetY);
+    // Limit the offset to the map's boundaries
+    offsetX = Math.min(0, Math.max(offsetX, minOffsetX));
+    offsetY = Math.min(0, Math.max(offsetY, minOffsetY));
 
-        // Update the fog of war
-        updateFogOfWar(userX / gridSize, userY / gridSize);
-    }
+    // Apply the transformation to the map
+    mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+
+    // Update the fog of war
+    updateFogOfWar(userX / gridSize, userY / gridSize);
+  }
 }
 
 
