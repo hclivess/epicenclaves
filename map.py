@@ -108,23 +108,25 @@ def insert_map_data(existing_data, new_data):
                 existing_data[coord] = construction_info
 
 
-def get_map_data_limit(x_pos, y_pos, map_data_dict, distance=None):
+def is_visible(x1, y1, x2, y2, distance):
+    return (x1 - x2) ** 2 + (y1 - y2) ** 2 <= distance ** 2
+
+def get_map_data_limit(x_pos, y_pos, map_data_dict, distance=5):
     filtered_data = {}
     for coords, data in map_data_dict.items():
         x_map, y_map = map(int, coords.split(","))
-        if distance is None or (x_map - x_pos) ** 2 + (y_map - y_pos) ** 2 <= distance**2:
+        if is_visible(x_pos, y_pos, x_map, y_map, distance):
             filtered_data[coords] = data
     return filtered_data
 
-def get_users_data_limit(x_pos, y_pos, usersdb, distance=None):
+def get_users_data_limit(x_pos, y_pos, usersdb, distance=5):
     filtered_data = {}
     for username, data in usersdb.items():
         x_map = data['x_pos']
         y_map = data['y_pos']
-        if distance is None or (x_map - x_pos) ** 2 + (y_map - y_pos) ** 2 <= distance**2:
+        if is_visible(x_pos, y_pos, x_map, y_map, distance):
             filtered_data[username] = data
     return filtered_data
-
 
 
 def get_buildings(user_data):

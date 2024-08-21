@@ -27,7 +27,7 @@ from backend import (
     update_user_data,
 )
 from map import get_tile_map, get_tile_users, get_user_data, get_surrounding_map_and_user_data, create_map_database, \
-    save_map_from_memory, load_map_to_memory, strip_usersdb
+    save_map_from_memory, load_map_to_memory, strip_usersdb, get_map_data_limit, get_users_data_limit
 from rest import attempt_rest
 from move import move
 from build import build
@@ -267,12 +267,21 @@ class MoveHandler(BaseHandler):
         message = moved["message"]
 
         if target == "map":
+            visible_distance = 5  # This should match the client-side visibleRadius
+            x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
+
+            visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb, visible_distance)
+            visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb), visible_distance)
+
+            map_data = {
+                "users": visible_users_data,
+                "construction": visible_map_data,
+            }
+
             self.render(
                 "templates/map.html",
                 user=user,
-                data=json.dumps(
-                    get_surrounding_map_and_user_data(user, strip_usersdb(usersdb), mapdb, 50)
-                ),
+                data=json.dumps(map_data),
                 message=message,
             )
         else:
