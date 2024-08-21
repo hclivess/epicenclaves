@@ -380,14 +380,16 @@ function centerMapOnUser(data) {
     const userY = (userToCenter.y_pos + 0.5) * gridSize;
 
     // Calculate the offset to center the user
-    const offsetX = Math.round(wrapper.clientWidth / 2 - userX - 6.75 * gridSize);
-    const offsetY = Math.round(wrapper.clientHeight / 2 - userY - 2.75 * gridSize);
+    const offsetX = Math.round(wrapper.clientWidth / 2 - userX - 6.66 * gridSize);
+    const offsetY = Math.round(wrapper.clientHeight / 2 - userY - 2.66 * gridSize);
 
     // Apply the transformation immediately
     mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
 
-    // Update the fog of war
-    updateFogOfWar(userToCenter.x_pos, userToCenter.y_pos);
+    // Update the fog of war with adjusted coordinates
+    const fogX = userToCenter.x_pos -1;
+    const fogY = userToCenter.y_pos -1;
+    updateFogOfWar(fogX, fogY);
   }
 }
 
