@@ -263,16 +263,16 @@ function createMap(data) {
     createEntity(`entity construction ${construction.type}`, constructionX, constructionY, content);
   });
 
-  mapContainer.style.width = (maxX + gridSize) + "px";
-  mapContainer.style.height = (maxY + gridSize) + "px";
+  mapContainer.style.width = (maxX + gridSize * (visibleRadius * 2 + 1)) + "px";
+  mapContainer.style.height = (maxY + gridSize * (visibleRadius * 2 + 1)) + "px";
 
-  for (var x = 0; x <= maxX + gridSize; x += gridSize) {
+  for (var x = 0; x <= maxX + gridSize * (visibleRadius * 2 + 1); x += gridSize) {
     createEntity("grid-line", x, 0, document.createElement("div")).style.width = "1px";
-    createEntity("grid-line", x, 0, document.createElement("div")).style.height = (maxY + gridSize) + "px";
+    createEntity("grid-line", x, 0, document.createElement("div")).style.height = (maxY + gridSize * (visibleRadius * 2 + 1)) + "px";
   }
-  for (var y = 0; y <= maxY + gridSize; y += gridSize) {
+  for (var y = 0; y <= maxY + gridSize * (visibleRadius * 2 + 1); y += gridSize) {
     createEntity("grid-line", 0, y, document.createElement("div")).style.height = "1px";
-    createEntity("grid-line", 0, y, document.createElement("div")).style.width = (maxX + gridSize) + "px";
+    createEntity("grid-line", 0, y, document.createElement("div")).style.width = (maxX + gridSize * (visibleRadius * 2 + 1)) + "px";
   }
 
   mapContainer.appendChild(fragment);
@@ -281,8 +281,8 @@ function createMap(data) {
 }
 
 function createFogOfWar(mapContainer, maxX, maxY) {
-  for (var x = 0; x <= maxX; x += gridSize) {
-    for (var y = 0; y <= maxY; y += gridSize) {
+  for (var x = 0; x <= maxX + gridSize * (visibleRadius * 2 + 1); x += gridSize) {
+    for (var y = 0; y <= maxY + gridSize * (visibleRadius * 2 + 1); y += gridSize) {
       var fogTile = document.createElement("div");
       fogTile.className = "fog";
       fogTile.style.left = x + "px";
@@ -362,14 +362,13 @@ function centerMapOnUser(data) {
     var userX = userToCenter.x_pos - 1;
     var userY = userToCenter.y_pos - 1;
 
-    var centerX = Math.floor(window.innerWidth / (2 * gridSize));
-    var centerY = Math.floor(window.innerHeight / (2 * gridSize));
-
-    var offsetX = userX - centerX;
-    var offsetY = userY - centerY;
-
     var mapContainer = document.getElementById("map");
-    mapContainer.style.transform = `translate(${-offsetX * gridSize}px, ${-offsetY * gridSize}px)`;
+    var wrapper = document.getElementById("wrapper");
+
+    var offsetX = (wrapper.clientWidth / 2) - ((userX + 0.5) * gridSize);
+    var offsetY = (wrapper.clientHeight / 2) - ((userY + 0.5) * gridSize);
+
+    mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
 
     updateFogOfWar(userX, userY);
   }
@@ -405,6 +404,10 @@ document.addEventListener("keydown", function(event) {
 });
 
 document.addEventListener("DOMContentLoaded", function() {
+  centerMapOnUser(jsonData);
+});
+
+window.addEventListener("resize", function() {
   centerMapOnUser(jsonData);
 });
 
