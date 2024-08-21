@@ -5,7 +5,6 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.8em' font-size='80'>🏰</text></svg>">
 <title>Epic Enclaves</title>
 <style>
-
 body {
   margin: 0;
   padding: 0;
@@ -18,9 +17,9 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
   gap: 1px;
   padding: 1px;
-  overflow: hidden; /* Remove the inner scrollbars */
+  overflow: hidden;
   height: 100vh;
-  overscroll-behavior: contain; /* Improve scrolling behavior */
+  overscroll-behavior: contain;
 }
 
 .map-content {
@@ -44,7 +43,6 @@ body {
   align-items: flex-end;
   padding: 1em;
   background-color: rgba(0, 0, 0, 0.1);
-  /* border-radius: 0 0 15px 0; */ /* Remove this line */
   z-index: 9999;
 }
 
@@ -88,20 +86,17 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-    border-radius: 10px;
-      box-shadow: inset 0 0 0 3px green;
-
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 3px green;
 }
 
 .player {
   background-color: purple;
   color: white;
   z-index: 2;
-
   box-shadow: inset 0 0 0 3px red;
   border-radius: 10px;
 }
-
 
 .player img {
   width: 50px;
@@ -116,7 +111,6 @@ body {
   z-index: 1;
 }
 
-/* Icons using ::before pseudo-element */
 .sawmill:before { content: "\1FA9A "; font-size: 20px; }
 .inn:before { content: "\1F3E8 "; font-size: 20px; }
 .barracks:before { content: "\2694 "; font-size: 20px; }
@@ -130,70 +124,22 @@ body {
 .wall:before { content: "\1F9F1 "; font-size: 30px; }
 .valenthis:before { content: ""; display: inline-block; width: 40px; height: 40px; background-image: url('img/assets/valenthis.png'); background-size: cover; }
 
-.valenthis {
-  background: linear-gradient(to right, gold, black);
-  color: white;
-}
+.valenthis { background: linear-gradient(to right, gold, black); color: white; }
+.mountain { background: linear-gradient(to right, brown, black); color: white; }
+.wolf { background: linear-gradient(to right, gray, black); color: white; }
+.boar { background: linear-gradient(to right, pink, black); color: white; }
+.forest { background: linear-gradient(to right, darkgreen, black); color: white; }
+.wall { background: linear-gradient(to right, white, gray); color: brown; }
+.sawmill { background: linear-gradient(to right, blue, black); color: white; }
+.inn { background: linear-gradient(to right, cyan, black); color: white; }
+.farm { background: linear-gradient(to right, green, black); color: white; }
+.barracks { background: linear-gradient(to right, red, black); color: white; }
+.mine { background: linear-gradient(to right, #B59410, black); color: white; }
+.house { background: linear-gradient(to right, gray, black); color: white; }
 
-.mountain {
-  background: linear-gradient(to right, brown, black);
-  color: white;
-}
-.wolf {
-  background: linear-gradient(to right, gray, black);
-  color: white;
-}
-.boar {
-  background: linear-gradient(to right, pink, black);
-  color: white;
-}
-
-.forest {
-  background: linear-gradient(to right, darkgreen, black);
-  color: white;
-}
-
-.wall {
-  background: linear-gradient(to right, white, gray);
-  color: brown;
-}
-
-.sawmill {
-  background: linear-gradient(to right, blue, black);
-  color: white;
-}
-
-.inn {
-  background: linear-gradient(to right, cyan, black);
-  color: white;
-}
-
-.farm {
-  background: linear-gradient(to right, green, black);
-  color: white;
-}
-
-.barracks {
-  background: linear-gradient(to right, red, black);
-  color: white;
-}
-
-.mine {
-  background: linear-gradient(to right, #B59410, black);
-  color: white;
-}
-
-.house {
-  background: linear-gradient(to right, gray, black);
-  color: white;
-}
-
-
-/* Additional styles for handling multiple entities on the same tile */
 .entity-group { display: flex; flex-wrap: wrap; }
 .entity-group .entity { margin: 2px; }
 
-/* Styling for the exclamation mark emoji */
 .exclamation-mark {
   position: absolute;
   font-size: 30px;
@@ -202,7 +148,6 @@ body {
   left: 5px;
 }
 
-/* Styling for the tooltip */
 .tooltip {
   position: absolute;
   background-color: rgba(0, 0, 0, 0.7);
@@ -219,6 +164,29 @@ body {
 
 .tooltip.visible { visibility: visible; opacity: 1; }
 
+.fog {
+  position: absolute;
+  width: 125px;
+  height: 125px;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 5;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.revealed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.archery_range:before {
+    content: "\1F3F9";
+    font-size: 20px;
+}
+
+.archery_range {
+    background: linear-gradient(to right, #8B4513, black);
+    color: white;
+}
 </style>
 </head>
 <body>
@@ -230,8 +198,8 @@ body {
   <a id="btnLeft" class="btn btn-move btn-lg active" href="/move?direction=left&target=map" role="button">◀️ Left</a>
   <a id="btnRight" class="btn btn-move btn-lg active" href="/move?direction=right&target=map" role="button">▶️ Right</a>
   <a class="btn btn-map btn-lg active" href="/" role="button">👤 User Panel</a>
-  <a class="btn btn-lg active btn-up" href="/map" role="button">Refresh 🔄</a> <!-- Modified Refresh button to navigate to / -->
-  <a class="btn btn-lg active btn-up" href="/scoreboard" role="button">Scores 🏆</a> <!-- Modified Refresh button to navigate to / -->
+  <a class="btn btn-lg active btn-up" href="/map" role="button">Refresh 🔄</a>
+  <a class="btn btn-lg active btn-up" href="/scoreboard" role="button">Scores 🏆</a>
   <a class="btn btn-quit btn-lg active" href="/logout" role="button">🌙 Logout</a>
 </div>
 </div>
@@ -241,132 +209,124 @@ body {
 </div>
 
 <script>
-
-const jsonData = {% raw data %};  // Your JSON data
-
+const jsonData = {% raw data %};
+const gridSize = 125;
+const visibleRadius = 5;  // Increased from 3 to 5 for better visibility
 
 function createMap(data) {
   var mapContainer = document.getElementById("map");
-  var gridSize = 125; // Default Grid size
   var maxX = 0;
   var maxY = 0;
+  var fragment = document.createDocumentFragment();
 
-  // Displaying users
+  function createEntity(className, x, y, content) {
+    var element = document.createElement("div");
+    element.className = className;
+    element.style.top = y + "px";
+    element.style.left = x + "px";
+    element.appendChild(content);
+    fragment.appendChild(element);
+    return element;
+  }
+
   Object.entries(data.users).forEach(function ([username, user]) {
     if (user.type === "player") {
-      var playerElement = document.createElement("div");
-      playerElement.className = "entity player";
-      playerElement.style.backgroundColor = "purple";
       var playerX = (user.x_pos - 1) * gridSize;
       var playerY = (user.y_pos - 1) * gridSize;
-      playerElement.style.top = playerY + "px";
-      playerElement.style.left = playerX + "px";
-      mapContainer.appendChild(playerElement);
+      maxX = Math.max(maxX, playerX);
+      maxY = Math.max(maxY, playerY);
 
+      var content = document.createElement("div");
       var playerImg = document.createElement("img");
       playerImg.src = user.img;
-      playerElement.appendChild(playerImg);
+      content.appendChild(playerImg);
 
       var playerLabel = document.createElement("div");
       playerLabel.className = "text-label";
-      playerLabel.innerHTML = "username: " + username + "<br>";
-      playerLabel.innerHTML += "pos: " + user.x_pos + ", " + user.y_pos + "<br>";
-      playerLabel.innerHTML += "exp: " + user.exp + "<br>";
-      playerLabel.innerHTML += "hp: " + user.hp + "<br>";
-      playerLabel.innerHTML += "armor: " + user.armor + "<br>";
-      playerElement.appendChild(playerLabel);
+      playerLabel.innerHTML = `username: ${username}<br>pos: ${user.x_pos}, ${user.y_pos}<br>exp: ${user.exp}<br>hp: ${user.hp}<br>armor: ${user.armor}`;
+      content.appendChild(playerLabel);
 
-      if (playerX > maxX) {
-        maxX = playerX;
-      }
-      if (playerY > maxY) {
-        maxY = playerY;
-      }
+      createEntity("entity player", playerX, playerY, content);
     }
   });
 
-  // Displaying global constructions
   Object.entries(data.construction).forEach(function ([key, construction]) {
     var [x_pos, y_pos] = key.split(",").map(Number);
     var constructionX = (x_pos - 1) * gridSize;
     var constructionY = (y_pos - 1) * gridSize;
-    if (constructionX > maxX) {
-      maxX = constructionX;
-    }
-    if (constructionY > maxY) {
-      maxY = constructionY;
-    }
-    var constructionElement = document.createElement("div");
-    constructionElement.className = "entity construction " + construction.type;
-    constructionElement.style.top = constructionY + "px";
-    constructionElement.style.left = constructionX + "px";
-    var textLabel = document.createElement("div");
-    textLabel.className = "text-label";
-    textLabel.innerHTML = "pos: " + x_pos + ", " + y_pos + "<br>";
-    Object.entries(construction).forEach(function ([key, value]) {
+    maxX = Math.max(maxX, constructionX);
+    maxY = Math.max(maxY, constructionY);
 
-        textLabel.innerHTML += key + ": " + value + "<br>";
+    var content = document.createElement("div");
+    content.className = "text-label";
+    content.innerHTML = `pos: ${x_pos}, ${y_pos}<br>${Object.entries(construction).map(([key, value]) => `${key}: ${value}`).join('<br>')}`;
 
-    });
-    constructionElement.appendChild(textLabel);
-    mapContainer.appendChild(constructionElement);
+    createEntity(`entity construction ${construction.type}`, constructionX, constructionY, content);
   });
 
-  // Set the map's width and height based on the maximum X and Y positions of construction and players
   mapContainer.style.width = (maxX + gridSize) + "px";
   mapContainer.style.height = (maxY + gridSize) + "px";
 
-  // Add grid lines
   for (var x = 0; x <= maxX + gridSize; x += gridSize) {
-    var gridLine = document.createElement("div");
-    gridLine.className = "grid-line";
-    gridLine.style.width = "1px";
-    gridLine.style.height = maxY + gridSize + "px";
-    gridLine.style.left = x + "px";
-    gridLine.style.top = "0";
-    mapContainer.appendChild(gridLine);
+    createEntity("grid-line", x, 0, document.createElement("div")).style.width = "1px";
+    createEntity("grid-line", x, 0, document.createElement("div")).style.height = (maxY + gridSize) + "px";
   }
   for (var y = 0; y <= maxY + gridSize; y += gridSize) {
-    var gridLine = document.createElement("div");
-    gridLine.className = "grid-line";
-    gridLine.style.width = maxX + gridSize + "px";
-    gridLine.style.height = "1px";
-    gridLine.style.top = y + "px";
-    gridLine.style.left = "0";
-    mapContainer.appendChild(gridLine);
+    createEntity("grid-line", 0, y, document.createElement("div")).style.height = "1px";
+    createEntity("grid-line", 0, y, document.createElement("div")).style.width = (maxX + gridSize) + "px";
   }
 
- // Group entities on the same tile and adjust their size if there are multiple entities
+  mapContainer.appendChild(fragment);
+  createFogOfWar(mapContainer, maxX, maxY);
+  groupEntitiesAndAddTooltips(mapContainer);
+  centerMapOnUser(data);
+}
+
+function createFogOfWar(mapContainer, maxX, maxY) {
+  for (var x = 0; x <= maxX; x += gridSize) {
+    for (var y = 0; y <= maxY; y += gridSize) {
+      var fogTile = document.createElement("div");
+      fogTile.className = "fog";
+      fogTile.style.left = x + "px";
+      fogTile.style.top = y + "px";
+      mapContainer.appendChild(fogTile);
+    }
+  }
+}
+
+function updateFogOfWar(playerX, playerY) {
+  var fogTiles = document.querySelectorAll(".fog");
+  var centerX = window.innerWidth / 2;
+  var centerY = window.innerHeight / 2;
+
+  fogTiles.forEach(function(tile) {
+    var tileX = parseInt(tile.style.left) / gridSize;
+    var tileY = parseInt(tile.style.top) / gridSize;
+
+    var screenX = (tileX - playerX) * gridSize + centerX;
+    var screenY = (tileY - playerY) * gridSize + centerY;
+
+    var distance = Math.sqrt(Math.pow(screenX - centerX, 2) + Math.pow(screenY - centerY, 2));
+
+    if (distance <= visibleRadius * gridSize) {
+      tile.classList.add("revealed");
+    } else {
+      tile.classList.remove("revealed");
+    }
+  });
+}
+
+function groupEntitiesAndAddTooltips(mapContainer) {
   var tileElements = mapContainer.querySelectorAll(".entity");
   var entitiesOnTile = {};
   tileElements.forEach(function (tileElement) {
-    var tileX = parseInt(tileElement.style.left);
-    var tileY = parseInt(tileElement.style.top);
-    var tileKey = tileX + "," + tileY;
+    var tileKey = tileElement.style.left + "," + tileElement.style.top;
     if (!entitiesOnTile[tileKey]) {
       entitiesOnTile[tileKey] = [];
     }
     entitiesOnTile[tileKey].push(tileElement);
   });
 
-  function showTooltip(entityGroup, tooltip) {
-    var combinedLabel = "";
-    entityGroup.forEach(function (entity) {
-      combinedLabel += entity.querySelector(".text-label").innerHTML + "<br>";
-    });
-    tooltip.innerHTML = combinedLabel;
-
-    var rect = entityGroup[0].getBoundingClientRect();
-    var left = rect.right + 10; // Move the tooltip to the right side of the entity
-    var top = rect.top; // Move the tooltip above the entity
-
-    tooltip.style.position = 'fixed';
-    tooltip.style.top = top + "px";
-    tooltip.style.left = left + "px";
-    tooltip.classList.add("visible");
-  }
-
-  // Add exclamation mark and tooltip for each group of entities on the same tile
   Object.values(entitiesOnTile).forEach(function (entityGroup) {
     if (entityGroup.length > 1) {
       entityGroup.forEach(function (entity) {
@@ -388,77 +348,96 @@ function createMap(data) {
       });
     }
   });
-
-
-
-
-
-  //centering start
-// Add this script to adjust the centering and scrolling
-var userKey = '{{ user }}'; // Replace this with the actual key or username
-var userToCenter = jsonData.users[userKey];
-
-if (userToCenter) {
-  var userX = (userToCenter.x_pos - 1) * gridSize + gridSize / 2; // Center of user's tile
-  var userY = (userToCenter.y_pos - 1) * gridSize + gridSize / 2; // Center of user's tile
-
-  var offsetX = Math.max(0, userX - window.innerWidth / 2);
-  var offsetY = Math.max(0, userY - window.innerHeight / 2);
-
-  // Scroll the window to the centered user position
-  window.scrollTo(offsetX, offsetY);
 }
-    //centering end
 
+function showTooltip(entityGroup, tooltip) {
+  var combinedLabel = entityGroup.map(entity => entity.querySelector(".text-label").innerHTML).join("<br>");
+  tooltip.innerHTML = combinedLabel;
 
+  var rect = entityGroup[0].getBoundingClientRect();
+  tooltip.style.position = 'fixed';
+  tooltip.style.top = rect.top + "px";
+  tooltip.style.left = (rect.right + 10) + "px";
+  tooltip.classList.add("visible");
+}
 
+function centerMapOnUser(data) {
+var userKey = '{{ user }}';
+  var userToCenter = data.users[userKey];
 
+  if (userToCenter) {
+    var userX = (userToCenter.x_pos - 1) * gridSize + gridSize / 2;
+    var userY = (userToCenter.y_pos - 1) * gridSize + gridSize / 2;
 
+    var centerX = window.innerWidth / 2;
+    var centerY = window.innerHeight / 2;
 
+    window.scrollTo(userX - centerX, userY - centerY);
+
+    updateFogOfWar(userToCenter.x_pos - 1, userToCenter.y_pos - 1);
+  }
+}
+
+function updateFogOfWarOnMove() {
+  var userKey = '{{ user }}';
+  var userToCenter = jsonData.users[userKey];
+
+  if (userToCenter) {
+    centerMapOnUser(jsonData);
+  }
 }
 
 createMap(jsonData);
-</script>
+centerMapOnUser(jsonData);
 
-     <script>
-document.addEventListener("DOMContentLoaded", function(event) {
-  document.addEventListener("keydown", function(event) {
-    var scrollAmount = 125;
-    var direction = null;
+document.addEventListener("keydown", function(event) {
+  var scrollAmount = 125;
+  var direction = null;
 
-    switch (event.key) {
-      case "ArrowLeft":
-        direction = "left";
-        window.scrollBy(-scrollAmount, 0);
-        break;
-      case "ArrowRight":
-        direction = "right";
-        window.scrollBy(scrollAmount, 0);
-        break;
-      case "ArrowUp":
-        direction = "up";
-        window.scrollBy(0, -scrollAmount);
-        break;
-      case "ArrowDown":
-        direction = "down";
-        window.scrollBy(0, scrollAmount);
-        break;
+  switch (event.key) {
+    case "ArrowLeft":
+      direction = "left";
+      window.scrollBy(-scrollAmount, 0);
+      break;
+    case "ArrowRight":
+      direction = "right";
+      window.scrollBy(scrollAmount, 0);
+      break;
+    case "ArrowUp":
+      direction = "up";
+      window.scrollBy(0, -scrollAmount);
+      break;
+    case "ArrowDown":
+      direction = "down";
+      window.scrollBy(0, scrollAmount);
+      break;
+  }
+
+  localStorage.setItem('scrollX', window.scrollX);
+  localStorage.setItem('scrollY', window.scrollY);
+
+  if (direction) {
+    var button = document.getElementById('btn' + direction.charAt(0).toUpperCase() + direction.slice(1));
+    if (button) {
+      button.click();
     }
+  }
+});
 
-    localStorage.setItem('scrollX', window.scrollX);
-    localStorage.setItem('scrollY', window.scrollY);
+document.addEventListener("DOMContentLoaded", function() {
+  centerMapOnUser(jsonData);
+});
 
-    if (direction) {
-      var button = document.getElementById('btn' + direction.charAt(0).toUpperCase() + direction.slice(1));
-      if (button) {
-        button.click();
-      }
-    }
+document.querySelectorAll('.btn-move').forEach(button => {
+  button.addEventListener('click', function(event) {
+    setTimeout(function() {
+      centerMapOnUser(jsonData);
+    }, 500);
   });
 });
 
 </script>
 
-
 </body>
 </html>
+
