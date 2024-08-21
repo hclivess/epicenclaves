@@ -57,20 +57,22 @@
                     </div>
                     <div class="card-body">
                         <img src="{{file['img']}}" alt="Profile Picture" class="profile-pic mb-3">
-                        <p>Age: {{ file.get("age", "N/A") }}</p>
-                        <p>Alive: {{ file.get("alive", "N/A") }}</p>
-                        <p>Experience: {{ file.get("exp", "N/A") }}</p>
-                        <p>Research Points: {{ file.get("research", "N/A") }}</p>
-                        <p>Health Points: {{ file.get("hp", "N/A") }}</p>
-                        <p>Armor: {{ file.get("armor", "N/A") }}</p>
-                        <p>Population limit: {{ file.get("pop_lim", "N/A") }}</p>
-                        <p>Peasants: {{ file.get("peasants", "N/A") }}</p>
-                        <p>Army: {{ file.get("army_free", "N/A") }} / {{ file.get("army_deployed", "N/A") }}</p>
-                        <p>Action points: {{ file.get("action_points", "N/A") }}</p>
-                        <p>Position: ({{ file.get("x_pos", "N/A") }}, {{ file.get("y_pos", "N/A") }})</p>
+                        <div class="user-stats">
+                            <p class="mb-1">Age: {{ file.get("age", "N/A") }}</p>
+                            <p class="mb-1">Alive: {{ file.get("alive", "N/A") }}</p>
+                            <p class="mb-1">Experience: {{ file.get("exp", "N/A") }}</p>
+                            <p class="mb-1">Research Points: {{ file.get("research", "N/A") }}</p>
+                            <p class="mb-1">Health Points: {{ file.get("hp", "N/A") }}</p>
+                            <p class="mb-1">Armor: {{ file.get("armor", "N/A") }}</p>
+                            <p class="mb-1">Population limit: {{ file.get("pop_lim", "N/A") }}</p>
+                            <p class="mb-1">Peasants: {{ file.get("peasants", "N/A") }}</p>
+                            <p class="mb-1">Army: {{ file.get("army_free", "N/A") }} / {{ file.get("army_deployed", "N/A") }}</p>
+                            <p class="mb-1">Action points: {{ file.get("action_points", "N/A") }}</p>
+                            <p class="mb-1">Position: ({{ file.get("x_pos", "N/A") }}, {{ file.get("y_pos", "N/A") }})</p>
+                        </div>
 
                         {% if not file.get("alive", "N/A") and file.get("action_points", "N/A") > 5000 %}
-                            <a href="/revive" class="btn btn-danger btn-block">💀 Revive 💀</a>
+                            <a href="/revive" class="btn btn-danger btn-block mt-3">💀 Revive 💀</a>
                         {% end %}
                     </div>
                 </div>
@@ -80,10 +82,10 @@
                         <h4 class="mb-0">Available Resources</h4>
                     </div>
                     <div class="card-body">
-                        <p>🪵 Wood: {{file.get("wood", "N/A")}}</p>
-                        <p>🥩 Food: {{file.get("food", "N/A")}}</p>
-                        <p>🪨 Bismuth: {{file.get("bismuth", "N/A")}}</p>
-                        <p>🧪 Research: {{file.get("research", "N/A")}}</p>
+                        <p class="mb-1">🪵 Wood: {{file.get("wood", "N/A")}}</p>
+                        <p class="mb-1">🥩 Food: {{file.get("food", "N/A")}}</p>
+                        <p class="mb-1">🪨 Bismuth: {{file.get("bismuth", "N/A")}}</p>
+                        <p class="mb-1">🧪 Research: {{file.get("research", "N/A")}}</p>
                     </div>
                 </div>
             </div>
