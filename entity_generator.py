@@ -4,11 +4,14 @@ import random
 
 import random
 
-def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=None, herd_size=15,
-          herd_radius=5, herd_probability=0.5):
+def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=None, max_entities_total=None,
+          herd_size=15, herd_radius=5, herd_probability=0.5):
     total_entities = 0
     additional_entity_data = generate_additional_entity_data(entity_instance, level)
     total_tiles = size * size
+
+    # Count existing entities on the map
+    existing_entities = sum(1 for value in mapdb.values() if value.get('type') == entity_instance.type)
 
     while True:
         if random.random() > probability:
@@ -16,6 +19,10 @@ def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=Non
             break
 
         if max_entities is not None and total_entities >= max_entities:
+            return
+
+        if max_entities_total is not None and existing_entities + total_entities >= max_entities_total:
+            print(f"Reached maximum total entities ({max_entities_total})")
             return
 
         if len(mapdb) >= total_tiles:
@@ -32,7 +39,10 @@ def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=Non
         if random.random() <= herd_probability:
             level_one_count = max(1, int(0.1 * herd_size))
             for idx in range(herd_size):
-                if total_entities >= max_entities:
+                if max_entities is not None and total_entities >= max_entities:
+                    return
+                if max_entities_total is not None and existing_entities + total_entities >= max_entities_total:
+                    print(f"Reached maximum total entities ({max_entities_total})")
                     return
                 effective_level = 1 if idx < level_one_count else level
                 x_offset = random.randint(-herd_radius, herd_radius)
@@ -53,7 +63,6 @@ def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=Non
             print(f"Generating {data} on {x_pos}, {y_pos}")
             save_map_data(x_pos=x_pos, y_pos=y_pos, data=data, map_data_dict=mapdb)
             total_entities += 1
-
 
 
 def generate_additional_entity_data(entity_instance, level):

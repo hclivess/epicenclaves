@@ -143,6 +143,7 @@ class TurnEngine(threading.Thread):
             probability=0.001,
             size=200,
             max_entities=1,
+            max_entities_total=1,
             level=1,
             herd_probability=1
         )
