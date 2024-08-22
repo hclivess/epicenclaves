@@ -148,17 +148,27 @@ def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users:
 
     return {"messages": messages, "battle_data": battle_data}
 
+
 def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict, npc: entities.Enemy) -> Dict:
     messages = []
     battle_data = {
         "player": {"name": user, "max_hp": user_data["hp"], "current_hp": user_data["hp"]},
-        "enemy": {"name": npc.type, "max_hp": npc.hp, "current_hp": npc.hp}
+        "enemy": {"name": npc.type, "max_hp": npc.hp, "current_hp": npc.hp},
+        "rounds": []
     }
 
+    round_number = 0
     while npc.alive and user_data["alive"]:
+        round_number += 1
         if npc.hp < 1:
             process_npc_defeat(npc, user_data, user, usersdb, mapdb, entry, messages)
             battle_data["enemy"]["current_hp"] = 0
+            battle_data["rounds"].append({
+                "round": round_number,
+                "player_hp": user_data["hp"],
+                "enemy_hp": 0,
+                "message": messages[-1]
+            })
             break
 
         if user_data["hp"] < 1:
@@ -171,14 +181,26 @@ def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dic
                 update_user_data(user=user, updated_values={"action_points": user_data["action_points"] - 1, "hp": 1},
                                  user_data_dict=usersdb)
             battle_data["player"]["current_hp"] = user_data["hp"]
+            battle_data["rounds"].append({
+                "round": round_number,
+                "player_hp": user_data["hp"],
+                "enemy_hp": npc.hp,
+                "message": messages[-1]
+            })
             break
 
         # Player attacks NPC
         user_dmg = get_weapon_damage(user_data, user_data["exp"])
         npc.hp -= user_dmg['damage']
         battle_data["enemy"]["current_hp"] = npc.hp
-        messages.append(
-            f"You {user_dmg['message']} the {npc.type} for {user_dmg['damage']} damage. It has {npc.hp} HP left")
+        message = f"You {user_dmg['message']} the {npc.type} for {user_dmg['damage']} damage. It has {npc.hp} HP left"
+        messages.append(message)
+        battle_data["rounds"].append({
+            "round": round_number,
+            "player_hp": user_data["hp"],
+            "enemy_hp": npc.hp,
+            "message": message
+        })
 
         # NPC attacks player
         if npc.hp > 0:
@@ -187,47 +209,98 @@ def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dic
             final_damage, _ = apply_armor_protection(user_with_name, npc_dmg["damage"], messages)
             user_data["hp"] -= final_damage
             battle_data["player"]["current_hp"] = user_data["hp"]
-            messages.append(
-                f"The {npc.type} {npc_dmg['message']} you for {final_damage} damage. You have {user_data['hp']} HP left")
+            message = f"The {npc.type} {npc_dmg['message']} you for {final_damage} damage. You have {user_data['hp']} HP left"
+            messages.append(message)
+            battle_data["rounds"].append({
+                "round": round_number,
+                "player_hp": user_data["hp"],
+                "enemy_hp": npc.hp,
+                "message": message
+            })
 
     return {"messages": messages, "battle_data": battle_data}
+
 
 def fight_player(entry: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> Dict:
     messages = []
     target_data = entry[target_name]
     battle_data = {
         "player": {"name": user, "max_hp": user_data["hp"], "current_hp": user_data["hp"]},
-        "enemy": {"name": target_name, "max_hp": target_data["hp"], "current_hp": target_data["hp"]}
+        "enemy": {"name": target_name, "max_hp": target_data["hp"], "current_hp": target_data["hp"]},
+        "rounds": []
     }
 
-    messages.append(f"You challenged {target_name}")
+    messages.append(f"You challenged {target_name}")  #redundant
+    battle_data["rounds"].append({
+        "round": 0,
+        "player_hp": user_data["hp"],
+        "enemy_hp": target_data["hp"],
+        "message": f"You challenged {target_name}"
+    })
 
+    round_number = 0
     while target_data["alive"] and user_data["alive"]:
+        round_number += 1
+
         # Player attacks target
         player_attack(target_data, user_data, target_name, messages)
         battle_data["enemy"]["current_hp"] = target_data["hp"]
+        battle_data["rounds"].append({
+            "round": round_number,
+            "player_hp": user_data["hp"],
+            "enemy_hp": target_data["hp"],
+            "message": messages[-1]
+        })
 
         # Target attacks player
         player_attack(user_data, target_data, "You", messages)
         battle_data["player"]["current_hp"] = user_data["hp"]
+        battle_data["rounds"].append({
+            "round": round_number,
+            "player_hp": user_data["hp"],
+            "enemy_hp": target_data["hp"],
+            "message": messages[-1]
+        })
 
         if 0 < target_data["hp"] < 10:
-            messages.append(f"{target_name} has fled seeing they stand no chance against you!")
+            message = f"{target_name} has fled seeing they stand no chance against you!"
+            messages.append(message)
+            battle_data["rounds"].append({
+                "round": round_number,
+                "player_hp": user_data["hp"],
+                "enemy_hp": target_data["hp"],
+                "message": message
+            })
             break
 
         if target_data["hp"] <= 0:
             experience = user_data["exp"] + 10 + target_data["exp"] / 10
             update_user_data(user=user, updated_values={"exp": experience}, user_data_dict=usersdb)
-            messages.extend(process_defeat(target_data, target_name, 0.5, usersdb))
+            defeat_messages = process_defeat(target_data, target_name, 0.5, usersdb)
+            messages.extend(defeat_messages)
+            for msg in defeat_messages:
+                battle_data["rounds"].append({
+                    "round": round_number,
+                    "player_hp": user_data["hp"],
+                    "enemy_hp": target_data["hp"],
+                    "message": msg
+                })
             break
         elif user_data["hp"] <= 0:
             experience = target_data["exp"] + 10 + user_data["exp"] / 10
             update_user_data(user=target_name, updated_values={"exp": experience}, user_data_dict=usersdb)
-            messages.extend(process_defeat(user_data, user, 0.5, usersdb))
+            defeat_messages = process_defeat(user_data, user, 0.5, usersdb)
+            messages.extend(defeat_messages)
+            for msg in defeat_messages:
+                battle_data["rounds"].append({
+                    "round": round_number,
+                    "player_hp": user_data["hp"],
+                    "enemy_hp": target_data["hp"],
+                    "message": msg
+                })
             break
 
     return {"messages": messages, "battle_data": battle_data}
-
 def player_attack(attacker: Dict, defender: Dict, attacker_name: str, messages: List[str]) -> None:
     print(f"{attacker_name} attacking {defender.get('name', 'opponent')}")
     if attacker["hp"] <= 0:
