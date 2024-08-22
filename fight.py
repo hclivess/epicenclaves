@@ -6,11 +6,13 @@ from backend import update_user_data, get_values
 from map import remove_from_map, get_coords
 import entities  # Import the entire entities module
 from weapon_generator import generate_weapon, generate_armor
+from unequip import unequip_item
+from trash import trash_item
 
-
-def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[str]) -> Tuple[int, int]:
+def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[str], usersdb: Dict) -> Tuple[int, int]:
     armor_protection = 0
     is_player = defender.get('name', 'You') == 'You'
+    username = defender['name'] if not is_player else defender.get('username', 'player')
 
     # Get all armor slots, including empty ones
     all_armor_slots = [armor for armor in defender.get("equipped", []) if armor.get("role") == "armor"]
@@ -39,8 +41,14 @@ def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[s
                 else:
                     messages.append(
                         f"{defender['name']}'s {selected_armor['type']} has broken and no longer provides protection!")
-                selected_armor["type"] = "empty"
-                selected_armor["protection"] = 0
+
+                # Unequip the broken item
+                unequip_message = unequip_item(usersdb, username, selected_armor['id'])
+                messages.append(unequip_message)
+
+                # Trash the broken item
+                trash_message = trash_item(usersdb, username, selected_armor['id'])
+                messages.append(trash_message)
         else:
             if is_player:
                 messages.append("The attack hit an unprotected area!")
