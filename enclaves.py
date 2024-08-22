@@ -431,7 +431,7 @@ class FightHandler(BaseHandler):
                 descriptions=descriptions,
             )
         else:
-            messages = fight(
+            fight_result = fight(
                 target,
                 target_name,
                 on_tile_map,
@@ -441,10 +441,13 @@ class FightHandler(BaseHandler):
                 usersdb,
                 mapdb,
             )
-            self.render("templates/fight.html",
-                        messages=messages,
-                        profile_picture=usersdb[user]["img"],
-                        target=target)
+            self.render(
+                "templates/fight.html",
+                messages=json.dumps(fight_result["messages"]),
+                battle_data=json.dumps(fight_result["battle_data"]),
+                profile_picture=usersdb[user]["img"],
+                target=target
+            )
 
 
 class ConquerHandler(BaseHandler):

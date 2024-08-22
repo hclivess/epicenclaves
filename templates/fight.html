@@ -154,62 +154,66 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const battleLog = document.getElementById('battleLog');
-        const playerHealth = document.getElementById('playerHealth');
-        const enemyHealth = document.getElementById('enemyHealth');
-        const messages = [
-            {% for message in messages %}
-                "{{message}}",
-            {% end %}
-        ];
+<script>
+    const battleLog = document.getElementById('battleLog');
+    const playerHealth = document.getElementById('playerHealth');
+    const enemyHealth = document.getElementById('enemyHealth');
+    const messages = {% raw messages %};
+    const battleData = {% raw battle_data %};
 
-        let playerCurrentHealth = 100;
-        let enemyCurrentHealth = 100;
+    let playerCurrentHealth = battleData.player.current_hp;
+    let enemyCurrentHealth = battleData.enemy.current_hp;
+    let playerMaxHealth = battleData.player.max_hp;
+    let enemyMaxHealth = battleData.enemy.max_hp;
 
-        function updateHealth(health, element) {
-            gsap.to(element, {
-                width: `${health}%`,
-                duration: 0.5,
-                ease: "power2.out"
-            });
-        }
+    function updateHealth(health, maxHealth, element) {
+        const healthPercentage = (health / maxHealth) * 100;
+        gsap.to(element, {
+            width: `${healthPercentage}%`,
+            duration: 0.5,
+            ease: "power2.out"
+        });
+    }
 
-        function animateAttack(attacker, target) {
-            const tl = gsap.timeline();
-            tl.to(attacker, { x: attacker.classList.contains('player') ? 100 : -100, duration: 0.2 })
-              .to(attacker, { x: 0, duration: 0.2 })
-              .to(target, { x: target.classList.contains('player') ? -50 : 50, duration: 0.1 }, "-=0.2")
-              .to(target, { x: 0, duration: 0.1 });
-        }
+    function animateAttack(attacker, target) {
+        const tl = gsap.timeline();
+        tl.to(attacker, { x: attacker.classList.contains('player') ? 100 : -100, duration: 0.2 })
+          .to(attacker, { x: 0, duration: 0.2 })
+          .to(target, { x: target.classList.contains('player') ? -50 : 50, duration: 0.1 }, "-=0.2")
+          .to(target, { x: 0, duration: 0.1 });
+    }
 
-        function addMessage(message, index) {
-            setTimeout(() => {
-                const li = document.createElement('li');
-                li.className = 'list-group-item battle-message';
+    function addMessage(message, index) {
+        setTimeout(() => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item battle-message';
 
-                if (message.includes("You hit") || message.includes("You critical hit")) {
-                    li.classList.add('player-attack');
-                    animateAttack(document.querySelector('.player'), document.querySelector('.enemy'));
-                    enemyCurrentHealth = Math.max(0, enemyCurrentHealth - 10);
-                    updateHealth(enemyCurrentHealth, enemyHealth);
-                } else if (message.includes("hits you") || message.includes("critical hit you")) {
-                    li.classList.add('enemy-attack');
-                    animateAttack(document.querySelector('.enemy'), document.querySelector('.player'));
-                    playerCurrentHealth = Math.max(0, playerCurrentHealth - 10);
-                    updateHealth(playerCurrentHealth, playerHealth);
-                } else if (message.includes("defeated") || message.includes("escaped")) {
-                    li.classList.add('battle-result');
-                }
+            if (message.includes("You hit") || message.includes("You critical hit")) {
+                li.classList.add('player-attack');
+                animateAttack(document.querySelector('.player'), document.querySelector('.enemy'));
+                enemyCurrentHealth = Math.max(0, enemyCurrentHealth - 10);
+                updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth);
+            } else if (message.includes("hits you") || message.includes("critical hit you")) {
+                li.classList.add('enemy-attack');
+                animateAttack(document.querySelector('.enemy'), document.querySelector('.player'));
+                playerCurrentHealth = Math.max(0, playerCurrentHealth - 10);
+                updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth);
+            } else if (message.includes("defeated") || message.includes("escaped")) {
+                li.classList.add('battle-result');
+            }
 
-                li.textContent = message;
-                battleLog.appendChild(li);
-                window.scrollTo(0, document.body.scrollHeight);
-            }, index * 1000);  // Delay each message by 1 second
-        }
+            li.textContent = message;
+            battleLog.appendChild(li);
+            window.scrollTo(0, document.body.scrollHeight);
+        }, index * 1000);  // Delay each message by 1 second
+    }
 
-        messages.forEach(addMessage);
-    </script>
+    // Initialize health bars
+    updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth);
+    updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth);
+
+    messages.forEach(addMessage);
+</script>
 </body>
 
 </html>

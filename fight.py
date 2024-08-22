@@ -7,7 +7,6 @@ from map import remove_from_map, get_coords
 import entities
 from weapon_generator import generate_weapon, generate_armor
 
-
 def get_entity_class(target: str) -> Optional[type]:
     """
     Get the entity class based on the target string.
@@ -31,7 +30,6 @@ def get_entity_class(target: str) -> Optional[type]:
 
     print(f"No matching entity class found for '{target}'")
     return None
-
 
 def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[str]) -> Tuple[int, int]:
     print(f"Applying armor protection. Initial damage: {initial_damage}")
@@ -85,7 +83,6 @@ def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[s
 
     return final_damage, absorbed_damage
 
-
 def get_weapon_damage(attacker: Dict, exp_bonus_value: int) -> Dict:
     print(f"Getting weapon damage for attacker. Exp bonus: {exp_bonus_value}")
     for weapon in attacker.get("equipped", {}):
@@ -98,6 +95,138 @@ def get_weapon_damage(attacker: Dict, exp_bonus_value: int) -> Dict:
     print("No weapon found, returning default damage")
     return {"damage": 1, "message": "hit"}  # Default damage if no weapon found
 
+def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users: List[Dict], user_data: Dict, user: str,
+          usersdb: Dict, mapdb: Dict) -> Dict:
+    print(f"Starting fight. Target: {target}, Target name: {target_name}")
+    messages = []
+    battle_data = {
+        "player": {"name": user, "max_hp": user_data["hp"], "current_hp": user_data["hp"]},
+        "enemy": {"name": target, "max_hp": 0, "current_hp": 0}
+    }
+
+    entity_class = get_entity_class(target)
+
+    if entity_class:
+        print(f"Found entity class: {entity_class.__name__}")
+    else:
+        print(f"No valid entity class found for: {target}")
+        messages.append(f"No valid target found: {target}")
+        return {"messages": messages, "battle_data": battle_data}
+
+    for entry in on_tile_map:
+        entry_type = get_values(entry).get("type")
+        print(f"Processing map entry. Type: {entry_type}")
+
+        if issubclass(entity_class, entities.Enemy):
+            print(f"Fighting NPC: {target}")
+            enemy = entity_class()
+            battle_data["enemy"]["max_hp"] = enemy.hp
+            battle_data["enemy"]["current_hp"] = enemy.hp
+            fight_result = fight_npc(entry, user_data, user, usersdb, mapdb, enemy)
+            messages.extend(fight_result["messages"])
+            battle_data.update(fight_result["battle_data"])
+        elif target == "player" and entry_type == "player":
+            print(f"Fighting player: {target_name}")
+            fight_result = fight_player(entry, target_name, user_data, user, usersdb)
+            messages.extend(fight_result["messages"])
+            battle_data.update(fight_result["battle_data"])
+
+    for entry in on_tile_users:
+        entry_type = get_values(entry).get("type")
+        entry_name = get_coords(entry)
+        print(f"Processing user entry. Type: {entry_type}, Name: {entry_name}")
+
+        if target == "player" and entry_type == "player" and target_name == entry_name:
+            print(f"Fighting player: {target_name}")
+            fight_result = fight_player(entry, target_name, user_data, user, usersdb)
+            messages.extend(fight_result["messages"])
+            battle_data.update(fight_result["battle_data"])
+
+    if not messages:
+        print(f"No valid target found for: {target}")
+        messages.append(f"No valid target found: {target}")
+
+    return {"messages": messages, "battle_data": battle_data}
+
+def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict, npc: entities.Enemy) -> Dict:
+    messages = []
+    battle_data = {
+        "player": {"name": user, "max_hp": user_data["hp"], "current_hp": user_data["hp"]},
+        "enemy": {"name": npc.type, "max_hp": npc.hp, "current_hp": npc.hp}
+    }
+
+    while npc.alive and user_data["alive"]:
+        if npc.hp < 1:
+            process_npc_defeat(npc, user_data, user, usersdb, mapdb, entry, messages)
+            battle_data["enemy"]["current_hp"] = 0
+            break
+
+        if user_data["hp"] < 1:
+            if death_roll(npc.kill_chance):
+                messages.append("You died")
+                user_data["alive"] = False
+                update_user_data(user=user, updated_values={"alive": False, "hp": 0}, user_data_dict=usersdb)
+            else:
+                messages.append("You are almost dead but managed to escape")
+                update_user_data(user=user, updated_values={"action_points": user_data["action_points"] - 1, "hp": 1},
+                                 user_data_dict=usersdb)
+            battle_data["player"]["current_hp"] = user_data["hp"]
+            break
+
+        # Player attacks NPC
+        user_dmg = get_weapon_damage(user_data, user_data["exp"])
+        npc.hp -= user_dmg['damage']
+        battle_data["enemy"]["current_hp"] = npc.hp
+        messages.append(
+            f"You {user_dmg['message']} the {npc.type} for {user_dmg['damage']} damage. It has {npc.hp} HP left")
+
+        # NPC attacks player
+        if npc.hp > 0:
+            npc_dmg = npc.roll_damage()
+            user_with_name = {"name": "You", **user_data}  # Add 'name' key to user_data
+            final_damage, _ = apply_armor_protection(user_with_name, npc_dmg["damage"], messages)
+            user_data["hp"] -= final_damage
+            battle_data["player"]["current_hp"] = user_data["hp"]
+            messages.append(
+                f"The {npc.type} {npc_dmg['message']} you for {final_damage} damage. You have {user_data['hp']} HP left")
+
+    return {"messages": messages, "battle_data": battle_data}
+
+def fight_player(entry: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> Dict:
+    messages = []
+    target_data = entry[target_name]
+    battle_data = {
+        "player": {"name": user, "max_hp": user_data["hp"], "current_hp": user_data["hp"]},
+        "enemy": {"name": target_name, "max_hp": target_data["hp"], "current_hp": target_data["hp"]}
+    }
+
+    messages.append(f"You challenged {target_name}")
+
+    while target_data["alive"] and user_data["alive"]:
+        # Player attacks target
+        player_attack(target_data, user_data, target_name, messages)
+        battle_data["enemy"]["current_hp"] = target_data["hp"]
+
+        # Target attacks player
+        player_attack(user_data, target_data, "You", messages)
+        battle_data["player"]["current_hp"] = user_data["hp"]
+
+        if 0 < target_data["hp"] < 10:
+            messages.append(f"{target_name} has fled seeing they stand no chance against you!")
+            break
+
+        if target_data["hp"] <= 0:
+            experience = user_data["exp"] + 10 + target_data["exp"] / 10
+            update_user_data(user=user, updated_values={"exp": experience}, user_data_dict=usersdb)
+            messages.extend(process_defeat(target_data, target_name, 0.5, usersdb))
+            break
+        elif user_data["hp"] <= 0:
+            experience = target_data["exp"] + 10 + user_data["exp"] / 10
+            update_user_data(user=target_name, updated_values={"exp": experience}, user_data_dict=usersdb)
+            messages.extend(process_defeat(user_data, user, 0.5, usersdb))
+            break
+
+    return {"messages": messages, "battle_data": battle_data}
 
 def player_attack(attacker: Dict, defender: Dict, attacker_name: str, messages: List[str]) -> None:
     print(f"{attacker_name} attacking {defender.get('name', 'opponent')}")
@@ -117,7 +246,6 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, messages: 
         messages.append(
             f"{attacker_name} hits you for {final_damage} {damage_dict['message']} damage, you have {defender['hp']} HP left")
 
-
 def process_defeat(entity: Dict, entity_name: str, chance: float, usersdb: Dict) -> List[str]:
     messages = []
     if death_roll(chance):
@@ -129,45 +257,6 @@ def process_defeat(entity: Dict, entity_name: str, chance: float, usersdb: Dict)
 
     update_user_data(user=entity_name, updated_values=new_data, user_data_dict=usersdb)
     return messages
-
-
-def fight_player(entry: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> List[str]:
-    messages = []
-    entry_name = get_coords(entry)
-    target_data = entry[entry_name]
-
-    if target_name != entry_name:
-        return messages
-
-    if target_data["hp"] == 0:
-        return [f"{entry_name} is already dead!"]
-
-    if target_data["exp"] < 10:
-        return [f"{entry_name} is too inexperienced to challenge!"]
-
-    messages.append(f"You challenged {entry_name}")
-
-    while target_data["alive"] and user_data["alive"]:
-        player_attack(target_data, user_data, entry_name, messages)
-        player_attack(user_data, target_data, "You", messages)
-
-        if 0 < target_data["hp"] < 10:
-            messages.append(f"{entry_name} has fled seeing they stand no chance against you!")
-            break
-
-        if target_data["hp"] <= 0:
-            experience = user_data["exp"] + 10 + target_data["exp"] / 10
-            update_user_data(user=user, updated_values={"exp": experience}, user_data_dict=usersdb)
-            messages.extend(process_defeat(target_data, entry_name, 0.5, usersdb))
-            break
-        elif user_data["hp"] <= 0:
-            experience = target_data["exp"] + 10 + user_data["exp"] / 10
-            update_user_data(user=target_name, updated_values={"exp": experience}, user_data_dict=usersdb)
-            messages.extend(process_defeat(user_data, user, 0.5, usersdb))
-            break
-
-    return messages
-
 
 def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict, entry: Dict,
                        messages: List[str]) -> None:
@@ -193,93 +282,6 @@ def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb:
 
     update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
 
-
-def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict, npc: entities.Enemy) -> List[str]:
-    messages = []
-
-    while npc.alive and user_data["alive"]:
-        if npc.hp < 1:
-            process_npc_defeat(npc, user_data, user, usersdb, mapdb, entry, messages)
-            break
-
-        if user_data["hp"] < 1:
-            if death_roll(npc.kill_chance):
-                messages.append("You died")
-                user_data["alive"] = False
-                update_user_data(user=user, updated_values={"alive": False, "hp": 0}, user_data_dict=usersdb)
-            else:
-                messages.append("You are almost dead but managed to escape")
-                update_user_data(user=user, updated_values={"action_points": user_data["action_points"] - 1, "hp": 1},
-                                 user_data_dict=usersdb)
-            break
-
-        # Player attacks NPC
-        user_dmg = get_weapon_damage(user_data, user_data["exp"])
-        npc.hp -= user_dmg['damage']
-        messages.append(
-            f"You {user_dmg['message']} the {npc.type} for {user_dmg['damage']} damage. It has {npc.hp} HP left")
-
-        # NPC attacks player
-        if npc.hp > 0:
-            npc_dmg = npc.roll_damage()
-            user_with_name = {"name": "You", **user_data}  # Add 'name' key to user_data
-            final_damage, _ = apply_armor_protection(user_with_name, npc_dmg["damage"], messages)
-            user_data["hp"] -= final_damage
-            messages.append(
-                f"The {npc.type} {npc_dmg['message']} you for {final_damage} damage. You have {user_data['hp']} HP left")
-
-    return messages
-
-
-def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users: List[Dict], user_data: Dict, user: str,
-          usersdb: Dict, mapdb: Dict) -> List[str]:
-    print(f"Starting fight. Target: {target}, Target name: {target_name}")
-    messages = []
-
-    entity_class = get_entity_class(target)
-
-    if entity_class:
-        print(f"Found entity class: {entity_class.__name__}")
-    else:
-        print(f"No valid entity class found for: {target}")
-        messages.append(f"No valid target found: {target}")
-        return messages
-
-    for entry in on_tile_map:
-        entry_type = get_values(entry).get("type")
-        print(f"Processing map entry. Type: {entry_type}")
-
-        if issubclass(entity_class, entities.Enemy):
-            print(f"Fighting NPC: {target}")
-            messages.extend(fight_npc(entry, user_data, user, usersdb, mapdb, entity_class()))
-        elif target == "player" and entry_type == "player":
-            print(f"Fighting player: {target_name}")
-            messages.extend(fight_player(entry, target_name, user_data, user, usersdb))
-
-    for entry in on_tile_users:
-        entry_type = get_values(entry).get("type")
-        entry_name = get_coords(entry)
-        print(f"Processing user entry. Type: {entry_type}, Name: {entry_name}")
-
-        if target == "player" and entry_type == "player" and target_name == entry_name:
-            print(f"Fighting player: {target_name}")
-            messages.extend(fight_player(entry, target_name, user_data, user, usersdb))
-
-    if not messages:
-        print(f"No valid target found for: {target}")
-        messages.append(f"No valid target found: {target}")
-
-    return messages
-
-
-def get_fight_preconditions(user_data: Dict) -> Optional[str]:
-    if user_data["action_points"] < 1:
-        return "Not enough action points to fight"
-    if not user_data["alive"]:
-        return "You are dead"
-    return None
-
-
 def exp_bonus(value: int, base: int = 10) -> int:
     if value <= 0:
         return 0
@@ -290,7 +292,6 @@ def exp_bonus(value: int, base: int = 10) -> int:
     log_value = math.log(value, base)
 
     return int(log_lower + (log_upper - log_lower) * ((log_value - log_lower) / (log_upper - log_lower)))
-
 
 def get_damage(min_dmg: int, max_dmg: int, weapon: Dict, exp_bonus: int) -> Dict:
     damage = int(min_dmg + (max_dmg - min_dmg) * random.betavariate(2, 5))
@@ -306,8 +307,14 @@ def get_damage(min_dmg: int, max_dmg: int, weapon: Dict, exp_bonus: int) -> Dict
 
     return {"damage": damage + exp_bonus, "message": message}
 
-
 def death_roll(hit_chance: float) -> bool:
     if not 0 <= hit_chance <= 1:
         raise ValueError("Hit chance should be between 0 and 1 inclusive.")
     return random.random() < hit_chance
+
+def get_fight_preconditions(user_data: Dict) -> Optional[str]:
+    if user_data["action_points"] < 1:
+        return "Not enough action points to fight"
+    if not user_data["alive"]:
+        return "You are dead"
+    return None
