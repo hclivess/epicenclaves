@@ -207,14 +207,14 @@
         const enemyMaxHealth = battleData.enemy.max_hp;
 
         function updateHealth(health, maxHealth, healthElement, hpDisplayElement) {
-            const clampedHealth = Math.max(0, health);
-            const healthPercentage = (clampedHealth / maxHealth) * 100;
+            const clampedHealth = Math.max(0, Math.min(health, maxHealth));
+            const healthPercentage = Math.min((clampedHealth / maxHealth) * 100, 100);
 
             // Use CSS transitions for smoother updates
             healthElement.style.transition = "width 0.3s ease-in-out";
             healthElement.style.width = `${healthPercentage}%`;
 
-            hpDisplayElement.textContent = `${health} / ${maxHealth} HP`;
+            hpDisplayElement.textContent = `${clampedHealth} / ${maxHealth} HP`;
 
             // Add a visual cue for values below 0
             if (clampedHealth <= 0) {
