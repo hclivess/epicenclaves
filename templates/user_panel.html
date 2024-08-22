@@ -157,6 +157,7 @@
                                         {% if item.get("role") == "armor" %}
                                             <p>Protection: {{item.get("protection")}}</p>
                                             <p>Durability: {{item.get("durability")}}</p>
+                                            <p>Efficiency: {{item.get("efficiency")}}%</p>
                                             <p>Slot: {{item.get("slot", "N/A")}}</p>
                                         {% else %}
                                             <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
