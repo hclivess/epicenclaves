@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple, Optional
 
 from backend import update_user_data, get_values
 from map import remove_from_map, get_coords
-from entities import Boar, Wolf, Enemy
+import entities  # Import the entire entities module
 from weapon_generator import generate_weapon, generate_armor
 
 
@@ -135,13 +135,13 @@ def fight_player(entry: Dict, target_name: str, user_data: Dict, user: str, user
     return messages
 
 
-def process_npc_defeat(npc: Enemy, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict, entry: Dict,
+def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict, entry: Dict,
                        messages: List[str]) -> None:
-    messages.append(f"The {npc.type} is dead")
+    messages.append(f"The {npc.type} is defeated")
     npc.alive = False
 
     if random.random() < npc.drop_chance:
-        max_level = get_values(entry).get("level")
+        max_level = get_values(entry).get("level", 1)
         level = random.randint(1, max_level)
         new_item = generate_weapon(level=level) if random.random() < 0.5 else generate_armor(level=level)
         messages.append(f"You found a level {level} {new_item['type']}!")
@@ -160,7 +160,7 @@ def process_npc_defeat(npc: Enemy, user_data: Dict, user: str, usersdb: Dict, ma
     update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
 
 
-def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict, npc: Enemy) -> List[str]:
+def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict, npc: entities.Enemy) -> List[str]:
     messages = []
 
     while npc.alive and user_data["alive"]:
@@ -201,10 +201,10 @@ def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users:
     for entry in on_tile_map:
         entry_type = get_values(entry).get("type")
 
-        if target == "boar":
-            messages.extend(fight_npc(entry, user_data, user, usersdb, mapdb, Boar()))
-        elif target == "wolf":
-            messages.extend(fight_npc(entry, user_data, user, usersdb, mapdb, Wolf()))
+        # Check if the target is a valid entity type
+        entity_class = getattr(entities, target.capitalize(), None)
+        if entity_class and issubclass(entity_class, entities.Enemy):
+            messages.extend(fight_npc(entry, user_data, user, usersdb, mapdb, entity_class()))
         elif target == "player" and entry_type == "player":
             messages.extend(fight_player(entry, target_name, user_data, user, usersdb))
 
@@ -220,7 +220,7 @@ def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users:
 
 def get_fight_preconditions(user_data: Dict) -> Optional[str]:
     if user_data["action_points"] < 1:
-        return "Not enough action points to slay"
+        return "Not enough action points to fight"
     if not user_data["alive"]:
         return "You are dead"
     return None
