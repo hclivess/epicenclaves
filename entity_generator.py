@@ -106,7 +106,7 @@ def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=Non
 
 
 def generate_additional_entity_data(entity_instance, level):
-    attributes = ['type', 'experience', 'armor', 'max_damage', 'role', 'level']
+    attributes = ['type', 'experience', 'armor', 'max_damage', 'role', 'level', 'hp']
     return {
         attr: getattr(entity_instance, attr, None) * level if attr in ['experience', 'armor', 'max_damage']
         else getattr(entity_instance, attr, None)
