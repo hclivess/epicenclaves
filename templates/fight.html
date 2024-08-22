@@ -226,8 +226,8 @@
 
         const battleData = {% raw battle_data %};
 
-        let playerCurrentHealth = battleData.player.current_hp;
-        let enemyCurrentHealth = battleData.enemy.current_hp;
+        let playerCurrentHealth = battleData.player.max_hp;  // Start with max HP
+        let enemyCurrentHealth = battleData.enemy.max_hp;    // Start with max HP
         const playerMaxHealth = battleData.player.max_hp;
         const enemyMaxHealth = battleData.enemy.max_hp;
 
@@ -282,47 +282,45 @@
               .to(target, { x: 0, duration: 0.1 });
         }
 
-        function addMessage(roundData, index) {
-            setTimeout(() => {
-                const li = document.createElement('li');
-                li.className = 'list-group-item battle-message';
-                li.textContent = roundData.message;
-
-                if (roundData.message.includes("You hit") || roundData.message.includes("You critical hit")) {
-                    li.classList.add('player-attack');
-                    const damage = Math.abs(roundData.enemy_hp - enemyCurrentHealth);
-                    showDamagePopUp(damage, false, roundData.message.includes("critical hit"));
-                    animateAttack(document.querySelector('.player'), document.querySelector('.enemy'));
-                    enemyCurrentHealth = roundData.enemy_hp;
-                    updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth, enemyHpDisplay);
-                } else if (roundData.message.includes("hit you")) {
-                    li.classList.add('enemy-attack');
-                    const damage = Math.abs(roundData.player_hp - playerCurrentHealth);
-                    showDamagePopUp(damage, true);
-                    animateAttack(document.querySelector('.enemy'), document.querySelector('.player'));
-                    playerCurrentHealth = roundData.player_hp;
-                    updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth, playerHpDisplay);
-                } else if (roundData.message.includes("defeated") || roundData.message.includes("escaped")) {
-                    li.classList.add('battle-result');
-                }
-
-                battleLog.appendChild(li);
-
-                // Scroll to the bottom of the battle log container
-                const battleLogContainer = document.querySelector('.battle-log-container');
-                battleLogContainer.scrollTop = battleLogContainer.scrollHeight;
-            }, index * 1000);  // Delay each message by 1 second
-        }
-
         function startBattle() {
+            // Initialize health displays
+            updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth, playerHpDisplay);
+            updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth, enemyHpDisplay);
+
             battleData.rounds.forEach((roundData, index) => {
-                addMessage(roundData, index);
+                setTimeout(() => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item battle-message';
+                    li.textContent = roundData.message;
+
+                    if (roundData.message.includes("You hit") || roundData.message.includes("You critical hit")) {
+                        li.classList.add('player-attack');
+                        const damage = Math.abs(roundData.enemy_hp - enemyCurrentHealth);
+                        showDamagePopUp(damage, false, roundData.message.includes("critical hit"));
+                        animateAttack(document.querySelector('.player'), document.querySelector('.enemy'));
+                        enemyCurrentHealth = roundData.enemy_hp;
+                        updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth, enemyHpDisplay);
+                    } else if (roundData.message.includes("hit you")) {
+                        li.classList.add('enemy-attack');
+                        const damage = Math.abs(roundData.player_hp - playerCurrentHealth);
+                        showDamagePopUp(damage, true);
+                        animateAttack(document.querySelector('.enemy'), document.querySelector('.player'));
+                        playerCurrentHealth = roundData.player_hp;
+                        updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth, playerHpDisplay);
+                    } else if (roundData.message.includes("defeated") || roundData.message.includes("escaped")) {
+                        li.classList.add('battle-result');
+                    }
+
+                    battleLog.appendChild(li);
+
+                    // Scroll to the bottom of the battle log container
+                    const battleLogContainer = document.querySelector('.battle-log-container');
+                    battleLogContainer.scrollTop = battleLogContainer.scrollHeight;
+                }, index * 1000);  // Delay each message by 1 second
             });
         }
 
         window.onload = function () {
-            updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth, playerHpDisplay);
-            updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth, enemyHpDisplay);
             startBattle();
         };
     </script>
