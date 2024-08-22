@@ -210,9 +210,11 @@
             const clampedHealth = Math.max(0, health);
             const healthPercentage = (clampedHealth / maxHealth) * 100;
 
+            // Use CSS transitions for smoother updates
+            healthElement.style.transition = "width 0.3s ease-in-out";
             healthElement.style.width = `${healthPercentage}%`;
 
-            hpDisplayElement.textContent = `${health} / ${maxHealth} HP`; // Display the actual health value, including negatives
+            hpDisplayElement.textContent = `${health} / ${maxHealth} HP`;
 
             // Add a visual cue for values below 0
             if (clampedHealth <= 0) {
