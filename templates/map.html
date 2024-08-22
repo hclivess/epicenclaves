@@ -442,7 +442,7 @@ document.querySelectorAll('.btn-move').forEach(button => {
   button.addEventListener('click', function(event) {
     setTimeout(function() {
       centerMapOnUser(jsonData);
-    }, 500);
+    }, 100);
   });
 });
 
@@ -488,7 +488,7 @@ function movePlayerToTile(targetX, targetY) {
         currentX = nextX;
         currentY = nextY;
         if (currentX !== targetX || currentY !== targetY) {
-          setTimeout(moveStep, 500); // Wait 500ms before the next step
+          setTimeout(moveStep, 100); // Wait x ms before the next step
         }
       } else {
         console.log("Movement blocked, stopping auto-move.");

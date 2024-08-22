@@ -59,7 +59,7 @@ class Boar(Enemy):
     type = "boar"
 
     def __init__(self):
-        super().__init__(hp=20,
+        super().__init__(hp=30,
                          min_damage=1,
                          max_damage=1,
                          crit_chance=0.1,
@@ -75,7 +75,7 @@ class Wolf(Enemy):
     type = "wolf"
 
     def __init__(self):
-        super().__init__(hp=40,
+        super().__init__(hp=60,
                          min_damage=1,
                          max_damage=3,
                          crit_chance=0.25,
@@ -86,6 +86,73 @@ class Wolf(Enemy):
                          drop_chance=0.15,
                          regular_drop={"food": 1})
 
+
+class Goblin(Enemy):
+    type = "goblin"
+
+    def __init__(self):
+        super().__init__(hp=40,
+                         min_damage=2,
+                         max_damage=5,
+                         crit_chance=0.15,
+                         crit_damage=8,
+                         armor=1,
+                         level=1,
+                         experience=3,
+                         drop_chance=0.2,
+                         regular_drop={"gold": 5})
+
+
+class Specter(Enemy):
+    type = "specter"
+
+    def __init__(self):
+        super().__init__(hp=80,
+                         min_damage=5,
+                         max_damage=10,
+                         crit_chance=0.3,
+                         crit_damage=20,
+                         armor=0,
+                         level=2,
+                         experience=10,
+                         drop_chance=0.3,
+                         regular_drop={"ectoplasm": 1})
+
+    def roll_damage(self):
+        damage = super().roll_damage()
+        if damage["message"] == "critical hit":
+            # Specters drain health on critical hits
+            self.hp += damage["damage"] // 2
+        return damage
+
+
+class DragonWhelp(Enemy):
+    type = "dragon_whelp"
+
+    def __init__(self):
+        super().__init__(hp=150,
+                         min_damage=10,
+                         max_damage=20,
+                         crit_chance=0.2,
+                         crit_damage=40,
+                         armor=5,
+                         level=3,
+                         experience=25,
+                         drop_chance=0.5,
+                         regular_drop={"dragon_scale": 1})
+        self.breath_attack_cooldown = 0
+
+    def roll_damage(self):
+        if self.breath_attack_cooldown == 0:
+            # Use breath attack
+            damage = random.randint(30, 50)
+            self.breath_attack_cooldown = 3
+            return {"damage": damage, "message": "breath attack"}
+        else:
+            # Normal attack
+            damage = super().roll_damage()
+            self.breath_attack_cooldown -= 1
+            return damage
 
 class Scenery:
 
