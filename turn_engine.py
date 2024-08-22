@@ -7,8 +7,8 @@ from sqlite import update_turn
 from user import save_users_from_memory
 from backend import update_user_data, hashify
 from map import save_map_from_memory
-from entities import Boar, Wolf, Valenthis
-from entity_generator import spawn
+from entities import Valenthis, Boar, Wolf, Goblin, Specter, DragonWhelp
+from entity_generator import spawn_all_entities
 import string
 
 if os.path.exists("test"):
@@ -113,40 +113,7 @@ class TurnEngine(threading.Thread):
         return counts
 
     def spawn_entities(self):
-        random_level = random.randint(1, 10)
-        spawn(
-            mapdb=self.mapdb,
-            entity_instance=Boar(),
-            probability=0.05,
-            herd_size=5,
-            max_entities=50,
-            level=random_level,
-            herd_probability=1
-
-        )
-
-        random_level = random.randint(1, 20)
-        spawn(
-            mapdb=self.mapdb,
-            entity_instance=Wolf(),
-            probability=0.05,
-            herd_size=7,
-            max_entities=50,
-            level=random_level,
-            herd_probability=1
-
-        )
-
-        spawn(
-            mapdb=self.mapdb,
-            entity_instance=Valenthis(),
-            probability=0.001,
-            size=200,
-            max_entities=1,
-            max_entities_total=1,
-            level=1,
-            herd_probability=1
-        )
+        spawn_all_entities(self.mapdb)
 
     def run(self):
         while self.running:

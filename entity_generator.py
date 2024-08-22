@@ -1,8 +1,21 @@
 from map import save_map_data
 import random
+from entities import Valenthis, Boar, Wolf, Goblin, Specter, DragonWhelp
 
-
-import random
+def spawn_all_entities(mapdb):
+    entity_classes = [Valenthis, Boar, Wolf, Goblin, Specter, DragonWhelp]
+    for entity_class in entity_classes:
+        entity_instance = entity_class()
+        spawn(
+            entity_instance=entity_instance,
+            probability=entity_instance.probability,
+            mapdb=mapdb,
+            level=entity_instance.level,
+            size=entity_instance.size,
+            max_entities=entity_instance.max_entities,
+            max_entities_total=entity_instance.max_entities_total,
+            herd_probability=entity_instance.herd_probability
+        )
 
 def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=None, max_entities_total=None,
           herd_size=15, herd_radius=5, herd_probability=0.5):

@@ -15,7 +15,12 @@ class Enemy:
                  kill_chance=0.01,
                  experience=1,
                  regular_drop=None,
-                 drop_chance=0.1):
+                 drop_chance=0.1,
+                 probability=0.01,
+                 size=101,
+                 max_entities=None,
+                 max_entities_total=None,
+                 herd_probability=0.5):
         if regular_drop is None:
             regular_drop = {}
 
@@ -32,6 +37,11 @@ class Enemy:
         self.experience = experience
         self.regular_drop = regular_drop
         self.drop_chance = drop_chance
+        self.probability = probability
+        self.size = size
+        self.max_entities = max_entities
+        self.max_entities_total = max_entities_total
+        self.herd_probability = herd_probability
 
     def roll_damage(self):
         damage = random.randint(self.min_damage, self.max_damage)
@@ -54,7 +64,13 @@ class Valenthis(Enemy):
                          level=1,
                          experience=100,
                          drop_chance=0.4,
-                         regular_drop={"bismuth": 50})
+                         regular_drop={"bismuth": 50},
+                         probability=0.001,
+                         size=200,
+                         max_entities=1,
+                         max_entities_total=1,
+                         herd_probability=1)
+
 class Boar(Enemy):
     type = "boar"
 
@@ -68,7 +84,12 @@ class Boar(Enemy):
                          level=1,
                          experience=1,
                          drop_chance=0.1,
-                         regular_drop={"food": 1})
+                         regular_drop={"food": 1},
+                         probability=0.05,
+                         size=200,
+                         max_entities=50,
+                         max_entities_total=100,
+                         herd_probability=0.7)
 
 
 class Wolf(Enemy):
@@ -84,7 +105,12 @@ class Wolf(Enemy):
                          level=1,
                          experience=2,
                          drop_chance=0.15,
-                         regular_drop={"food": 1})
+                         regular_drop={"food": 1},
+                         probability=0.03,
+                         size=200,
+                         max_entities=30,
+                         max_entities_total=60,
+                         herd_probability=0.8)
 
 
 class Goblin(Enemy):
@@ -100,7 +126,12 @@ class Goblin(Enemy):
                          level=1,
                          experience=3,
                          drop_chance=0.2,
-                         regular_drop={"gold": 5})
+                         regular_drop={"gold": 5},
+                         probability=0.02,
+                         size=200,
+                         max_entities=20,
+                         max_entities_total=40,
+                         herd_probability=0.6)
 
 
 class Specter(Enemy):
@@ -116,7 +147,12 @@ class Specter(Enemy):
                          level=2,
                          experience=10,
                          drop_chance=0.3,
-                         regular_drop={"ectoplasm": 1})
+                         regular_drop={"ectoplasm": 1},
+                         probability=0.01,
+                         size=200,
+                         max_entities=10,
+                         max_entities_total=20,
+                         herd_probability=0.3)
 
     def roll_damage(self):
         damage = super().roll_damage()
@@ -139,7 +175,12 @@ class DragonWhelp(Enemy):
                          level=3,
                          experience=25,
                          drop_chance=0.5,
-                         regular_drop={"dragon_scale": 1})
+                         regular_drop={"dragon_scale": 1},
+                         probability=0.005,
+                         size=200,
+                         max_entities=5,
+                         max_entities_total=10,
+                         herd_probability=0.2)
         self.breath_attack_cooldown = 0
 
     def roll_damage(self):
@@ -155,7 +196,6 @@ class DragonWhelp(Enemy):
             return damage
 
 class Scenery:
-
     def __init__(self, hp):
         self.hp = hp
         self.type = "scenery"
