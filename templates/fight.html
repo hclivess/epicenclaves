@@ -69,19 +69,28 @@
             color: #28a745;
         }
 
-        .battle-arena {
-            position: relative;
-            height: 400px;
-            margin-bottom: 20px;
-        }
+.battle-arena {
+    position: relative;
+    height: 300px; /* Reduced height to reduce space above */
+    margin-bottom: 40px; /* Increased margin to add more space below */
+}
 
-        .fighter {
-            position: absolute;
-            bottom: 0;
-            width: 150px;
-            height: 150px;
-            background-size: cover;
-        }
+.fighter {
+    position: absolute;
+    bottom: 40px; /* Moved the fighters up by decreasing the bottom value */
+    width: 150px;
+    height: 150px;
+    background-size: cover;
+}
+
+.health-bar {
+    position: absolute;
+    bottom: -10px; /* Move the health bars closer to the fighter */
+    width: 100%;
+    height: 10px;
+    background-color: #ccc;
+}
+
 
         .player {
             left: 20%;
@@ -91,14 +100,6 @@
         .enemy {
             right: 20%;
             background-image: url('img/assets/{{target}}.png');
-        }
-
-        .health-bar {
-            position: absolute;
-            bottom: -20px;
-            width: 100%;
-            height: 10px;
-            background-color: #ccc;
         }
 
         .health {
