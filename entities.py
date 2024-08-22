@@ -209,6 +209,7 @@ class Forest(Scenery):
         super().__init__(hp=100)
         self.type = "forest"
         self.role = "scenery"
+        self.probability = 0
 
 
 class Mountain(Scenery):
@@ -218,6 +219,7 @@ class Mountain(Scenery):
         super().__init__(hp=100)
         self.type = "mountain"
         self.role = "scenery"
+        self.probability = 0
 
 
 class Wall(Scenery):
@@ -225,3 +227,4 @@ class Wall(Scenery):
         super().__init__(hp=200)
         self.type = "wall"
         self.role = "obstacle"
+        self.probability = 0
