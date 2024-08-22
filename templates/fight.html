@@ -69,28 +69,19 @@
             color: #28a745;
         }
 
-.battle-arena {
-    position: relative;
-    height: 300px; /* Reduced height to reduce space above */
-    margin-bottom: 40px; /* Increased margin to add more space below */
-}
+        .battle-arena {
+            position: relative;
+            height: 300px; /* Reduced height to reduce space above */
+            margin-bottom: 40px; /* Increased margin to add more space below */
+        }
 
-.fighter {
-    position: absolute;
-    bottom: 40px; /* Moved the fighters up by decreasing the bottom value */
-    width: 150px;
-    height: 150px;
-    background-size: cover;
-}
-
-.health-bar {
-    position: absolute;
-    bottom: -10px; /* Move the health bars closer to the fighter */
-    width: 100%;
-    height: 10px;
-    background-color: #ccc;
-}
-
+        .fighter {
+            position: absolute;
+            bottom: 40px; /* Moved the fighters up by decreasing the bottom value */
+            width: 150px;
+            height: 150px;
+            background-size: cover;
+        }
 
         .player {
             left: 20%;
@@ -102,11 +93,53 @@
             background-image: url('img/assets/{{target}}.png');
         }
 
+        .health-bar {
+            position: absolute;
+            bottom: -10px; /* Move the health bars closer to the fighter */
+            width: 100%;
+            height: 10px;
+            background-color: #ccc;
+        }
+
         .health {
             width: 100%;
             height: 100%;
             background-color: #28a745;
             transition: width 0.5s ease-in-out;
+        }
+
+        .hp-display {
+            position: absolute;
+            top: -25px;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            color: #000; /* Changed color to black for contrast */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .pop-up-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Make sure clicks pass through */
+        }
+
+        .pop-up {
+            position: absolute;
+            font-size: 20px;
+            font-weight: bold;
+            white-space: nowrap;
+            pointer-events: none;
+            transform: translateX(-50%); /* Center the pop-up horizontally */
+        }
+
+        .pop-up.player-pop-up {
+            color: #007bff; /* Blue color for player actions */
+        }
+
+        .pop-up.enemy-pop-up {
+            color: #dc3545; /* Red color for enemy actions */
         }
     </style>
 </head>
@@ -130,14 +163,18 @@
                         <hr>
                         <div class="battle-arena">
                             <div class="fighter player">
+                                <div class="hp-display" id="playerHpDisplay"></div>
                                 <div class="health-bar">
                                     <div id="playerHealth" class="health"></div>
                                 </div>
+                                <div class="pop-up-container player-pop-up"></div>
                             </div>
                             <div class="fighter enemy">
+                                <div class="hp-display" id="enemyHpDisplay"></div>
                                 <div class="health-bar">
                                     <div id="enemyHealth" class="health"></div>
                                 </div>
+                                <div class="pop-up-container enemy-pop-up"></div>
                             </div>
                         </div>
                         <ul id="battleLog" class="list-group list-group-flush">
@@ -155,70 +192,112 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const battleLog = document.getElementById('battleLog');
-    const playerHealth = document.getElementById('playerHealth');
-    const enemyHealth = document.getElementById('enemyHealth');
+    <script>
+        const battleLog = document.getElementById('battleLog');
+        const playerHealth = document.getElementById('playerHealth');
+        const enemyHealth = document.getElementById('enemyHealth');
+        const playerHpDisplay = document.getElementById('playerHpDisplay');
+        const enemyHpDisplay = document.getElementById('enemyHpDisplay');
 
-    const battleData = {% raw battle_data %};
+        const battleData = {% raw battle_data %};
 
-    let playerCurrentHealth = battleData.player.current_hp;
-    let enemyCurrentHealth = battleData.enemy.current_hp;
-    const playerMaxHealth = battleData.player.max_hp;
-    const enemyMaxHealth = battleData.enemy.max_hp;
+        let playerCurrentHealth = battleData.player.current_hp;
+        let enemyCurrentHealth = battleData.enemy.current_hp;
+        const playerMaxHealth = battleData.player.max_hp;
+        const enemyMaxHealth = battleData.enemy.max_hp;
 
-    function updateHealth(health, maxHealth, element) {
-        const healthPercentage = (health / maxHealth) * 100;
-        gsap.to(element, {
-            width: `${healthPercentage}%`,
-            duration: 0.5,
-            ease: "power2.out"
-        });
-    }
+        function updateHealth(health, maxHealth, healthElement, hpDisplayElement) {
+            const clampedHealth = Math.max(0, health);
+            const healthPercentage = (clampedHealth / maxHealth) * 100;
 
-    function animateAttack(attacker, target) {
-        const tl = gsap.timeline();
-        tl.to(attacker, { x: attacker.classList.contains('player') ? 100 : -100, duration: 0.2 })
-          .to(attacker, { x: 0, duration: 0.2 })
-          .to(target, { x: target.classList.contains('player') ? -50 : 50, duration: 0.1 }, "-=0.2")
-          .to(target, { x: 0, duration: 0.1 });
-    }
+            healthElement.style.width = `${healthPercentage}%`;
 
-    function addMessage(roundData, index) {
-        setTimeout(() => {
-            const li = document.createElement('li');
-            li.className = 'list-group-item battle-message';
-            li.textContent = roundData.message;
+            hpDisplayElement.textContent = `${health} / ${maxHealth} HP`; // Display the actual health value, including negatives
 
-            if (roundData.message.includes("You hit") || roundData.message.includes("You critical hit")) {
-                li.classList.add('player-attack');
-                animateAttack(document.querySelector('.player'), document.querySelector('.enemy'));
-                enemyCurrentHealth = roundData.enemy_hp;
-                updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth);
-            } else if (roundData.message.includes("hit you")) {
-                li.classList.add('enemy-attack');
-                animateAttack(document.querySelector('.enemy'), document.querySelector('.player'));
-                playerCurrentHealth = roundData.player_hp;
-                updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth);
-            } else if (roundData.message.includes("defeated") || roundData.message.includes("escaped")) {
-                li.classList.add('battle-result');
+            // Add a visual cue for values below 0
+            if (clampedHealth <= 0) {
+                healthElement.style.backgroundColor = "red";
+                healthElement.style.borderColor = "black";
+            } else {
+                healthElement.style.backgroundColor = "green";
+                healthElement.style.borderColor = "";
             }
+        }
 
-            battleLog.appendChild(li);
-            window.scrollTo(0, document.body.scrollHeight);
-        }, index * 1000);  // Delay each message by 1 second
-    }
+        function showDamagePopUp(damage, isPlayer, crit = false) {
+            const popUpContainer = document.querySelector(isPlayer ? '.player-pop-up' : '.enemy-pop-up');
+            const popUp = document.createElement('div');
+            popUp.className = 'pop-up';
+            popUp.textContent = crit ? `${damage} (CRIT!)` : `${damage}`;
 
-    // Initialize health bars
-    updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth);
-    updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth);
+            popUpContainer.appendChild(popUp);
 
-    // Loop through battle rounds and add messages
-    battleData.rounds.forEach((round, index) => {
-        addMessage(round, index);
-    });
+            gsap.fromTo(popUp, {
+                y: 0,
+                opacity: 1,
+                scale: 1,
+                color: crit ? 'orange' : undefined // Optional: change color for critical hits
+            }, {
+                y: -50, // Move up
+                opacity: 0, // Fade out
+                scale: 1.5, // Grow slightly
+                duration: 1, // 1-second duration
+                ease: "power2.out",
+                onComplete: () => {
+                    popUpContainer.removeChild(popUp); // Remove the element after animation
+                }
+            });
+        }
 
-</script>
+        function animateAttack(attacker, target) {
+            const tl = gsap.timeline();
+            tl.to(attacker, { x: attacker.classList.contains('player') ? 100 : -100, duration: 0.2 })
+              .to(attacker, { x: 0, duration: 0.2 })
+              .to(target, { x: target.classList.contains('player') ? -50 : 50, duration: 0.1 }, "-=0.2")
+              .to(target, { x: 0, duration: 0.1 });
+        }
+
+        function addMessage(roundData, index) {
+            setTimeout(() => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item battle-message';
+                li.textContent = roundData.message;
+
+                if (roundData.message.includes("You hit") || roundData.message.includes("You critical hit")) {
+                    li.classList.add('player-attack');
+                    const damage = Math.abs(roundData.enemy_hp - enemyCurrentHealth);
+                    showDamagePopUp(damage, false, roundData.message.includes("critical hit"));
+                    animateAttack(document.querySelector('.player'), document.querySelector('.enemy'));
+                    enemyCurrentHealth = roundData.enemy_hp;
+                    updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth, enemyHpDisplay);
+                } else if (roundData.message.includes("hit you")) {
+                    li.classList.add('enemy-attack');
+                    const damage = Math.abs(roundData.player_hp - playerCurrentHealth);
+                    showDamagePopUp(damage, true);
+                    animateAttack(document.querySelector('.enemy'), document.querySelector('.player'));
+                    playerCurrentHealth = roundData.player_hp;
+                    updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth, playerHpDisplay);
+                } else if (roundData.message.includes("defeated") || roundData.message.includes("escaped")) {
+                    li.classList.add('battle-result');
+                }
+
+                battleLog.appendChild(li);
+                window.scrollTo(0, document.body.scrollHeight);
+            }, index * 1000);  // Delay each message by 1 second
+        }
+
+        function startBattle() {
+            battleData.rounds.forEach((roundData, index) => {
+                addMessage(roundData, index);
+            });
+        }
+
+        window.onload = function () {
+            updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth, playerHpDisplay);
+            updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth, enemyHpDisplay);
+            startBattle();
+        };
+    </script>
 </body>
 
 </html>
