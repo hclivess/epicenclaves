@@ -118,7 +118,7 @@ def fight_player(entry: Dict, target_name: str, user_data: Dict, user: str, user
         player_attack(user_data, target_data, "You", messages)
 
         if 0 < target_data["hp"] < 10:
-            messages.append(f"{entry_name} has run seeing they stand no chance against you!")
+            messages.append(f"{entry_name} has fled seeing they stand no chance against you!")
             break
 
         if target_data["hp"] <= 0:
