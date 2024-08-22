@@ -7,9 +7,12 @@ from sqlite import update_turn
 from user import save_users_from_memory
 from backend import update_user_data, hashify
 from map import save_map_from_memory
-from entities import Valenthis, Boar, Wolf, Goblin, Specter, DragonWhelp
 from entity_generator import spawn_all_entities
 import string
+import importlib
+
+# Import all entities dynamically
+entities = importlib.import_module('entities')
 
 if os.path.exists("test"):
     TEST = 1
@@ -26,7 +29,6 @@ def interruptible_sleep(seconds, interval=1, stop_condition=None):
             break
         time.sleep(interval)
         total_time_slept += interval
-
 
 class TurnEngine(threading.Thread):
     def __init__(self, usersdb, mapdb):
@@ -124,7 +126,6 @@ class TurnEngine(threading.Thread):
 
     def stop(self):
         self.running = False
-
 
 if __name__ == "__main__":
     turn_engine = TurnEngine({}, {})
