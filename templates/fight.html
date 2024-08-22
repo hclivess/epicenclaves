@@ -71,13 +71,13 @@
 
         .battle-arena {
             position: relative;
-            height: 300px; /* Reduced height to reduce space above */
-            margin-bottom: 40px; /* Increased margin to add more space below */
+            height: 300px;
+            margin-bottom: 40px;
         }
 
         .fighter {
             position: absolute;
-            bottom: 40px; /* Moved the fighters up by decreasing the bottom value */
+            bottom: 40px;
             width: 150px;
             height: 150px;
             background-size: cover;
@@ -95,7 +95,7 @@
 
         .health-bar {
             position: absolute;
-            bottom: -10px; /* Move the health bars closer to the fighter */
+            bottom: -10px;
             width: 100%;
             height: 10px;
             background-color: #ccc;
@@ -114,7 +114,7 @@
             width: 100%;
             text-align: center;
             font-weight: bold;
-            color: #000; /* Changed color to black for contrast */
+            color: #000;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
 
@@ -122,7 +122,7 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            pointer-events: none; /* Make sure clicks pass through */
+            pointer-events: none;
         }
 
         .pop-up {
@@ -131,15 +131,38 @@
             font-weight: bold;
             white-space: nowrap;
             pointer-events: none;
-            transform: translateX(-50%); /* Center the pop-up horizontally */
+            transform: translateX(-50%);
         }
 
         .pop-up.player-pop-up {
-            color: #007bff; /* Blue color for player actions */
+            color: #007bff;
         }
 
         .pop-up.enemy-pop-up {
-            color: #dc3545; /* Red color for enemy actions */
+            color: #dc3545;
+        }
+
+        .battle-log-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        #battleLog {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .battle-message {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .battle-message:last-child {
+            border-bottom: none;
         }
     </style>
 </head>
@@ -177,9 +200,11 @@
                                 <div class="pop-up-container enemy-pop-up"></div>
                             </div>
                         </div>
-                        <ul id="battleLog" class="list-group list-group-flush">
-                            <!-- Battle messages will be dynamically added here -->
-                        </ul>
+                        <div class="battle-log-container">
+                            <ul id="battleLog" class="list-group list-group-flush">
+                                <!-- Battle messages will be dynamically added here -->
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -210,13 +235,11 @@
             const clampedHealth = Math.max(0, Math.min(health, maxHealth));
             const healthPercentage = Math.min((clampedHealth / maxHealth) * 100, 100);
 
-            // Use CSS transitions for smoother updates
             healthElement.style.transition = "width 0.3s ease-in-out";
             healthElement.style.width = `${healthPercentage}%`;
 
             hpDisplayElement.textContent = `${clampedHealth} / ${maxHealth} HP`;
 
-            // Add a visual cue for values below 0
             if (clampedHealth <= 0) {
                 healthElement.style.backgroundColor = "red";
                 healthElement.style.borderColor = "black";
@@ -238,15 +261,15 @@
                 y: 0,
                 opacity: 1,
                 scale: 1,
-                color: crit ? 'orange' : undefined // Optional: change color for critical hits
+                color: crit ? 'orange' : undefined
             }, {
-                y: -50, // Move up
-                opacity: 0, // Fade out
-                scale: 1.5, // Grow slightly
-                duration: 1, // 1-second duration
+                y: -50,
+                opacity: 0,
+                scale: 1.5,
+                duration: 1,
                 ease: "power2.out",
                 onComplete: () => {
-                    popUpContainer.removeChild(popUp); // Remove the element after animation
+                    popUpContainer.removeChild(popUp);
                 }
             });
         }
@@ -284,7 +307,10 @@
                 }
 
                 battleLog.appendChild(li);
-                window.scrollTo(0, document.body.scrollHeight);
+
+                // Scroll to the bottom of the battle log container
+                const battleLogContainer = document.querySelector('.battle-log-container');
+                battleLogContainer.scrollTop = battleLogContainer.scrollHeight;
             }, index * 1000);  // Delay each message by 1 second
         }
 
