@@ -1,21 +1,28 @@
 from map import save_map_data
 import random
-from entities import Valenthis, Boar, Wolf, Goblin, Specter, DragonWhelp
+import importlib
+
+# Import all entities from a separate module
+entities = importlib.import_module('entities')
+
 
 def spawn_all_entities(mapdb):
-    entity_classes = [Valenthis, Boar, Wolf, Goblin, Specter, DragonWhelp]
+    # Get all classes from the entities module that have a 'type' attribute
+    entity_classes = [cls for name, cls in entities.__dict__.items() if isinstance(cls, type) and hasattr(cls, 'type')]
+
     for entity_class in entity_classes:
         entity_instance = entity_class()
         spawn(
             entity_instance=entity_instance,
-            probability=entity_instance.probability,
+            probability=getattr(entity_instance, 'probability', 1),
             mapdb=mapdb,
-            level=entity_instance.level,
-            size=entity_instance.size,
-            max_entities=entity_instance.max_entities,
-            max_entities_total=entity_instance.max_entities_total,
-            herd_probability=entity_instance.herd_probability
+            level=getattr(entity_instance, 'level', 1),
+            size=getattr(entity_instance, 'size', 101),
+            max_entities=getattr(entity_instance, 'max_entities', None),
+            max_entities_total=getattr(entity_instance, 'max_entities_total', None),
+            herd_probability=getattr(entity_instance, 'herd_probability', 0.5)
         )
+
 
 def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=None, max_entities_total=None,
           herd_size=15, herd_radius=5, herd_probability=0.5):
@@ -64,10 +71,12 @@ def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=Non
             herd_spawned = 0
             for idx in range(herd_size):
                 if max_entities is not None and total_entities >= max_entities:
-                    print(f"Reached maximum entities per spawn ({max_entities}) during herd spawn for {entity_instance.type}")
+                    print(
+                        f"Reached maximum entities per spawn ({max_entities}) during herd spawn for {entity_instance.type}")
                     return
                 if max_entities_total is not None and existing_entities + total_entities >= max_entities_total:
-                    print(f"Reached maximum total entities ({max_entities_total}) during herd spawn for {entity_instance.type}")
+                    print(
+                        f"Reached maximum total entities ({max_entities_total}) during herd spawn for {entity_instance.type}")
                     return
                 effective_level = 1 if idx < level_one_count else level
                 x_offset = random.randint(-herd_radius, herd_radius)
@@ -97,13 +106,11 @@ def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=Non
 
 
 def generate_additional_entity_data(entity_instance, level):
+    attributes = ['type', 'experience', 'armor', 'max_damage', 'role', 'level']
     return {
-        "type": getattr(entity_instance, "type", entity_instance.type),
-        **({"experience": entity_instance.experience * level} if hasattr(entity_instance, "experience") else {}),
-        **({"armor": entity_instance.armor * level} if hasattr(entity_instance, "armor") else {}),
-        **({"max_damage": entity_instance.max_damage * level} if hasattr(entity_instance, "max_damage") else {}),
-        **({"role": entity_instance.role} if hasattr(entity_instance, "role") else {}),
-        **({"level": level} if hasattr(entity_instance, "level") else {})
+        attr: getattr(entity_instance, attr, None) * level if attr in ['experience', 'armor', 'max_damage']
+        else getattr(entity_instance, attr, None)
+        for attr in attributes if hasattr(entity_instance, attr)
     }
 
 

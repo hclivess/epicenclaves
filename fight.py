@@ -4,26 +4,50 @@ from typing import Dict, List, Tuple, Optional
 
 from backend import update_user_data, get_values
 from map import remove_from_map, get_coords
-import entities  # Import the entire entities module
+import entities
 from weapon_generator import generate_weapon, generate_armor
-from unequip import unequip_item
-from trash import trash_item
 
-def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[str], usersdb: Dict) -> Tuple[int, int]:
+
+def get_entity_class(target: str) -> Optional[type]:
+    """
+    Get the entity class based on the target string.
+    Handles case sensitivity, multi-word entity names, and type-class name mismatches.
+    """
+    # Convert target to a normalized form (remove underscores and lowercase)
+    normalized_target = target.replace('_', '').lower()
+
+    # Try to find a matching class
+    for name in dir(entities):
+        if name.lower() == normalized_target:
+            return getattr(entities, name)
+
+    # If not found, try matching by removing common words and checking for partial matches
+    words_to_remove = ['whelp', 'monster', 'creature', 'enemy']
+    simplified_target = ''.join(word for word in normalized_target.split() if word not in words_to_remove)
+
+    for name in dir(entities):
+        if simplified_target in name.lower():
+            return getattr(entities, name)
+
+    print(f"No matching entity class found for '{target}'")
+    return None
+
+
+def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[str]) -> Tuple[int, int]:
+    print(f"Applying armor protection. Initial damage: {initial_damage}")
     armor_protection = 0
     is_player = defender.get('name', 'You') == 'You'
-    username = defender['name'] if not is_player else defender.get('username', 'player')
 
-    # Get all armor slots, including empty ones
     all_armor_slots = [armor for armor in defender.get("equipped", []) if armor.get("role") == "armor"]
 
     if all_armor_slots:
-        # Randomly select one armor slot
         selected_armor = random.choice(all_armor_slots)
+        print(f"Selected armor: {selected_armor}")
 
         if selected_armor.get("type") != "empty":
             protection = selected_armor.get("protection", 0) * (selected_armor.get("efficiency", 100) / 100)
             armor_protection = protection
+            print(f"Armor protection: {armor_protection}")
 
             old_durability = selected_armor["durability"]
             selected_armor["durability"] -= 1
@@ -41,14 +65,8 @@ def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[s
                 else:
                     messages.append(
                         f"{defender['name']}'s {selected_armor['type']} has broken and no longer provides protection!")
-
-                # Unequip the broken item
-                unequip_message = unequip_item(usersdb, username, selected_armor['id'])
-                messages.append(unequip_message)
-
-                # Trash the broken item
-                trash_message = trash_item(usersdb, username, selected_armor['id'])
-                messages.append(trash_message)
+                selected_armor["type"] = "empty"
+                selected_armor["protection"] = 0
         else:
             if is_player:
                 messages.append("The attack hit an unprotected area!")
@@ -57,6 +75,7 @@ def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[s
 
     final_damage = math.floor(max(1, initial_damage - armor_protection))
     absorbed_damage = initial_damage - final_damage
+    print(f"Final damage: {final_damage}, Absorbed damage: {absorbed_damage}")
 
     if absorbed_damage > 0:
         if is_player:
@@ -68,22 +87,29 @@ def apply_armor_protection(defender: Dict, initial_damage: int, messages: List[s
 
 
 def get_weapon_damage(attacker: Dict, exp_bonus_value: int) -> Dict:
+    print(f"Getting weapon damage for attacker. Exp bonus: {exp_bonus_value}")
     for weapon in attacker.get("equipped", {}):
         if weapon.get("role") == "right_hand":
             min_dmg = weapon.get("min_damage", 1)
             max_dmg = weapon.get("max_damage", 1)
-            return get_damage(min_dmg, max_dmg, weapon, exp_bonus=exp_bonus(value=exp_bonus_value))
+            damage_dict = get_damage(min_dmg, max_dmg, weapon, exp_bonus=exp_bonus(value=exp_bonus_value))
+            print(f"Weapon damage: {damage_dict}")
+            return damage_dict
+    print("No weapon found, returning default damage")
     return {"damage": 1, "message": "hit"}  # Default damage if no weapon found
 
 
 def player_attack(attacker: Dict, defender: Dict, attacker_name: str, messages: List[str]) -> None:
+    print(f"{attacker_name} attacking {defender.get('name', 'opponent')}")
     if attacker["hp"] <= 0:
+        print(f"{attacker_name} has 0 HP, cannot attack")
         return
 
     damage_dict = get_weapon_damage(attacker, attacker["exp"])
-    final_damage, _ = apply_armor_protection(defender, damage_dict['damage'], messages)
+    final_damage, absorbed_damage = apply_armor_protection(defender, damage_dict['damage'], messages)
 
     defender["hp"] -= final_damage
+    print(f"Defender's HP reduced to {defender['hp']}")
 
     if attacker_name == "You":
         messages.append(f"You {damage_dict['message']} for {final_damage} damage, they have {defender['hp']} HP left")
@@ -183,13 +209,15 @@ def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dic
                 update_user_data(user=user, updated_values={"alive": False, "hp": 0}, user_data_dict=usersdb)
             else:
                 messages.append("You are almost dead but managed to escape")
-                update_user_data(user=user, updated_values={"action_points": user_data["action_points"] - 1, "hp": 1}, user_data_dict=usersdb)
+                update_user_data(user=user, updated_values={"action_points": user_data["action_points"] - 1, "hp": 1},
+                                 user_data_dict=usersdb)
             break
 
         # Player attacks NPC
         user_dmg = get_weapon_damage(user_data, user_data["exp"])
         npc.hp -= user_dmg['damage']
-        messages.append(f"You {user_dmg['message']} the {npc.type} for {user_dmg['damage']} damage. It has {npc.hp} HP left")
+        messages.append(
+            f"You {user_dmg['message']} the {npc.type} for {user_dmg['damage']} damage. It has {npc.hp} HP left")
 
         # NPC attacks player
         if npc.hp > 0:
@@ -197,31 +225,49 @@ def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dic
             user_with_name = {"name": "You", **user_data}  # Add 'name' key to user_data
             final_damage, _ = apply_armor_protection(user_with_name, npc_dmg["damage"], messages)
             user_data["hp"] -= final_damage
-            messages.append(f"The {npc.type} {npc_dmg['message']} you for {final_damage} damage. You have {user_data['hp']} HP left")
+            messages.append(
+                f"The {npc.type} {npc_dmg['message']} you for {final_damage} damage. You have {user_data['hp']} HP left")
 
     return messages
 
 
 def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users: List[Dict], user_data: Dict, user: str,
           usersdb: Dict, mapdb: Dict) -> List[str]:
+    print(f"Starting fight. Target: {target}, Target name: {target_name}")
     messages = []
+
+    entity_class = get_entity_class(target)
+
+    if entity_class:
+        print(f"Found entity class: {entity_class.__name__}")
+    else:
+        print(f"No valid entity class found for: {target}")
+        messages.append(f"No valid target found: {target}")
+        return messages
 
     for entry in on_tile_map:
         entry_type = get_values(entry).get("type")
+        print(f"Processing map entry. Type: {entry_type}")
 
-        # Check if the target is a valid entity type
-        entity_class = getattr(entities, target.capitalize(), None)
-        if entity_class and issubclass(entity_class, entities.Enemy):
+        if issubclass(entity_class, entities.Enemy):
+            print(f"Fighting NPC: {target}")
             messages.extend(fight_npc(entry, user_data, user, usersdb, mapdb, entity_class()))
         elif target == "player" and entry_type == "player":
+            print(f"Fighting player: {target_name}")
             messages.extend(fight_player(entry, target_name, user_data, user, usersdb))
 
     for entry in on_tile_users:
         entry_type = get_values(entry).get("type")
         entry_name = get_coords(entry)
+        print(f"Processing user entry. Type: {entry_type}, Name: {entry_name}")
 
         if target == "player" and entry_type == "player" and target_name == entry_name:
+            print(f"Fighting player: {target_name}")
             messages.extend(fight_player(entry, target_name, user_data, user, usersdb))
+
+    if not messages:
+        print(f"No valid target found for: {target}")
+        messages.append(f"No valid target found: {target}")
 
     return messages
 
