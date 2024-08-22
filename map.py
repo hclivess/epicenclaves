@@ -7,6 +7,7 @@ from user import get_users_at_coords
 
 
 def get_tile_map(x, y, mapdb):
+    #todo this must also return actions and descriptions
     map_entities = get_map_at_coords(x_pos=x, y_pos=y, map_data_dict=mapdb)
     if not isinstance(map_entities, list):
         map_entities = [map_entities] if map_entities else []
@@ -14,6 +15,7 @@ def get_tile_map(x, y, mapdb):
 
 
 def get_tile_users(x, y, user, usersdb):
+    # todo this must also return actions and descriptions
     user_entities = get_users_at_coords(
         x_pos=x,
         y_pos=y,
