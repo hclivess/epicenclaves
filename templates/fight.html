@@ -158,13 +158,13 @@
     const battleLog = document.getElementById('battleLog');
     const playerHealth = document.getElementById('playerHealth');
     const enemyHealth = document.getElementById('enemyHealth');
-    const messages = {% raw messages %};
+
     const battleData = {% raw battle_data %};
 
     let playerCurrentHealth = battleData.player.current_hp;
     let enemyCurrentHealth = battleData.enemy.current_hp;
-    let playerMaxHealth = battleData.player.max_hp;
-    let enemyMaxHealth = battleData.enemy.max_hp;
+    const playerMaxHealth = battleData.player.max_hp;
+    const enemyMaxHealth = battleData.enemy.max_hp;
 
     function updateHealth(health, maxHealth, element) {
         const healthPercentage = (health / maxHealth) * 100;
@@ -183,26 +183,26 @@
           .to(target, { x: 0, duration: 0.1 });
     }
 
-    function addMessage(message, index) {
+    function addMessage(roundData, index) {
         setTimeout(() => {
             const li = document.createElement('li');
             li.className = 'list-group-item battle-message';
+            li.textContent = roundData.message;
 
-            if (message.includes("You hit") || message.includes("You critical hit")) {
+            if (roundData.message.includes("You hit") || roundData.message.includes("You critical hit")) {
                 li.classList.add('player-attack');
                 animateAttack(document.querySelector('.player'), document.querySelector('.enemy'));
-                enemyCurrentHealth = Math.max(0, enemyCurrentHealth - 10);
+                enemyCurrentHealth = roundData.enemy_hp;
                 updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth);
-            } else if (message.includes("hits you") || message.includes("critical hit you")) {
+            } else if (roundData.message.includes("hit you")) {
                 li.classList.add('enemy-attack');
                 animateAttack(document.querySelector('.enemy'), document.querySelector('.player'));
-                playerCurrentHealth = Math.max(0, playerCurrentHealth - 10);
+                playerCurrentHealth = roundData.player_hp;
                 updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth);
-            } else if (message.includes("defeated") || message.includes("escaped")) {
+            } else if (roundData.message.includes("defeated") || roundData.message.includes("escaped")) {
                 li.classList.add('battle-result');
             }
 
-            li.textContent = message;
             battleLog.appendChild(li);
             window.scrollTo(0, document.body.scrollHeight);
         }, index * 1000);  // Delay each message by 1 second
@@ -212,7 +212,11 @@
     updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth);
     updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth);
 
-    messages.forEach(addMessage);
+    // Loop through battle rounds and add messages
+    battleData.rounds.forEach((round, index) => {
+        addMessage(round, index);
+    });
+
 </script>
 </body>
 
