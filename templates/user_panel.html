@@ -156,7 +156,7 @@
                                         <p><strong>{{item.get("type")}}</strong> (Lvl {{item.get("level", "N/A")}})</p>
                                         {% if item.get("role") == "armor" %}
                                             <p>Protection: {{item.get("protection")}}</p>
-                                            <p>Durability: {{item.get("durability")}}</p>
+                                            <p>Durability: {{item.get("durability")}}/{{item.get("max_durability")}}</p>
                                             <p>Efficiency: {{item.get("efficiency")}}%</p>
                                             <p>Slot: {{item.get("slot", "N/A")}}</p>
                                         {% else %}
@@ -188,7 +188,7 @@
                                         <p><strong>{{item.get("type")}}</strong> (Lvl {{item.get("level", "N/A")}})</p>
                                         {% if item.get("role") == "armor" %}
                                             <p>Protection: {{item.get("protection")}}</p>
-                                            <p>Durability: {{item.get("durability")}}</p>
+                                            <p>Durability: {{item.get("durability")}}/{{item.get("max_durability")}}</p>
                                             <p>Efficiency: {{item.get("efficiency")}}%</p>
                                             <p>Slot: {{item.get("slot", "N/A")}}</p>
                                         {% else %}
