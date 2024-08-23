@@ -1,10 +1,31 @@
 from map import save_map_data
 import random
 import importlib
+import math
 
 # Import all entities from a separate module
 entities = importlib.import_module('entities')
 
+def generate_random_level(level):
+    """Generates a random level between `level` and 100, with logarithmic probability.
+
+    Args:
+        level: The current level of the entity.
+
+    Returns:
+        The randomly generated level.
+    """
+
+    # Calculate the logarithmic probability distribution
+    distribution = [math.log(x) for x in range(level, 101)]
+    total_prob = sum(distribution)
+
+    # Normalize the probabilities
+    normalized_probs = [prob / total_prob for prob in distribution]
+
+    # Choose a random level based on the normalized probabilities
+    random_index = random.choices(range(level, 101), weights=normalized_probs)[0]
+    return random_index
 
 def spawn_all_entities(mapdb):
     # Get all classes from the entities module that have a 'type' attribute
@@ -16,7 +37,7 @@ def spawn_all_entities(mapdb):
             entity_instance=entity_instance,
             probability=getattr(entity_instance, 'probability', 1),
             mapdb=mapdb,
-            level=getattr(entity_instance, 'level', 1),
+            level=generate_random_level(getattr(entity_instance, 'level', 1)),
             size=getattr(entity_instance, 'size', 101),
             max_entities=getattr(entity_instance, 'max_entities', None),
             max_entities_total=getattr(entity_instance, 'max_entities_total', None),
