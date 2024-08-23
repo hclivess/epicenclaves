@@ -1,7 +1,7 @@
 import json
 import sqlite3
 import random
-from weapon_generator import id_generator, generate_armor, generate_weapon
+from item_generator import id_generator, generate_armor, generate_weapon, generate_tool
 import threading
 
 
@@ -74,7 +74,7 @@ def create_user(user_data_dict, user, mapdb, profile_pic=""):
     initial_armor = [generate_armor(level=1, slot=slot) for slot in ["head", "body", "arms", "legs", "feet"]]
 
     # Generate a hatchet as the starting weapon
-    starting_hatchet = generate_weapon(level=1, weapon_type="hatchet")
+    starting_hatchet = generate_tool(level=1, tool_type="hatchet")
 
     # Prepare the data dictionary
     data = {

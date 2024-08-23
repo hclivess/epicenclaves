@@ -2,6 +2,7 @@ import random
 import string
 import weapons
 import armor
+import tools
 import math
 
 def id_generator(length=10):
@@ -36,11 +37,26 @@ def generate_armor(level=1, slot=None):
     armor_piece = selected_class(level, id_generator())
     return armor_piece.to_dict()  # Return the dictionary representation
 
-# Add these functions to both weapons.py and armor.py files
+def generate_tool(level=1, tool_type=None):
+    tool_classes = [cls for cls in tools.__dict__.values() if
+                    isinstance(cls, type) and issubclass(cls, tools.Tool) and cls != tools.Tool]
+
+    if tool_type:
+        selected_class = next((cls for cls in tool_classes if cls.__name__.lower() == tool_type.lower()), None)
+        if not selected_class:
+            raise ValueError(f"Unknown tool type: {tool_type}")
+    else:
+        selected_class = random.choice(tool_classes)
+
+    tool = selected_class()
+    tool_dict = tool.to_dict()
+    tool_dict['id'] = id_generator()
+    tool_dict['level'] = level
+    return tool_dict
+
 def calculate_stat(base_stat, level, scaling_factor=0.1):
     return math.floor(base_stat * (1 + math.log(level, 2) * scaling_factor))
 
-# Update Weapon class in weapons.py
 class Weapon:
     def __init__(self, level, weapon_id):
         self.level = level
@@ -56,7 +72,6 @@ class Weapon:
             "damage": self.damage
         }
 
-# Update Armor class in armor.py
 class Armor:
     def __init__(self, level, armor_id):
         self.level = level
@@ -73,15 +88,18 @@ class Armor:
             "defense": self.defense
         }
 
-# Update your weapon and armor subclasses in weapons.py and armor.py to use these new base classes
-
 if __name__ == "__main__":
     print("Weapon damage progression:")
     for level in range(1, 21, 2):  # Testing levels 1, 3, 5, ..., 19
         weapon = generate_weapon(level=level)
-        print(f"Level {level}: {weapon['damage']} damage")
+        print(f"Level {level}: {weapon['type']} - {weapon['damage']} damage")
 
     print("\nArmor defense progression:")
     for level in range(1, 21, 2):  # Testing levels 1, 3, 5, ..., 19
         armor = generate_armor(level=level)
-        print(f"Level {level}: {armor['defense']} defense")
+        print(f"Level {level}: {armor['type']} - {armor['defense']} defense")
+
+    print("\nTool generation:")
+    for _ in range(5):  # Generate 5 random tools
+        tool = generate_tool()
+        print(f"Generated {tool['type']} - Level: {tool['level']}")

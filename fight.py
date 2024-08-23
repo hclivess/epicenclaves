@@ -1,7 +1,7 @@
 from backend import update_user_data, get_values
 from map import remove_from_map, get_coords
 import entities
-from weapon_generator import generate_weapon, generate_armor
+from item_generator import generate_weapon, generate_armor
 import math
 import random
 from typing import Dict, List, Tuple, Optional

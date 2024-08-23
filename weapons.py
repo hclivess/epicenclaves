@@ -45,10 +45,6 @@ class Sword(Weapon):
     BASE_DAMAGE = (7, 12)
     RANGE = "melee"
 
-class Hatchet(Weapon):
-    BASE_DAMAGE = (0, 2)
-    RANGE = "melee"
-
 class Bow(Weapon):
     BASE_DAMAGE = (10, 20)
     RANGE = "ranged"
