@@ -23,7 +23,7 @@ usersdb - data indexed by username:
          "y_pos":1,
          "equipped":[
             {
-               "type":"axe",
+               "type":"hatchet",
                "damage":1,
                "durability":100,
                "role":"melee"

@@ -3,7 +3,7 @@ from costs import building_costs, upgrade_costs
 class Descriptions:
     def __init__(self):
         self.descriptions_dict = {
-            "axe": "A tool to cut wood with in the forest and mine in a mountain.",
+            "hatchet": "A tool to cut wood with in the forest and mine in a mountain.",
             "house": self.format_cost("Increases population limit by 10.", building_costs["house"]),
             "inn": self.format_cost("Allows user to rest and restore health.", building_costs["inn"]),
             "farm": self.format_cost("Generates food and peasants if housing is available.", building_costs["farm"]),

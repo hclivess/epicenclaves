@@ -73,8 +73,8 @@ def create_user(user_data_dict, user, mapdb, profile_pic=""):
     # Generate initial weak armor for each slot
     initial_armor = [generate_armor(level=1, slot=slot) for slot in ["head", "body", "arms", "legs", "feet"]]
 
-    # Generate an axe as the starting weapon
-    starting_axe = generate_weapon(level=1, weapon_type="axe")
+    # Generate a hatchet as the starting weapon
+    starting_hatchet = generate_weapon(level=1, weapon_type="hatchet")
 
     # Prepare the data dictionary
     data = {
@@ -97,7 +97,7 @@ def create_user(user_data_dict, user, mapdb, profile_pic=""):
         "bismuth": 500,
 
         "equipped": [
-            starting_axe,  # Start with an axe equipped
+            starting_hatchet,  # Start with an hatchet equipped
             *initial_armor  # Unpack the initial armor into the equipped list
         ],
 

@@ -3,8 +3,8 @@ from map import occupied_by, owned_by
 
 
 def mine_mountain(user, chop_amount, user_data, usersdb, mapdb):
-    # Check if the user has an axe equipped
-    item = "axe"
+    # Check if the user has a hatchet equipped
+    item = "hatchet"
     if not has_item_equipped(user_data, item):
         return f"You have no {item} at hand"
 
