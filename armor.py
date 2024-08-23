@@ -10,7 +10,9 @@ class Armor:
         self._set_attributes()
 
     def _set_attributes(self):
-        self.protection = int(self.BASE_PROTECTION * random.uniform(0.8, 1.2) * self.level)
+        # Calculate protection, ensuring it's at least 1
+        base_protection = int(self.BASE_PROTECTION * random.uniform(0.8, 1.2) * self.level)
+        self.protection = max(1, base_protection)  # Ensure minimum protection is 1
         self.durability = random.randint(30, 50) * self.level
         self.max_durability = self.durability
         self.efficiency = random.randint(80, 100)
