@@ -30,6 +30,113 @@ def get_entity_class(target: str) -> Optional[type]:
     print(f"No matching entity class found for '{target}'")
     return None
 
+def calculate_scaled_stat(base_stat, level, scaling_factor=0.1):
+    return math.floor(base_stat * (1 + math.log(level, 2) * scaling_factor))
+
+def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict, npc: entities.Enemy) -> Dict:
+    # Scale NPC's HP based on its level
+    npc_level = get_values(entry).get("level", 1)
+    scaled_hp = calculate_scaled_stat(npc.hp, npc_level, scaling_factor=0.15)
+    npc.hp = scaled_hp
+
+    battle_data = {
+        "player": {"name": user, "max_hp": user_data["hp"], "current_hp": user_data["hp"]},
+        "enemy": {"name": npc.type, "max_hp": npc.hp, "current_hp": npc.hp},
+        "rounds": []
+    }
+
+    round_number = 0
+    while npc.alive and user_data["alive"]:
+        round_number += 1
+
+        if npc.hp < 1:
+            process_npc_defeat(npc, user_data, user, usersdb, mapdb, entry, battle_data, round_number)
+            break
+
+        if user_data["hp"] < 1:
+            if death_roll(npc.kill_chance):
+                battle_data["rounds"].append({
+                    "round": round_number,
+                    "player_hp": 0,
+                    "enemy_hp": npc.hp,
+                    "message": "You died"
+                })
+                user_data["alive"] = False
+                update_user_data(user=user, updated_values={"alive": False, "hp": 0}, user_data_dict=usersdb)
+            else:
+                battle_data["rounds"].append({
+                    "round": round_number,
+                    "player_hp": 1,
+                    "enemy_hp": npc.hp,
+                    "message": "You are almost dead but managed to escape"
+                })
+                update_user_data(user=user, updated_values={"action_points": user_data["action_points"] - 1, "hp": 1},
+                                 user_data_dict=usersdb)
+            break
+
+        # Player attacks NPC
+        user_dmg = get_weapon_damage(user_data, user_data["exp"])
+        npc.hp -= user_dmg['damage']
+        battle_data["enemy"]["current_hp"] = npc.hp
+        battle_data["rounds"].append({
+            "round": round_number,
+            "player_hp": user_data["hp"],
+            "enemy_hp": npc.hp,
+            "message": f"You {user_dmg['message']} the {npc.type} for {user_dmg['damage']} damage. It has {npc.hp} HP left"
+        })
+
+        # NPC attacks player
+        if npc.hp > 0:
+            npc_dmg = npc.roll_damage()
+            final_damage, absorbed_damage = apply_armor_protection(user_data, npc_dmg["damage"], battle_data["rounds"], round_number)
+            user_data["hp"] -= final_damage
+            battle_data["player"]["current_hp"] = user_data["hp"]
+            battle_data["rounds"].append({
+                "round": round_number,
+                "player_hp": user_data["hp"],
+                "enemy_hp": npc.hp,
+                "message": f"The {npc.type} {npc_dmg['message']} you for {final_damage} damage. You have {user_data['hp']} HP left"
+            })
+
+    return {"battle_data": battle_data}
+
+def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict, entry: Dict,
+                       battle_data: Dict, round_number: int) -> None:
+    battle_data["rounds"].append({
+        "round": round_number,
+        "player_hp": user_data["hp"],
+        "enemy_hp": 0,
+        "message": f"The {npc.type} is defeated"
+    })
+    npc.alive = False
+
+    if random.random() < npc.drop_chance:
+        max_level = get_values(entry).get("level", 1)
+        level = random.randint(1, max_level)
+        new_item = generate_weapon(level=level) if random.random() < 0.5 else generate_armor(level=level)
+        battle_data["rounds"].append({
+            "round": round_number,
+            "player_hp": user_data["hp"],
+            "enemy_hp": 0,
+            "message": f"You found a level {level} {new_item['type']}!"
+        })
+        user_data["unequipped"].append(new_item)
+
+    remove_from_map(entity_type=npc.type.lower(), coords=get_coords(entry), map_data_dict=mapdb)
+
+    # Scale experience gained based on the NPC's level
+    npc_level = get_values(entry).get("level", 1)
+    scaled_experience = calculate_scaled_stat(npc.experience, npc_level, scaling_factor=0.1)
+
+    updated_values = {
+        "action_points": user_data["action_points"] - 1,
+        "exp": user_data["exp"] + scaled_experience,
+        "hp": user_data["hp"],
+        "unequipped": user_data["unequipped"],
+        **{key: user_data.get(key, 0) + value for key, value in npc.regular_drop.items()}
+    }
+
+    update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
 
 def calculate_armor_effectiveness(armor: Dict, damage: int) -> int:
     base_protection = armor.get("protection", 0)
@@ -202,67 +309,6 @@ def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users:
     return {"battle_data": battle_data}
 
 
-def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict, npc: entities.Enemy) -> Dict:
-    battle_data = {
-        "player": {"name": user, "max_hp": user_data["hp"], "current_hp": user_data["hp"]},
-        "enemy": {"name": npc.type, "max_hp": npc.hp, "current_hp": npc.hp},
-        "rounds": []
-    }
-
-    round_number = 0
-    while npc.alive and user_data["alive"]:
-        round_number += 1
-
-        if npc.hp < 1:
-            process_npc_defeat(npc, user_data, user, usersdb, mapdb, entry, battle_data, round_number)
-            break
-
-        if user_data["hp"] < 1:
-            if death_roll(npc.kill_chance):
-                battle_data["rounds"].append({
-                    "round": round_number,
-                    "player_hp": 0,
-                    "enemy_hp": npc.hp,
-                    "message": "You died"
-                })
-                user_data["alive"] = False
-                update_user_data(user=user, updated_values={"alive": False, "hp": 0}, user_data_dict=usersdb)
-            else:
-                battle_data["rounds"].append({
-                    "round": round_number,
-                    "player_hp": 1,
-                    "enemy_hp": npc.hp,
-                    "message": "You are almost dead but managed to escape"
-                })
-                update_user_data(user=user, updated_values={"action_points": user_data["action_points"] - 1, "hp": 1},
-                                 user_data_dict=usersdb)
-            break
-
-        # Player attacks NPC
-        user_dmg = get_weapon_damage(user_data, user_data["exp"])
-        npc.hp -= user_dmg['damage']
-        battle_data["enemy"]["current_hp"] = npc.hp
-        battle_data["rounds"].append({
-            "round": round_number,
-            "player_hp": user_data["hp"],
-            "enemy_hp": npc.hp,
-            "message": f"You {user_dmg['message']} the {npc.type} for {user_dmg['damage']} damage. It has {npc.hp} HP left"
-        })
-
-        # NPC attacks player
-        if npc.hp > 0:
-            npc_dmg = npc.roll_damage()
-            final_damage, absorbed_damage = apply_armor_protection(user_data, npc_dmg["damage"], battle_data["rounds"], round_number)
-            user_data["hp"] -= final_damage
-            battle_data["player"]["current_hp"] = user_data["hp"]
-            battle_data["rounds"].append({
-                "round": round_number,
-                "player_hp": user_data["hp"],
-                "enemy_hp": npc.hp,
-                "message": f"The {npc.type} {npc_dmg['message']} you for {final_damage} damage. You have {user_data['hp']} HP left"
-            })
-
-    return {"battle_data": battle_data}
 
 def fight_player(entry: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> Dict:
     target_data = entry[target_name]
@@ -365,39 +411,7 @@ def process_defeat(entity: Dict, entity_name: str, chance: float, usersdb: Dict)
     update_user_data(user=entity_name, updated_values=new_data, user_data_dict=usersdb)
     return messages
 
-def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict, entry: Dict,
-                       battle_data: Dict, round_number: int) -> None:
-    battle_data["rounds"].append({
-        "round": round_number,
-        "player_hp": user_data["hp"],
-        "enemy_hp": 0,
-        "message": f"The {npc.type} is defeated"
-    })
-    npc.alive = False
 
-    if random.random() < npc.drop_chance:
-        max_level = get_values(entry).get("level", 1)
-        level = random.randint(1, max_level)
-        new_item = generate_weapon(level=level) if random.random() < 0.5 else generate_armor(level=level)
-        battle_data["rounds"].append({
-            "round": round_number,
-            "player_hp": user_data["hp"],
-            "enemy_hp": 0,
-            "message": f"You found a level {level} {new_item['type']}!"
-        })
-        user_data["unequipped"].append(new_item)
-
-    remove_from_map(entity_type=npc.type.lower(), coords=get_coords(entry), map_data_dict=mapdb)
-
-    updated_values = {
-        "action_points": user_data["action_points"] - 1,
-        "exp": user_data["exp"] + npc.experience,
-        "hp": user_data["hp"],
-        "unequipped": user_data["unequipped"],
-        **{key: user_data.get(key, 0) + value for key, value in npc.regular_drop.items()}
-    }
-
-    update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
 
 def exp_bonus(value: int, base: int = 10) -> int:
     if value <= 0:
