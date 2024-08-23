@@ -23,6 +23,31 @@ def generate_random_level(base_level):
             return level
 
 
+def calculate_scaled_stat(base_stat, level, scaling_factor=0.1):
+    return math.floor(base_stat * (1 + math.log(level, 2) * scaling_factor))
+
+
+def generate_additional_entity_data(entity_instance, level):
+    attributes = ['type', 'experience', 'armor', 'max_damage', 'role', 'level', 'hp']
+
+    result = {}
+    for attr in attributes:
+        if hasattr(entity_instance, attr):
+            if attr == 'level':
+                result[attr] = level
+            elif attr in ['experience', 'armor', 'max_damage', 'hp']:
+                base_value = getattr(entity_instance, attr)
+                if attr == 'hp':
+                    # Use a higher scaling factor for HP to ensure it grows faster than damage
+                    result[attr] = calculate_scaled_stat(base_value, level, scaling_factor=0.15)
+                else:
+                    result[attr] = calculate_scaled_stat(base_value, level)
+            else:
+                result[attr] = getattr(entity_instance, attr)
+
+    return result
+
+
 def spawn_all_entities(mapdb):
     entity_classes = [cls for name, cls in entities.__dict__.items() if isinstance(cls, type) and hasattr(cls, 'type')]
     for entity_class in entity_classes:
@@ -118,15 +143,24 @@ def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=Non
     print(f"Spawn attempt for {entity_instance.type} complete. Total new entities: {total_entities}")
 
 
-def generate_additional_entity_data(entity_instance, level):
-    attributes = ['type', 'experience', 'armor', 'max_damage', 'role', 'level', 'hp']
-    return {
-        attr: level if attr == 'level' else
-        getattr(entity_instance, attr, None) * level if attr in ['experience', 'armor', 'max_damage']
-        else getattr(entity_instance, attr, None)
-        for attr in attributes if hasattr(entity_instance, attr)
-    }
-
-
 def count_entities_of_type(mapdb, entity_type):
     return sum(1 for data in mapdb.values() if "type" in data and data["type"] == entity_type)
+
+
+if __name__ == "__main__":
+    # Add a test to demonstrate entity stat scaling
+    class TestEntity:
+        type = 'test'
+        level = 1
+        hp = 100
+        max_damage = 10
+        armor = 5
+        experience = 50
+
+
+    print("Entity stat progression:")
+    for level in range(1, 21, 2):  # Testing levels 1, 3, 5, ..., 19
+        entity = TestEntity()
+        stats = generate_additional_entity_data(entity, level)
+        print(
+            f"Level {level}: HP: {stats['hp']}, Damage: {stats['max_damage']}, Armor: {stats['armor']}, XP: {stats['experience']}")
