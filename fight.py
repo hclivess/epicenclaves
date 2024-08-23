@@ -1,11 +1,10 @@
-import math
-import random
-from typing import Dict, List, Tuple, Optional
-
 from backend import update_user_data, get_values
 from map import remove_from_map, get_coords
 import entities
 from weapon_generator import generate_weapon, generate_armor
+import math
+import random
+from typing import Dict, List, Tuple, Optional
 
 def get_entity_class(target: str) -> Optional[type]:
     """
@@ -31,7 +30,8 @@ def get_entity_class(target: str) -> Optional[type]:
     print(f"No matching entity class found for '{target}'")
     return None
 
-def calculate_armor_effectiveness(armor: Dict) -> float:
+
+def calculate_armor_effectiveness(armor: Dict, damage: int) -> int:
     base_protection = armor.get("protection", 0)
     max_durability = armor.get("max_durability", 100)
     current_durability = armor.get("durability", 0)
@@ -40,11 +40,12 @@ def calculate_armor_effectiveness(armor: Dict) -> float:
     # Calculate durability factor (ranges from 0.5 to 1)
     durability_factor = 0.5 + (0.5 * (current_durability / max_durability))
 
-    # Calculate efficiency factor (ranges from 0.8 to 1.2)
-    efficiency_factor = 0.8 + (0.4 * efficiency)
+    # Calculate damage reduction based on efficiency
+    damage_reduction = min(damage, base_protection)
+    damage_reduction = int(round(damage_reduction * efficiency))
 
-    # Calculate effective protection
-    effective_protection = base_protection * durability_factor * efficiency_factor
+    # Apply durability factor and round to nearest integer
+    effective_protection = int(round(damage_reduction * durability_factor))
 
     return effective_protection
 
@@ -62,7 +63,7 @@ def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dic
         print(f"Selected armor: {selected_armor}")
 
         if selected_armor.get("type") != "empty":
-            effective_protection = calculate_armor_effectiveness(selected_armor)
+            effective_protection = calculate_armor_effectiveness(selected_armor, initial_damage)
             armor_protection = min(initial_damage, effective_protection)  # Can't absorb more than the initial damage
 
             # Calculate damage reduction percentage
@@ -71,6 +72,9 @@ def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dic
             armor_info = (
                 f"Your {selected_armor['type']}" if is_player else f"{defender['name']}'s {selected_armor['type']}"
             )
+
+            # Calculate final damage
+            final_damage = max(0, initial_damage - armor_protection)
 
             # Update the round information
             rounds.append({
@@ -81,7 +85,8 @@ def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dic
                     f"{armor_info} (Base Protection: {selected_armor['protection']}, "
                     f"Efficiency: {selected_armor['efficiency']}%, "
                     f"Durability: {selected_armor['durability']}/{selected_armor['max_durability']}) "
-                    f"reduced damage by {damage_reduction_percentage:.1f}% ({armor_protection:.1f} points)."
+                    f"reduced damage by {damage_reduction_percentage:.1f}% ({armor_protection} points). "
+                    f"Final damage: {final_damage}"
                 )
             })
 
@@ -122,15 +127,14 @@ def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dic
                 "enemy_hp": defender["hp"],
                 "message": message
             })
+            final_damage = initial_damage
 
-    final_damage = math.floor(max(1, initial_damage - armor_protection))
-    absorbed_damage = initial_damage - final_damage
-    print(f"Final damage: {final_damage}, Absorbed damage: {absorbed_damage}")
-
-    if absorbed_damage > 0:
+    else:
+        # No armor equipped
+        final_damage = initial_damage
         message = (
-            f"Your armor absorbed {absorbed_damage:.1f} damage" if is_player else
-            f"{defender['name']}'s armor absorbed {absorbed_damage:.1f} damage"
+            "You have no armor equipped!" if is_player else
+            f"{defender['name']} has no armor equipped!"
         )
         rounds.append({
             "round": round_number,
@@ -138,6 +142,9 @@ def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dic
             "enemy_hp": defender["hp"],
             "message": message
         })
+
+    absorbed_damage = initial_damage - final_damage
+    print(f"Final damage: {final_damage}, Absorbed damage: {absorbed_damage}")
 
     return final_damage, absorbed_damage
 

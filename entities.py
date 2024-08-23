@@ -77,7 +77,7 @@ class Boar(Enemy):
     def __init__(self):
         super().__init__(hp=30,
                          min_damage=1,
-                         max_damage=1,
+                         max_damage=3,
                          crit_chance=0.1,
                          crit_damage=3,
                          armor=0,
@@ -97,8 +97,8 @@ class Wolf(Enemy):
 
     def __init__(self):
         super().__init__(hp=60,
-                         min_damage=1,
-                         max_damage=3,
+                         min_damage=2,
+                         max_damage=6,
                          crit_chance=0.25,
                          crit_damage=5,
                          armor=0,
@@ -118,8 +118,8 @@ class Goblin(Enemy):
 
     def __init__(self):
         super().__init__(hp=40,
-                         min_damage=2,
-                         max_damage=5,
+                         min_damage=4,
+                         max_damage=6,
                          crit_chance=0.15,
                          crit_damage=8,
                          armor=1,
@@ -139,8 +139,8 @@ class Specter(Enemy):
 
     def __init__(self):
         super().__init__(hp=80,
-                         min_damage=5,
-                         max_damage=10,
+                         min_damage=10,
+                         max_damage=20,
                          crit_chance=0.3,
                          crit_damage=20,
                          armor=0,
@@ -167,8 +167,8 @@ class DragonWhelp(Enemy):
 
     def __init__(self):
         super().__init__(hp=150,
-                         min_damage=10,
-                         max_damage=20,
+                         min_damage=20,
+                         max_damage=40,
                          crit_chance=0.2,
                          crit_damage=40,
                          armor=5,
