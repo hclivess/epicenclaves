@@ -94,13 +94,6 @@ def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dic
             old_durability = selected_armor["durability"]
             selected_armor["durability"] = max(0, selected_armor["durability"] - durability_loss)
 
-            rounds.append({
-                "round": round_number,
-                "player_hp": defender["hp"],
-                "enemy_hp": defender["hp"],
-                "message": f"{armor_info} durability reduced from {old_durability} to {selected_armor['durability']}."
-            })
-
             if selected_armor["durability"] <= 0:
                 message = (
                     f"Your {selected_armor['type']} has broken and is no longer usable!"
