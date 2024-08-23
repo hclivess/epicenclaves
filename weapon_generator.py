@@ -36,16 +36,17 @@ def generate_armor(level=1, slot=None):
     armor_piece = selected_class(level, id_generator())
     return armor_piece.to_dict()  # Return the dictionary representation
 
-# Add this function to the weapons.py file
-def calculate_damage(base_damage, level):
-    return math.floor(base_damage * (1 + math.log(level, 2) * 0.1))
+# Add these functions to both weapons.py and armor.py files
+def calculate_stat(base_stat, level, scaling_factor=0.1):
+    return math.floor(base_stat * (1 + math.log(level, 2) * scaling_factor))
 
+# Update Weapon class in weapons.py
 class Weapon:
     def __init__(self, level, weapon_id):
         self.level = level
         self.id = weapon_id
         self.base_damage = random.randint(self.MIN_DAMAGE, self.MAX_DAMAGE)
-        self.damage = calculate_damage(self.base_damage, self.level)
+        self.damage = calculate_stat(self.base_damage, self.level)
 
     def to_dict(self):
         return {
@@ -55,15 +56,32 @@ class Weapon:
             "damage": self.damage
         }
 
-# Update your weapon classes in weapons.py to use the new Weapon base class
+# Update Armor class in armor.py
+class Armor:
+    def __init__(self, level, armor_id):
+        self.level = level
+        self.id = armor_id
+        self.base_defense = random.randint(self.MIN_DEFENSE, self.MAX_DEFENSE)
+        self.defense = calculate_stat(self.base_defense, self.level)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "type": self.__class__.__name__,
+            "slot": self.SLOT,
+            "level": self.level,
+            "defense": self.defense
+        }
+
+# Update your weapon and armor subclasses in weapons.py and armor.py to use these new base classes
 
 if __name__ == "__main__":
     print("Weapon damage progression:")
-    for level in range(1, 11):
+    for level in range(1, 21, 2):  # Testing levels 1, 3, 5, ..., 19
         weapon = generate_weapon(level=level)
         print(f"Level {level}: {weapon['damage']} damage")
 
-    print("\nArmor progression:")
-    for level in range(1, 11):
+    print("\nArmor defense progression:")
+    for level in range(1, 21, 2):  # Testing levels 1, 3, 5, ..., 19
         armor = generate_armor(level=level)
         print(f"Level {level}: {armor['defense']} defense")
