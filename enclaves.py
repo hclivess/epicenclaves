@@ -443,7 +443,6 @@ class FightHandler(BaseHandler):
             )
             self.render(
                 "templates/fight.html",
-                messages=json.dumps(fight_result["messages"]),
                 battle_data=json.dumps(fight_result["battle_data"]),
                 profile_picture=usersdb[user]["img"],
                 target=target

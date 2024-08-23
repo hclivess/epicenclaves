@@ -1,4 +1,5 @@
 import random
+#todo untangle this, let weapon classes define their everything
 
 class Weapon:
     def __init__(self, level, weapon_id):
@@ -49,7 +50,7 @@ class Axe(Weapon):
     RANGE = "melee"
 
 class Bow(Weapon):
-    BASE_DAMAGE = (5, 10)
+    BASE_DAMAGE = (10, 20)
     RANGE = "ranged"
 
 class Spear(Weapon):
