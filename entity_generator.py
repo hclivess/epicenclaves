@@ -6,13 +6,22 @@ import math
 # Import all entities from a separate module
 entities = importlib.import_module('entities')
 
-def generate_random_level(level):
-    """Generates a random level between `level` and 100, with logarithmic probability."""
-    distribution = [math.log(x) for x in range(level, 101)]
-    total_prob = sum(distribution)
-    normalized_probs = [prob / total_prob for prob in distribution]
-    random_index = random.choices(range(level, 101), weights=normalized_probs)[0]
-    return random_index
+
+def generate_random_level(base_level):
+    """Generates a random level between `base_level` and 100, with exponentially decreasing probability."""
+    max_level = 100
+    # Decay factor: higher values make high levels rarer
+    decay = 0.05
+
+    while True:
+        level = base_level
+        while level < max_level:
+            if random.random() > math.exp(-decay * (level - base_level)):
+                return level
+            level += 1
+        if level == max_level:
+            return level
+
 
 def spawn_all_entities(mapdb):
     entity_classes = [cls for name, cls in entities.__dict__.items() if isinstance(cls, type) and hasattr(cls, 'type')]
@@ -28,6 +37,7 @@ def spawn_all_entities(mapdb):
             max_entities_total=getattr(entity_instance, 'max_entities_total', None),
             herd_probability=getattr(entity_instance, 'herd_probability', 0.5)
         )
+
 
 def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=None, max_entities_total=None,
           herd_size=15, herd_radius=5, herd_probability=0.5):
@@ -74,10 +84,12 @@ def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=Non
             herd_spawned = 0
             for idx in range(herd_size):
                 if max_entities is not None and total_entities >= max_entities:
-                    print(f"Reached maximum entities per spawn ({max_entities}) during herd spawn for {entity_instance.type}")
+                    print(
+                        f"Reached maximum entities per spawn ({max_entities}) during herd spawn for {entity_instance.type}")
                     return
                 if max_entities_total is not None and existing_entities + total_entities >= max_entities_total:
-                    print(f"Reached maximum total entities ({max_entities_total}) during herd spawn for {entity_instance.type}")
+                    print(
+                        f"Reached maximum total entities ({max_entities_total}) during herd spawn for {entity_instance.type}")
                     return
                 effective_level = 1 if idx < level_one_count else level
                 x_offset = random.randint(-herd_radius, herd_radius)
@@ -105,14 +117,16 @@ def spawn(entity_instance, probability, mapdb, level, size=101, max_entities=Non
 
     print(f"Spawn attempt for {entity_instance.type} complete. Total new entities: {total_entities}")
 
+
 def generate_additional_entity_data(entity_instance, level):
     attributes = ['type', 'experience', 'armor', 'max_damage', 'role', 'level', 'hp']
     return {
         attr: level if attr == 'level' else
-              getattr(entity_instance, attr, None) * level if attr in ['experience', 'armor', 'max_damage']
-              else getattr(entity_instance, attr, None)
+        getattr(entity_instance, attr, None) * level if attr in ['experience', 'armor', 'max_damage']
+        else getattr(entity_instance, attr, None)
         for attr in attributes if hasattr(entity_instance, attr)
     }
+
 
 def count_entities_of_type(mapdb, entity_type):
     return sum(1 for data in mapdb.values() if "type" in data and data["type"] == entity_type)
