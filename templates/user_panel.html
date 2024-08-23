@@ -143,72 +143,91 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0">Equipped Items</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="item-grid">
-                            {% for item in file["equipped"] %} {% if item.get("type") != "empty" %}
-                                <div class="item-card">
-                                    <img src="/img/assets/{{item['type']}}.png" alt="Item Icon" class="menu-icon">
-                                    <div class="item-details">
-                                        <p><strong>{{item.get("type")}}</strong> (Lvl {{item.get("level", "N/A")}})</p>
-                                        {% if item.get("role") == "armor" %}
-                                            <p>Protection: {{item.get("protection")}}</p>
-                                            <p>Durability: {{item.get("durability")}}/{{item.get("max_durability")}}</p>
-                                            <p>Efficiency: {{item.get("efficiency")}}%</p>
-                                            <p>Slot: {{item.get("slot", "N/A")}}</p>
-                                        {% else %}
-                                            <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
-                                            <p>Accuracy: {{item.get("accuracy")}}%</p>
-                                            <p>Slot: {{item.get("role", "N/A")}}</p>
-                                        {% end %}
-                                        <p>{{descriptions.get(item["type"])}}</p>
-                                        {% if item.get('id') %}
-                                            <a href="/unequip?id={{item['id']}}" class="btn btn-warning btn-sm">Stash</a>
-                                        {% end %}
-                                    </div>
-                                </div>
-                            {% end %}
-                            {% end %}
-                        </div>
-                    </div>
-                </div>
+                <!-- ... (previous parts of the HTML remain unchanged) -->
 
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0">Inventory</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="item-grid">
-                            {% for item in file["unequipped"] %} {% if item.get("type") != "empty" %}
-                                <div class="item-card">
-                                    <img src="/img/assets/{{item['type']}}.png" alt="Item Icon" class="menu-icon">
-                                    <div class="item-details">
-                                        <p><strong>{{item.get("type")}}</strong> (Lvl {{item.get("level", "N/A")}})</p>
-                                        {% if item.get("role") == "armor" %}
-                                            <p>Protection: {{item.get("protection")}}</p>
-                                            <p>Durability: {{item.get("durability")}}/{{item.get("max_durability")}}</p>
-                                            <p>Efficiency: {{item.get("efficiency")}}%</p>
-                                            <p>Slot: {{item.get("slot", "N/A")}}</p>
-                                        {% else %}
-                                            <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
-                                            <p>Accuracy: {{item.get("accuracy")}}%</p>
-                                            <p>Slot: {{item.get("role", "N/A")}}</p>
-                                        {% end %}
-                                        <p>{{descriptions.get(item["type"])}}</p>
-                                        {% if item.get('id') %}
-                                            <a href="/equip?id={{item['id']}}" class="btn btn-primary btn-sm">Equip</a>
-                                            <a href="/trash?id={{item['id']}}" class="btn btn-danger btn-sm">Trash</a>
-                                        {% end %}
-                                    </div>
-                                </div>
-                            {% end %}
-                            {% end %}
-                        </div>
+<div class="card">
+    <div class="card-header">
+        <h4 class="mb-0">Equipped Items</h4>
+    </div>
+    <div class="card-body">
+        <div class="item-grid">
+            {% for item in file["equipped"] %} {% if item.get("type") != "empty" %}
+                <div class="item-card">
+                    <img src="/img/assets/{{item['type']}}.png" alt="Item Icon" class="menu-icon">
+                    <div class="item-details">
+                        <p><strong>{{item.get("type")}}</strong> (Lvl {{item.get("level", "N/A")}})</p>
+                        {% if item.get("class") == "tool" %}
+                            <p>Damage: {{item.get("min_damage", "N/A")}}-{{item.get("max_damage", "N/A")}}</p>
+                            <p>Accuracy: {{item.get("accuracy", "N/A")}}%</p>
+                            <p>Slot: {{item.get("slot", "N/A")}}</p>
+                        {% elif item.get("role") == "armor" %}
+                            <p>Protection: {{item.get("protection")}}</p>
+                            <p>Durability: {{item.get("durability")}}/{{item.get("max_durability")}}</p>
+                            <p>Efficiency: {{item.get("efficiency")}}%</p>
+                            <p>Slot: {{item.get("slot", "N/A")}}</p>
+                        {% else %}
+                            <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
+                            <p>Accuracy: {{item.get("accuracy")}}%</p>
+                            <p>Slot: {{item.get("role", "N/A")}}</p>
+                        {% end %}
+                        <p>{{descriptions.get(item["type"])}}</p>
+                        {% if item.get('id') %}
+                            <a href="/unequip?id={{item['id']}}" class="btn btn-warning btn-sm">Stash</a>
+                        {% end %}
                     </div>
                 </div>
+            {% end %}
+            {% end %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h4 class="mb-0">Inventory</h4>
+    </div>
+    <div class="card-body">
+        <div class="item-grid">
+            {% for item in file["unequipped"] %} {% if item.get("type") != "empty" %}
+                <div class="item-card">
+                    <img src="/img/assets/{{item['type']}}.png" alt="Item Icon" class="menu-icon">
+                    <div class="item-details">
+                        <p><strong>{{item.get("type")}}</strong> (Lvl {{item.get("level", "N/A")}})</p>
+                        {% if item.get("class") == "tool" %}
+                            <p>Damage: {{item.get("min_damage", "N/A")}}-{{item.get("max_damage", "N/A")}}</p>
+                            <p>Accuracy: {{item.get("accuracy", "N/A")}}%</p>
+                            <p>Slot: {{item.get("slot", "N/A")}}</p>
+                        {% elif item.get("role") == "armor" %}
+                            <p>Protection: {{item.get("protection")}}</p>
+                            <p>Durability: {{item.get("durability")}}/{{item.get("max_durability")}}</p>
+                            <p>Efficiency: {{item.get("efficiency")}}%</p>
+                            <p>Slot: {{item.get("slot", "N/A")}}</p>
+                        {% else %}
+                            <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
+                            <p>Accuracy: {{item.get("accuracy")}}%</p>
+                            <p>Slot: {{item.get("role", "N/A")}}</p>
+                        {% end %}
+                        <p>{{descriptions.get(item["type"])}}</p>
+                        {% if item.get('id') %}
+                            {% set item_slot = item.get("slot") if item.get("class") == "tool" or item.get("role") == "armor" else item.get("role") %}
+                            {% set is_slot_occupied = any(
+                                (equipped_item.get("slot") if equipped_item.get("class") == "tool" or equipped_item.get("role") == "armor" else equipped_item.get("role")) == item_slot
+                                and equipped_item.get("type") != "empty"
+                                for equipped_item in file["equipped"]
+                            ) %}
+                            <a href="/equip?id={{item['id']}}" class="btn btn-primary btn-sm {% if is_slot_occupied %}disabled{% end %}" {% if is_slot_occupied %}disabled{% end %}>
+                                {% if is_slot_occupied %}Slot Occupied{% else %}Equip{% end %}
+                            </a>
+                            <a href="/trash?id={{item['id']}}" class="btn btn-danger btn-sm">Trash</a>
+                        {% end %}
+                    </div>
+                </div>
+            {% end %}
+            {% end %}
+        </div>
+    </div>
+</div>
+
             </div>
         </div>
 
