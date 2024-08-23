@@ -85,7 +85,6 @@ def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dic
                     f"Efficiency: {selected_armor['efficiency']}%, "
                     f"Durability: {selected_armor['durability']}/{selected_armor['max_durability']}) "
                     f"reduced damage by {damage_reduction_percentage:.1f}% ({armor_protection} points). "
-                    f"Final damage: {final_damage}"
                 )
             })
 
