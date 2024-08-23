@@ -50,8 +50,7 @@ def calculate_armor_effectiveness(armor: Dict, damage: int) -> int:
     return effective_protection
 
 
-def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dict], round_number: int) -> Tuple[
-    int, int]:
+def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dict], round_number: int) -> Tuple[int, int]:
     print(f"Applying armor protection. Initial damage: {initial_damage}")
     armor_protection = 0
     is_player = defender.get('name', 'You') == 'You'
@@ -104,9 +103,9 @@ def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dic
 
             if selected_armor["durability"] <= 0:
                 message = (
-                    f"Your {selected_armor['type']} has broken and no longer provides protection!"
+                    f"Your {selected_armor['type']} has broken and is no longer usable!"
                     if is_player else
-                    f"{defender['name']}'s {selected_armor['type']} has broken and no longer provides protection!"
+                    f"{defender['name']}'s {selected_armor['type']} has broken and is no longer usable!"
                 )
                 rounds.append({
                     "round": round_number,
@@ -114,8 +113,8 @@ def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dic
                     "enemy_hp": defender["hp"],
                     "message": message
                 })
-                selected_armor["type"] = "empty"
-                selected_armor["protection"] = 0
+                # Remove the broken armor from the equipped items
+                defender["equipped"] = [item for item in defender["equipped"] if item != selected_armor]
         else:
             message = (
                 "The attack hit an unprotected area!" if is_player else
