@@ -209,15 +209,7 @@
                         {% end %}
                         <p>{{descriptions.get(item["type"])}}</p>
                         {% if item.get('id') %}
-                            {% set item_slot = item.get("slot") if item.get("class") == "tool" or item.get("role") == "armor" else item.get("role") %}
-                            {% set is_slot_occupied = any(
-                                (equipped_item.get("slot") if equipped_item.get("class") == "tool" or equipped_item.get("role") == "armor" else equipped_item.get("role")) == item_slot
-                                and equipped_item.get("type") != "empty"
-                                for equipped_item in file["equipped"]
-                            ) %}
-                            <a href="/equip?id={{item['id']}}" class="btn btn-primary btn-sm {% if is_slot_occupied %}disabled{% end %}" {% if is_slot_occupied %}disabled{% end %}>
-                                {% if is_slot_occupied %}Slot Occupied{% else %}Equip{% end %}
-                            </a>
+                            <a href="/equip?id={{item['id']}}" class="btn btn-primary btn-sm">Equip</a>
                             <a href="/trash?id={{item['id']}}" class="btn btn-danger btn-sm">Trash</a>
                         {% end %}
                     </div>
