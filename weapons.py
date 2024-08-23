@@ -23,7 +23,7 @@ class Weapon:
             self.crit_dmg_pct = 200
             self.crit_chance = 100
         else:
-            self.accuracy = random.randint(80, 100)
+            self.accuracy = random.randint(30, 100)
             self.crit_dmg_pct = random.randint(100, 400)
             self.crit_chance = random.randint(1, 10)
 
