@@ -149,7 +149,7 @@
                     </div>
                     <div class="card-body">
                         <div class="item-grid">
-                            {% for item in file["equipped"] %}
+                            {% for item in file["equipped"] %} {% if item.get("type") != "empty" %}
                                 <div class="item-card">
                                     <img src="/img/assets/{{item['type']}}.png" alt="Item Icon" class="menu-icon">
                                     <div class="item-details">
@@ -171,6 +171,7 @@
                                     </div>
                                 </div>
                             {% end %}
+                            {% end %}
                         </div>
                     </div>
                 </div>
@@ -181,7 +182,7 @@
                     </div>
                     <div class="card-body">
                         <div class="item-grid">
-                            {% for item in file["unequipped"] %}
+                            {% for item in file["unequipped"] %} {% if item.get("type") != "empty" %}
                                 <div class="item-card">
                                     <img src="/img/assets/{{item['type']}}.png" alt="Item Icon" class="menu-icon">
                                     <div class="item-details">
@@ -203,6 +204,7 @@
                                         {% end %}
                                     </div>
                                 </div>
+                            {% end %}
                             {% end %}
                         </div>
                     </div>
