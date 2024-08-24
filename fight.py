@@ -35,7 +35,8 @@ def calculate_scaled_stat(base_stat, level, scaling_factor=0.1):
 
 def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict, npc: entities.Enemy) -> Dict:
     # Scale NPC's HP based on its level using logarithmic scaling
-    npc_level = logarithmic_level(get_values(entry).get("max_level", 20))
+    max_level = get_values(entry).get("max_level", 20)
+    npc_level = logarithmic_level(max_level)
     scaled_hp = calculate_scaled_stat(npc.hp, npc_level, scaling_factor=0.15)
     npc.hp = scaled_hp
 
@@ -112,7 +113,6 @@ def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb:
 
     if random.random() < npc.drop_chance:
         max_level = get_values(entry).get("max_level", 20)
-        level = logarithmic_level(max_level)
         new_item = generate_weapon(max_level=max_level) if random.random() < 0.5 else generate_armor(max_level=max_level)
         battle_data["rounds"].append({
             "round": round_number,
@@ -137,7 +137,6 @@ def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb:
     }
 
     update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
-
 def calculate_armor_effectiveness(armor: Dict, damage: int) -> int:
     base_protection = armor.get("protection", 0)
     max_durability = armor.get("max_durability", 100)
