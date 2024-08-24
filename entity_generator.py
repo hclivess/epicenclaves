@@ -1,8 +1,7 @@
+from map import save_map_data
 import random
 import importlib
 import math
-
-# Import all entities from a separate module
 entities = importlib.import_module('entities')
 
 
