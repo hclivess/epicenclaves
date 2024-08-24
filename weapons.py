@@ -12,11 +12,9 @@ class Weapon:
         self._set_attributes()
 
     def _generate_level(self):
-        # Generate a random number between 0 and 1
         r = random.random()
-        # Use logarithmic distribution to skew towards lower levels
         level = int(math.exp(r * math.log(self.max_level))) + 1
-        return min(level, self.max_level)  # Ensure we don't exceed max_level
+        return min(level, self.max_level)
 
     def _log_scale(self, min_val, max_val):
         if self.level == 1:
@@ -27,10 +25,8 @@ class Weapon:
     def _set_damage(self):
         base_min, base_max = self.BASE_DAMAGE
         log_factor = math.log(self.level, 2) / math.log(self.max_level, 2)
-
         self.min_damage = int(base_min * (1 + log_factor * (self.max_level - 1)) * random.uniform(0.8, 1.2))
         self.max_damage = int(base_max * (1 + log_factor * (self.max_level - 1)) * random.uniform(0.8, 1.2))
-
         if self.max_damage <= self.min_damage:
             self.max_damage = self.min_damage + 1
 
@@ -38,6 +34,8 @@ class Weapon:
         self.accuracy = self._log_scale(self.MIN_ACCURACY, self.MAX_ACCURACY)
         self.crit_dmg_pct = self._log_scale(self.MIN_CRIT_DMG, self.MAX_CRIT_DMG)
         self.crit_chance = self._log_scale(self.MIN_CRIT_CHANCE, self.MAX_CRIT_CHANCE)
+        if self.RANGE == "ranged":
+            self.crit_chance = min(self.crit_chance * 2, 100)  # Double crit chance for ranged weapons, capped at 100%
 
     def to_dict(self):
         return {
@@ -52,7 +50,6 @@ class Weapon:
             "crit_dmg_pct": self.crit_dmg_pct,
             "crit_chance": self.crit_chance
         }
-
 
 class Sword(Weapon):
     BASE_DAMAGE = (3, 7)

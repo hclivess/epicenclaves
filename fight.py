@@ -76,7 +76,7 @@ def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dic
             break
 
         # Player attacks NPC
-        user_dmg = get_weapon_damage(user_data, user_data["exp"])
+        user_dmg = get_weapon_damage(user_data, exp_bonus(user_data["exp"]))
         npc.hp -= user_dmg['damage']
         battle_data["enemy"]["current_hp"] = npc.hp
         battle_data["rounds"].append({
@@ -244,18 +244,26 @@ def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dic
 
     return final_damage, absorbed_damage
 
+
 def get_weapon_damage(attacker: Dict, exp_bonus_value: int) -> Dict:
     print(f"Getting weapon damage for attacker. Exp bonus: {exp_bonus_value}")
-    for weapon in attacker.get("equipped", {}):
+    for weapon in attacker.get("equipped", []):
         if weapon.get("role") == "right_hand":
-            min_dmg = weapon.get("min_damage", 1)
-            max_dmg = weapon.get("max_damage", 1)
-            weapon_level = weapon.get("level", 1)
-            scaled_min_dmg = calculate_scaled_stat(min_dmg, weapon_level, scaling_factor=0.05)
-            scaled_max_dmg = calculate_scaled_stat(max_dmg, weapon_level, scaling_factor=0.05)
-            damage_dict = get_damage(scaled_min_dmg, scaled_max_dmg, weapon, exp_bonus=exp_bonus(value=exp_bonus_value))
-            print(f"Weapon damage: {damage_dict}")
-            return damage_dict
+            damage = random.randint(weapon["min_damage"], weapon["max_damage"])
+
+            if random.randint(1, 100) > weapon["accuracy"]:
+                return {"damage": 0, "message": "miss"}
+
+            if random.randint(1, 100) <= weapon["crit_chance"]:
+                damage = int(damage * (weapon["crit_dmg_pct"] / 100))
+                message = "critical hit"
+            else:
+                message = "hit"
+
+            final_damage = damage + exp_bonus_value
+            print(f"Weapon damage: {final_damage}, Message: {message}")
+            return {"damage": final_damage, "message": message}
+
     print("No weapon found, returning default damage")
     return {"damage": 1, "message": "hit"}  # Default damage if no weapon found
 
@@ -356,14 +364,13 @@ def fight_player(entry: Dict, target_name: str, user_data: Dict, user: str, user
 
     return {"battle_data": battle_data}
 
-def player_attack(attacker: Dict, defender: Dict, attacker_name: str, rounds: List[Dict],
-                  round_number: int) -> None:
+def player_attack(attacker: Dict, defender: Dict, attacker_name: str, rounds: List[Dict], round_number: int) -> None:
     print(f"{attacker_name} attacking {defender.get('name', 'opponent')}")
     if attacker["hp"] <= 0:
         print(f"{attacker_name} has 0 HP, cannot attack")
         return
 
-    damage_dict = get_weapon_damage(attacker, attacker["exp"])
+    damage_dict = get_weapon_damage(attacker, exp_bonus(attacker["exp"]))
     final_damage, absorbed_damage = apply_armor_protection(defender, damage_dict['damage'], rounds, round_number)
 
     defender["hp"] -= final_damage
