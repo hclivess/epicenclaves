@@ -1,21 +1,41 @@
 import random
+import math
 
 class Armor:
-    def __init__(self, level, armor_id):
+    def __init__(self, max_level, armor_id):
         self.type = self.__class__.__name__.lower()
         self.slot = self.SLOT
-        self.level = level
+        self.max_level = max_level
+        self.level = self._generate_level()
         self.id = armor_id
         self.role = "armor"
         self._set_attributes()
 
+    def _generate_level(self):
+        r = random.random()
+        level = int(math.exp(r * math.log(self.max_level))) + 1
+        return min(level, self.max_level)
+
+    def _log_scale(self, min_val, max_val):
+        if self.level == 1:
+            return min_val
+        log_factor = math.log(self.level, 2) / math.log(self.max_level, 2)
+        return min_val + int((max_val - min_val) * log_factor)
+
     def _set_attributes(self):
-        # Calculate protection, ensuring it's at least 1
-        base_protection = int(self.BASE_PROTECTION * random.uniform(0.8, 1.2) * self.level)
+        # Calculate protection using logarithmic scaling
+        log_factor = math.log(self.level, 2) / math.log(self.max_level, 2)
+        base_protection = int(self.BASE_PROTECTION * (1 + log_factor * (self.max_level - 1)) * random.uniform(0.8, 1.2))
         self.protection = max(1, base_protection)  # Ensure minimum protection is 1
-        self.durability = random.randint(30, 50) * self.level
+
+        # Calculate durability using logarithmic scaling
+        min_durability = 30
+        max_durability = 50 * self.max_level
+        self.durability = self._log_scale(min_durability, max_durability)
         self.max_durability = self.durability
-        self.efficiency = random.randint(80, 100)
+
+        # Calculate efficiency using logarithmic scaling
+        self.efficiency = self._log_scale(80, 100)
 
     def to_dict(self):
         return {
