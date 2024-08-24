@@ -65,7 +65,7 @@ class Sword(Weapon):
     MAX_CRIT_CHANCE = 6
 
 class Bow(Weapon):
-    BASE_DAMAGE = (1, 8)
+    BASE_DAMAGE = (4, 7)
     RANGE = "ranged"
     MIN_ACCURACY = 25
     MAX_ACCURACY = 45
@@ -85,17 +85,17 @@ class Spear(Weapon):
     MAX_CRIT_CHANCE = 4
 
 class Dagger(Weapon):
-    BASE_DAMAGE = (2, 4)
+    BASE_DAMAGE = (2, 5)
     RANGE = "melee"
     MIN_ACCURACY = 50
     MAX_ACCURACY = 70
     MIN_CRIT_DMG = 120
     MAX_CRIT_DMG = 200
-    MIN_CRIT_CHANCE = 7
-    MAX_CRIT_CHANCE = 12
+    MIN_CRIT_CHANCE = 8
+    MAX_CRIT_CHANCE = 13
 
 class Mace(Weapon):
-    BASE_DAMAGE = (5, 7)
+    BASE_DAMAGE = (4, 7)
     RANGE = "melee"
     MIN_ACCURACY = 35
     MAX_ACCURACY = 50
