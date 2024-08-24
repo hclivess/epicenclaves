@@ -9,8 +9,7 @@ class Tool:
 
     def to_dict(self):
         return {
-            "type": self.__class__.__name__,
-            "class": getattr(self, 'CLASS', 'tool'),
+            "type": self.type,  # This is now lowercase, matching Armor and Weapon classes
             "level": self.level,
             "slot": self.slot,
             "accuracy": self.accuracy,
@@ -19,7 +18,6 @@ class Tool:
 
 class Hatchet(Tool):
     BASE_DAMAGE = (1, 3)  # Minimum and maximum base damage
-    CLASS = "tool"
     DESCRIPTION = "A small, sharp axe useful for chopping wood and self-defense."
 
     def __init__(self, level=1):

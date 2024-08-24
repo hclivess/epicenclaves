@@ -46,7 +46,7 @@ class Sword(Weapon):
     RANGE = "melee"
 
 class Bow(Weapon):
-    BASE_DAMAGE = (10, 20)
+    BASE_DAMAGE = (1, 11)
     RANGE = "ranged"
 
 class Spear(Weapon):
