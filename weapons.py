@@ -1,37 +1,43 @@
 import random
 import math
 
-
 class Weapon:
-    def __init__(self, level, weapon_id):
+    def __init__(self, max_level, weapon_id):
         self.type = self.__class__.__name__.lower()
-        self.level = level
+        self.max_level = max_level
+        self.level = self._generate_level()
         self.id = weapon_id
         self.role = "right_hand"
         self._set_damage()
         self._set_attributes()
 
+    def _generate_level(self):
+        # Generate a random number between 0 and 1
+        r = random.random()
+        # Use logarithmic distribution to skew towards lower levels
+        level = int(math.exp(r * math.log(self.max_level))) + 1
+        return min(level, self.max_level)  # Ensure we don't exceed max_level
+
+    def _log_scale(self, min_val, max_val):
+        if self.level == 1:
+            return min_val
+        log_factor = math.log(self.level, 2) / math.log(self.max_level, 2)
+        return min_val + int((max_val - min_val) * log_factor)
+
     def _set_damage(self):
         base_min, base_max = self.BASE_DAMAGE
-        log_factor = math.log(self.level + 1, 2)  # +1 to avoid log(0)
+        log_factor = math.log(self.level, 2) / math.log(self.max_level, 2)
 
-        self.min_damage = int(base_min * random.uniform(0.8, 1.2) * log_factor * self.level)
-        self.max_damage = int(base_max * random.uniform(0.8, 1.2) * log_factor * self.level)
+        self.min_damage = int(base_min * (1 + log_factor * (self.max_level - 1)) * random.uniform(0.8, 1.2))
+        self.max_damage = int(base_max * (1 + log_factor * (self.max_level - 1)) * random.uniform(0.8, 1.2))
 
         if self.max_damage <= self.min_damage:
             self.max_damage = self.min_damage + 1
 
     def _set_attributes(self):
-        log_factor = math.log(self.level + 1, 2)  # +1 to avoid log(0)
-
-        self.accuracy = int(random.randint(self.MIN_ACCURACY, self.MAX_ACCURACY) * log_factor)
-        self.crit_dmg_pct = int(random.randint(self.MIN_CRIT_DMG, self.MAX_CRIT_DMG) * log_factor)
-        self.crit_chance = int(random.randint(self.MIN_CRIT_CHANCE, self.MAX_CRIT_CHANCE) * log_factor)
-
-        # Ensure attributes don't exceed their maximum values
-        self.accuracy = min(self.accuracy, self.MAX_ACCURACY)
-        self.crit_dmg_pct = min(self.crit_dmg_pct, self.MAX_CRIT_DMG)
-        self.crit_chance = min(self.crit_chance, self.MAX_CRIT_CHANCE)
+        self.accuracy = self._log_scale(self.MIN_ACCURACY, self.MAX_ACCURACY)
+        self.crit_dmg_pct = self._log_scale(self.MIN_CRIT_DMG, self.MAX_CRIT_DMG)
+        self.crit_chance = self._log_scale(self.MIN_CRIT_CHANCE, self.MAX_CRIT_CHANCE)
 
     def to_dict(self):
         return {
@@ -46,6 +52,7 @@ class Weapon:
             "crit_dmg_pct": self.crit_dmg_pct,
             "crit_chance": self.crit_chance
         }
+
 
 class Sword(Weapon):
     BASE_DAMAGE = (7, 12)
