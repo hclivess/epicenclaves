@@ -55,51 +55,51 @@ class Weapon:
 
 
 class Sword(Weapon):
-    BASE_DAMAGE = (7, 12)
-    RANGE = "melee"
-    MIN_ACCURACY = 70
-    MAX_ACCURACY = 90
-    MIN_CRIT_DMG = 150
-    MAX_CRIT_DMG = 250
-    MIN_CRIT_CHANCE = 5
-    MAX_CRIT_CHANCE = 10
-
-class Bow(Weapon):
-    BASE_DAMAGE = (1, 11)
-    RANGE = "ranged"
-    MIN_ACCURACY = 40
-    MAX_ACCURACY = 60
-    MIN_CRIT_DMG = 175
-    MAX_CRIT_DMG = 225
-    MIN_CRIT_CHANCE = 8
-    MAX_CRIT_CHANCE = 12
-
-class Spear(Weapon):
-    BASE_DAMAGE = (6, 11)
-    RANGE = "melee"
-    MIN_ACCURACY = 75
-    MAX_ACCURACY = 95
-    MIN_CRIT_DMG = 125
-    MAX_CRIT_DMG = 200
-    MIN_CRIT_CHANCE = 3
-    MAX_CRIT_CHANCE = 7
-
-class Dagger(Weapon):
     BASE_DAMAGE = (3, 7)
     RANGE = "melee"
-    MIN_ACCURACY = 80
-    MAX_ACCURACY = 100
-    MIN_CRIT_DMG = 200
-    MAX_CRIT_DMG = 400
-    MIN_CRIT_CHANCE = 10
-    MAX_CRIT_CHANCE = 20
+    MIN_ACCURACY = 40
+    MAX_ACCURACY = 55
+    MIN_CRIT_DMG = 80
+    MAX_CRIT_DMG = 130
+    MIN_CRIT_CHANCE = 3
+    MAX_CRIT_CHANCE = 6
+
+class Bow(Weapon):
+    BASE_DAMAGE = (1, 8)
+    RANGE = "ranged"
+    MIN_ACCURACY = 25
+    MAX_ACCURACY = 45
+    MIN_CRIT_DMG = 100
+    MAX_CRIT_DMG = 150
+    MIN_CRIT_CHANCE = 5
+    MAX_CRIT_CHANCE = 8
+
+class Spear(Weapon):
+    BASE_DAMAGE = (4, 6)
+    RANGE = "melee"
+    MIN_ACCURACY = 45
+    MAX_ACCURACY = 60
+    MIN_CRIT_DMG = 70
+    MAX_CRIT_DMG = 110
+    MIN_CRIT_CHANCE = 2
+    MAX_CRIT_CHANCE = 4
+
+class Dagger(Weapon):
+    BASE_DAMAGE = (2, 4)
+    RANGE = "melee"
+    MIN_ACCURACY = 50
+    MAX_ACCURACY = 70
+    MIN_CRIT_DMG = 120
+    MAX_CRIT_DMG = 200
+    MIN_CRIT_CHANCE = 7
+    MAX_CRIT_CHANCE = 12
 
 class Mace(Weapon):
-    BASE_DAMAGE = (8, 13)
+    BASE_DAMAGE = (5, 7)
     RANGE = "melee"
-    MIN_ACCURACY = 60
-    MAX_ACCURACY = 80
-    MIN_CRIT_DMG = 175
-    MAX_CRIT_DMG = 300
-    MIN_CRIT_CHANCE = 4
-    MAX_CRIT_CHANCE = 8
+    MIN_ACCURACY = 35
+    MAX_ACCURACY = 50
+    MIN_CRIT_DMG = 90
+    MAX_CRIT_DMG = 160
+    MIN_CRIT_CHANCE = 2
+    MAX_CRIT_CHANCE = 5
