@@ -2,6 +2,7 @@ import random
 
 class Tool:
     def __init__(self, level=1):
+        self.type = self.__class__.__name__.lower()
         self.level = level
         self.slot = "right_hand"  # Default slot for tools
         self.accuracy = 100  # Default accuracy
