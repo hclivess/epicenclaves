@@ -4,11 +4,11 @@ import math
 class Enemy:
     def __init__(self,
                  base_hp,
+                 base_min_damage,
+                 base_max_damage,
                  armor,
                  role="enemy",
                  level=1,
-                 min_damage=0,
-                 max_damage=2,
                  crit_chance=0.0,
                  crit_damage=0,
                  alive=True,
@@ -25,12 +25,12 @@ class Enemy:
             regular_drop = {}
 
         self.base_hp = base_hp
+        self.base_min_damage = base_min_damage
+        self.base_max_damage = base_max_damage
         self.armor = armor
         self.alive = alive
         self.level = level
         self.kill_chance = kill_chance
-        self.min_damage = min_damage
-        self.max_damage = max_damage
         self.crit_chance = crit_chance
         self.crit_damage = crit_damage
         self.role = role
@@ -43,15 +43,22 @@ class Enemy:
         self.max_entities_total = max_entities_total
         self.herd_probability = herd_probability
         self.hp = self.calculate_hp()
+        self.min_damage, self.max_damage = self.calculate_damage()
 
     def calculate_hp(self):
         return int(self.base_hp * (1 + 0.1 * (self.level - 1)))
+
+    def calculate_damage(self):
+        scaling_factor = 1 + 0.05 * (self.level - 1)  # 5% increase per level
+        min_damage = int(self.base_min_damage * scaling_factor)
+        max_damage = int(self.base_max_damage * scaling_factor)
+        return min_damage, max_damage
 
     def roll_damage(self):
         damage = random.randint(self.min_damage, self.max_damage)
         message = "normal hit"
         if random.random() < self.crit_chance:
-            damage = self.crit_damage
+            damage = int(damage * self.crit_damage)
             message = "critical hit"
         return {"damage": damage, "message": message}
 
@@ -60,10 +67,10 @@ class Valenthis(Enemy):
 
     def __init__(self, level=1):
         super().__init__(base_hp=350,
-                         min_damage=25,
-                         max_damage=25,
+                         base_min_damage=20,
+                         base_max_damage=30,
                          crit_chance=0.4,
-                         crit_damage=300,
+                         crit_damage=2.0,
                          armor=0,
                          level=level,
                          experience=100,
@@ -80,10 +87,10 @@ class Boar(Enemy):
 
     def __init__(self, level=1):
         super().__init__(base_hp=30,
-                         min_damage=1,
-                         max_damage=3,
+                         base_min_damage=1,
+                         base_max_damage=3,
                          crit_chance=0.1,
-                         crit_damage=3,
+                         crit_damage=1.5,
                          armor=0,
                          level=level,
                          experience=1,
@@ -100,10 +107,10 @@ class Wolf(Enemy):
 
     def __init__(self, level=1):
         super().__init__(base_hp=60,
-                         min_damage=2,
-                         max_damage=6,
+                         base_min_damage=2,
+                         base_max_damage=6,
                          crit_chance=0.25,
-                         crit_damage=5,
+                         crit_damage=1.8,
                          armor=0,
                          level=level,
                          experience=2,
@@ -120,10 +127,10 @@ class Goblin(Enemy):
 
     def __init__(self, level=1):
         super().__init__(base_hp=40,
-                         min_damage=4,
-                         max_damage=6,
+                         base_min_damage=4,
+                         base_max_damage=6,
                          crit_chance=0.15,
-                         crit_damage=8,
+                         crit_damage=1.6,
                          armor=1,
                          level=level,
                          experience=3,
@@ -140,10 +147,10 @@ class Specter(Enemy):
 
     def __init__(self, level=2):
         super().__init__(base_hp=80,
-                         min_damage=10,
-                         max_damage=20,
+                         base_min_damage=10,
+                         base_max_damage=20,
                          crit_chance=0.3,
-                         crit_damage=20,
+                         crit_damage=2.0,
                          armor=0,
                          level=level,
                          experience=10,
@@ -156,21 +163,21 @@ class Specter(Enemy):
                          herd_probability=0.3)
 
     def roll_damage(self):
-        damage = super().roll_damage()
-        if damage["message"] == "critical hit":
+        damage_info = super().roll_damage()
+        if damage_info["message"] == "critical hit":
             # Specters drain health on critical hits
-            self.hp += damage["damage"] // 2
-        return damage
+            self.hp += damage_info["damage"] // 2
+        return damage_info
 
 class DragonWhelp(Enemy):
     type = "dragon_whelp"
 
     def __init__(self, level=3):
         super().__init__(base_hp=150,
-                         min_damage=20,
-                         max_damage=40,
+                         base_min_damage=20,
+                         base_max_damage=40,
                          crit_chance=0.2,
-                         crit_damage=40,
+                         crit_damage=1.8,
                          armor=5,
                          level=level,
                          experience=25,
@@ -186,14 +193,14 @@ class DragonWhelp(Enemy):
     def roll_damage(self):
         if self.breath_attack_cooldown == 0:
             # Use breath attack
-            damage = random.randint(30, 50)
+            damage = random.randint(int(self.max_damage * 1.5), int(self.max_damage * 2))
             self.breath_attack_cooldown = 3
             return {"damage": damage, "message": "breath attack"}
         else:
             # Normal attack
-            damage = super().roll_damage()
+            damage_info = super().roll_damage()
             self.breath_attack_cooldown -= 1
-            return damage
+            return damage_info
 
 class Scenery:
     def __init__(self, hp):

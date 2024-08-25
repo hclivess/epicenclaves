@@ -51,6 +51,9 @@ def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dic
     npc.hp = entity_data.get('hp', npc.calculate_hp())
     npc.max_hp = entity_data.get('max_hp', npc.hp)
 
+    # Recalculate damage based on the actual level
+    npc.min_damage, npc.max_damage = npc.calculate_damage()
+
     battle_data = {
         "player": {"name": user, "max_hp": user_data["hp"], "current_hp": user_data["hp"]},
         "enemy": {"name": npc.type, "max_hp": npc.max_hp, "current_hp": npc.hp, "level": npc.level},
@@ -108,7 +111,7 @@ def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dic
                 "round": round_number,
                 "player_hp": user_data["hp"],
                 "enemy_hp": npc.hp,
-                "message": f"The level {npc.level} {npc.type} {npc_dmg['message']} you for {final_damage} damage. You have {user_data['hp']} HP left"
+                "message": f"The level {npc.level} {npc.type} {npc_dmg['message']} you for {final_damage} damage (Damage range: {npc.min_damage}-{npc.max_damage}). You have {user_data['hp']} HP left"
             })
 
     return {"battle_data": battle_data}
