@@ -12,7 +12,7 @@ import tornado.web
 import tornado.escape
 
 import actions
-import descriptions
+from buildings import Building
 import entities
 from weapons import Weapon
 from armor import Armor
@@ -53,6 +53,10 @@ armor_classes = {name.lower(): cls for name, cls in inspect.getmembers(inspect.g
 tool_classes = {name.lower(): cls for name, cls in inspect.getmembers(inspect.getmodule(Tool), inspect.isclass)
                 if issubclass(cls, Tool) and cls != Tool}
 
+building_types = {name.lower(): cls for name, cls in inspect.getmembers(inspect.getmodule(Building), inspect.isclass)
+                  if issubclass(cls, Building) and cls != Building}
+
+building_descriptions = {building_type: cls(1).to_dict() for building_type, cls in building_types.items()}
 
 def generate_inventory_descriptions(user_data):
     inventory_descriptions = {}
@@ -97,7 +101,7 @@ class BaseHandler(tornado.web.RequestHandler):
             on_tile_map=on_tile_map,
             on_tile_users=on_tile_users,
             actions=actions,
-            descriptions=descriptions,
+            building_descriptions=building_descriptions,
             inventory_descriptions=inventory_descriptions
         )
 
@@ -474,7 +478,6 @@ if __name__ == "__main__":
         generate_multiple_mazes(mapdb, 20, 20, 10, 10, 0.1, 25, 200)
 
     actions = actions.TileActions()
-    descriptions = descriptions.Descriptions()
 
     turn_engine = TurnEngine(usersdb, mapdb)
     turn_engine.start()

@@ -259,30 +259,35 @@
             </div>
         </div>
 
-        <div class="row mt-4">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0">Construction Menu</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="item-grid">
-                            <!--This is a legacy and needs replacing-->
-                            {% for building in ["house", "mine", "farm", "barracks", "sawmill", "inn", "archery_range", "laboratory", "blacksmith"] %}
-                                <div class="item-card">
-                                    <img src="/img/assets/{{building}}.png" alt="{{building}} Icon" class="menu-icon">
-                                    <div class="item-details">
-                                        <h5>{{building.capitalize()}}</h5>
-                                        <p>{{descriptions.get(building)}}</p>
-                                        <a href="/build?entity={{building}}&name=town1" class="btn btn-success btn-sm">Build</a>
-                                    </div>
-                                </div>
-                            {% end %}
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Construction Menu</h4>
+            </div>
+            <div class="card-body">
+                <div class="item-grid">
+                    {% for building_type, building_data in building_descriptions.items() %}
+                        <div class="item-card">
+                            <img src="/img/assets/{{building_type}}.png" alt="{{building_data['display_name']}} Icon" class="menu-icon">
+                            <div class="item-details">
+                                <h5>{{building_data['display_name']}}</h5>
+                                <p>{{building_data['description']}}</p>
+                                <p>Cost:
+                                    {% for resource, amount in building_data['cost'].items() %}
+                                        {{resource}}: {{amount}}
+                                    {% end %}
+                                </p>
+                                <a href="/build?entity={{building_type}}&name=town1" class="btn btn-success btn-sm">Build</a>
+                            </div>
                         </div>
-                    </div>
+                    {% end %}
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
