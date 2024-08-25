@@ -183,9 +183,9 @@ class DeployArmyHandler(UserActionHandler):
 
 class BuildHandler(UserActionHandler):
     def get(self, data):
+        user = tornado.escape.xhtml_escape(self.current_user)
         entity = self.get_argument("entity")
         name = self.get_argument("name")
-        user = tornado.escape.xhtml_escape(self.current_user)
         self.perform_action(user, build, entity, name, mapdb, usersdb=usersdb)
 
 

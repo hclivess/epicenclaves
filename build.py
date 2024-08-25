@@ -3,8 +3,11 @@ from map import get_tile_map, get_user_data, insert_map_data
 from costs import building_costs
 
 
-def build(entity, name, user, mapdb, usersdb):
+def build(user, entity, name, mapdb, usersdb):
     user_data = get_user_data(user, usersdb)
+    if user_data is None:
+        return f"User {user} not found in the dictionary."
+
     on_tile = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
 
     if user_data["action_points"] < 1:
