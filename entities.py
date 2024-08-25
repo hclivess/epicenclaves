@@ -17,7 +17,7 @@ class Enemy:
                  regular_drop=None,
                  drop_chance=0.1,
                  probability=0.01,
-                 size=101,
+                 map_size=101,
                  max_entities=None,
                  max_entities_total=None,
                  herd_probability=0.5):
@@ -38,7 +38,7 @@ class Enemy:
         self.regular_drop = regular_drop
         self.drop_chance = drop_chance
         self.probability = probability
-        self.size = size
+        self.map_size = map_size
         self.max_entities = max_entities
         self.max_entities_total = max_entities_total
         self.herd_probability = herd_probability
@@ -66,7 +66,7 @@ class Valenthis(Enemy):
                          drop_chance=1,
                          regular_drop={"bismuth": 50},
                          probability=0.001,
-                         size=200,
+                         map_size=200,
                          max_entities=1,
                          max_entities_total=1,
                          herd_probability=0)
@@ -86,7 +86,7 @@ class Boar(Enemy):
                          drop_chance=0.2,
                          regular_drop={"food": 1},
                          probability=0.05,
-                         size=200,
+                         map_size=200,
                          max_entities=50,
                          max_entities_total=100,
                          herd_probability=0.7)
@@ -107,7 +107,7 @@ class Wolf(Enemy):
                          drop_chance=0.3,
                          regular_drop={"food": 1},
                          probability=0.03,
-                         size=200,
+                         map_size=200,
                          max_entities=30,
                          max_entities_total=60,
                          herd_probability=0.8)
@@ -128,7 +128,7 @@ class Goblin(Enemy):
                          drop_chance=0.4,
                          regular_drop={"gold": 5},
                          probability=0.02,
-                         size=200,
+                         map_size=200,
                          max_entities=20,
                          max_entities_total=40,
                          herd_probability=0.6)
@@ -149,7 +149,7 @@ class Specter(Enemy):
                          drop_chance=0.6,
                          regular_drop={"ectoplasm": 1},
                          probability=0.01,
-                         size=200,
+                         map_size=200,
                          max_entities=10,
                          max_entities_total=20,
                          herd_probability=0.3)
@@ -177,7 +177,7 @@ class DragonWhelp(Enemy):
                          drop_chance=0.8,
                          regular_drop={"dragon_scale": 1},
                          probability=0.005,
-                         size=200,
+                         map_size=200,
                          max_entities=5,
                          max_entities_total=10,
                          herd_probability=0.2)
@@ -203,7 +203,7 @@ class Scenery:
 
 
 class Forest(Scenery):
-    type = "Forest"
+    type = "forest"
 
     def __init__(self):
         super().__init__(hp=100)

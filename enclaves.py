@@ -695,7 +695,7 @@ if __name__ == "__main__":
             mapdb=mapdb,
             entity_class=Forest(),
             probability=1,
-            size=200,
+            map_size=200,
             max_entities=250,
             level=1,
             herd_probability=0
@@ -705,7 +705,7 @@ if __name__ == "__main__":
             mapdb=mapdb,
             entity_class=Mountain(),
             probability=1,
-            size=200,
+            map_size=200,
             max_entities=250,
             level=1,
             herd_probability=0
