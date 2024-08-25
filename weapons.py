@@ -24,9 +24,15 @@ class Weapon:
 
     def _set_damage(self):
         base_min, base_max = self.BASE_DAMAGE
-        log_factor = math.log(self.level, 2) / math.log(self.max_level, 2)
+
+        if self.max_level == 1:
+            log_factor = 1
+        else:
+            log_factor = math.log(self.level, 2) / math.log(self.max_level, 2)
+
         self.min_damage = int(base_min * (1 + log_factor * (self.max_level - 1)) * random.uniform(0.8, 1.2))
         self.max_damage = int(base_max * (1 + log_factor * (self.max_level - 1)) * random.uniform(0.8, 1.2))
+
         if self.max_damage <= self.min_damage:
             self.max_damage = self.min_damage + 1
 

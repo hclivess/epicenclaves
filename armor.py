@@ -24,7 +24,10 @@ class Armor:
 
     def _set_attributes(self):
         # Calculate protection using logarithmic scaling
-        log_factor = math.log(self.level, 2) / math.log(self.max_level, 2)
+        if self.max_level == 1:
+            log_factor = 1
+        else:
+            log_factor = math.log(self.level, 2) / math.log(self.max_level, 2)
         base_protection = int(self.BASE_PROTECTION * (1 + log_factor * (self.max_level - 1)) * random.uniform(0.8, 1.2))
         self.protection = max(1, base_protection)  # Ensure minimum protection is 1
 
