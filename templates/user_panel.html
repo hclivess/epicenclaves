@@ -143,7 +143,6 @@
                     </div>
                 </div>
 
-                <!-- ... (previous parts of the HTML remain unchanged) -->
 
 <div class="card">
     <div class="card-header">
@@ -170,7 +169,11 @@
                             <p>Accuracy: {{item.get("accuracy", "N/A")}}%</p>
                             <p>Slot: {{item.get("role", "N/A")}}</p>
                         {% end %}
-                        <p>{{inventory_descriptions.get(item["type"])}}</p>
+                        {% for item_id, description in inventory_descriptions.items() %}
+                          {% if item['id'] == item_id %}
+                            <p>{{description}}</p>
+                          {% end %}
+                        {% end %}
                         {% if item.get('id') %}
                             <a href="/unequip?id={{item['id']}}" class="btn btn-warning btn-sm">Stash</a>
                         {% end %}
@@ -207,7 +210,11 @@
                             <p>Accuracy: {{item.get("accuracy")}}%</p>
                             <p>Slot: {{item.get("role", "N/A")}}</p>
                         {% end %}
-                        <p>{{inventory_descriptions.get(item["type"])}}</p>
+                        {% for item_id, description in inventory_descriptions.items() %}
+                          {% if item['id'] == item_id %}
+                            <p>{{description}}</p>
+                          {% end %}
+                        {% end %}
                         {% if item.get('id') %}
                             <a href="/equip?id={{item['id']}}" class="btn btn-primary btn-sm">Equip</a>
                             <a href="/trash?id={{item['id']}}" class="btn btn-danger btn-sm">Trash</a>

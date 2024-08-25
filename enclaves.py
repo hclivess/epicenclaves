@@ -55,7 +55,6 @@ def generate_inventory_descriptions(user_data):
             inventory_descriptions[item['id']] = f"A {item['type']} item."
     return inventory_descriptions
 
-
 class BaseHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, **kwargs):
         self.render("templates/error.html")
@@ -70,7 +69,6 @@ class BaseHandler(tornado.web.RequestHandler):
             on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
 
         inventory_descriptions = generate_inventory_descriptions(user_data)
-
         self.render(
             "templates/user_panel.html",
             user=user,
