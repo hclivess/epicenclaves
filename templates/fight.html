@@ -192,6 +192,7 @@ body {
     color: #e0e0e0;
 }
 
+
 #battleLog {
     list-style-type: none;
     padding-left: 0;
@@ -200,10 +201,28 @@ body {
 .battle-message {
     padding: 5px 0;
     border-bottom: 1px solid #444;
+    background-color: #1a1a1a; /* Dark background for each message */
+    color: #e0e0e0; /* Light text color */
+    margin-bottom: 5px; /* Add some space between messages */
+    border-radius: 4px; /* Rounded corners for each message */
+    padding: 8px; /* Padding inside each message */
 }
 
 .battle-message:last-child {
     border-bottom: none;
+}
+
+/* Specific styles for different types of battle messages */
+.battle-message.player-attack {
+    background-color: rgba(0, 123, 255, 0.1); /* Slight blue tint for player attacks */
+}
+
+.battle-message.enemy-attack {
+    background-color: rgba(220, 53, 69, 0.1); /* Slight red tint for enemy attacks */
+}
+
+.battle-message.battle-result {
+    background-color: rgba(40, 167, 69, 0.1); /* Slight green tint for battle results */
 }
 
 /* Additional styles to ensure dark theme consistency */
