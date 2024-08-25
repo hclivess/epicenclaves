@@ -161,13 +161,13 @@
                             <p>Accuracy: {{item.get("accuracy", "N/A")}}%</p>
                             <p>Slot: {{item.get("slot", "N/A")}}</p>
                         {% elif item.get("role") == "armor" %}
-                            <p>Protection: {{item.get("protection")}}</p>
-                            <p>Durability: {{item.get("durability")}}/{{item.get("max_durability")}}</p>
-                            <p>Efficiency: {{item.get("efficiency")}}%</p>
+                            <p>Protection: {{item.get("protection", "N/A")}}</p>
+                            <p>Durability: {{item.get("durability", "N/A")}}/{{item.get("max_durability")}}</p>
+                            <p>Efficiency: {{item.get("efficiency", "N/A")}}%</p>
                             <p>Slot: {{item.get("slot", "N/A")}}</p>
                         {% else %}
-                            <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
-                            <p>Accuracy: {{item.get("accuracy")}}%</p>
+                            <p>Damage: {{item.get("min_damage", "N/A")}}-{{item.get("max_damage")}}</p>
+                            <p>Accuracy: {{item.get("accuracy", "N/A")}}%</p>
                             <p>Slot: {{item.get("role", "N/A")}}</p>
                         {% end %}
                         <p>{{descriptions.get(item["type"])}}</p>

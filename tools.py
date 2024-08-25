@@ -4,21 +4,21 @@ class Tool:
     def __init__(self, level=1):
         self.type = self.__class__.__name__.lower()
         self.level = level
-        self.slot = "right_hand"  # Default slot for tools
+        self.role = "right_hand"  # Default slot for tools
         self.accuracy = 100  # Default accuracy
 
     def to_dict(self):
         return {
             "type": self.type,  # This is now lowercase, matching Armor and Weapon classes
             "level": self.level,
-            "slot": self.slot,
+            "role": self.role,
             "accuracy": self.accuracy,
             "description": getattr(self, 'DESCRIPTION', 'A useful tool.')
         }
 
 class Hatchet(Tool):
     BASE_DAMAGE = (1, 3)  # Minimum and maximum base damage
-    DESCRIPTION = "A small, sharp axe useful for chopping wood and self-defense."
+    DESCRIPTION = ""
 
     def __init__(self, level=1):
         super().__init__(level)
