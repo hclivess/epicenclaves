@@ -269,7 +269,7 @@
                 <div class="item-grid">
                     {% for building_type, building_data in building_descriptions.items() %}
                         <div class="item-card">
-                            <img src="/img/assets/{{building_type}}.png" alt="{{building_data['display_name']}} Icon" class="menu-icon">
+                            <img src="/img/assets/{{building_data['image_source']}}" alt="{{building_data['display_name']}} Icon" class="menu-icon">
                             <div class="item-details">
                                 <h5>{{building_data['display_name']}}</h5>
                                 <p>{{building_data['description']}}</p>
