@@ -310,9 +310,11 @@ class ConquerHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         target = self.get_argument("target", default="")
-        user_data = get_user_data(user, usersdb)
+        self.perform_action(user, self._attempt_conquer, target)
+
+    def _attempt_conquer(self, user, user_data, target):
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-        self.perform_action(user, attempt_conquer, target, on_tile_map, usersdb, mapdb, user_data)
+        return attempt_conquer(user, target, on_tile_map, usersdb, mapdb, user_data)
 
 
 class MineHandler(UserActionHandler):
