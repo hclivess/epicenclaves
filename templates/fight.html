@@ -9,178 +9,229 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
     <title>Epic Enclaves - Battle</title>
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
+   <style>
+       @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
 
-        body {
-            font-family: 'Merriweather', serif;
-            background-color: #0a0a0a;
-            background-image: url('img/assets/background.png');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: #e0e0e0;
-        }
+body {
+    font-family: 'Merriweather', serif;
+    background-color: #0a0a0a;
+    background-image: url('img/assets/background.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: #e0e0e0;
+}
 
-        .fixed-menu {
-          position: fixed;
-          top: 0;
-          right: 0;
-          display: flex;
-          align-items: flex-end;
-          padding: 1em;
-          background-color: rgba(0, 0, 0, 0.7);
-          border-bottom-left-radius: 10px;
-            width: 100%;
-            z-index: 1000;
-        }
+.card {
+    background-color: #1a1a1a;
+    border: 1px solid #444;
+    color: #e0e0e0;
+}
 
-        .btn-scroll {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            z-index: 999;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 10px;
-        }
+.card-body {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
 
-        .btn-up {
-            background-color: #007bff;
-            color: #fff;
-            border-color: #007bff;
-            margin: 5px;
-        }
+.card-header {
+    background-color: #2a2a2a;
+    border-bottom: 1px solid #444;
+    color: #e0e0e0;
+}
 
-        .btn-up:hover {
-            background-color: #0056b3;
-        }
+.card-footer {
+    background-color: #2a2a2a;
+    border-top: 1px solid #444;
+    color: #e0e0e0;
+}
 
-        @keyframes fadeInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
+.fixed-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 1em;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-bottom-left-radius: 10px;
+    width: 100%;
+    z-index: 1000;
+}
 
-        .battle-message {
-            animation: fadeInLeft 0.5s ease-out;
-        }
+.btn-scroll {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 999;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
 
-        .player-attack {
-            color: #007bff;
-        }
+.btn-up {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    border-color: #444;
+    margin: 5px;
+}
 
-        .enemy-attack {
-            color: #dc3545;
-        }
+.btn-up:hover {
+    background-color: #2a2a2a;
+}
 
-        .battle-result {
-            font-weight: bold;
-            color: #28a745;
-        }
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
 
-        .battle-arena {
-            position: relative;
-            height: 300px;
-            margin-bottom: 40px;
-        }
+.battle-message {
+    animation: fadeInLeft 0.5s ease-out;
+}
 
-        .fighter {
-            position: absolute;
-            bottom: 40px;
-            width: 150px;
-            height: 150px;
-            background-size: cover;
-        }
+.player-attack {
+    color: #4da6ff;
+}
 
-        .player {
-            left: 20%;
-            background-image: url('{{profile_picture}}');
-        }
+.enemy-attack {
+    color: #ff6b6b;
+}
 
-        .enemy {
-            right: 20%;
-            background-image: url('img/assets/{{target}}.png');
-        }
+.battle-result {
+    font-weight: bold;
+    color: #5cb85c;
+}
 
-        .health-bar {
-            position: absolute;
-            bottom: -10px;
-            width: 100%;
-            height: 10px;
-            background-color: #ccc;
-        }
+.battle-arena {
+    position: relative;
+    height: 300px;
+    margin-bottom: 40px;
+}
 
-        .health {
-            width: 100%;
-            height: 100%;
-            background-color: #28a745;
-            transition: width 0.5s ease-in-out;
-        }
+.fighter {
+    position: absolute;
+    bottom: 40px;
+    width: 150px;
+    height: 150px;
+    background-size: cover;
+}
 
-        .hp-display {
-            position: absolute;
-            top: -25px;
-            width: 100%;
-            text-align: center;
-            font-weight: bold;
-            color: #000;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
+.player {
+    left: 20%;
+    background-image: url('{{profile_picture}}');
+}
 
-        .pop-up-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
+.enemy {
+    right: 20%;
+    background-image: url('img/assets/{{target}}.png');
+}
 
-        .pop-up {
-            position: absolute;
-            font-size: 20px;
-            font-weight: bold;
-            white-space: nowrap;
-            pointer-events: none;
-            transform: translateX(-50%);
-        }
+.health-bar {
+    position: absolute;
+    bottom: -10px;
+    width: 100%;
+    height: 10px;
+    background-color: #444;
+}
 
-        .pop-up.player-pop-up {
-            color: #007bff;
-        }
+.health {
+    width: 100%;
+    height: 100%;
+    background-color: #28a745;
+    transition: width 0.5s ease-in-out;
+}
 
-        .pop-up.enemy-pop-up {
-            color: #dc3545;
-        }
+.hp-display {
+    position: absolute;
+    top: -25px;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    color: #e0e0e0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
 
-        .battle-log-container {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #dee2e6;
-            border-radius: 0.25rem;
-            padding: 10px;
-            margin-top: 20px;
-        }
+.pop-up-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
 
-        #battleLog {
-            list-style-type: none;
-            padding-left: 0;
-        }
+.pop-up {
+    position: absolute;
+    font-size: 20px;
+    font-weight: bold;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateX(-50%);
+}
 
-        .battle-message {
-            padding: 5px 0;
-            border-bottom: 1px solid #eee;
-        }
+.pop-up.player-pop-up {
+    color: #4da6ff;
+}
 
-        .battle-message:last-child {
-            border-bottom: none;
-        }
-    </style>
+.pop-up.enemy-pop-up {
+    color: #ff6b6b;
+}
+
+.battle-log-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #444;
+    border-radius: 0.25rem;
+    padding: 10px;
+    margin-top: 20px;
+    background-color: rgba(20, 20, 20, 0.8);
+    color: #e0e0e0;
+}
+
+#battleLog {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.battle-message {
+    padding: 5px 0;
+    border-bottom: 1px solid #444;
+}
+
+.battle-message:last-child {
+    border-bottom: none;
+}
+
+/* Additional styles to ensure dark theme consistency */
+input, select, textarea {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+
+button {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+
+button:hover {
+    background-color: #2a2a2a;
+}
+
+a {
+    color: #4da6ff;
+}
+
+a:hover {
+    color: #7fbfff;
+}
+
+   </style>
 </head>
 
 <body class="bg-light">
