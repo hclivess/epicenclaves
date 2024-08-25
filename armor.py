@@ -54,21 +54,26 @@ class Armor:
         }
 
 class Helmet(Armor):
+    DESCRIPTION = "Protective headgear that reduces damage taken to the head."
     SLOT = "head"
     BASE_PROTECTION = 2
 
 class Chestplate(Armor):
+    DESCRIPTION = "Armor that covers the torso and provides substantial protection."
     SLOT = "body"
     BASE_PROTECTION = 3
 
 class Gauntlets(Armor):
+    DESCRIPTION = "Armored gloves that protect the hands and forearms."
     SLOT = "arms"
     BASE_PROTECTION = 1
 
 class Leggings(Armor):
+    DESCRIPTION = "Armor that covers the legs, providing mobility and protection."
     SLOT = "legs"
     BASE_PROTECTION = 2
 
 class Boots(Armor):
+    DESCRIPTION = "Sturdy footwear that protects the feet and enhances movement."
     SLOT = "feet"
     BASE_PROTECTION = 1

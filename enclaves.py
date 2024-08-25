@@ -15,6 +15,7 @@ import actions
 import descriptions
 import entities
 from weapons import Weapon
+from armor import Armor
 from chop import chop_forest
 from mine import mine_mountain
 from conquer import attempt_conquer
@@ -45,12 +46,17 @@ max_size = 1000000
 weapon_classes = {name.lower(): cls for name, cls in inspect.getmembers(inspect.getmodule(Weapon), inspect.isclass)
                   if issubclass(cls, Weapon) and cls != Weapon}
 
+armor_classes = {name.lower(): cls for name, cls in inspect.getmembers(inspect.getmodule(Armor), inspect.isclass)
+                 if issubclass(cls, Armor) and cls != Armor}
 
 def generate_inventory_descriptions(user_data):
     inventory_descriptions = {}
     for item in user_data.get('equipped', []) + user_data.get('unequipped', []):
-        if item['type'].lower() in weapon_classes:
-            inventory_descriptions[item['id']] = weapon_classes[item['type'].lower()].DESCRIPTION
+        item_type = item['type'].lower()
+        if item_type in weapon_classes:
+            inventory_descriptions[item['id']] = weapon_classes[item_type].DESCRIPTION
+        elif item_type in armor_classes:
+            inventory_descriptions[item['id']] = armor_classes[item_type].DESCRIPTION
         else:
             inventory_descriptions[item['id']] = f"A {item['type']} item."
     return inventory_descriptions
@@ -69,6 +75,8 @@ class BaseHandler(tornado.web.RequestHandler):
             on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
 
         inventory_descriptions = generate_inventory_descriptions(user_data)
+        print(inventory_descriptions)
+
         self.render(
             "templates/user_panel.html",
             user=user,
