@@ -74,8 +74,6 @@ def calculate_stat(base_stat, level, scaling_factor=0.1):
     return math.floor(base_stat * (1 + math.log(level, 2) * scaling_factor))
 
 
-# ... (rest of the file remains the same)
-
 if __name__ == "__main__":
     print("Level distribution test:")
     level_counts = {i: 0 for i in range(1, 21)}
