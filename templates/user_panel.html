@@ -167,6 +167,8 @@
                         {% else %}
                             <p>Damage: {{item.get("min_damage", "N/A")}}-{{item.get("max_damage")}}</p>
                             <p>Accuracy: {{item.get("accuracy", "N/A")}}%</p>
+                            <p>Crit damage: {{item.get("crit_dmg_pct", "N/A")}}%</p>
+                            <p>Crit chance: {{item.get("crit_chance", "N/A")}}%</p>
                             <p>Slot: {{item.get("role", "N/A")}}</p>
                         {% end %}
                         {% for item_id, description in inventory_descriptions.items() %}
@@ -208,6 +210,8 @@
                         {% else %}
                             <p>Damage: {{item.get("min_damage")}}-{{item.get("max_damage")}}</p>
                             <p>Accuracy: {{item.get("accuracy")}}%</p>
+                            <p>Crit damage: {{item.get("crit_dmg_pct", "N/A")}}%</p>
+                            <p>Crit chance: {{item.get("crit_chance", "N/A")}}%</p>
                             <p>Slot: {{item.get("role", "N/A")}}</p>
                         {% end %}
                         {% for item_id, description in inventory_descriptions.items() %}
