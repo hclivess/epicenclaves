@@ -247,25 +247,47 @@ def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dic
 
 def get_weapon_damage(attacker: Dict, exp_bonus_value: int) -> Dict:
     print(f"Getting weapon damage for attacker. Exp bonus: {exp_bonus_value}")
-    for weapon in attacker.get("equipped", []):
-        if weapon.get("role") == "right_hand":
-            damage = random.randint(weapon["min_damage"], weapon["max_damage"])
 
-            if random.randint(1, 100) > weapon["accuracy"]:
-                return {"damage": 0, "message": "miss"}
+    # Default weapon values
+    default_weapon = {
+        "min_damage": 1,
+        "max_damage": 2,
+        "accuracy": 100,
+        "crit_chance": 5,
+        "crit_dmg_pct": 150
+    }
 
-            if random.randint(1, 100) <= weapon["crit_chance"]:
-                damage = int(damage * (weapon["crit_dmg_pct"] / 100))
-                message = "critical hit"
-            else:
-                message = "hit"
+    weapon = None
+    for item in attacker.get("equipped", []):
+        if item.get("role") == "right_hand":
+            weapon = item
+            break
 
-            final_damage = damage + exp_bonus_value
-            print(f"Weapon damage: {final_damage}, Message: {message}")
-            return {"damage": final_damage, "message": message}
+    if not weapon:
+        print("No weapon found, using default values")
+        weapon = default_weapon
 
-    print("No weapon found, returning default damage")
-    return {"damage": 1, "message": "hit"}  # Default damage if no weapon found
+    # Use get() method with default values
+    min_damage = weapon.get("min_damage", default_weapon["min_damage"])
+    max_damage = weapon.get("max_damage", default_weapon["max_damage"])
+    accuracy = weapon.get("accuracy", default_weapon["accuracy"])
+    crit_chance = weapon.get("crit_chance", default_weapon["crit_chance"])
+    crit_dmg_pct = weapon.get("crit_dmg_pct", default_weapon["crit_dmg_pct"])
+
+    damage = random.randint(min_damage, max_damage)
+
+    if random.randint(1, 100) > accuracy:
+        return {"damage": 0, "message": "miss"}
+
+    if random.randint(1, 100) <= crit_chance:
+        damage = int(damage * (crit_dmg_pct / 100))
+        message = "critical hit"
+    else:
+        message = "hit"
+
+    final_damage = damage + exp_bonus_value
+    print(f"Weapon damage: {final_damage}, Message: {message}")
+    return {"damage": final_damage, "message": message}
 
 def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users: List[Dict], user_data: Dict, user: str,
           usersdb: Dict, mapdb: Dict) -> Dict:
