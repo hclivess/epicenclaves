@@ -156,14 +156,20 @@ class EquipHandler(UserActionHandler):
     def get(self):
         id = self.get_argument("id")
         user = tornado.escape.xhtml_escape(self.current_user)
-        self.perform_action(user, equip_item, usersdb, id)
+        self.perform_action(user, self._equip_item, id)
+
+    def _equip_item(self, user, user_data, item_id):
+        return equip_item(user, usersdb, item_id)
 
 
 class UnequipHandler(UserActionHandler):
     def get(self):
         id = self.get_argument("id")
         user = tornado.escape.xhtml_escape(self.current_user)
-        self.perform_action(user, unequip_item, usersdb, id)
+        self.perform_action(user, self._unequip_item, id)
+
+    def _unequip_item(self, user, user_data, item_id):
+        return unequip_item(user, usersdb, item_id)
 
 
 class TrashHandler(UserActionHandler):

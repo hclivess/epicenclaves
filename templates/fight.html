@@ -200,6 +200,9 @@
                                 <div class="pop-up-container enemy-pop-up"></div>
                             </div>
                         </div>
+                        <div class="text-center mb-3">
+                            <button id="skipAnimation" class="btn btn-secondary">Skip Animation</button>
+                        </div>
                         <div class="battle-log-container">
                             <ul id="battleLog" class="list-group list-group-flush">
                                 <!-- Battle messages will be dynamically added here -->
@@ -230,6 +233,9 @@
         let enemyCurrentHealth = battleData.enemy.max_hp;    // Start with max HP
         const playerMaxHealth = battleData.player.max_hp;
         const enemyMaxHealth = battleData.enemy.max_hp;
+
+        let animationInterval;
+        let currentRoundIndex = 0;
 
         function updateHealth(health, maxHealth, healthElement, hpDisplayElement) {
             const clampedHealth = Math.max(0, Math.min(health, maxHealth));
@@ -282,13 +288,50 @@
               .to(target, { x: 0, duration: 0.1 });
         }
 
+        function skipAnimation() {
+            clearInterval(animationInterval);
+
+            // Show all battle messages
+            battleData.rounds.forEach((roundData) => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item battle-message';
+                li.textContent = roundData.message;
+
+                if (roundData.message.includes("You hit") || roundData.message.includes("You critical hit")) {
+                    li.classList.add('player-attack');
+                } else if (roundData.message.includes("hit you")) {
+                    li.classList.add('enemy-attack');
+                } else if (roundData.message.includes("defeated") || roundData.message.includes("escaped")) {
+                    li.classList.add('battle-result');
+                }
+
+                battleLog.appendChild(li);
+            });
+
+            // Update final health
+            const finalRound = battleData.rounds[battleData.rounds.length - 1];
+            playerCurrentHealth = finalRound.player_hp;
+            enemyCurrentHealth = finalRound.enemy_hp;
+            updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth, playerHpDisplay);
+            updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth, enemyHpDisplay);
+
+            // Scroll to the bottom of the battle log container
+            const battleLogContainer = document.querySelector('.battle-log-container');
+            battleLogContainer.scrollTop = battleLogContainer.scrollHeight;
+
+            // Disable the skip button
+            document.getElementById('skipAnimation').disabled = true;
+        }
+
         function startBattle() {
             // Initialize health displays
             updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth, playerHpDisplay);
             updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth, enemyHpDisplay);
 
-            battleData.rounds.forEach((roundData, index) => {
-                setTimeout(() => {
+            animationInterval = setInterval(() => {
+                if (currentRoundIndex < battleData.rounds.length) {
+                    const roundData = battleData.rounds[currentRoundIndex];
+
                     const li = document.createElement('li');
                     li.className = 'list-group-item battle-message';
                     li.textContent = roundData.message;
@@ -316,12 +359,18 @@
                     // Scroll to the bottom of the battle log container
                     const battleLogContainer = document.querySelector('.battle-log-container');
                     battleLogContainer.scrollTop = battleLogContainer.scrollHeight;
-                }, index * 1000);  // Delay each message by 1 second
-            });
+
+                    currentRoundIndex++;
+                } else {
+                    clearInterval(animationInterval);
+                    document.getElementById('skipAnimation').disabled = true;
+                }
+            }, 1000);  // Delay each message by 1 second
         }
 
         window.onload = function () {
             startBattle();
+            document.getElementById('skipAnimation').addEventListener('click', skipAnimation);
         };
     </script>
 </body>
