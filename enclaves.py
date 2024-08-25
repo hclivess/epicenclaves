@@ -131,14 +131,23 @@ class MapHandler(BaseHandler):
             return
 
         visible_distance = 5
-        data = get_surrounding_map_and_user_data(
+        full_data = get_surrounding_map_and_user_data(
             user=user,
             user_data_dict=usersdb,
             map_data_dict=mapdb,
             distance=visible_distance
         )
-        self.render("templates/map.html", data=json.dumps(data), user=user)
 
+        # Filter the data to include only essential information
+        for username, user_info in full_data["users"].items():
+            essential_keys = ["x_pos", "y_pos", "type", "img"]
+            full_data["users"][username] = {key: user_info[key] for key in essential_keys if key in user_info}
+
+        for coord, construction in full_data["construction"].items():
+            essential_keys = ["type", "name", "level", "control", "army", "role"]
+            full_data["construction"][coord] = {key: construction[key] for key in essential_keys if key in construction}
+
+        self.render("templates/map.html", data=json.dumps(full_data), user=user)
 
 class ScoreboardHandler(BaseHandler):
     def get(self):
