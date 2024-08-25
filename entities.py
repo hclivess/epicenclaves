@@ -1,5 +1,8 @@
 import random
 import math
+from typing import List, Dict
+import inspect
+
 
 class Enemy:
     def __init__(self,
@@ -62,6 +65,10 @@ class Enemy:
             message = "critical hit"
         return {"damage": damage, "message": message}
 
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        return [{"name": "fight", "action": f"/fight?target={self.type}"}]
+
+
 class Valenthis(Enemy):
     type = "valenthis"
 
@@ -81,6 +88,7 @@ class Valenthis(Enemy):
                          max_entities=1,
                          max_entities_total=1,
                          herd_probability=0)
+
 
 class Boar(Enemy):
     type = "boar"
@@ -102,6 +110,10 @@ class Boar(Enemy):
                          max_entities_total=100,
                          herd_probability=0.7)
 
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        return [{"name": "hunt", "action": f"/fight?target={self.type}"}]
+
+
 class Wolf(Enemy):
     type = "wolf"
 
@@ -122,6 +134,10 @@ class Wolf(Enemy):
                          max_entities_total=60,
                          herd_probability=0.8)
 
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        return [{"name": "hunt", "action": f"/fight?target={self.type}"}]
+
+
 class Goblin(Enemy):
     type = "goblin"
 
@@ -141,6 +157,7 @@ class Goblin(Enemy):
                          max_entities=20,
                          max_entities_total=40,
                          herd_probability=0.6)
+
 
 class Specter(Enemy):
     type = "specter"
@@ -168,6 +185,7 @@ class Specter(Enemy):
             # Specters drain health on critical hits
             self.hp += damage_info["damage"] // 2
         return damage_info
+
 
 class DragonWhelp(Enemy):
     type = "dragon_whelp"
@@ -202,11 +220,19 @@ class DragonWhelp(Enemy):
             self.breath_attack_cooldown -= 1
             return damage_info
 
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        return [{"name": "slay", "action": f"/fight?target={self.type}"}]
+
+
 class Scenery:
     def __init__(self, hp):
         self.hp = hp
         self.type = "scenery"
         self.role = "scenery"
+
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        return []
+
 
 class Forest(Scenery):
     type = "forest"
@@ -217,6 +243,14 @@ class Forest(Scenery):
         self.role = "scenery"
         self.probability = 0
 
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        return [
+            {"name": "chop", "action": "/chop?amount=1"},
+            {"name": "chop 10", "action": "/chop?amount=10"},
+            {"name": "conquer", "action": f"/conquer?target={self.type}"},
+        ]
+
+
 class Mountain(Scenery):
     type = "mountain"
 
@@ -226,9 +260,33 @@ class Mountain(Scenery):
         self.role = "scenery"
         self.probability = 0
 
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        return [
+            {"name": "mine", "action": "/mine?amount=1"},
+            {"name": "mine 10", "action": "/mine?amount=10"},
+            {"name": "conquer", "action": f"/conquer?target={self.type}"},
+        ]
+
+
 class Wall(Scenery):
     def __init__(self):
         super().__init__(hp=200)
         self.type = "wall"
         self.role = "obstacle"
         self.probability = 0
+
+
+# Dictionary to store all entity types
+# Automatically collect all entity classes
+entity_classes = [
+    cls for name, cls in inspect.getmembers(inspect.getmodule(Enemy), inspect.isclass)
+    if issubclass(cls, (Enemy, Scenery)) and cls not in (Enemy, Scenery)
+]
+
+# Create the entity_types dictionary
+entity_types = {}
+for cls in entity_classes:
+    if hasattr(cls, 'type'):
+        entity_types[cls.type] = cls
+    else:
+        print(f"Warning: {cls.__name__} does not have a 'type' attribute.")

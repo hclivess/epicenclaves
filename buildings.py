@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 import inspect
 
 class Building:
@@ -26,6 +26,14 @@ class Building:
             "formatted_upgrade_costs": {level: self.format_cost(cost) for level, cost in self.UPGRADE_COSTS.items()}
         }
 
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        return [
+            {"name": "deploy army", "action": f"/deploy?type=soldiers&action=add"},
+            {"name": "remove army", "action": f"/deploy?type=soldiers&action=remove"},
+            {"name": "upgrade", "action": f"/upgrade"},
+            {"name": "conquer", "action": f"/conquer?target={self.type}"},
+        ]
+
 class House(Building):
     DISPLAY_NAME = "House"
     DESCRIPTION = "Increases population limit by 10."
@@ -49,6 +57,14 @@ class Inn(Building):
         4: {"wood": 337, "bismuth": 168},
         5: {"wood": 506, "bismuth": 252}
     }
+
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        actions = super().get_actions(user)
+        actions.extend([
+            {"name": "sleep 10 hours", "action": "/rest?hours=10"},
+            {"name": "sleep 20 hours", "action": "/rest?hours=20"},
+        ])
+        return actions
 
 class Farm(Building):
     DISPLAY_NAME = "Farm"
@@ -93,9 +109,9 @@ class Mine(Building):
     IMAGE_SOURCE = "mine.png"
     UPGRADE_COSTS = {
         2: {"wood": 150, "bismuth": 75},
-        3: {"wood": 225, "bismuth": 112},
-        4: {"wood": 337, "bismuth": 168},
-        5: {"wood": 506, "bismuth": 252}
+        3: {"word": 225, "bismuth": 112},
+        4: {"word": 337, "bismuth": 168},
+        5: {"word": 506, "bismuth": 252}
     }
 
 class ArcheryRange(Building):
@@ -109,6 +125,14 @@ class ArcheryRange(Building):
         4: {"wood": 675, "bismuth": 337},
         5: {"wood": 1012, "bismuth": 506}
     }
+
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        actions = super().get_actions(user)
+        actions.extend([
+            {"name": "train 1 archer", "action": "/train?type=archer&amount=1"},
+            {"name": "train 10 archers", "action": "/train?type=archer&amount=10"},
+        ])
+        return actions
 
 class Laboratory(Building):
     DISPLAY_NAME = "Laboratory"
@@ -133,6 +157,11 @@ class Blacksmith(Building):
         4: {"wood": 506, "bismuth": 252},
         5: {"wood": 759, "bismuth": 378}
     }
+
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        actions = super().get_actions(user)
+        actions.append({"name": "repair all gear", "action": "/repair?type=all"})
+        return actions
 
 building_types = {
     cls.__name__.lower(): cls for name, cls in globals().items()

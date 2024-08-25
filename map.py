@@ -1,21 +1,20 @@
 import json
 import sqlite3
 import threading
+from typing import List, Dict, Any, Optional, Tuple
 
 from backend import get_user, map_lock
-from user import get_users_at_coords
+from user import User, get_users_at_coords
+from buildings import Building
+from entities import Enemy, Scenery
 
-
-def get_tile_map(x, y, mapdb):
-    #todo this must also return actions and descriptions
+def get_tile_map(x: int, y: int, mapdb: Dict[str, Any]) -> List[Dict[str, Any]]:
     map_entities = get_map_at_coords(x_pos=x, y_pos=y, map_data_dict=mapdb)
     if not isinstance(map_entities, list):
         map_entities = [map_entities] if map_entities else []
     return map_entities
 
-
-def get_tile_users(x, y, user, usersdb):
-    # todo this must also return actions and descriptions
+def get_tile_users(x: int, y: int, user: str, usersdb: Dict[str, Any]) -> List[Dict[str, Any]]:
     user_entities = get_users_at_coords(
         x_pos=x,
         y_pos=y,
@@ -28,8 +27,12 @@ def get_tile_users(x, y, user, usersdb):
         user_entities = [user_entities] if user_entities else []
     return user_entities
 
+def get_tile_actions(tile: Any, user: str) -> List[Dict[str, str]]:
+    if isinstance(tile, (Building, Enemy, Scenery, User)):
+        return tile.get_actions(user)
+    return []
 
-def get_user_data(user, usersdb):
+def get_user_data(user: str, usersdb: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     data = get_user(user, usersdb)
     if data is None:
         return None
@@ -37,13 +40,10 @@ def get_user_data(user, usersdb):
     user_data = data[username]
     return user_data
 
-
-def occupied_by(x, y, what, mapdb):
-    # Use the get_map_data function to check if the given position is occupied by the specified entity type
+def occupied_by(x: int, y: int, what: str, mapdb: Dict[str, Any]) -> bool:
     entity_map = get_map_at_coords(x_pos=x, y_pos=y, map_data_dict=mapdb)
 
     if entity_map:
-        # Access the entity at the specified position
         entity = entity_map.get(f"{x},{y}")
 
         if entity and entity.get("type") == what:
@@ -51,8 +51,7 @@ def occupied_by(x, y, what, mapdb):
 
     return False
 
-
-def owned_by(x, y, control, mapdb):
+def owned_by(x: int, y: int, control: str, mapdb: Dict[str, Any]) -> bool:
     entity_map = get_map_at_coords(x_pos=x, y_pos=y, map_data_dict=mapdb)
 
     if entity_map:
@@ -63,8 +62,7 @@ def owned_by(x, y, control, mapdb):
 
     return False
 
-
-def update_map_data(update_data, map_data_dict):
+def update_map_data(update_data: Dict[str, Any], map_data_dict: Dict[str, Any]) -> None:
     with map_lock:
         coords = list(update_data.keys())[0]
         tile_data = update_data[coords]
@@ -74,32 +72,23 @@ def update_map_data(update_data, map_data_dict):
         else:
             raise KeyError(f"No data found at the given coordinates {coords}.")
 
-
-def remove_from_map(coords, entity_type, map_data_dict):
+def remove_from_map(coords: str, entity_type: str, map_data_dict: Dict[str, Any]) -> None:
     with map_lock:
         print("remove_from_map", coords, entity_type)
 
-        # Create a key using the coordinates
-        key = coords
-
         # Check if the key exists in the map_data_dict
-        if key in map_data_dict:
+        if coords in map_data_dict:
             # Check if the type matches
-            if map_data_dict[key].get("type") == entity_type:
+            if map_data_dict[coords].get("type") == entity_type:
                 # Remove the key from the map_data_dict
-                del map_data_dict[key]
-                print(
-                    f"Entity of type {entity_type} at coordinates {coords} has been removed."
-                )
+                del map_data_dict[coords]
+                print(f"Entity of type {entity_type} at coordinates {coords} has been removed.")
             else:
-                print(
-                    f"Entity of type {entity_type} not found at the given coordinates {coords}."
-                )
+                print(f"Entity of type {entity_type} not found at the given coordinates {coords}.")
         else:
             print(f"No data found at the given coordinates {coords}.")
 
-
-def insert_map_data(existing_data, new_data):
+def insert_map_data(existing_data: Dict[str, Any], new_data: Dict[str, Any]) -> None:
     with map_lock:
         print("insert_map_data", new_data)
 
@@ -111,11 +100,10 @@ def insert_map_data(existing_data, new_data):
                 # If the coordinate doesn't exist, create a new entry
                 existing_data[coord] = construction_info
 
-
-def is_visible(x1, y1, x2, y2, distance):
+def is_visible(x1: int, y1: int, x2: int, y2: int, distance: int) -> bool:
     return (x1 - x2) ** 2 + (y1 - y2) ** 2 <= distance ** 2
 
-def get_map_data_limit(x_pos, y_pos, map_data_dict, distance=5):
+def get_map_data_limit(x_pos: int, y_pos: int, map_data_dict: Dict[str, Any], distance: int = 5) -> Dict[str, Any]:
     filtered_data = {}
     for coords, data in map_data_dict.items():
         x_map, y_map = map(int, coords.split(","))
@@ -123,7 +111,7 @@ def get_map_data_limit(x_pos, y_pos, map_data_dict, distance=5):
             filtered_data[coords] = data
     return filtered_data
 
-def get_users_data_limit(x_pos, y_pos, usersdb, distance=5):
+def get_users_data_limit(x_pos: int, y_pos: int, usersdb: Dict[str, Any], distance: int = 5) -> Dict[str, Any]:
     filtered_data = {}
     for username, data in usersdb.items():
         x_map = data['x_pos']
@@ -132,7 +120,7 @@ def get_users_data_limit(x_pos, y_pos, usersdb, distance=5):
             filtered_data[username] = data
     return filtered_data
 
-def get_buildings(user_data):
+def get_buildings(user_data: Dict[str, Any]) -> List[Dict[str, Any]]:
     if user_data is None:
         return []
 
@@ -143,7 +131,7 @@ def get_buildings(user_data):
 
     return list(construction.values())
 
-def is_surrounded_by(x, y, entity_type, mapdb, diameter=1):
+def is_surrounded_by(x: int, y: int, entity_type: str, mapdb: Dict[str, Any], diameter: int = 1) -> bool:
     for i in range(x - diameter, x + diameter + 1):
         for j in range(y - diameter, y + diameter + 1):
             if i == x and j == y:
@@ -152,7 +140,7 @@ def is_surrounded_by(x, y, entity_type, mapdb, diameter=1):
                 return True
     return False
 
-def get_surrounding_map_and_user_data(user, user_data_dict, map_data_dict, distance):
+def get_surrounding_map_and_user_data(user: str, user_data_dict: Dict[str, Any], map_data_dict: Dict[str, Any], distance: int) -> Dict[str, Any]:
     if user not in user_data_dict:
         return {"error": "User not found."}
 
@@ -173,17 +161,15 @@ def get_surrounding_map_and_user_data(user, user_data_dict, map_data_dict, dista
 
     return result
 
-
-def get_coords(entry):
+def get_coords(entry: Dict[str, Any]) -> str:
     return list(entry.keys())[0]
 
-
-def save_map_data(map_data_dict, x_pos, y_pos, data):
+def save_map_data(map_data_dict: Dict[str, Any], x_pos: int, y_pos: int, data: Dict[str, Any]) -> None:
     # Use a string coordinate key like 'x,y'
     coord_key = f"{x_pos},{y_pos}"
     map_data_dict[coord_key] = data
 
-def create_map_database():
+def create_map_database() -> None:
     # Connect to the database or create one if it doesn't exist
     conn = sqlite3.connect("db/map_data.db")
     cursor = conn.cursor()
@@ -200,8 +186,7 @@ def create_map_database():
     conn.commit()
     conn.close()
 
-
-def get_map_at_coords(x_pos, y_pos, map_data_dict):
+def get_map_at_coords(x_pos: int, y_pos: int, map_data_dict: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """returns map data at a specific coordinate"""
     key = f"{x_pos},{y_pos}"
 
@@ -214,7 +199,7 @@ def get_map_at_coords(x_pos, y_pos, map_data_dict):
 
 sql_lock = threading.Lock()
 
-def save_map_from_memory(map_data_dict):
+def save_map_from_memory(map_data_dict: Dict[str, Any]) -> None:
     with sql_lock:
         print("saving map to drive")
         conn_map = sqlite3.connect("db/map_data.db")
@@ -235,8 +220,7 @@ def save_map_from_memory(map_data_dict):
         conn_map.commit()
         conn_map.close()
 
-
-def load_map_to_memory():
+def load_map_to_memory() -> Dict[str, Any]:
     # Connect to the database and get a cursor
     conn_map = sqlite3.connect("db/map_data.db")
     cursor_map = conn_map.cursor()
@@ -261,12 +245,10 @@ def load_map_to_memory():
 
     return map_data_dict
 
-
-def strip_usersdb(usersdb):
+def strip_usersdb(usersdb: Dict[str, Any]) -> Dict[str, Any]:
     # strip usersdb of non-displayed data
     keys_to_keep = ['x_pos', 'y_pos', 'exp', 'hp', 'armor', 'img', 'online', 'type']
     new_usersdb = {}
     for username, user_data in usersdb.items():
         new_usersdb[username] = {k: v for k, v in user_data.items() if k in keys_to_keep}
     return new_usersdb
-    # strip usersdb of non-displayed data

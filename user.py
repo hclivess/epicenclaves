@@ -1,32 +1,71 @@
 import json
 import sqlite3
 import random
+from typing import List, Dict, Any
 from item_generator import id_generator, generate_armor, generate_weapon, generate_tool
 import threading
 
-
-def get_users_at_coords(x_pos, y_pos, user, users_dict, include_construction=True, include_self=True):
-    """Returns a list of user data at a specific coordinate"""
-
-    users_at_coords = []
-
-    for username, user_data in users_dict.items():
-        # Skip this user if it's the same as the specified user and include_self is False
-        if username == user and not include_self:
-            continue
-
-        if user_data["x_pos"] == x_pos and user_data["y_pos"] == y_pos:
-            if not include_construction:
-                user_data = user_data.copy()  # So we don't modify the original data
-                user_data.pop('construction', None)  # Remove the construction data if present
-            users_at_coords.append({username: user_data})
-
-    # Return the list of users at the given coordinates (may be empty if no users found)
-    return users_at_coords
-
-
 user_lock = threading.Lock()
 
+class User:
+    def __init__(self, username: str, x_pos: int, y_pos: int, profile_pic: str = ""):
+        self.username = username
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.type = "player"
+        self.age = 0
+        self.img = profile_pic
+        self.exp = 0
+        self.units = []
+        self.research = 0
+        self.hp = 100
+        self.armor = 0
+        self.action_points = 500
+        self.army_deployed = 0
+        self.army_free = 0
+        self.peasants = 0
+        self.wood = 500
+        self.food = 500
+        self.bismuth = 500
+        self.equipped = []
+        self.unequipped = []
+        self.pop_lim = 0
+        self.alive = True
+        self.online = True
+        self.construction = {}
+
+    def get_actions(self, current_user: str) -> List[Dict[str, str]]:
+        if self.username != current_user:
+            return [{"name": "challenge", "action": f"/fight?target=player&name={self.username}"}]
+        return []
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "username": self.username,
+            "x_pos": self.x_pos,
+            "y_pos": self.y_pos,
+            "type": self.type,
+            "age": self.age,
+            "img": self.img,
+            "exp": self.exp,
+            "units": self.units,
+            "research": self.research,
+            "hp": self.hp,
+            "armor": self.armor,
+            "action_points": self.action_points,
+            "army_deployed": self.army_deployed,
+            "army_free": self.army_free,
+            "peasants": self.peasants,
+            "wood": self.wood,
+            "food": self.food,
+            "bismuth": self.bismuth,
+            "equipped": self.equipped,
+            "unequipped": self.unequipped,
+            "pop_lim": self.pop_lim,
+            "alive": self.alive,
+            "online": self.online,
+            "construction": self.construction
+        }
 
 def create_users_db():
     with user_lock:
@@ -37,8 +76,7 @@ def create_users_db():
         conn.commit()
         conn.close()
 
-
-def find_open_space(mapdb):
+def find_open_space(mapdb: Dict[str, Any]) -> tuple:
     x = random.randint(0, 100)
     y = random.randint(0, 100)
 
@@ -65,8 +103,7 @@ def find_open_space(mapdb):
             if x > 2 ** 31:
                 raise Exception("No open space found within available range.")
 
-
-def create_user(user_data_dict, user, mapdb, profile_pic=""):
+def create_user(user_data_dict: Dict[str, Any], user: str, mapdb: Dict[str, Any], profile_pic: str = "") -> None:
     print(f"Creating {user}")
     x_pos, y_pos = find_open_space(mapdb)
 
@@ -76,47 +113,21 @@ def create_user(user_data_dict, user, mapdb, profile_pic=""):
     # Generate a hatchet as the starting weapon
     starting_hatchet = generate_tool(max_level=1, tool_type="hatchet")
 
-    # Prepare the data dictionary
-    data = {
-        "x_pos": x_pos,
-        "y_pos": y_pos,
-        "type": "player",
-        "age": 0,
-        "img": profile_pic,
-        "exp": 0,
-        "units": [],
-        "research": 0,
-        "hp": 100,
-        "armor": sum(armor["protection"] for armor in initial_armor),  # Total initial armor value
-        "action_points": 500,
-        "army_deployed": 0,
-        "army_free": 0,
-        "peasants": 0,
-        "wood": 500,
-        "food": 500,
-        "bismuth": 500,
+    # Create a new User instance
+    new_user = User(user, x_pos, y_pos, profile_pic)
 
-        "equipped": [
-            starting_hatchet,  # Start with an hatchet equipped
-            *initial_armor  # Unpack the initial armor into the equipped list
-        ],
+    # Set initial equipment
+    new_user.equipped = [starting_hatchet] + initial_armor
+    new_user.unequipped = [generate_weapon(max_level=1)]
 
-        "unequipped": [generate_weapon(max_level=1)],  # Generate another level 1 weapon for the unequipped slot
-        "pop_lim": 0,
-        "alive": True,
-        "online": True,
-    }
-
-    # Ensure all equipped slots have an item (even if it's an empty slot)
-    armor_slots = ["head", "body", "arms", "legs", "feet"]
-
+    # Calculate total initial armor value
+    new_user.armor = sum(armor["protection"] for armor in initial_armor)
 
     # Insert or update user data in the passed dictionary
-    user_data_dict[user] = data
+    user_data_dict[user] = new_user.to_dict()
     print("User created")
 
-
-def save_users_from_memory(user_data_dict):
+def save_users_from_memory(user_data_dict: Dict[str, Any]) -> None:
     print("saving users to drive")
     conn_user = sqlite3.connect("db/user_data.db")
     cursor_user = conn_user.cursor()
@@ -147,8 +158,7 @@ def save_users_from_memory(user_data_dict):
     conn_user.commit()
     conn_user.close()
 
-
-def load_users_to_memory():
+def load_users_to_memory() -> Dict[str, Any]:
     conn_user = sqlite3.connect("db/user_data.db")
     cursor_user = conn_user.cursor()
 
@@ -174,3 +184,22 @@ def load_users_to_memory():
         user_data_dict[username] = user_data
 
     return user_data_dict
+
+def get_users_at_coords(x_pos: int, y_pos: int, user: str, users_dict: Dict[str, Any], include_construction: bool = True, include_self: bool = True) -> List[Dict[str, Any]]:
+    """Returns a list of user data at a specific coordinate"""
+
+    users_at_coords = []
+
+    for username, user_data in users_dict.items():
+        # Skip this user if it's the same as the specified user and include_self is False
+        if username == user and not include_self:
+            continue
+
+        if user_data["x_pos"] == x_pos and user_data["y_pos"] == y_pos:
+            if not include_construction:
+                user_data = user_data.copy()  # So we don't modify the original data
+                user_data.pop('construction', None)  # Remove the construction data if present
+            users_at_coords.append({username: user_data})
+
+    # Return the list of users at the given coordinates (may be empty if no users found)
+    return users_at_coords
