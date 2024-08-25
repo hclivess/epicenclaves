@@ -38,7 +38,7 @@ class Armor:
         self.max_durability = self.durability
 
         # Calculate efficiency using logarithmic scaling
-        self.efficiency = self._log_scale(80, 100)
+        self.efficiency = self._log_scale(20, 100)
 
     def to_dict(self):
         return {
