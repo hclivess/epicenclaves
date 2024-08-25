@@ -693,7 +693,7 @@ if __name__ == "__main__":
     if not db_status["map_exists"]:
         spawn(
             mapdb=mapdb,
-            entity_instance=Forest(),
+            entity_class=Forest(),
             probability=1,
             size=200,
             max_entities=250,
@@ -703,7 +703,7 @@ if __name__ == "__main__":
 
         spawn(
             mapdb=mapdb,
-            entity_instance=Mountain(),
+            entity_class=Mountain(),
             probability=1,
             size=200,
             max_entities=250,
@@ -713,7 +713,7 @@ if __name__ == "__main__":
 
         spawn(
             mapdb=mapdb,
-            entity_instance=Boar(),
+            entity_class=Boar(),
             probability=1,
             herd_size=15,
             max_entities=50,
