@@ -69,7 +69,7 @@ class Valenthis(Enemy):
                          size=200,
                          max_entities=1,
                          max_entities_total=1,
-                         herd_probability=1)
+                         herd_probability=0)
 
 class Boar(Enemy):
     type = "boar"
