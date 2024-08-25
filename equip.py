@@ -1,4 +1,41 @@
-def equip_item(usersdb, username, item_id):
+def unequip_item(username, usersdb, item_id):
+    player = usersdb[username]
+
+    # Search for the item to unequip in the equipped list
+    item_to_unequip = next((item for item in player['equipped'] if item['id'] == item_id), None)
+
+    # If the item is not found, return a message
+    if item_to_unequip is None:
+        return "Item not found in equipped inventory."
+
+    # Remove the item from the equipped list and add it to the unequipped list
+    player['equipped'].remove(item_to_unequip)
+    player['unequipped'].append(item_to_unequip)
+
+    # Determine the slot for the item
+    if item_to_unequip.get('class') == 'tool':
+        slot = item_to_unequip.get('slot', 'right_hand')
+    else:
+        slot = item_to_unequip.get('slot') if item_to_unequip.get('role') == 'armor' else 'right_hand'
+
+    # If it's an armor item, update the player's total armor value
+    if item_to_unequip.get('role') == 'armor':
+        player['armor'] = max(0, player['armor'] - item_to_unequip.get('protection', 0))
+
+    # Replace with an empty slot
+    empty_slot = {
+        "type": "empty",
+        "slot": slot,
+        "role": "armor" if item_to_unequip.get('role') == 'armor' else "right_hand",
+        "protection": 0
+    }
+    player['equipped'].append(empty_slot)
+
+    usersdb[username] = player
+
+    return f"Unequipped item with ID: {item_id}, Type: {item_to_unequip['type']}"
+
+def equip_item(username, usersdb, item_id):
     player = usersdb[username]
 
     # Search for the item to equip in the unequipped list
@@ -35,39 +72,6 @@ def equip_item(usersdb, username, item_id):
     # Remove the newly equipped item from the unequipped list
     player['unequipped'].remove(item_to_equip)
 
+    usersdb[username] = player
+
     return f"Equipped item with ID: {item_id}, Type: {item_to_equip['type']}"
-
-
-def unequip_item(usersdb, username, item_id):
-    player = usersdb[username]
-
-    # Search for the item to unequip in the equipped list
-    item_to_unequip = next((item for item in player['equipped'] if item['id'] == item_id), None)
-
-    if item_to_unequip is None:
-        return "Item not found in equipped inventory."
-
-    # Remove the item from the equipped list and add it to the unequipped list
-    player['equipped'].remove(item_to_unequip)
-    player['unequipped'].append(item_to_unequip)
-
-    # Determine the slot for the item
-    if item_to_unequip.get('class') == 'tool':
-        slot = item_to_unequip.get('slot', 'right_hand')
-    else:
-        slot = item_to_unequip.get('slot') if item_to_unequip.get('role') == 'armor' else 'right_hand'
-
-    # If it's an armor item, update the player's total armor value
-    if item_to_unequip.get('role') == 'armor':
-        player['armor'] = max(0, player['armor'] - item_to_unequip.get('protection', 0))
-
-    # Replace with an empty slot
-    empty_slot = {
-        "type": "empty",
-        "slot": slot,
-        "role": "armor" if item_to_unequip.get('role') == 'armor' else "right_hand",
-        "protection": 0
-    }
-    player['equipped'].append(empty_slot)
-
-    return f"Unequipped item with ID: {item_id}, Type: {item_to_unequip['type']}"

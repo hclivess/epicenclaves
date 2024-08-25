@@ -21,8 +21,7 @@ from chop import chop_forest
 from mine import mine_mountain
 from conquer import attempt_conquer
 from deploy_army import deploy_army, remove_army
-from equip import equip_item
-from unequip import unequip_item
+from equip import equip_item, unequip_item
 from fight import fight, get_fight_preconditions
 from login import login
 from turn_engine import TurnEngine
@@ -64,7 +63,11 @@ def generate_inventory_descriptions(user_data):
         elif item_type in tool_classes:
             inventory_descriptions[item['id']] = tool_classes[item_type].DESCRIPTION
         else:
-            inventory_descriptions[item['id']] = f"A {item['type']} item."
+            item_id = item.get('id')
+            if item_id:
+                inventory_descriptions[item_id] = f"A {item['type']} item."
+            else:
+                inventory_descriptions['unknown_item'] = f"An unknown item."
     return inventory_descriptions
 class BaseHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, **kwargs):
@@ -155,7 +158,6 @@ class UnequipHandler(UserActionHandler):
         id = self.get_argument("id")
         user = tornado.escape.xhtml_escape(self.current_user)
         self.perform_action(user, unequip_item, usersdb, id)
-
 
 class TrashHandler(UserActionHandler):
     def get(self):
