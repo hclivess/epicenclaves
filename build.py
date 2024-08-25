@@ -1,8 +1,11 @@
 from backend import has_resources, update_user_data
 from map import get_tile_map, insert_map_data
-from costs import building_costs
+from buildings import building_types
 
 def build(user, user_data, entity, name, mapdb, usersdb):
+    print(f"Attempting to build: {entity}")
+    print(f"Available building types: {list(building_types.keys())}")
+
     if user_data is None:
         return f"User {user} not found."
 
@@ -11,45 +14,43 @@ def build(user, user_data, entity, name, mapdb, usersdb):
 
     on_tile = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
 
-    building_count = {}
-    for key, value in user_data.get("construction", {}).items():
-        building_type = value.get("type")
-        if building_type:
-            building_count[building_type] = building_count.get(building_type, 0) + 1
-
-    if building_count.get(entity, 0) >= 10:
-        return "Cannot have more than 10 of the same building type"
-
-    building_or_scenery_exists = False
-    for entry in on_tile:
-        tile_data = entry.get(f"{user_data['x_pos']},{user_data['y_pos']}")
-        if tile_data and (tile_data["role"] == "building" or tile_data["role"] == "scenery"):
-            building_or_scenery_exists = True
-            break
-
-    if building_or_scenery_exists:
+    # Check if there's already a building or scenery on the tile
+    if any(entry.get(f"{user_data['x_pos']},{user_data['y_pos']}", {}).get("role") in ["building", "scenery"] for entry in on_tile):
         return "Cannot build here"
 
-    if entity not in building_costs:
-        return "Building procedure not defined"
+    if entity not in building_types:
+        return f"Building type '{entity}' not recognized. Available types: {', '.join(building_types.keys())}"
 
-    if not has_resources(user_data, building_costs[entity]):
-        return f"Not enough resources to build {entity}"
+    building_class = building_types[entity]
+    building_instance = building_class(1)  # Create an instance with ID 1 (you might want to generate a unique ID)
+    building_data = building_instance.to_dict()
 
-    for resource, amount in building_costs[entity].items():
+    # Check building limit
+    user_buildings = user_data.get("construction", {})
+    if sum(1 for b in user_buildings.values() if b["type"] == entity) >= 10:
+        return f"Cannot have more than 10 {building_data['display_name']} buildings"
+
+    if not has_resources(user_data, building_data["cost"]):
+        return f"Not enough resources to build {building_data['display_name']}"
+
+    # Deduct resources
+    for resource, amount in building_data["cost"].items():
         user_data[resource] -= amount
 
+    # Special case for house
     if entity == "house":
-        user_data["pop_lim"] += 10
+        user_data["pop_lim"] = user_data.get("pop_lim", 0) + 10
 
+    # Update user data
     updated_values = {
         "action_points": user_data["action_points"] - 1,
         "wood": user_data["wood"],
-        "pop_lim": user_data.get("pop_lim", None),
+        "bismuth": user_data["bismuth"],
+        "pop_lim": user_data.get("pop_lim"),
     }
-
     update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
 
+    # Prepare building data for insertion
     entity_data = {
         "type": entity,
         "name": name,
@@ -57,10 +58,18 @@ def build(user, user_data, entity, name, mapdb, usersdb):
         "control": user,
         "role": "building",
         "army": 0,
+        "display_name": building_data["display_name"],
+        "description": building_data["description"],
+        "image_source": building_data["image_source"],
+        "upgrade_costs": building_data["upgrade_costs"],
     }
 
-    data = {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data}
-    update_user_data(user=user, updated_values={"construction": data}, user_data_dict=usersdb)
-    insert_map_data(mapdb, data)
+    # Update construction data
+    construction_data = user_data.get("construction", {})
+    construction_data[f"{user_data['x_pos']},{user_data['y_pos']}"] = entity_data
+    update_user_data(user=user, updated_values={"construction": construction_data}, user_data_dict=usersdb)
 
-    return f"Successfully built {entity}"
+    # Insert into map database
+    insert_map_data(mapdb, {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data})
+
+    return f"Successfully built {building_data['display_name']}"

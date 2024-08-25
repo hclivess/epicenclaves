@@ -2,7 +2,6 @@ import time
 
 from backend import has_resources, update_user_data
 from map import get_tile_map, get_user_data, insert_map_data
-from costs import upgrade_costs
 
 def upgrade(user, mapdb, usersdb):
     user_data = get_user_data(user, usersdb)
