@@ -4,23 +4,22 @@ from PIL import Image
 
 
 def login(password, uploaded_file, auth_exists_user, auth_add_user, create_user, save_users_from_memory,
-          save_map_from_memory, auth_login_validate, get_user_data, get_tile_map, get_tile_users, actions, descriptions,
-          usersdb, mapdb, user):
+          save_map_from_memory, auth_login_validate, usersdb, mapdb, user):
     profile_pic_path = "img/pps/default.png"
 
     if uploaded_file:
         uploaded_file = uploaded_file[0]
         if len(uploaded_file["body"]) > 500 * 1024:
-            return "Profile picture size should be less than 500 KB!", None
+            return "Profile picture size should be less than 500 KB!"
 
         file_extension = os.path.splitext(uploaded_file["filename"])[-1].lower()
         if file_extension not in [".jpg", ".jpeg", ".png", ".gif"]:
-            return "Invalid file type!", None
+            return "Invalid file type!"
 
         try:
             Image.open(io.BytesIO(uploaded_file["body"]))
         except Exception as e:
-            return f"Uploaded file is not a valid image: {e}!", None
+            return f"Uploaded file is not a valid image: {e}!"
 
         save_dir = "img/pps/"
         if not os.path.exists(save_dir):
@@ -39,19 +38,6 @@ def login(password, uploaded_file, auth_exists_user, auth_add_user, create_user,
         save_map_from_memory(mapdb)
 
     if auth_login_validate(user, password):
-        user_data = get_user_data(user, usersdb)
-        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-        on_tile_users = get_tile_users(
-            user_data["x_pos"], user_data["y_pos"], user, usersdb
-        )
-        return f"Welcome, {user}!", {
-            'user': user,
-            'file': user_data,
-            'message': f"Welcome, {user}!",
-            'on_tile_map': on_tile_map,
-            'on_tile_users': on_tile_users,
-            'actions': actions,
-            'descriptions': descriptions,
-        }
+        return f"Welcome, {user}!"
     else:
-        return "Wrong password", None
+        return "Wrong password"

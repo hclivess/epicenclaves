@@ -314,13 +314,13 @@ class LoginHandler(BaseHandler):
         password = self.get_argument("password")
         uploaded_file = self.request.files.get("profile_picture", None)
 
-        message, context = login(password, uploaded_file, auth_exists_user, auth_add_user, create_user,
-                                 save_users_from_memory, save_map_from_memory, auth_login_validate, get_user_data,
-                                 get_tile_map, get_tile_users, actions, descriptions, usersdb, mapdb, user)
+        message = login(password, uploaded_file, auth_exists_user, auth_add_user, create_user,
+                        save_users_from_memory, save_map_from_memory, auth_login_validate, usersdb, mapdb, user)
 
-        if context:
+        if message.startswith("Welcome"):
             self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
-            self.render("templates/user_panel.html", **context)
+            user_data = get_user_data(user, usersdb)
+            self.render_user_panel(user, user_data, message=message)
         else:
             self.render("templates/denied.html", message=message)
 
