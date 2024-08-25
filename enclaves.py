@@ -16,6 +16,7 @@ import descriptions
 import entities
 from weapons import Weapon
 from armor import Armor
+from tools import Tool
 from chop import chop_forest
 from mine import mine_mountain
 from conquer import attempt_conquer
@@ -49,6 +50,9 @@ weapon_classes = {name.lower(): cls for name, cls in inspect.getmembers(inspect.
 armor_classes = {name.lower(): cls for name, cls in inspect.getmembers(inspect.getmodule(Armor), inspect.isclass)
                  if issubclass(cls, Armor) and cls != Armor}
 
+tool_classes = {name.lower(): cls for name, cls in inspect.getmembers(inspect.getmodule(Tool), inspect.isclass)
+                if issubclass(cls, Tool) and cls != Tool}
+
 def generate_inventory_descriptions(user_data):
     inventory_descriptions = {}
     for item in user_data.get('equipped', []) + user_data.get('unequipped', []):
@@ -57,10 +61,11 @@ def generate_inventory_descriptions(user_data):
             inventory_descriptions[item['id']] = weapon_classes[item_type].DESCRIPTION
         elif item_type in armor_classes:
             inventory_descriptions[item['id']] = armor_classes[item_type].DESCRIPTION
+        elif item_type in tool_classes:
+            inventory_descriptions[item['id']] = tool_classes[item_type].DESCRIPTION
         else:
             inventory_descriptions[item['id']] = f"A {item['type']} item."
     return inventory_descriptions
-
 class BaseHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, **kwargs):
         self.render("templates/error.html")

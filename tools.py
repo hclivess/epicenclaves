@@ -18,7 +18,7 @@ class Tool:
 
 class Hatchet(Tool):
     BASE_DAMAGE = (1, 3)  # Minimum and maximum base damage
-    DESCRIPTION = ""
+    DESCRIPTION = "A small, versatile axe for chopping wood and other materials."
 
     def __init__(self, level=1):
         super().__init__(level)
