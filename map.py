@@ -31,6 +31,8 @@ def get_tile_users(x, y, user, usersdb):
 
 def get_user_data(user, usersdb):
     data = get_user(user, usersdb)
+    if data is None:
+        return None
     username = list(data.keys())[0]
     user_data = data[username]
     return user_data

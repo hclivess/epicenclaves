@@ -52,6 +52,7 @@ armor_classes = {name.lower(): cls for name, cls in inspect.getmembers(inspect.g
 tool_classes = {name.lower(): cls for name, cls in inspect.getmembers(inspect.getmodule(Tool), inspect.isclass)
                 if issubclass(cls, Tool) and cls != Tool}
 
+
 def generate_inventory_descriptions(user_data):
     inventory_descriptions = {}
     for item in user_data.get('equipped', []) + user_data.get('unequipped', []):
@@ -69,6 +70,8 @@ def generate_inventory_descriptions(user_data):
             else:
                 inventory_descriptions['unknown_item'] = f"An unknown item."
     return inventory_descriptions
+
+
 class BaseHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, **kwargs):
         self.render("templates/error.html")
@@ -140,9 +143,12 @@ class ScoreboardHandler(BaseHandler):
 
 class UserActionHandler(BaseHandler):
     def perform_action(self, user, action_func, *args, **kwargs):
-        user_data = get_user_data(user, usersdb=usersdb)
+        user_data = get_user_data(user, usersdb)
+        if user_data is None:
+            self.render_user_panel(user, {}, message=f"User {user} not found.")
+            return
         message = action_func(user, user_data, *args, **kwargs)
-        user_data = get_user_data(user, usersdb=usersdb)  # Refresh user data
+        user_data = get_user_data(user, usersdb)  # Refresh user data
         self.render_user_panel(user, user_data, message=message)
 
 
@@ -159,6 +165,7 @@ class UnequipHandler(UserActionHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
         self.perform_action(user, unequip_item, usersdb, id)
 
+
 class TrashHandler(UserActionHandler):
     def get(self):
         id = self.get_argument("id")
@@ -170,14 +177,13 @@ class DeployArmyHandler(UserActionHandler):
     def get(self, data):
         action = self.get_argument("action")
         user = tornado.escape.xhtml_escape(self.current_user)
-        user_data = get_user_data(user, usersdb=usersdb)
-        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
 
         if action == "add":
-            self.perform_action(user, deploy_army, on_tile_map, usersdb, mapdb, user_data)
+            self.perform_action(user, deploy_army, mapdb)
         elif action == "remove":
-            self.perform_action(user, remove_army, on_tile_map, usersdb, mapdb, user_data)
+            self.perform_action(user, remove_army, mapdb)
         else:
+            user_data = get_user_data(user, usersdb=usersdb)
             self.render_user_panel(user, user_data, message="No action specified.")
 
 
@@ -186,13 +192,24 @@ class BuildHandler(UserActionHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
         entity = self.get_argument("entity")
         name = self.get_argument("name")
-        self.perform_action(user, build, entity, name, mapdb, usersdb=usersdb)
+        self.perform_action(user, build, entity, name, mapdb, usersdb)
+
+
+class UserActionHandler(BaseHandler):
+    def perform_action(self, user, action_func, *args, **kwargs):
+        user_data = get_user_data(user, usersdb)
+        if user_data is None:
+            self.render_user_panel(user, {}, message=f"User {user} not found.")
+            return
+        message = action_func(user, user_data, *args, **kwargs)
+        user_data = get_user_data(user, usersdb)  # Refresh user data
+        self.render_user_panel(user, user_data, message=message)
 
 
 class UpgradeHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-        self.perform_action(user, upgrade, mapdb, usersdb=usersdb)
+        self.perform_action(user, upgrade, mapdb, usersdb)
 
 
 class MoveToHandler(BaseHandler):
@@ -352,6 +369,7 @@ def make_app():
         (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),
     ])
 
+
 async def main():
     with open("config_enclaves.json") as certlocfile:
         contents = json.load(certlocfile)
@@ -385,6 +403,7 @@ async def main():
 
     await shutdown_event.wait()
 
+
 def init_databases():
     map_exists = os.path.exists("db/map_data.db")
     game_exists = os.path.exists("db/game_data.db")
@@ -399,17 +418,22 @@ def init_databases():
 
     return {"map_exists": map_exists}
 
+
 def initialize_map_and_users():
     return load_map_to_memory(), load_users_to_memory()
+
 
 if __name__ == "__main__":
     db_status = init_databases()
     mapdb, usersdb = initialize_map_and_users()
 
     if not db_status["map_exists"]:
-        spawn(mapdb=mapdb, entity_class=entities.Forest, probability=1, map_size=200, max_entities=250, level=1, herd_probability=0)
-        spawn(mapdb=mapdb, entity_class=entities.Mountain, probability=1, map_size=200, max_entities=250, level=1, herd_probability=0)
-        spawn(mapdb=mapdb, entity_class=entities.Boar, probability=1, herd_size=15, max_entities=50, level=1, herd_probability=1)
+        spawn(mapdb=mapdb, entity_class=entities.Forest, probability=1, map_size=200, max_entities=250, level=1,
+              herd_probability=0)
+        spawn(mapdb=mapdb, entity_class=entities.Mountain, probability=1, map_size=200, max_entities=250, level=1,
+              herd_probability=0)
+        spawn(mapdb=mapdb, entity_class=entities.Boar, probability=1, herd_size=15, max_entities=50, level=1,
+              herd_probability=1)
         generate_multiple_mazes(mapdb, 20, 20, 10, 10, 0.1, 25, 200)
 
     actions = actions.TileActions()

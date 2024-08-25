@@ -34,7 +34,6 @@ def has_item_equipped(data, item_type):
 
 
 def get_user(user, user_data_dict, get_construction=True):
-    # Check if the user exists in the user_data_dict
     if user not in user_data_dict:
         print(f"User {user} not found in the dictionary. (backend.py)")
         return None

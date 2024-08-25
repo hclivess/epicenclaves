@@ -2,16 +2,14 @@ from backend import has_resources, update_user_data
 from map import get_tile_map, get_user_data, insert_map_data
 from costs import building_costs
 
-
-def build(user, entity, name, mapdb, usersdb):
-    user_data = get_user_data(user, usersdb)
+def build(user, user_data, entity, name, mapdb, usersdb):
     if user_data is None:
-        return f"User {user} not found in the dictionary."
-
-    on_tile = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        return f"User {user} not found."
 
     if user_data["action_points"] < 1:
         return "Not enough action points to build"
+
+    on_tile = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
 
     building_count = {}
     for key, value in user_data.get("construction", {}).items():
