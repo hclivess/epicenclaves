@@ -6,6 +6,11 @@ class Building:
         self.id = building_id
         self.role = "building"
 
+    @staticmethod
+    def format_cost(cost: Dict[str, int]) -> str:
+        emoji_map = {"wood": "🪵", "bismuth": "🪨", "gold": "💰"}
+        return " ".join(f"{emoji_map.get(resource, resource)}{amount}" for resource, amount in cost.items())
+
     def to_dict(self):
         return {
             "type": self.type,
@@ -14,6 +19,7 @@ class Building:
             "role": self.role,
             "id": self.id,
             "cost": self.COST,
+            "formatted_cost": self.format_cost(self.COST),
             "image_source": self.IMAGE_SOURCE
         }
 
@@ -37,36 +43,36 @@ class Farm(Building):
 
 class Barracks(Building):
     DISPLAY_NAME = "Barracks"
-    DESCRIPTION = "Turns peasants into army for 2 food per turn and additional housing. Army is the only deployable unit."
+    DESCRIPTION = "Turns peasants into army units. Costs 2 🍖 per turn. Provides additional housing."
     COST = {"wood": 150, "bismuth": 75}
     IMAGE_SOURCE = "barracks.png"
 
 class Sawmill(Building):
     DISPLAY_NAME = "Sawmill"
-    DESCRIPTION = "Passively produces 🪵1 per turn per every sawmill level and forest."
+    DESCRIPTION = "Produces 🪵1 per turn for each sawmill level and nearby forest."
     COST = {"wood": 100, "bismuth": 50}
     IMAGE_SOURCE = "sawmill.png"
 
 class Mine(Building):
     DISPLAY_NAME = "Mine"
-    DESCRIPTION = "Passively produces 🪨1 per turn per every mine level and forest."
+    DESCRIPTION = "Produces 🪨1 per turn for each mine level and nearby mountain."
     COST = {"wood": 100, "bismuth": 50}
     IMAGE_SOURCE = "mine.png"
 
 class ArcheryRange(Building):
     DISPLAY_NAME = "Archery Range"
-    DESCRIPTION = "Allows you to train army into archers."
+    DESCRIPTION = "Allows training army units into archers."
     COST = {"wood": 200, "bismuth": 100}
     IMAGE_SOURCE = "archery_range.png"
 
 class Laboratory(Building):
     DISPLAY_NAME = "Laboratory"
-    DESCRIPTION = "Turns peasants into researchers to generate research points."
+    DESCRIPTION = "Turns peasants into researchers, generating research points."
     COST = {"wood": 250, "bismuth": 125}
     IMAGE_SOURCE = "laboratory.png"
 
 class Blacksmith(Building):
     DISPLAY_NAME = "Blacksmith"
-    DESCRIPTION = "Allows you to restore durability of your items."
+    DESCRIPTION = "Allows restoration of item durability."
     COST = {"wood": 150, "bismuth": 75}
     IMAGE_SOURCE = "blacksmith.png"

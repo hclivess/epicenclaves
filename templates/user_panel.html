@@ -273,11 +273,7 @@
                             <div class="item-details">
                                 <h5>{{building_data['display_name']}}</h5>
                                 <p>{{building_data['description']}}</p>
-                                <p>Cost:
-                                    {% for resource, amount in building_data['cost'].items() %}
-                                        {{resource}}: {{amount}}
-                                    {% end %}
-                                </p>
+                                <p><strong>Cost:</strong> {{building_data['formatted_cost']}}</p>
                                 <a href="/build?entity={{building_type}}&name=town1" class="btn btn-success btn-sm">Build</a>
                             </div>
                         </div>
