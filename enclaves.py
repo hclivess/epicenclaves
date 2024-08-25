@@ -176,7 +176,10 @@ class TrashHandler(UserActionHandler):
     def get(self):
         id = self.get_argument("id")
         user = tornado.escape.xhtml_escape(self.current_user)
-        self.perform_action(user, trash_item, usersdb, id)
+        self.perform_action(user, self._trash_item, id)
+
+    def _trash_item(self, user, user_data, item_id):
+        return trash_item(usersdb, user, item_id)
 
 
 class DeployArmyHandler(UserActionHandler):
