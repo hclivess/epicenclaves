@@ -1,9 +1,9 @@
 import random
-
+import math
 
 class Enemy:
     def __init__(self,
-                 hp,
+                 base_hp,
                  armor,
                  role="enemy",
                  level=1,
@@ -24,7 +24,7 @@ class Enemy:
         if regular_drop is None:
             regular_drop = {}
 
-        self.hp = hp
+        self.base_hp = base_hp
         self.armor = armor
         self.alive = alive
         self.level = level
@@ -42,6 +42,10 @@ class Enemy:
         self.max_entities = max_entities
         self.max_entities_total = max_entities_total
         self.herd_probability = herd_probability
+        self.hp = self.calculate_hp()
+
+    def calculate_hp(self):
+        return int(self.base_hp * (1 + math.log(self.level, 2) * 0.1))
 
     def roll_damage(self):
         damage = random.randint(self.min_damage, self.max_damage)
@@ -54,14 +58,14 @@ class Enemy:
 class Valenthis(Enemy):
     type = "valenthis"
 
-    def __init__(self):
-        super().__init__(hp=350,
+    def __init__(self, level=1):
+        super().__init__(base_hp=350,
                          min_damage=25,
                          max_damage=25,
                          crit_chance=0.4,
                          crit_damage=300,
                          armor=0,
-                         level=1,
+                         level=level,
                          experience=100,
                          drop_chance=1,
                          regular_drop={"bismuth": 50},
@@ -74,14 +78,14 @@ class Valenthis(Enemy):
 class Boar(Enemy):
     type = "boar"
 
-    def __init__(self):
-        super().__init__(hp=30,
+    def __init__(self, level=1):
+        super().__init__(base_hp=30,
                          min_damage=1,
                          max_damage=3,
                          crit_chance=0.1,
                          crit_damage=3,
                          armor=0,
-                         level=1,
+                         level=level,
                          experience=1,
                          drop_chance=0.2,
                          regular_drop={"food": 1},
@@ -91,18 +95,17 @@ class Boar(Enemy):
                          max_entities_total=100,
                          herd_probability=0.7)
 
-
 class Wolf(Enemy):
     type = "wolf"
 
-    def __init__(self):
-        super().__init__(hp=60,
+    def __init__(self, level=1):
+        super().__init__(base_hp=60,
                          min_damage=2,
                          max_damage=6,
                          crit_chance=0.25,
                          crit_damage=5,
                          armor=0,
-                         level=1,
+                         level=level,
                          experience=2,
                          drop_chance=0.3,
                          regular_drop={"food": 1},
@@ -112,18 +115,17 @@ class Wolf(Enemy):
                          max_entities_total=60,
                          herd_probability=0.8)
 
-
 class Goblin(Enemy):
     type = "goblin"
 
-    def __init__(self):
-        super().__init__(hp=40,
+    def __init__(self, level=1):
+        super().__init__(base_hp=40,
                          min_damage=4,
                          max_damage=6,
                          crit_chance=0.15,
                          crit_damage=8,
                          armor=1,
-                         level=1,
+                         level=level,
                          experience=3,
                          drop_chance=0.4,
                          regular_drop={"gold": 5},
@@ -133,18 +135,17 @@ class Goblin(Enemy):
                          max_entities_total=40,
                          herd_probability=0.6)
 
-
 class Specter(Enemy):
     type = "specter"
 
-    def __init__(self):
-        super().__init__(hp=80,
+    def __init__(self, level=2):
+        super().__init__(base_hp=80,
                          min_damage=10,
                          max_damage=20,
                          crit_chance=0.3,
                          crit_damage=20,
                          armor=0,
-                         level=2,
+                         level=level,
                          experience=10,
                          drop_chance=0.6,
                          regular_drop={"ectoplasm": 1},
@@ -161,18 +162,17 @@ class Specter(Enemy):
             self.hp += damage["damage"] // 2
         return damage
 
-
 class DragonWhelp(Enemy):
     type = "dragon_whelp"
 
-    def __init__(self):
-        super().__init__(hp=150,
+    def __init__(self, level=3):
+        super().__init__(base_hp=150,
                          min_damage=20,
                          max_damage=40,
                          crit_chance=0.2,
                          crit_damage=40,
                          armor=5,
-                         level=3,
+                         level=level,
                          experience=25,
                          drop_chance=0.8,
                          regular_drop={"dragon_scale": 1},
@@ -201,7 +201,6 @@ class Scenery:
         self.type = "scenery"
         self.role = "scenery"
 
-
 class Forest(Scenery):
     type = "forest"
 
@@ -211,7 +210,6 @@ class Forest(Scenery):
         self.role = "scenery"
         self.probability = 0
 
-
 class Mountain(Scenery):
     type = "mountain"
 
@@ -220,7 +218,6 @@ class Mountain(Scenery):
         self.type = "mountain"
         self.role = "scenery"
         self.probability = 0
-
 
 class Wall(Scenery):
     def __init__(self):

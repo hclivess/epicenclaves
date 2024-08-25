@@ -13,6 +13,7 @@ import tornado.escape
 
 import actions
 import descriptions
+import entities
 from chop import chop_forest
 from mine import mine_mountain
 from conquer import attempt_conquer
@@ -693,7 +694,7 @@ if __name__ == "__main__":
     if not db_status["map_exists"]:
         spawn(
             mapdb=mapdb,
-            entity_class=Forest(),
+            entity_class=entities.Forest,
             probability=1,
             map_size=200,
             max_entities=250,
@@ -703,7 +704,7 @@ if __name__ == "__main__":
 
         spawn(
             mapdb=mapdb,
-            entity_class=Mountain(),
+            entity_class=entities.Mountain,
             probability=1,
             map_size=200,
             max_entities=250,
@@ -713,7 +714,7 @@ if __name__ == "__main__":
 
         spawn(
             mapdb=mapdb,
-            entity_class=Boar(),
+            entity_class=entities.Boar,
             probability=1,
             herd_size=15,
             max_entities=50,
