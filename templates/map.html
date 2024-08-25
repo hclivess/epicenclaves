@@ -377,19 +377,26 @@ function centerMapOnUser(data) {
 
   if (userToCenter) {
     const mapContainer = document.getElementById("map");
-    const wrapper = document.getElementById("wrapper");
 
-    // Define the centering offset (in tiles)
-    const centerOffsetX = 6.66;
-    const centerOffsetY = 2.66;
+    // Calculate the ratio based on the current window size
+    const ratioX = window.innerWidth / 3840;
+    const ratioY = window.innerHeight / 2160;
+
+    // Define the centering offset (in tiles) for 4K resolution
+    const centerOffsetX4K = 13.10;
+    const centerOffsetY4K = 6.25;
+
+    // Calculate the centering offsets for the current resolution
+    const centerOffsetX = centerOffsetX4K * ratioX;
+    const centerOffsetY = centerOffsetY4K * ratioY;
 
     // Calculate the user's position in pixels
     const userX = (userToCenter.x_pos + 0.5) * gridSize;
     const userY = (userToCenter.y_pos + 0.5) * gridSize;
 
     // Calculate the offset to center the user
-    const offsetX = Math.round(wrapper.clientWidth / 2 - userX - centerOffsetX * gridSize);
-    const offsetY = Math.round(wrapper.clientHeight / 2 - userY - centerOffsetY * gridSize);
+    const offsetX = Math.round(window.innerWidth / 2 - userX - centerOffsetX * gridSize);
+    const offsetY = Math.round(window.innerHeight / 2 - userY - centerOffsetY * gridSize);
 
     // Apply the transformation
     mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
