@@ -179,12 +179,20 @@ class DeployArmyHandler(UserActionHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
 
         if action == "add":
-            self.perform_action(user, deploy_army, mapdb)
+            self.perform_action(user, self._deploy_army, mapdb, usersdb)
         elif action == "remove":
-            self.perform_action(user, remove_army, mapdb)
+            self.perform_action(user, self._remove_army, mapdb, usersdb)
         else:
             user_data = get_user_data(user, usersdb=usersdb)
             self.render_user_panel(user, user_data, message="No action specified.")
+
+    def _deploy_army(self, user, user_data, mapdb, usersdb):
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        return deploy_army(user, on_tile_map, usersdb, mapdb, user_data)
+
+    def _remove_army(self, user, user_data, mapdb, usersdb):
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        return remove_army(user, on_tile_map, usersdb, mapdb, user_data)
 
 
 class BuildHandler(UserActionHandler):
@@ -209,7 +217,10 @@ class UserActionHandler(BaseHandler):
 class UpgradeHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-        self.perform_action(user, upgrade, mapdb, usersdb)
+        self.perform_action(user, self._upgrade)
+
+    def _upgrade(self, user, user_data):
+        return upgrade(user, mapdb, usersdb)
 
 
 class MoveToHandler(BaseHandler):
