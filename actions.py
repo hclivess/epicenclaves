@@ -29,6 +29,9 @@ class TileActions:
                 {"name": "train 1 archer", "action": "/train?type=archer&amount=1"},
                 {"name": "train 10 archers", "action": "/train?type=archer&amount=10"},
             ] + building_actions,
+            "blacksmith": [
+                 {"name": "repair all gear", "action": "/repair?type=all"},
+             ] + building_actions,
             "mountain": [
                 {"name": "mine", "action": "/mine?amount=1"},
                 {"name": "mine 10", "action": "/mine?amount=10"},

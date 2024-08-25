@@ -39,6 +39,7 @@ from user import create_users_db, create_user, save_users_from_memory, load_user
 from wall_generator import generate_multiple_mazes
 from upgrade import upgrade
 from trash import trash_item
+from repair import repair_all_items
 
 max_size = 1000000
 
@@ -171,6 +172,13 @@ class UnequipHandler(UserActionHandler):
     def _unequip_item(self, user, user_data, item_id):
         return unequip_item(user, usersdb, item_id)
 
+class RepairHandler(UserActionHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        self.perform_action(user, self._repair_items)
+
+    def _repair_items(self, user, user_data):
+        return repair_all_items(user, usersdb)
 
 class TrashHandler(UserActionHandler):
     def get(self):
@@ -329,15 +337,21 @@ class ConquerHandler(UserActionHandler):
 class MineHandler(UserActionHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
-        chop_amount = int(self.get_argument("amount", default="1"))
-        self.perform_action(user, mine_mountain, chop_amount, usersdb, mapdb)
+        mine_amount = int(self.get_argument("amount", default="1"))
+        self.perform_action(user, self._mine_mountain, mine_amount)
+
+    def _mine_mountain(self, user, user_data, mine_amount):
+        return mine_mountain(user, mine_amount, user_data, usersdb, mapdb)
 
 
 class ChopHandler(UserActionHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
         chop_amount = int(self.get_argument("amount", default="1"))
-        self.perform_action(user, chop_forest, chop_amount, usersdb, mapdb)
+        self.perform_action(user, self._chop_forest, chop_amount)
+
+    def _chop_forest(self, user, user_data, chop_amount):
+        return chop_forest(user, chop_amount, user_data, usersdb, mapdb)
 
 
 class RedirectToHTTPSHandler(tornado.web.RequestHandler):
@@ -386,6 +400,7 @@ def make_app():
         (r"/equip", EquipHandler),
         (r"/unequip", UnequipHandler),
         (r"/trash", TrashHandler),
+        (r"/repair", RepairHandler),
         (r"/deploy(.*)", DeployArmyHandler),
         (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),
         (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),

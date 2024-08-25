@@ -1,5 +1,5 @@
 from backend import has_resources, update_user_data
-from map import get_tile_map, get_user_data, insert_map_data
+from map import get_tile_map, insert_map_data
 from costs import building_costs
 
 def build(user, user_data, entity, name, mapdb, usersdb):

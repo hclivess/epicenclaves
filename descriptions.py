@@ -11,6 +11,7 @@ class Descriptions:
             "mine": self.format_cost("Passively produces 🪨1 per turn per every mine level and forest.", building_costs["mine"]),
             "archery_range": self.format_cost("Allows you to train army into archers.", building_costs["archery_range"]),
             "laboratory": self.format_cost("Turns peasants into researchers to generate research points.", building_costs["laboratory"]),
+            "blacksmith": self.format_cost("Allows you to restore durability of your items.", building_costs["blacksmith"]),
         }
 
     def format_cost(self, description, cost_dict):
@@ -20,7 +21,7 @@ class Descriptions:
     def get_emoji(self, resource):
         emoji_dict = {
             "wood": "🪵",
-            "stone": "🪨",
+            "bismuth": "🪨",
             "gold": "💰",
             # Add more resource emojis as needed
         }
