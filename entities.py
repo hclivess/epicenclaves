@@ -45,7 +45,7 @@ class Enemy:
         self.hp = self.calculate_hp()
 
     def calculate_hp(self):
-        return int(self.base_hp * (1 + math.log(self.level, 2) * 0.1))
+        return int(self.base_hp * (1 + 0.1 * (self.level - 1)))
 
     def roll_damage(self):
         damage = random.randint(self.min_damage, self.max_damage)
