@@ -1,5 +1,4 @@
-# reduce this spaghetti
-
+#TODO: THIS IS LEGACY, ACTIONS WILL BE ENCAPSULATED SAME WAY AS FOR TOOLS, WEAPONS, ARMOR
 class TileActions:
     def get(self, entry):
         type = list(entry.values())[0].get("type")

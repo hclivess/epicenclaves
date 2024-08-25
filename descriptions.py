@@ -1,5 +1,5 @@
 from costs import building_costs, upgrade_costs
-
+#TODO: THIS IS LEGACY, DESCRIPTIONS WILL BE ENCAPSULATED SAME WAY AS FOR TOOLS, WEAPONS, ARMOR
 class Descriptions:
     def __init__(self):
         self.descriptions_dict = {
