@@ -141,7 +141,7 @@ class ScoreboardHandler(BaseHandler):
 class UserActionHandler(BaseHandler):
     def perform_action(self, user, action_func, *args, **kwargs):
         user_data = get_user_data(user, usersdb=usersdb)
-        message = action_func(user, *args, **kwargs)
+        message = action_func(user, user_data, *args, **kwargs)
         user_data = get_user_data(user, usersdb=usersdb)  # Refresh user data
         self.render_user_panel(user, user_data, message=message)
 
