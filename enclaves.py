@@ -140,12 +140,12 @@ class MapHandler(BaseHandler):
 
         # Filter the data to include only essential information
         for username, user_info in full_data["users"].items():
-            essential_keys = ["x_pos", "y_pos", "type", "img"]
-            full_data["users"][username] = {key: user_info[key] for key in essential_keys if key in user_info}
+            essential_keys = ["x_pos", "y_pos", "type", "img", "exp", "hp", "armor"]
+            full_data["users"][username] = {key: user_info.get(key, "N/A") for key in essential_keys}
 
         for coord, construction in full_data["construction"].items():
             essential_keys = ["type", "name", "level", "control", "army", "role"]
-            full_data["construction"][coord] = {key: construction[key] for key in essential_keys if key in construction}
+            full_data["construction"][coord] = {key: construction.get(key, "N/A") for key in essential_keys}
 
         self.render("templates/map.html", data=json.dumps(full_data), user=user)
 
@@ -290,6 +290,16 @@ class MoveHandler(UserActionHandler):
             x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
             visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb, visible_distance)
             visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb), visible_distance)
+
+            # Filter the data to include only essential information
+            for username, user_info in visible_users_data.items():
+                essential_keys = ["x_pos", "y_pos", "type", "img", "exp", "hp", "armor"]
+                visible_users_data[username] = {key: user_info.get(key, "N/A") for key in essential_keys}
+
+            for coord, construction in visible_map_data.items():
+                essential_keys = ["type", "name", "level", "control", "army", "role"]
+                visible_map_data[coord] = {key: construction.get(key, "N/A") for key in essential_keys}
+
             map_data = {"users": visible_users_data, "construction": visible_map_data}
             self.render("templates/map.html", user=user, data=json.dumps(map_data), message=moved["message"])
         else:
