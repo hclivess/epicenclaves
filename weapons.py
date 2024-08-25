@@ -58,6 +58,7 @@ class Weapon:
         }
 
 class Sword(Weapon):
+    DESCRIPTION = "A versatile melee weapon with balanced stats."
     BASE_DAMAGE = (3, 7)
     RANGE = "melee"
     MIN_ACCURACY = 40
@@ -68,6 +69,7 @@ class Sword(Weapon):
     MAX_CRIT_CHANCE = 6
 
 class Bow(Weapon):
+    DESCRIPTION = "A ranged weapon with high critical chance and damage."
     BASE_DAMAGE = (4, 7)
     RANGE = "ranged"
     MIN_ACCURACY = 25
@@ -78,6 +80,7 @@ class Bow(Weapon):
     MAX_CRIT_CHANCE = 16
 
 class Spear(Weapon):
+    DESCRIPTION = "A melee weapon with good reach and high accuracy."
     BASE_DAMAGE = (4, 6)
     RANGE = "melee"
     MIN_ACCURACY = 45
@@ -88,6 +91,7 @@ class Spear(Weapon):
     MAX_CRIT_CHANCE = 4
 
 class Dagger(Weapon):
+    DESCRIPTION = "A fast melee weapon with high critical damage and chance."
     BASE_DAMAGE = (2, 5)
     RANGE = "melee"
     MIN_ACCURACY = 50
@@ -98,6 +102,7 @@ class Dagger(Weapon):
     MAX_CRIT_CHANCE = 13
 
 class Mace(Weapon):
+    DESCRIPTION = "A heavy melee weapon with good damage and critical potential."
     BASE_DAMAGE = (4, 7)
     RANGE = "melee"
     MIN_ACCURACY = 35
@@ -108,6 +113,7 @@ class Mace(Weapon):
     MAX_CRIT_CHANCE = 5
 
 class Axe(Weapon):
+    DESCRIPTION = "A powerful melee weapon with high damage and critical damage."
     BASE_DAMAGE = (5, 8)
     RANGE = "melee"
     MIN_ACCURACY = 30
@@ -118,6 +124,7 @@ class Axe(Weapon):
     MAX_CRIT_CHANCE = 7
 
 class Crossbow(Weapon):
+    DESCRIPTION = "A strong ranged weapon with high base damage and good critical stats."
     BASE_DAMAGE = (6, 9)
     RANGE = "ranged"
     MIN_ACCURACY = 35
@@ -128,6 +135,7 @@ class Crossbow(Weapon):
     MAX_CRIT_CHANCE = 14
 
 class Rapier(Weapon):
+    DESCRIPTION = "A precise melee weapon with high accuracy and good critical chance."
     BASE_DAMAGE = (2, 6)
     RANGE = "melee"
     MIN_ACCURACY = 55
@@ -138,6 +146,7 @@ class Rapier(Weapon):
     MAX_CRIT_CHANCE = 10
 
 class WarHammer(Weapon):
+    DESCRIPTION = "A massive melee weapon with the highest base damage and critical damage."
     BASE_DAMAGE = (7, 10)
     RANGE = "melee"
     MIN_ACCURACY = 25
@@ -148,6 +157,7 @@ class WarHammer(Weapon):
     MAX_CRIT_CHANCE = 4
 
 class Sling(Weapon):
+    DESCRIPTION = "A simple ranged weapon with low damage but extremely high critical potential."
     BASE_DAMAGE = (1, 4)
     RANGE = "ranged"
     MIN_ACCURACY = 20
@@ -158,6 +168,7 @@ class Sling(Weapon):
     MAX_CRIT_CHANCE = 24
 
 class Katana(Weapon):
+    DESCRIPTION = "An elegant melee weapon with high damage and good critical stats."
     BASE_DAMAGE = (4, 8)
     RANGE = "melee"
     MIN_ACCURACY = 45
@@ -168,6 +179,7 @@ class Katana(Weapon):
     MAX_CRIT_CHANCE = 9
 
 class ThrowingKnives(Weapon):
+    DESCRIPTION = "Ranged weapons with moderate damage but very high critical chance."
     BASE_DAMAGE = (2, 4)
     RANGE = "ranged"
     MIN_ACCURACY = 40
@@ -178,6 +190,7 @@ class ThrowingKnives(Weapon):
     MAX_CRIT_CHANCE = 28
 
 class Halberd(Weapon):
+    DESCRIPTION = "A versatile melee weapon with good damage and balanced stats."
     BASE_DAMAGE = (5, 9)
     RANGE = "melee"
     MIN_ACCURACY = 35
@@ -188,6 +201,7 @@ class Halberd(Weapon):
     MAX_CRIT_CHANCE = 6
 
 class Scythe(Weapon):
+    DESCRIPTION = "A menacing melee weapon with high damage and critical damage."
     BASE_DAMAGE = (6, 10)
     RANGE = "melee"
     MIN_ACCURACY = 30
@@ -198,6 +212,7 @@ class Scythe(Weapon):
     MAX_CRIT_CHANCE = 8
 
 class Chakram(Weapon):
+    DESCRIPTION = "A unique ranged weapon with moderate damage and high critical chance."
     BASE_DAMAGE = (3, 6)
     RANGE = "ranged"
     MIN_ACCURACY = 35
