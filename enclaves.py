@@ -177,32 +177,17 @@ class MapHandler(BaseHandler):
             return
 
         visible_distance = 5
-        full_data = get_surrounding_map_and_user_data(
-            user=user,
-            user_data_dict=usersdb,
-            map_data_dict=mapdb,
-            distance=visible_distance
-        )
-
-        # Get valid parameters for User class
-        user_params = set(inspect.signature(User.__init__).parameters.keys()) - {'self'}
+        user_data = get_user_data(user, usersdb=usersdb)
+        x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
+        visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb, visible_distance)
+        visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb), visible_distance)
 
         # Filter the data to include only essential information
-        for username, user_info in full_data["users"].items():
-            essential_keys = ["x_pos", "y_pos", "type", "img", "exp", "hp"]
-            filtered_user_info = {key: user_info[key] for key in essential_keys if key in user_info}
-            full_data["users"][username] = filtered_user_info
+        for username, user_info in visible_users_data.items():
+            essential_keys = ["x_pos", "y_pos", "type", "img", "exp", "hp", "armor"]
+            visible_users_data[username] = {key: user_info[key] for key in essential_keys if key in user_info}
 
-            # Filter user_info to only include valid parameters for User creation
-            user_creation_info = {k: v for k, v in user_info.items() if k in user_params}
-
-            # Ensure username is passed to the User constructor
-            user_creation_info['username'] = username
-
-            # Generate actions for each user
-            full_data["users"][username]["actions"] = get_tile_actions(User(**user_creation_info), user)
-
-        for coord, entity in full_data["construction"].items():
+        for coord, entity in visible_map_data.items():
             filtered_entity = {"type": entity["type"]}
             if "level" in entity:
                 filtered_entity["level"] = entity["level"]
@@ -210,11 +195,10 @@ class MapHandler(BaseHandler):
                 filtered_entity["control"] = entity["control"]
             if "army" in entity:
                 filtered_entity["army"] = entity["army"]
-            # Generate actions for each entity
-            filtered_entity["actions"] = get_tile_actions(entity, user)
-            full_data["construction"][coord] = filtered_entity
+            visible_map_data[coord] = filtered_entity
 
-        self.render("templates/map.html", data=json.dumps(full_data), user=user)
+        map_data = {"users": visible_users_data, "construction": visible_map_data}
+        self.render("templates/map.html", user=user, data=json.dumps(map_data))
 
 class ScoreboardHandler(BaseHandler):
     def get(self):

@@ -182,7 +182,7 @@ body {
   position: absolute;
   width: 125px;
   height: 125px;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.7); /* Changed from 0.9 to 0.7 for more transparency */
   z-index: 5;
   transition: opacity 0.5s ease;
 }
@@ -221,7 +221,7 @@ body {
   font-size: 30px;
   margin-bottom: 5px;
   z-index: -1;
-  opacity: 0.75;
+  opacity: 0.75; /* Adjust opacity as needed */
 }
 
 .blacksmith:before { content: "\2692"; }
@@ -330,27 +330,12 @@ function createMap(data) {
   var maxY = 0;
   var fragment = document.createDocumentFragment();
 
-  function createEntity(className, x, y, content, actions) {
+  function createEntity(className, x, y, content) {
     var element = document.createElement("div");
     element.className = className;
     element.style.top = y + "px";
     element.style.left = x + "px";
     element.appendChild(content);
-
-    // Add action buttons
-    if (actions && actions.length > 0) {
-      var actionContainer = document.createElement("div");
-      actionContainer.className = "tile-actions";
-      actions.forEach(function(action) {
-        var actionButton = document.createElement("a");
-        actionButton.href = action.action;
-        actionButton.className = "btn btn-secondary btn-sm";
-        actionButton.textContent = action.name;
-        actionContainer.appendChild(actionButton);
-      });
-      element.appendChild(actionContainer);
-    }
-
     fragment.appendChild(element);
     return element;
   }
@@ -372,7 +357,7 @@ function createMap(data) {
       playerLabel.innerHTML = `username: ${username}<br>pos: ${user.x_pos}, ${user.y_pos}<br>exp: ${user.exp}<br>hp: ${user.hp}`;
       content.appendChild(playerLabel);
 
-      createEntity("entity player", playerX, playerY, content, user.actions);
+      createEntity("entity player", playerX, playerY, content);
     }
   });
 
@@ -387,7 +372,7 @@ function createMap(data) {
     content.className = "text-label";
     content.innerHTML = `pos: ${x_pos}, ${y_pos}<br>${Object.entries(construction).map(([key, value]) => `${key}: ${value}`).join('<br>')}`;
 
-    createEntity(`entity construction ${construction.type}`, constructionX, constructionY, content, construction.actions);
+    createEntity(`entity construction ${construction.type}`, constructionX, constructionY, content);
   });
 
   mapContainer.style.width = (maxX + gridSize * (visibleRadius * 2 + 1)) + "px";
@@ -481,6 +466,7 @@ function showTooltip(entityGroup, tooltip) {
   tooltip.classList.add("visible");
 }
 
+
 function centerMapOnUser(data) {
   const userKey = '{{ user }}';
   const userToCenter = data.users[userKey];
@@ -521,6 +507,7 @@ function centerMapOnUser(data) {
 function updateMap(data) {
   centerMapOnUser(data);
 }
+
 
 createMap(jsonData);
 centerMapOnUser(jsonData);
@@ -567,6 +554,7 @@ document.querySelectorAll('.btn-move').forEach(button => {
     }, 100);
   });
 });
+
 
 ///auto moves
 function addClickListenerToMap() {
