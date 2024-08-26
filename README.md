@@ -1,7 +1,7 @@
 # EPIC ENCLAVES
 _The first blockchain game worth playing_
 
-![Castle Image](img/assets/castle.png)
+![Thumb](thumb.png)
 
 Coming Soon to NADO and Bismuth
 
