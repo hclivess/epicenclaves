@@ -176,7 +176,7 @@ class MapHandler(BaseHandler):
             self.redirect("/")
             return
 
-        visible_distance = 5
+        visible_distance = 10
         user_data = get_user_data(user, usersdb=usersdb)
         x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
         visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb, visible_distance)
@@ -315,7 +315,7 @@ class MoveHandler(UserActionHandler):
         user_data = get_user_data(user, usersdb=usersdb)  # Refresh user data
 
         if target == "map":
-            visible_distance = 5
+            visible_distance = 10
             x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
             visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb, visible_distance)
             visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb), visible_distance)
@@ -449,7 +449,7 @@ class MoveToHandler(BaseHandler):
         moved = move_to(user, x, y, max_size, user_data, users_dict=usersdb, map_dict=mapdb)
         user_data = get_user_data(user, usersdb=usersdb)  # Refresh user data
 
-        visible_distance = 5
+        visible_distance = 10
         x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
         visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb, visible_distance)
         visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb), visible_distance)
