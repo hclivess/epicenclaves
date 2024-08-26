@@ -1,132 +1,118 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.8em' font-size='80'>🏰</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epic Enclaves - Scoreboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
 
-<title>Epic Enclaves - Scoreboard</title>
-<style>
-body {
-  font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
-    color: #333;
-}
-.container {
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-}
-.map, .users {
-    margin: 20px;
-    border: 1px solid #000;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    width: 45%; /* Add this line to control the width of the columns */
-}
-
-.map div, .users div {
-    display: inline-block; /* Change this line to control the display type */
-    width: 45%; /* Add this line to control the width of the entries */
-    margin: 0 2% 20px 2%; /* Add this line to control the margin around the entries */
-    vertical-align: top; /* Add this line to align the entries to the top */
-}
-
-h2 {
-    font-size: 24px;
-    margin-bottom: 16px;
-}
-h3 {
-    font-size: 18px;
-    margin-bottom: 8px;
-}
-p {
-    font-size: 16px;
-    margin-bottom: 8px;
-}
-img {
-    border-radius: 50%;
-}
-
-.navigation-container {
-  position: fixed;
-  top: 0;
-  right: 0;
-  display: flex;
-  align-items: flex-end;
-  padding: 1em;
-  background-color: rgba(0, 0, 0, 0.1);
-  /* border-radius: 0 0 15px 0; */ /* Remove this line */
-  z-index: 9999;
-}
-
-.btn-group {
-  display: flex;
-  background-color: transparent;
-}
-
-
-.btn-group a {
-  text-decoration: none;
-  padding: 0.5em 1em;
-  color: #fff;
-  background-color: #007bff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin-right: 5px;
-}
-
-.btn-group a:last-child {
-  margin-right: 0;
-}
-
-.btn-group a:hover {
-  background-color: #0056b3;
-}
-
-</style>
+        body {
+            font-family: 'Merriweather', serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .navigation-container {
+            margin-bottom: 20px;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            background-color: #2a2a2a;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #3a3a3a;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .users, .map {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            width: calc(50% - 10px);
+        }
+        h2 {
+            font-family: 'Cinzel', serif;
+            color: #4ecdc4;
+            border-bottom: 1px solid #4ecdc4;
+            padding-bottom: 10px;
+        }
+        .user-card, .map-card {
+            background-color: #333;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .user-card img {
+            max-width: 80px;
+            border-radius: 50%;
+            margin-right: 15px;
+            float: left;
+        }
+        .user-card h3, .map-card h3 {
+            font-family: 'Cinzel', serif;
+            color: #ff6b6b;
+            margin-top: 0;
+        }
+        @media (max-width: 768px) {
+            .users, .map {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<div class="navigation-container">
-<div class="btn-group">
-  <a class="btn btn-map btn-lg active" href="/" role="button">👤 User Panel</a>
-  <a class="btn btn-lg active btn-up" href="/map" role="button">Map 🗺️</a>
-  <a class="btn btn-lg active btn-up" href="/scoreboard" role="button">Refresh 🔄</a> <!-- Modified Refresh button to navigate to / -->
-  <a class="btn btn-quit btn-lg active" href="/logout" role="button">🌙 Logout</a>
-</div>
-</div>
-
-
-<div class="container">
-    <div class="users">
-        <h2>Users</h2>
-        {% for user_id, user_info in usersdb.items() %}
-        <div>
-            <p><img src="{{ user_info['img'] }}" alt="User Image" style="max-width: 80px;"></p>
-            <h3>User ID: {{ user_id }}</h3>
-            <p>Position: ({{ user_info['x_pos'] }}, {{ user_info['y_pos'] }})</p>
-            <p>Type: {{ user_info['type'] }}</p>
-            <p>Age: {{ user_info['age'] }}</p>
-            <p>Experience: {{ user_info['exp'] }}</p>
+    <div class="navigation-container">
+        <div class="btn-group">
+            <a href="/" class="btn">👤 User Panel</a>
+            <a href="/map" class="btn">🗺️ Map</a>
+            <a href="/scoreboard" class="btn">🔄 Refresh</a>
+            <a href="/logout" class="btn">🌙 Logout</a>
         </div>
-        {% end %}
     </div>
 
-    <div class="map">
-        <h2>Map</h2>
-        {% for position, terrain_info in mapdb.items() %}
-        <div>
-            <h3>Position: {{ position }}</h3>
-            <p>Type: {{ terrain_info.get('type') }}</p>
-            <p>Role: {{ terrain_info.get('role') }}</p>
+    <div class="container">
+        <div class="users">
+            <h2>Users</h2>
+            {% for user_id, user_info in usersdb.items() %}
+            <div class="user-card">
+                <img src="{{ user_info['img'] }}" alt="User Image">
+                <h3>User ID: {{ user_id }}</h3>
+                <p>Position: ({{ user_info['x_pos'] }}, {{ user_info['y_pos'] }})</p>
+                <p>Type: {{ user_info['type'] }}</p>
+                <p>Age: {{ user_info['age'] }}</p>
+                <p>Experience: {{ user_info['exp'] }}</p>
+            </div>
+            {% end %}
         </div>
-        {% end %}
-    </div>
-</div>
 
+        <div class="map">
+            <h2>Map</h2>
+            {% for position, terrain_info in mapdb.items() %}
+            <div class="map-card">
+                <h3>Position: {{ position }}</h3>
+                <p>Type: {{ terrain_info.get('type') }}</p>
+                <p>Role: {{ terrain_info.get('role') }}</p>
+            </div>
+            {% end %}
+        </div>
+    </div>
 </body>
 </html>

@@ -2,37 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-       <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.8em' font-size='80'>🏰</text></svg>">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oops! Something went wrong</title>
+    <title>Error</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            color: #333;
-            text-align: center;
-            padding: 20px;
+            font-family: 'Merriweather', serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             margin: 0;
         }
+        .container {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
         h1 {
-            font-size: 36px;
-            margin-bottom: 20px;
-            color: #ff4500;
+            font-family: 'Cinzel', serif;
+            color: #ff6b6b;
+            margin-bottom: 1rem;
         }
         p {
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-        li {
-            margin-bottom: 10px;
+            margin-bottom: 1.5rem;
         }
         a {
-            color: #007bff;
+            color: #4ecdc4;
             text-decoration: none;
         }
         a:hover {
@@ -41,13 +43,15 @@
     </style>
 </head>
 <body>
-    <h1>Oops! Something went wrong</h1>
-    <p>We're sorry, but it seems there was an error while trying to access this page.</p>
-    <p>Please try the following:</p>
-    <ul>
-        <li><a href="javascript:history.back()">Go back to the previous page</a> and try again.</li>
-        <li>Try to <a href="/logout">log out</a> in case there is an issue with your account.</li>
-    </ul>
-    <p>If the problem persists, feel free to <a href="mailto:support@example.com">contact our support team</a> for assistance.</p>
+    <div class="container">
+        <h1>Oops! Something went wrong</h1>
+        <p>We're sorry, but it seems there was an error while trying to access this page.</p>
+        <p>Please try the following:</p>
+        <ul>
+            <li><a href="javascript:history.back()">Go back to the previous page</a> and try again.</li>
+            <li>Try to <a href="/logout">log out</a> in case there is an issue with your account.</li>
+        </ul>
+        <p>If the problem persists, feel free to <a href="mailto:support@example.com">contact our support team</a> for assistance.</p>
+    </div>
 </body>
 </html>
