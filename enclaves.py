@@ -307,13 +307,13 @@ class ReviveHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         user_data = get_user_data(user, usersdb)
-        if user_data.get("action_points") > 5000:
-            new_ap = user_data["action_points"] - 5000
+        if user_data.get("action_points") > 250:
+            new_ap = user_data["action_points"] - 250
             update_user_data(user=user, updated_values={"alive": True, "hp": 100, "action_points": new_ap},
                              user_data_dict=usersdb)
             message = "You awaken from the dead"
         else:
-            message = "There is no way to revive you"
+            message = "You do not have enough action points to revive"
         user_data = get_user_data(user, usersdb)
         self.render_user_panel(user, user_data, message=message)
 

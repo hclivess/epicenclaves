@@ -221,7 +221,7 @@
                             <p class="mb-1">Position: ({{ file.get("x_pos", "N/A") }}, {{ file.get("y_pos", "N/A") }})</p>
                         </div>
 
-                        {% if not file.get("alive", "N/A") and file.get("action_points", "N/A") > 5000 %}
+                        {% if not file.get("alive", "N/A") %}
                             <a href="/revive" class="btn btn-danger btn-block mt-3">💀 Revive 💀</a>
                         {% end %}
                     </div>
