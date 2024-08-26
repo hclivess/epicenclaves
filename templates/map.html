@@ -120,7 +120,6 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  margin-bottom: 5px;
   border: 2px solid #ffd700;
   object-fit: cover;
 }
@@ -213,8 +212,16 @@ body {
 
 /* Entity icons */
 .entity:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   font-size: 30px;
   margin-bottom: 5px;
+  z-index: -1;
+  opacity: 0.2; /* Adjust opacity as needed */
 }
 
 .blacksmith:before { content: "\2692"; }
@@ -264,28 +271,29 @@ body {
 /* Responsive font sizing */
 @media screen and (max-width: 1024px) {
   .entity {
-    font-size: 8px;
+    position: relative;
+    font-size: 12px;
   }
   .text-label {
-    font-size: 6px;
+    font-size: 10px;
   }
 }
 
 @media screen and (min-width: 1025px) and (max-width: 1440px) {
   .entity {
-    font-size: 9px;
+    font-size: 12px;
   }
   .text-label {
-    font-size: 7px;
+    font-size: 11px;
   }
 }
 
 @media screen and (min-width: 1441px) {
   .entity {
-    font-size: 10px;
+    font-size: 14px;
   }
   .text-label {
-    font-size: 8px;
+    font-size: 12px;
   }
 }
 
@@ -346,7 +354,7 @@ function createMap(data) {
 
       var playerLabel = document.createElement("div");
       playerLabel.className = "text-label";
-      playerLabel.innerHTML = `username: ${username}<br>pos: ${user.x_pos}, ${user.y_pos}<br>exp: ${user.exp}<br>hp: ${user.hp}<br>armor: ${user.armor}`;
+      playerLabel.innerHTML = `username: ${username}<br>pos: ${user.x_pos}, ${user.y_pos}<br>exp: ${user.exp}<br>hp: ${user.hp}`;
       content.appendChild(playerLabel);
 
       createEntity("entity player", playerX, playerY, content);

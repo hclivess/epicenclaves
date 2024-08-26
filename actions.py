@@ -41,6 +41,7 @@ class TileActions:
             "barracks": building_actions,
             "house": building_actions,
             "sawmill": building_actions,
+            "mine": building_actions,
             "laboratory": building_actions,
             "boar": [{"name": "hunt", "action": f"/fight?target={type}"}],
             "wolf": [{"name": "hunt", "action": f"/fight?target={type}"}],
