@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Epic Enclaves - Login</title>
+    <title>Epic Enclaves - A Medieval Fantasy RPG Adventure</title>
+    <meta name="description" content="Embark on an epic medieval fantasy RPG adventure in Epic Enclaves. Create your character, explore vast realms, and engage in thrilling quests and battles.">
+    <meta name="keywords" content="Epic Enclaves, RPG, fantasy, medieval, adventure, game, online game, quests, battles">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
 
@@ -27,12 +29,19 @@
         }
 
         .container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .login-panel {
+            flex: 1;
+            margin-right: 2rem;
             background-color: #2a2a2a;
             border-radius: 8px;
             padding: 2rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
         }
 
         h1 {
@@ -85,27 +94,54 @@
         button:hover {
             background-color: #45b7a0;
         }
+
+        .description-panel {
+            flex: 1;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .description-panel h2 {
+            font-family: 'Cinzel', serif;
+            color: #4ecdc4;
+            margin-bottom: 1rem;
+        }
+
+        .description-panel p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Epic Enclaves</h1>
-        <img src="img/assets/castle_500.png" alt="Welcome to Epic Enclaves" class="welcome-image">
-        <form action="/login" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <div class="form-group">
-                <label for="profile-picture">Profile Picture:</label>
-                <input type="file" id="profile-picture" name="profile-picture" accept="image/*">
-            </div>
-            <button type="submit">Sign in / Sign up</button>
-        </form>
+        <div class="login-panel">
+            <h1>Epic Enclaves</h1>
+            <img src="img/assets/castle_500.png" alt="Welcome to Epic Enclaves" class="welcome-image">
+            <form action="/login" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="profile-picture">Profile Picture:</label>
+                    <input type="file" id="profile-picture" name="profile-picture" accept="image/*">
+                </div>
+                <button type="submit">Sign in / Sign up</button>
+            </form>
+        </div>
+        <div class="description-panel">
+            <h2>Enter a World of Fantasy and Adventure</h2>
+            <p>Epic Enclaves is a captivating medieval fantasy RPG that immerses you in a realm of magic, valor, and epic quests. Create your unique character and embark on a journey through enchanted forests, ancient castles, and treacherous dungeons.</p>
+            <p>Engage in thrilling battles against mythical creatures and forge alliances with fellow adventurers. Unravel mysterious plots, complete daring missions, and shape the fate of the kingdom. With stunning graphics, immersive gameplay, and a rich, evolving storyline, Epic Enclaves offers an unparalleled RPG experience.</p>
+            <p>Sign in or create an account to start your adventure today!</p>
+        </div>
     </div>
 </body>
 </html>
