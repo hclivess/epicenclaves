@@ -72,14 +72,17 @@ def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dic
                                  user_data_dict=usersdb)
             break
 
-        user_dmg = get_weapon_damage(user_data, exp_bonus(user_data["exp"]))
+        exp_bonus_value = exp_bonus(user_data["exp"])
+        user_dmg = get_weapon_damage(user_data, exp_bonus_value)
         npc.hp -= user_dmg['damage']
         battle_data["enemy"]["current_hp"] = npc.hp
         battle_data["rounds"].append({
             "round": round_number,
             "player_hp": user_data["hp"],
             "enemy_hp": npc.hp,
-            "message": f"You {user_dmg['message']} the level {npc.level} {npc.type} for {user_dmg['damage']} damage. It has {npc.hp}/{npc.max_hp} HP left"
+            "message": f"You {user_dmg['message']} the level {npc.level} {npc.type} for {user_dmg['damage']} damage "
+                       f"(Base: {user_dmg['base_damage']}, Exp bonus: {user_dmg['exp_bonus']}). "
+                       f"It has {npc.hp}/{npc.max_hp} HP left"
         })
 
         if npc.hp > 0:
@@ -92,7 +95,8 @@ def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dic
                 "round": round_number,
                 "player_hp": user_data["hp"],
                 "enemy_hp": npc.hp,
-                "message": f"The level {npc.level} {npc.type} {npc_dmg['message']} you for {final_damage} damage (Damage range: {npc.min_damage}-{npc.max_damage}). You have {user_data['hp']} HP left"
+                "message": f"The level {npc.level} {npc.type} {npc_dmg['message']} you for {final_damage} damage "
+                           f"(Damage range: {npc.min_damage}-{npc.max_damage}). You have {user_data['hp']} HP left"
             })
 
     return {"battle_data": battle_data}
@@ -272,7 +276,7 @@ def get_weapon_damage(attacker: Dict, exp_bonus_value: int) -> Dict:
     damage = random.randint(min_damage, max_damage)
 
     if random.randint(1, 100) > accuracy:
-        return {"damage": 0, "message": "miss"}
+        return {"damage": 0, "base_damage": 0, "exp_bonus": 0, "message": "miss"}
 
     if random.randint(1, 100) <= crit_chance:
         damage = int(damage * (crit_dmg_pct / 100))
@@ -281,8 +285,8 @@ def get_weapon_damage(attacker: Dict, exp_bonus_value: int) -> Dict:
         message = "hit"
 
     final_damage = damage + exp_bonus_value
-    print(f"Weapon damage: {final_damage}, Message: {message}")
-    return {"damage": final_damage, "message": message}
+    print(f"Weapon damage: {final_damage}, Base damage: {damage}, Exp bonus: {exp_bonus_value}, Message: {message}")
+    return {"damage": final_damage, "base_damage": damage, "exp_bonus": exp_bonus_value, "message": message}
 
 
 def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users: List[Dict], user_data: Dict, user: str,
@@ -387,7 +391,8 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, rounds: Li
         print(f"{attacker_name} has 0 HP, cannot attack")
         return
 
-    damage_dict = get_weapon_damage(attacker, exp_bonus(attacker["exp"]))
+    exp_bonus_value = exp_bonus(attacker["exp"])
+    damage_dict = get_weapon_damage(attacker, exp_bonus_value)
     final_damage, absorbed_damage = apply_armor_protection(defender, damage_dict['damage'], rounds,
                                                            round_number)
 
@@ -395,9 +400,13 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, rounds: Li
     print(f"Defender's HP reduced to {defender['hp']}")
 
     if attacker_name == "You":
-        message = f"You {damage_dict['message']} for {final_damage} damage, they have {defender['hp']} HP left"
+        message = (f"You {damage_dict['message']} for {final_damage} damage "
+                   f"(Base: {damage_dict['base_damage']}, Exp bonus: {damage_dict['exp_bonus']}), "
+                   f"they have {defender['hp']} HP left")
     else:
-        message = f"{attacker_name} hits you for {final_damage} {damage_dict['message']} damage, you have {defender['hp']} HP left"
+        message = (f"{attacker_name} hits you for {final_damage} {damage_dict['message']} damage "
+                   f"(Base: {damage_dict['base_damage']}, Exp bonus: {damage_dict['exp_bonus']}), "
+                   f"you have {defender['hp']} HP left")
 
     rounds.append({
         "round": round_number,
