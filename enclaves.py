@@ -11,8 +11,11 @@ import tornado.ioloop
 import tornado.web
 import tornado.escape
 
-import actions
+from entities import Enemy, Scenery
 from buildings import Building
+import buildings
+from user import User
+
 import entities
 from weapons import Weapon
 from armor import Armor
@@ -24,6 +27,7 @@ from deploy_army import deploy_army, remove_army
 from equip import equip_item, unequip_item
 from fight import fight, get_fight_preconditions
 from login import login
+from typing import List, Dict, Any
 from turn_engine import TurnEngine
 from backend import get_user, update_user_data
 from map import (get_tile_map, get_tile_users, get_user_data, get_surrounding_map_and_user_data,
@@ -58,6 +62,15 @@ building_types = {name.lower(): cls for name, cls in inspect.getmembers(inspect.
 
 building_descriptions = {building_type: cls(1).to_dict() for building_type, cls in building_types.items()}
 
+
+def get_all_subclasses(cls):
+    return set(cls.__subclasses__()).union(
+        [s for c in cls.__subclasses__() for s in get_all_subclasses(c)])
+
+# Dynamically gather all entity and building types
+entity_types = {cls.__name__.lower(): cls for cls in get_all_subclasses(entities.Enemy) | get_all_subclasses(entities.Scenery)}
+building_types = {cls.__name__.lower(): cls for cls in get_all_subclasses(buildings.Building)}
+
 def generate_inventory_descriptions(user_data):
     inventory_descriptions = {}
     for item in user_data.get('equipped', []) + user_data.get('unequipped', []):
@@ -77,6 +90,29 @@ def generate_inventory_descriptions(user_data):
     return inventory_descriptions
 
 
+def get_constructor_params(cls):
+    return set(inspect.signature(cls.__init__).parameters.keys()) - {'self'}
+
+def get_tile_actions(tile: Any, user: str) -> List[Dict[str, str]]:
+    if isinstance(tile, dict):
+        tile_type = tile.get('type', '').lower()
+        if tile_type in entity_types:
+            cls = entity_types[tile_type]
+            valid_params = get_constructor_params(cls)
+            filtered_tile = {k: v for k, v in tile.items() if k in valid_params}
+            tile = cls(**filtered_tile)
+        elif tile_type in building_types:
+            cls = building_types[tile_type]
+            valid_params = get_constructor_params(cls)
+            filtered_tile = {k: v for k, v in tile.items() if k in valid_params}
+            tile = cls(**filtered_tile)
+        elif tile_type == 'player':
+            tile = User(**tile)  # Assuming User can handle all the keys in tile
+
+    if hasattr(tile, 'get_actions'):
+        return tile.get_actions(user)
+    return []
+
 class BaseHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, **kwargs):
         self.render("templates/error.html")
@@ -90,8 +126,14 @@ class BaseHandler(tornado.web.RequestHandler):
         if on_tile_users is None:
             on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
 
+        # Generate actions for each tile
+        tile_actions = {}
+        for entry in on_tile_map + on_tile_users:
+            coord = list(entry.keys())[0]
+            tile = list(entry.values())[0]
+            tile_actions[coord] = get_tile_actions(tile, user)
+
         inventory_descriptions = generate_inventory_descriptions(user_data)
-        print(inventory_descriptions)
 
         self.render(
             "templates/user_panel.html",
@@ -100,7 +142,7 @@ class BaseHandler(tornado.web.RequestHandler):
             message=message,
             on_tile_map=on_tile_map,
             on_tile_users=on_tile_users,
-            actions=actions,
+            actions=tile_actions,
             building_descriptions=building_descriptions,
             inventory_descriptions=inventory_descriptions
         )
@@ -142,19 +184,19 @@ class MapHandler(BaseHandler):
         for username, user_info in full_data["users"].items():
             essential_keys = ["x_pos", "y_pos", "type", "img", "exp", "hp"]
             full_data["users"][username] = {key: user_info[key] for key in essential_keys if key in user_info}
+            # Generate actions for each user
+            full_data["users"][username]["actions"] = get_tile_actions(User(**user_info), user)
 
         for coord, entity in full_data["construction"].items():
             filtered_entity = {"type": entity["type"]}
-            #if "name" in entity:
-                #filtered_entity["name"] = entity["name"]
             if "level" in entity:
                 filtered_entity["level"] = entity["level"]
             if "control" in entity:
                 filtered_entity["control"] = entity["control"]
             if "army" in entity:
                 filtered_entity["army"] = entity["army"]
-            #if "role" in entity:
-                #filtered_entity["role"] = entity["role"]
+            # Generate actions for each entity
+            filtered_entity["actions"] = get_tile_actions(entity, user)
             full_data["construction"][coord] = filtered_entity
 
         self.render("templates/map.html", data=json.dumps(full_data), user=user)
@@ -534,8 +576,6 @@ if __name__ == "__main__":
         spawn(mapdb=mapdb, entity_class=entities.Boar, probability=1, herd_size=15, max_entities=50, level=1,
               herd_probability=1)
         generate_multiple_mazes(mapdb, 20, 20, 10, 10, 0.1, 25, 200)
-
-    actions = actions.TileActions()
 
     turn_engine = TurnEngine(usersdb, mapdb)
     turn_engine.start()

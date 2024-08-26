@@ -254,20 +254,21 @@
                             <div class="card-body">
                                 {% for entry in on_tile_map %}
                                     <div class="item-card">
-                                        <img src="/img/assets/{{list(entry.values())[0].get('type')}}.png" alt="Icon" class="menu-icon">
+                                        <img src="/img/assets/{{ list(entry.values())[0].get('type') }}.png" class="menu-icon" alt="Icon">
                                         <div class="item-details">
                                             <p><strong>Type:</strong> {{ list(entry.values())[0].get("type") }}</p>
                                             <p><strong>Control:</strong> {{ list(entry.values())[0].get("control") }}</p>
                                             <p><strong>Army:</strong> {{ list(entry.values())[0].get("army") }}</p>
                                             <p><strong>Level:</strong> {{ list(entry.values())[0].get("level") }}</p>
                                             <div class="tile-actions">
-                                                {% for action in actions.get(entry) %}
+                                                {% set coord = list(entry.keys())[0] %}
+                                                {% for action in actions.get(coord, []) %}
                                                     <a href="{{ action['action'] }}" class="btn btn-secondary btn-sm">{{ action['name'] }}</a>
                                                 {% end %}
                                             </div>
                                         </div>
                                     </div>
-                                {% end %}
+                                    {% end %}
                             </div>
                         </div>
                     </div>
