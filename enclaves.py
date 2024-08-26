@@ -162,6 +162,7 @@ class MapHandler(BaseHandler):
 class ScoreboardHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
+        print(mapdb, usersdb)
         self.render("templates/scoreboard.html", mapdb=mapdb, usersdb=usersdb, ensure_ascii=False, user=user)
 
 
