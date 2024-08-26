@@ -140,21 +140,21 @@ class MapHandler(BaseHandler):
 
         # Filter the data to include only essential information
         for username, user_info in full_data["users"].items():
-            essential_keys = ["x_pos", "y_pos", "type", "img", "exp", "hp", "armor"]
+            essential_keys = ["x_pos", "y_pos", "type", "img", "exp", "hp"]
             full_data["users"][username] = {key: user_info[key] for key in essential_keys if key in user_info}
 
         for coord, entity in full_data["construction"].items():
             filtered_entity = {"type": entity["type"]}
-            if "name" in entity:
-                filtered_entity["name"] = entity["name"]
+            #if "name" in entity:
+                #filtered_entity["name"] = entity["name"]
             if "level" in entity:
                 filtered_entity["level"] = entity["level"]
             if "control" in entity:
                 filtered_entity["control"] = entity["control"]
             if "army" in entity:
                 filtered_entity["army"] = entity["army"]
-            if "role" in entity:
-                filtered_entity["role"] = entity["role"]
+            #if "role" in entity:
+                #filtered_entity["role"] = entity["role"]
             full_data["construction"][coord] = filtered_entity
 
         self.render("templates/map.html", data=json.dumps(full_data), user=user)
@@ -285,16 +285,16 @@ class MoveHandler(UserActionHandler):
 
             for coord, entity in visible_map_data.items():
                 filtered_entity = {"type": entity["type"]}
-                if "name" in entity:
-                    filtered_entity["name"] = entity["name"]
+                #if "name" in entity:
+                    #filtered_entity["name"] = entity["name"]
                 if "level" in entity:
                     filtered_entity["level"] = entity["level"]
                 if "control" in entity:
                     filtered_entity["control"] = entity["control"]
                 if "army" in entity:
                     filtered_entity["army"] = entity["army"]
-                if "role" in entity:
-                    filtered_entity["role"] = entity["role"]
+                #if "role" in entity:
+                    #filtered_entity["role"] = entity["role"]
                 visible_map_data[coord] = filtered_entity
 
             map_data = {"users": visible_users_data, "construction": visible_map_data}
@@ -421,16 +421,16 @@ class MoveToHandler(BaseHandler):
         filtered_map_data = {}
         for coord, entity in visible_map_data.items():
             filtered_entity = {"type": entity["type"]}
-            if "name" in entity:
-                filtered_entity["name"] = entity["name"]
+            #if "name" in entity:
+                #filtered_entity["name"] = entity["name"]
             if "level" in entity:
                 filtered_entity["level"] = entity["level"]
             if "control" in entity:
                 filtered_entity["control"] = entity["control"]
             if "army" in entity:
                 filtered_entity["army"] = entity["army"]
-            if "role" in entity:
-                filtered_entity["role"] = entity["role"]
+            #if "role" in entity:
+                #filtered_entity["role"] = entity["role"]
             filtered_map_data[coord] = filtered_entity
 
         map_data = {
