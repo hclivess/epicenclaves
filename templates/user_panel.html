@@ -18,7 +18,10 @@
             background-attachment: fixed;
             color: #e0e0e0;
         }
-
+        .revive-btn {
+            margin-top: 0 !important;
+            margin-bottom: 15px;
+        }
         .container {
             background-color: rgba(20, 20, 20, 0.8);
             border-radius: 15px;
@@ -208,6 +211,9 @@
                     <div class="card-body">
                         <img src="{{file['img']}}" alt="Profile Picture" class="profile-pic mb-3">
                         <div class="user-stats">
+                            {% if not file.get("alive", False) %}
+                                <a href="/revive" class="btn btn-danger btn-block revive-btn">💀 Revive 💀</a>
+                            {% end %}
                             <p class="mb-1">Age: {{ file.get("age", "N/A") }}</p>
                             <p class="mb-1">Alive: {{ file.get("alive", "N/A") }}</p>
                             <p class="mb-1">Experience: {{ file.get("exp", "N/A") }}</p>
@@ -221,9 +227,7 @@
                             <p class="mb-1">Position: ({{ file.get("x_pos", "N/A") }}, {{ file.get("y_pos", "N/A") }})</p>
                         </div>
 
-                        {% if not file.get("alive", "N/A") %}
-                            <a href="/revive" class="btn btn-danger btn-block mt-3">💀 Revive 💀</a>
-                        {% end %}
+
                     </div>
                 </div>
 
