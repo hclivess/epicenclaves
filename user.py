@@ -8,7 +8,7 @@ import threading
 user_lock = threading.Lock()
 
 class User:
-    def __init__(self, username: str, x_pos: int, y_pos: int, profile_pic: str = ""):
+    def __init__(self, username: str, x_pos: int, y_pos: int, profile_pic: str = "", **kwargs):
         self.username = username
         self.x_pos = x_pos
         self.y_pos = y_pos
@@ -33,6 +33,9 @@ class User:
         self.alive = True
         self.online = True
         self.construction = {}
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def get_actions(self, current_user: str) -> List[Dict[str, str]]:
         if self.username != current_user:

@@ -93,6 +93,7 @@ def generate_inventory_descriptions(user_data):
 def get_constructor_params(cls):
     return set(inspect.signature(cls.__init__).parameters.keys()) - {'self'}
 
+
 def get_tile_actions(tile: Any, user: str) -> List[Dict[str, str]]:
     if isinstance(tile, dict):
         tile_type = tile.get('type', '').lower()
@@ -105,9 +106,12 @@ def get_tile_actions(tile: Any, user: str) -> List[Dict[str, str]]:
             cls = building_types[tile_type]
             valid_params = get_constructor_params(cls)
             filtered_tile = {k: v for k, v in tile.items() if k in valid_params}
+            # Provide a default building_id if it's not present
+            if 'building_id' not in filtered_tile:
+                filtered_tile['building_id'] = tile.get('id', 1)  # Use 'id' if present, else default to 1
             tile = cls(**filtered_tile)
         elif tile_type == 'player':
-            tile = User(**tile)  # Assuming User can handle all the keys in tile
+            tile = User(**tile)
 
     if hasattr(tile, 'get_actions'):
         return tile.get_actions(user)
@@ -180,12 +184,23 @@ class MapHandler(BaseHandler):
             distance=visible_distance
         )
 
+        # Get valid parameters for User class
+        user_params = set(inspect.signature(User.__init__).parameters.keys()) - {'self'}
+
         # Filter the data to include only essential information
         for username, user_info in full_data["users"].items():
             essential_keys = ["x_pos", "y_pos", "type", "img", "exp", "hp"]
-            full_data["users"][username] = {key: user_info[key] for key in essential_keys if key in user_info}
+            filtered_user_info = {key: user_info[key] for key in essential_keys if key in user_info}
+            full_data["users"][username] = filtered_user_info
+
+            # Filter user_info to only include valid parameters for User creation
+            user_creation_info = {k: v for k, v in user_info.items() if k in user_params}
+
+            # Ensure username is passed to the User constructor
+            user_creation_info['username'] = username
+
             # Generate actions for each user
-            full_data["users"][username]["actions"] = get_tile_actions(User(**user_info), user)
+            full_data["users"][username]["actions"] = get_tile_actions(User(**user_creation_info), user)
 
         for coord, entity in full_data["construction"].items():
             filtered_entity = {"type": entity["type"]}
