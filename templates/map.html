@@ -6,7 +6,8 @@
     <title>Epic Enclaves Map</title>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-            .dragon { background: url('img/assets/dragon.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
+
+        .dragon { background: url('img/assets/dragon.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
     .goblin { background: url('img/assets/goblin.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
     .specter { background: url('img/assets/specter.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
     .dragon_whelp { background: url('img/assets/dragon_whelp.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
@@ -156,8 +157,8 @@
     </div>
 
     <script>
-        const jsonData = {"users": {"zz": {"x_pos": 16, "y_pos": 10, "type": "player", "img": "img/pps/default.png", "exp": 0, "hp": 1, "armor": 7}}, "construction": {"13,16": {"type": "forest"}, "16,18": {"type": "forest"}, "17,17": {"type": "mountain"}, "24,12": {"type": "mountain"}, "8,15": {"type": "troll", "level": 1}, "8,14": {"type": "troll", "level": 17}, "9,15": {"type": "troll", "level": 23}, "10,3": {"type": "troll", "level": 1}, "9,12": {"type": "troll", "level": 13}, "13,10": {"type": "troll", "level": 12}, "14,3": {"type": "troll", "level": 8}, "11,12": {"type": "troll", "level": 10}, "11,4": {"type": "troll", "level": 7}, "8,13": {"type": "troll", "level": 9}, "13,9": {"type": "troll", "level": 14}, "23,4": {"type": "wraith", "level": 13}}};
-        const currentUser = 'zz';
+    const jsonData = {% raw data %};
+    const currentUser = '{{ user }}';
         const gridSize = 80;
         const verticalTiles = 20;
 
@@ -252,11 +253,31 @@
         }
 
         function moveToPosition(x, y, callback) {
-            // Simulating movement without actual server request
-            jsonData.users[currentUser].x_pos = x;
-            jsonData.users[currentUser].y_pos = y;
+          fetch(`/move_to?x=${x}&y=${y}&target=map`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+          .then(response => response.json())
+          .then(data => {
+            Object.assign(jsonData, data);
             updateMap(jsonData);
-            callback(true);
+
+            if (data.message) {
+              const messageDisplay = document.getElementById('message-display');
+              if (messageDisplay) {
+                messageDisplay.textContent = data.message;
+              }
+            }
+
+            const success = data.message === "Moved successfully";
+            callback(success);
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+            callback(false);
+          });
         }
 
         function addClickListenerToMap() {
