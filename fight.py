@@ -129,8 +129,8 @@ def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb:
         new_item = generate_weapon(max_level=max_item_level) if random.random() < 0.5 else generate_armor(
             max_level=max_item_level)
 
-        # Check if the item's level is at least 5 levels below the NPC's level
-        if new_item['level'] >= npc.level - 4:
+        # Check if the item's level is at least 10 levels below the NPC's level
+        if new_item['level'] >= npc.level - 9:
             battle_data["rounds"].append({
                 "round": round_number,
                 "player_hp": user_data["hp"],
