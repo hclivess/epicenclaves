@@ -9,6 +9,18 @@
       height: 600px;
       background-color: #f0f0f0;
     }
+    .tile {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      cursor: pointer;
+    }
     .entity {
       position: absolute;
       width: 50px;
@@ -38,10 +50,23 @@
     const jsonData = {% raw data %};
     const currentUser = '{{ user }}';
     const gridSize = 50;
+    const mapWidth = 20;
+    const mapHeight = 20;
 
     function createMap(data) {
       const mapContainer = document.getElementById("map");
       const fragment = document.createDocumentFragment();
+
+      function createTile(x, y) {
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.style.top = y * gridSize + "px";
+        tile.style.left = x * gridSize + "px";
+        tile.dataset.x = x;
+        tile.dataset.y = y;
+        fragment.appendChild(tile);
+        return tile;
+      }
 
       function createEntity(className, x, y, content) {
         const element = document.createElement("div");
@@ -62,6 +87,12 @@
 
         const entityClass = username === currentUser ? "entity player current-user" : "entity player";
         createEntity(entityClass, user.x_pos - 1, user.y_pos - 1, content);
+      }
+
+      for (let y = 0; y < mapHeight; y++) {
+        for (let x = 0; x < mapWidth; x++) {
+          createTile(x, y);
+        }
       }
 
       Object.entries(data.users).forEach(([username, user]) => {
@@ -118,15 +149,16 @@
     function addClickListenerToMap() {
       const mapContainer = document.getElementById("map");
       mapContainer.addEventListener("click", (event) => {
-        const rect = mapContainer.getBoundingClientRect();
-        const clickX = Math.floor((event.clientX - rect.left) / gridSize) + 1;
-        const clickY = Math.floor((event.clientY - rect.top) / gridSize) + 1;
+        if (event.target.classList.contains("tile")) {
+          const clickX = parseInt(event.target.dataset.x) + 1;
+          const clickY = parseInt(event.target.dataset.y) + 1;
 
-        moveToPosition(clickX, clickY, (success) => {
-          if (success) {
-            updateMap(jsonData);
-          }
-        });
+          moveToPosition(clickX, clickY, (success) => {
+            if (success) {
+              updateMap(jsonData);
+            }
+          });
+        }
       });
     }
 
