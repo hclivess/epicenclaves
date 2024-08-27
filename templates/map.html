@@ -1,643 +1,137 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.8em' font-size='80'>🏰</text></svg>">
-<title>Epic Enclaves</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
-
-body {
-    font-family: 'Merriweather', serif;
-    background-color: #0a0a0a;
-    background-image: url('img/assets/background_map.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    color: #e0e0e0;
-}
-
-.wrapper {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.map {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  overflow: hidden;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-}
-
-.navigation-container {
-  position: fixed;
-  top: 0;
-  right: 0;
-  display: flex;
-  align-items: flex-end;
-  padding: 1em;
-  background-color: rgba(0, 0, 0, 0.7);
-  border-bottom-left-radius: 10px;
-  z-index: 9999;
-}
-
-.btn-group {
-  display: flex;
-  background-color: transparent;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.btn-group a {
-  text-decoration: none;
-  padding: 0.5em 1em;
-  color: #ffd700;
-  background-color: rgba(0, 0, 0, 0.6);
-  border: 1px solid #ffd700;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 700;
-  margin-right: 5px;
-  margin-bottom: 5px;
-}
-
-.btn-group a:last-child {
-  margin-right: 0;
-}
-
-.btn-group a:hover {
-  background-color: rgba(255, 215, 0, 0.2);
-  transform: translateY(-2px);
-}
-
-.grid-line {
-  position: absolute;
-  border: 1px solid rgba(255, 215, 0, 0.1);
-}
-
-.entity {
-  font-family: "Noto Color Emoji", "Segoe UI Emoji", sans-serif;
-  position: absolute;
-  font-size: 10px;
-  text-align: center;
-  width: 125px;
-  height: 125px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  border-radius: 10px;
-  box-shadow: inset 0 0 0 3px rgba(0, 255, 0, 0.3);
-  transition: all 0.3s ease;
-  background-color: rgba(0, 0, 0, 0.6);
-  overflow: hidden;
-  padding: 0; /* Remove padding */
-}
-
-.text-label {
-  font-size: 8px;
-  text-align: center;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: normal;
-  width: 100%; /* Full width */
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 2px 0;
-  margin-top: auto;
-}
-
-
-.entity:hover {
-  transform: scale(1.05);
-  z-index: 10;
-}
-
-.player {
-  background-color: rgba(128, 0, 128, 0.7);
-  color: #ffd700;
-  z-index: 2;
-  justify-content: flex-end;
-  padding: 0;
-  position: relative;
-  overflow: hidden;
-  border-radius: 10px; /* Round the corners of the main container */
-}
-
-.player::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border: 3px solid rgba(255, 0, 0, 1); /* Bright red border */
-  pointer-events: none;
-  z-index: 2;
-  border-radius: 10px; /* Round the corners of the border */
-}
-
-.player img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border: none;
-  border-radius: 10px; /* Round the corners of the image */
-  margin: 0;
-}
-
-.player .text-label {
-  width: 100%;
-  margin: 0;
-  padding: 5px 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 3;
-  font-size: 10px;
-  line-height: 1.2;
-  min-height: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border-bottom-left-radius: 10px; /* Round only the bottom corners of the text label */
-  border-bottom-right-radius: 10px;
-}
-.construction {
-  font-size: 12px;
-  color: #ffd700;
-  z-index: 1;
-}
-
-.blacksmith, .sawmill, .inn, .barracks, .house, .farm, .mine, .forest, .boar, .wolf, .mountain, .wall, .dragon, .goblin, .specter, .dragon_whelp, .archery_range {
-  color: #ffd700;
-}
-
-.entity-group { display: flex; flex-wrap: wrap; }
-.entity-group .entity { margin: 2px; }
-
-.exclamation-mark {
-  position: absolute;
-  font-size: 30px;
-  color: #ff4500;
-  top: 5px;
-  left: 5px;
-  text-shadow: 0 0 5px rgba(255, 69, 0, 0.7);
-}
-
-.tooltip {
-  position: absolute;
-  background-color: rgba(0, 0, 0, 0.9);
-  color: #ffd700;
-  font-size: 14px;
-  padding: 10px;
-  border-radius: 5px;
-  white-space: pre-line;
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.3s, visibility 0.3s;
-  z-index: 20;
-  border: 1px solid #ffd700;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-  max-width: 200px;
-  word-wrap: break-word;
-}
-
-.tooltip.visible {
-  visibility: visible;
-  opacity: 1;
-}
-
-.fog {
-  position: absolute;
-  width: 125px;
-  height: 125px;
-  background-color: rgba(0, 0, 0, 0.7); /* Changed from 0.9 to 0.7 for more transparency */
-  z-index: 5;
-  transition: opacity 0.5s ease;
-}
-
-.revealed {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: #1a1a1a;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #ffd700;
-  border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #ffec8b;
-}
-
-/* Entity icons */
-.entity:before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  font-size: 30px;
-  margin-bottom: 5px;
-  z-index: -1;
-  opacity: 0.75; /* Adjust opacity as needed */
-}
-
-.archery_range:before { content: "\1F3F9"; }
-
-.dragon { background: url('img/assets/dragon.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
-.goblin { background: url('img/assets/goblin.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
-.specter { background: url('img/assets/specter.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
-.dragon_whelp { background: url('img/assets/dragon_whelp.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
-.bandit { background: url('img/assets/bandit.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.troll { background: url('img/assets/troll.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.harpy { background: url('img/assets/harpy.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.minotaur { background: url('img/assets/minotaur.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.wraith { background: url('img/assets/wraith.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.boar { background: url('img/assets/boar.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.forest { background: url('img/assets/forest.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.mountain { background: url('img/assets/mountain.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.wall { background: url('img/assets/wall.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.wolf { background: url('img/assets/wolf.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.inn { background: url('img/assets/inn.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.barracks { background: url('img/assets/barracks.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.sawmill { background: url('img/assets/sawmill.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.house { background: url('img/assets/house.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.farm { background: url('img/assets/farm.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.mine { background: url('img/assets/mine.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.blacksmith { background: url('img/assets/blacksmith.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-
-
-/* Responsive font sizing */
-@media screen and (max-width: 1024px) {
-  .entity {
-    position: relative;
-    font-size: 12px;
-  }
-  .text-label {
-    font-size: 10px;
-  }
-}
-
-@media screen and (min-width: 1025px) and (max-width: 1440px) {
-  .entity {
-    font-size: 12px;
-  }
-  .text-label {
-    font-size: 11px;
-  }
-}
-
-@media screen and (min-width: 1441px) {
-  .entity {
-    font-size: 14px;
-  }
-  .text-label {
-    font-size: 12px;
-  }
-}
-
-</style>
-
+  <title>Epic Enclaves Map</title>
+  <style>
+    .map {
+      position: relative;
+      width: 100%;
+      height: 600px;
+      background-color: #f0f0f0;
+    }
+    .entity {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: #ccc;
+      border: 1px solid #999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+    }
+    .player {
+      background-color: #8bc34a;
+    }
+    .current-user {
+      background-color: #ff9800;
+    }
+    .text-label {
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
+  <div id="map" class="map"></div>
 
-<div class="navigation-container">
-<div class="btn-group">
-  <a id="btnUp" class="btn btn-move btn-lg active" href="/move?direction=up&target=map" role="button">🔼 Up</a>
-  <a id="btnDown" class="btn btn-move btn-lg active" href="/move?direction=down&target=map" role="button">🔽 Down</a>
-  <a id="btnLeft" class="btn btn-move btn-lg active" href="/move?direction=left&target=map" role="button">◀️ Left</a>
-  <a id="btnRight" class="btn btn-move btn-lg active" href="/move?direction=right&target=map" role="button">▶️ Right</a>
-  <a class="btn btn-map btn-lg active" href="/" role="button">👤 User Panel</a>
-  <a class="btn btn-lg active btn-up" href="/map" role="button">Refresh 🔄</a>
-  <a class="btn btn-lg active btn-up" href="/scoreboard" role="button">Scores 🏆</a>
-  <a class="btn btn-quit btn-lg active" href="/logout" role="button">🌙 Logout</a>
-</div>
-</div>
+  <script>
+    const jsonData = {% raw data %};
+    const currentUser = '{{ user }}';
+    const gridSize = 50;
 
-<div class="wrapper" id="wrapper">
-  <div class="map" id="map"></div>
-</div>
+    function createMap(data) {
+      const mapContainer = document.getElementById("map");
+      const fragment = document.createDocumentFragment();
 
-<script>
-const jsonData = {% raw data %};
-const currentUser = '{{ user }}';
-const gridSize = 125;
-const visibleRadius = 5;
-const centerOffsetX = 5;
-const centerOffsetY = 5;
+      function createEntity(className, x, y, content) {
+        const element = document.createElement("div");
+        element.className = className;
+        element.style.top = y * gridSize + "px";
+        element.style.left = x * gridSize + "px";
+        element.appendChild(content);
+        fragment.appendChild(element);
+        return element;
+      }
 
-function calculatePosition(pos) {
-  return (pos - 1) * gridSize;
-}
+      function createUserEntity(username, user) {
+        const content = document.createElement("div");
+        const playerLabel = document.createElement("div");
+        playerLabel.className = "text-label";
+        playerLabel.innerHTML = `${username}<br>exp: ${user.exp}<br>hp: ${user.hp}`;
+        content.appendChild(playerLabel);
 
-function createMap(data) {
-  const mapContainer = document.getElementById("map");
-  let maxX = 0;
-  let maxY = 0;
-  const fragment = document.createDocumentFragment();
+        const entityClass = username === currentUser ? "entity player current-user" : "entity player";
+        createEntity(entityClass, user.x_pos - 1, user.y_pos - 1, content);
+      }
 
-  function createEntity(className, x, y, content) {
-    const element = document.createElement("div");
-    element.className = className;
-    element.style.top = y + "px";
-    element.style.left = x + "px";
-    element.appendChild(content);
-    fragment.appendChild(element);
-    return element;
-  }
+      Object.entries(data.users).forEach(([username, user]) => {
+        if (user.type === "player") {
+          createUserEntity(username, user);
+        }
+      });
 
-  function createUserEntity(username, user) {
-    const playerX = calculatePosition(user.x_pos);
-    const playerY = calculatePosition(user.y_pos);
-    maxX = Math.max(maxX, playerX);
-    maxY = Math.max(maxY, playerY);
+      Object.entries(data.construction).forEach(([key, construction]) => {
+        const [x_pos, y_pos] = key.split(",").map(Number);
+        const content = document.createElement("div");
+        content.className = "text-label";
+        content.innerHTML = `${construction.type}<br>level: ${construction.level || '-'}`;
+        createEntity(`entity construction ${construction.type}`, x_pos - 1, y_pos - 1, content);
+      });
 
-    const content = document.createElement("div");
-    const playerImg = document.createElement("img");
-    playerImg.src = user.img;
-    content.appendChild(playerImg);
-
-    const playerLabel = document.createElement("div");
-    playerLabel.className = "text-label";
-    playerLabel.innerHTML = `username: ${username}<br>pos: ${user.x_pos}, ${user.y_pos}<br>exp: ${user.exp}<br>hp: ${user.hp}`;
-    content.appendChild(playerLabel);
-
-    const entityClass = username === currentUser ? "entity player current-user" : "entity player";
-    createEntity(entityClass, playerX, playerY, content);
-  }
-
-  Object.entries(data.users).forEach(([username, user]) => {
-    if (user.type === "player") {
-      createUserEntity(username, user);
+      mapContainer.appendChild(fragment);
     }
-  });
 
-  Object.entries(data.construction).forEach(([key, construction]) => {
-    const [x_pos, y_pos] = key.split(",").map(Number);
-    const constructionX = calculatePosition(x_pos);
-    const constructionY = calculatePosition(y_pos);
-    maxX = Math.max(maxX, constructionX);
-    maxY = Math.max(maxY, constructionY);
-
-    const content = document.createElement("div");
-    content.className = "text-label";
-    content.innerHTML = `pos: ${x_pos}, ${y_pos}<br>${Object.entries(construction).map(([key, value]) => `${key}: ${value}`).join('<br>')}`;
-
-    createEntity(`entity construction ${construction.type}`, constructionX, constructionY, content);
-  });
-
-  mapContainer.style.width = (maxX + gridSize * (visibleRadius * 2 + 1)) + "px";
-  mapContainer.style.height = (maxY + gridSize * (visibleRadius * 2 + 1)) + "px";
-
-  for (let x = 0; x <= maxX + gridSize * (visibleRadius * 2); x += gridSize) {
-    createEntity("grid-line", x, 0, document.createElement("div")).style.width = "1px";
-    createEntity("grid-line", x, 0, document.createElement("div")).style.height = (maxY + gridSize * (visibleRadius * 2)) + "px";
-  }
-  for (let y = 0; y <= maxY + gridSize * (visibleRadius * 2 ); y += gridSize) {
-    createEntity("grid-line", 0, y, document.createElement("div")).style.height = "1px";
-    createEntity("grid-line", 0, y, document.createElement("div")).style.width = (maxX + gridSize * (visibleRadius * 2)) + "px";
-  }
-
-  mapContainer.appendChild(fragment);
-  groupEntitiesAndAddTooltips(mapContainer);
-}
-
-function centerMapOnUser(data) {
-  const userToCenter = data.users[currentUser];
-  if (!userToCenter) {
-    console.error("Current user not found in data");
-    return;
-  }
-
-  const mapContainer = document.getElementById("map");
-  const userX = calculatePosition(userToCenter.x_pos);
-  const userY = calculatePosition(userToCenter.y_pos);
-  const offsetX = Math.round(window.innerWidth / 2 - userX - centerOffsetX * gridSize);
-  const offsetY = Math.round(window.innerHeight / 2 - userY - centerOffsetY * gridSize);
-
-  mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-}
-
-const debouncedCenterMapOnUser = debounce(centerMapOnUser, 100);
-
-function groupEntitiesAndAddTooltips(mapContainer) {
-  const tileElements = mapContainer.querySelectorAll(".entity");
-  const entitiesOnTile = {};
-  tileElements.forEach((tileElement) => {
-    const tileKey = tileElement.style.left + "," + tileElement.style.top;
-    if (!entitiesOnTile[tileKey]) {
-      entitiesOnTile[tileKey] = [];
+    function updateMap(data) {
+      const mapContainer = document.getElementById("map");
+      mapContainer.innerHTML = '';
+      createMap(data);
     }
-    entitiesOnTile[tileKey].push(tileElement);
-  });
 
-  Object.values(entitiesOnTile).forEach((entityGroup) => {
-    if (entityGroup.length > 1) {
-      entityGroup.forEach((entity) => {
-        const exclamationMark = document.createElement("div");
-        exclamationMark.className = "exclamation-mark";
-        exclamationMark.innerHTML = "❗";
-        entity.appendChild(exclamationMark);
+    function moveToPosition(x, y, callback) {
+      fetch(`/move_to?x=${x}&y=${y}&target=map`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(response => response.json())
+      .then(data => {
+        Object.assign(jsonData, data);
+        updateMap(jsonData);
 
-        const tooltip = document.createElement("div");
-        tooltip.className = "tooltip";
-        document.body.appendChild(tooltip);
+        if (data.message) {
+          const messageDisplay = document.getElementById('message-display');
+          if (messageDisplay) {
+            messageDisplay.textContent = data.message;
+          }
+        }
 
-        entity.addEventListener("mouseenter", () => {
-          showTooltip(entityGroup, tooltip);
-        });
-        entity.addEventListener("mouseleave", () => {
-          tooltip.classList.remove("visible");
+        const success = data.message === "Moved successfully";
+        callback(success);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        callback(false);
+      });
+    }
+
+    function addClickListenerToMap() {
+      const mapContainer = document.getElementById("map");
+      mapContainer.addEventListener("click", (event) => {
+        const rect = mapContainer.getBoundingClientRect();
+        const clickX = Math.floor((event.clientX - rect.left) / gridSize) + 1;
+        const clickY = Math.floor((event.clientY - rect.top) / gridSize) + 1;
+
+        moveToPosition(clickX, clickY, (success) => {
+          if (success) {
+            updateMap(jsonData);
+          }
         });
       });
     }
-  });
-}
 
-function showTooltip(entityGroup, tooltip) {
-  const combinedLabel = entityGroup.map(entity => entity.querySelector(".text-label").innerHTML).join("<br>");
-  tooltip.innerHTML = combinedLabel;
-
-  const rect = entityGroup[0].getBoundingClientRect();
-  tooltip.style.position = 'fixed';
-  tooltip.style.top = rect.top + "px";
-  tooltip.style.left = (rect.right + 10) + "px";
-  tooltip.classList.add("visible");
-}
-
-function updateMap(data) {
-  const mapContainer = document.getElementById("map");
-  mapContainer.innerHTML = '';
-  createMap(data);
-  debouncedCenterMapOnUser(data);
-}
-
-function addClickListenerToMap() {
-  const mapContainer = document.getElementById("map");
-  mapContainer.addEventListener("click", (event) => {
-    const rect = mapContainer.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const clickY = event.clientY - rect.top;
-
-    const mapCenterX = rect.width / 2;
-    const mapCenterY = rect.height / 2;
-
-    const deltaX = Math.round((clickX - mapCenterX) / gridSize);
-    const deltaY = Math.round((clickY - mapCenterY) / gridSize);
-
-    const targetX = jsonData.users[currentUser].x_pos + deltaX;
-    const targetY = jsonData.users[currentUser].y_pos + deltaY;
-
-    movePlayerToTile(targetX, targetY);
-  });
-}
-
-function movePlayerToTile(targetX, targetY) {
-  const player = jsonData.users[currentUser];
-  let currentX = player.x_pos;
-  let currentY = player.y_pos;
-
-  if (currentX === targetX && currentY === targetY) {
-    console.log("Already at the target position.");
-    return;
-  }
-
-  function moveStep() {
-    let nextX = currentX;
-    let nextY = currentY;
-
-    if (currentX < targetX) nextX++;
-    else if (currentX > targetX) nextX--;
-    else if (currentY < targetY) nextY++;
-    else if (currentY > targetY) nextY--;
-
-    moveToPosition(nextX, nextY, (success) => {
-      if (success) {
-        currentX = nextX;
-        currentY = nextY;
-        if (currentX !== targetX || currentY !== targetY) {
-          setTimeout(moveStep, 100);
-        }
-      } else {
-        console.log("Movement blocked, stopping auto-move.");
-      }
-    });
-  }
-
-  moveStep();
-}
-
-function moveToPosition(x, y, callback) {
-  fetch(`/move_to?x=${x}&y=${y}&target=map`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-  .then(response => response.json())
-  .then(data => {
-    Object.assign(jsonData, data);
-    updateMap(jsonData);
-
-    if (data.message) {
-      const messageDisplay = document.getElementById('message-display');
-      if (messageDisplay) {
-        messageDisplay.textContent = data.message;
-      }
-    }
-
-    const success = data.message === "Moved successfully";
-    callback(success);
-  })
-  .catch((error) => {
-    console.error('Error:', error);
-    callback(false);
-  });
-}
-
-function debounce(func, wait) {
-  let timeout;
-  return function(...args) {
-    const context = this;
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(context, args), wait);
-  };
-}
-
-createMap(jsonData);
-centerMapOnUser(jsonData);
-addClickListenerToMap();
-
-document.addEventListener("keydown", (event) => {
-  let direction = null;
-
-  switch (event.key) {
-    case "ArrowLeft":
-      direction = "left";
-      break;
-    case "ArrowRight":
-      direction = "right";
-      break;
-    case "ArrowUp":
-      direction = "up";
-      break;
-    case "ArrowDown":
-      direction = "down";
-      break;
-  }
-
-  if (direction) {
-    const button = document.getElementById('btn' + direction.charAt(0).toUpperCase() + direction.slice(1));
-    if (button) {
-      button.click();
-    }
-  }
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  debouncedCenterMapOnUser(jsonData);
-});
-
-window.addEventListener("resize", () => {
-  debouncedCenterMapOnUser(jsonData);
-});
-
-document.querySelectorAll('.btn-move').forEach(button => {
-  button.addEventListener('click', () => {
-    setTimeout(() => {
-      debouncedCenterMapOnUser(jsonData);
-    }, 100);
-  });
-});
-</script>
-
+    createMap(jsonData);
+    addClickListenerToMap();
+  </script>
 </body>
 </html>
