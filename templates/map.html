@@ -41,17 +41,26 @@
     .text-label {
       text-align: center;
     }
+    .map-container {
+      overflow: auto;
+      width: 100%;
+      height: 600px;
+    }
   </style>
 </head>
 <body>
-  <div id="map" class="map"></div>
+  <div class="map-container">
+    <div id="map" class="map"></div>
+  </div>
 
   <script>
     const jsonData = {% raw data %};
     const currentUser = '{{ user }}';
     const gridSize = 50;
-    const mapWidth = 20;
-    const mapHeight = 20;
+    const initialMapSize = 20;
+
+    let mapWidth = initialMapSize;
+    let mapHeight = initialMapSize;
 
     function createMap(data) {
       const mapContainer = document.getElementById("map");
@@ -89,11 +98,22 @@
         createEntity(entityClass, user.x_pos - 1, user.y_pos - 1, content);
       }
 
-      for (let y = 0; y < mapHeight; y++) {
-        for (let x = 0; x < mapWidth; x++) {
-          createTile(x, y);
+      function createVisibleTiles() {
+        const currentUserData = jsonData.users[currentUser];
+        if (currentUserData) {
+          const { x_pos, y_pos } = currentUserData;
+          const halfWidth = Math.floor(mapWidth / 2);
+          const halfHeight = Math.floor(mapHeight / 2);
+
+          for (let y = Math.max(0, y_pos - halfHeight); y <= y_pos + halfHeight; y++) {
+            for (let x = Math.max(0, x_pos - halfWidth); x <= x_pos + halfWidth; x++) {
+              createTile(x, y);
+            }
+          }
         }
       }
+
+      createVisibleTiles();
 
       Object.entries(data.users).forEach(([username, user]) => {
         if (user.type === "player") {
@@ -110,6 +130,7 @@
       });
 
       mapContainer.appendChild(fragment);
+      adjustMapSize();
     }
 
     function updateMap(data) {
@@ -160,6 +181,24 @@
           });
         }
       });
+    }
+
+    function adjustMapSize() {
+      const currentUserData = jsonData.users[currentUser];
+      if (currentUserData) {
+        const { x_pos, y_pos } = currentUserData;
+
+        if (x_pos > mapWidth / 2) {
+          mapWidth = x_pos * 2;
+        }
+        if (y_pos > mapHeight / 2) {
+          mapHeight = y_pos * 2;
+        }
+
+        const mapContainer = document.getElementById("map");
+        mapContainer.style.width = (mapWidth * gridSize) + "px";
+        mapContainer.style.height = (mapHeight * gridSize) + "px";
+      }
     }
 
     createMap(jsonData);
