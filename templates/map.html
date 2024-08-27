@@ -41,15 +41,19 @@
       justify-content: center;
       align-items: center;
       font-size: 12px;
+      flex-direction: column;
     }
-    .player {
-      background-color: #8bc34a;
-    }
-    .current-user {
-      background-color: #ff9800;
-    }
+    .player { background-color: #8bc34a; }
+    .current-user { background-color: #ff9800; }
+    .forest { background-color: #4caf50; }
+    .mountain { background-color: #795548; }
+    .troll { background-color: #9c27b0; }
+    .wraith { background-color: #607d8b; }
     .text-label {
       text-align: center;
+      width: 100%;
+      font-size: 10px;
+      line-height: 1.2;
     }
   </style>
 </head>
@@ -62,10 +66,14 @@
     const jsonData = {% raw data %};
     const currentUser = '{{ user }}';
     const gridSize = 50;
-    const initialMapSize = 20;
+    const verticalTiles = 20; // Keep vertical size the same
 
-    let mapWidth = initialMapSize;
-    let mapHeight = initialMapSize;
+    let horizontalTiles;
+
+    function calculateHorizontalTiles() {
+      const mapContainer = document.querySelector('.map-container');
+      horizontalTiles = Math.ceil(mapContainer.offsetWidth / gridSize) + 4; // Add extra tiles for smoother scrolling
+    }
 
     function createMap(data) {
       const mapContainer = document.getElementById("map");
@@ -84,7 +92,7 @@
 
       function createEntity(className, x, y, content) {
         const element = document.createElement("div");
-        element.className = className;
+        element.className = `entity ${className}`;
         element.style.top = y * gridSize + "px";
         element.style.left = x * gridSize + "px";
         element.appendChild(content);
@@ -92,26 +100,28 @@
         return element;
       }
 
-      function createUserEntity(username, user) {
+      function createEntityContent(entity, pos) {
         const content = document.createElement("div");
-        const playerLabel = document.createElement("div");
-        playerLabel.className = "text-label";
-        playerLabel.innerHTML = `${username}<br>exp: ${user.exp}<br>hp: ${user.hp}`;
-        content.appendChild(playerLabel);
-
-        const entityClass = username === currentUser ? "entity player current-user" : "entity player";
-        createEntity(entityClass, user.x_pos - 1, user.y_pos - 1, content);
+        content.className = "text-label";
+        let infoText = `${entity.type}`;
+        if (entity.level !== undefined) infoText += ` Lvl${entity.level}`;
+        if (entity.hp !== undefined) infoText += ` HP${entity.hp}`;
+        if (entity.exp !== undefined) infoText += ` Exp${entity.exp}`;
+        if (entity.armor !== undefined) infoText += ` Arm${entity.armor}`;
+        infoText += `\n(${pos.x},${pos.y})`;
+        content.innerText = infoText;
+        return content;
       }
 
       function createVisibleTiles() {
         const currentUserData = jsonData.users[currentUser];
         if (currentUserData) {
           const { x_pos, y_pos } = currentUserData;
-          const halfWidth = Math.floor(mapWidth / 2);
-          const halfHeight = Math.floor(mapHeight / 2);
+          const halfWidth = Math.floor(horizontalTiles / 2);
+          const halfHeight = Math.floor(verticalTiles / 2);
 
-          for (let y = Math.max(0, y_pos - halfHeight); y <= y_pos + halfHeight; y++) {
-            for (let x = Math.max(0, x_pos - halfWidth); x <= x_pos + halfWidth; x++) {
+          for (let y = Math.max(0, y_pos - halfHeight); y < y_pos + halfHeight; y++) {
+            for (let x = Math.max(0, x_pos - halfWidth); x < x_pos + halfWidth; x++) {
               createTile(x, y);
             }
           }
@@ -121,17 +131,15 @@
       createVisibleTiles();
 
       Object.entries(data.users).forEach(([username, user]) => {
-        if (user.type === "player") {
-          createUserEntity(username, user);
-        }
+        const content = createEntityContent(user, {x: user.x_pos, y: user.y_pos});
+        const className = `player ${username === currentUser ? 'current-user' : ''}`;
+        createEntity(className, user.x_pos - 1, user.y_pos - 1, content);
       });
 
       Object.entries(data.construction).forEach(([key, construction]) => {
         const [x_pos, y_pos] = key.split(",").map(Number);
-        const content = document.createElement("div");
-        content.className = "text-label";
-        content.innerHTML = `${construction.type}<br>level: ${construction.level || '-'}`;
-        createEntity(`entity construction ${construction.type}`, x_pos - 1, y_pos - 1, content);
+        const content = createEntityContent(construction, {x: x_pos, y: y_pos});
+        createEntity(construction.type, x_pos - 1, y_pos - 1, content);
       });
 
       mapContainer.appendChild(fragment);
@@ -145,39 +153,20 @@
     }
 
     function moveToPosition(x, y, callback) {
-      fetch(`/move_to?x=${x}&y=${y}&target=map`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      .then(response => response.json())
-      .then(data => {
-        Object.assign(jsonData, data);
-        updateMap(jsonData);
-
-        if (data.message) {
-          const messageDisplay = document.getElementById('message-display');
-          if (messageDisplay) {
-            messageDisplay.textContent = data.message;
-          }
-        }
-
-        const success = data.message === "Moved successfully";
-        callback(success);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        callback(false);
-      });
+      // Simulating movement without actual server request
+      jsonData.users[currentUser].x_pos = x;
+      jsonData.users[currentUser].y_pos = y;
+      updateMap(jsonData);
+      callback(true);
     }
 
     function addClickListenerToMap() {
       const mapContainer = document.getElementById("map");
       mapContainer.addEventListener("click", (event) => {
-        if (event.target.classList.contains("tile")) {
-          const clickX = parseInt(event.target.dataset.x) + 1;
-          const clickY = parseInt(event.target.dataset.y) + 1;
+        if (event.target.classList.contains("tile") || event.target.closest(".entity")) {
+          const clickedElement = event.target.classList.contains("tile") ? event.target : event.target.closest(".entity");
+          const clickX = parseInt(clickedElement.style.left) / gridSize + 1;
+          const clickY = parseInt(clickedElement.style.top) / gridSize + 1;
 
           moveToPosition(clickX, clickY, (success) => {
             if (success) {
@@ -206,6 +195,12 @@
       }
     }
 
+    window.addEventListener('resize', () => {
+      calculateHorizontalTiles();
+      updateMap(jsonData);
+    });
+
+    calculateHorizontalTiles();
     createMap(jsonData);
     addClickListenerToMap();
   </script>
