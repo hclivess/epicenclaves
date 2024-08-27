@@ -351,15 +351,21 @@ const jsonData = {% raw data %};
 const currentUser = '{{ user }}';
 const gridSize = 125;
 const visibleRadius = 5;
+const centerOffsetX = 5;
+const centerOffsetY = 5;
+
+function calculatePosition(pos) {
+  return (pos - 1) * gridSize;
+}
 
 function createMap(data) {
-  var mapContainer = document.getElementById("map");
-  var maxX = 0;
-  var maxY = 0;
-  var fragment = document.createDocumentFragment();
+  const mapContainer = document.getElementById("map");
+  let maxX = 0;
+  let maxY = 0;
+  const fragment = document.createDocumentFragment();
 
   function createEntity(className, x, y, content) {
-    var element = document.createElement("div");
+    const element = document.createElement("div");
     element.className = className;
     element.style.top = y + "px";
     element.style.left = x + "px";
@@ -368,59 +374,54 @@ function createMap(data) {
     return element;
   }
 
-  function calculatePosition(pos) {
-    return (pos) * gridSize;
-  }
-
   function createUserEntity(username, user) {
-    var playerX = calculatePosition(user.x_pos);
-    var playerY = calculatePosition(user.y_pos);
+    const playerX = calculatePosition(user.x_pos);
+    const playerY = calculatePosition(user.y_pos);
     maxX = Math.max(maxX, playerX);
     maxY = Math.max(maxY, playerY);
 
-    var content = document.createElement("div");
-    var playerImg = document.createElement("img");
+    const content = document.createElement("div");
+    const playerImg = document.createElement("img");
     playerImg.src = user.img;
     content.appendChild(playerImg);
 
-    var playerLabel = document.createElement("div");
+    const playerLabel = document.createElement("div");
     playerLabel.className = "text-label";
     playerLabel.innerHTML = `username: ${username}<br>pos: ${user.x_pos}, ${user.y_pos}<br>exp: ${user.exp}<br>hp: ${user.hp}`;
     content.appendChild(playerLabel);
 
-    var entityClass = username === currentUser ? "entity player current-user" : "entity player";
+    const entityClass = username === currentUser ? "entity player current-user" : "entity player";
     createEntity(entityClass, playerX, playerY, content);
   }
 
-  // Create entities for all users
-  Object.entries(data.users).forEach(function ([username, user]) {
+  Object.entries(data.users).forEach(([username, user]) => {
     if (user.type === "player") {
       createUserEntity(username, user);
     }
   });
 
-  Object.entries(data.construction).forEach(function ([key, construction]) {
-    var [x_pos, y_pos] = key.split(",").map(Number);
-    var constructionX = calculatePosition(x_pos);
-    var constructionY = calculatePosition(y_pos);
+  Object.entries(data.construction).forEach(([key, construction]) => {
+    const [x_pos, y_pos] = key.split(",").map(Number);
+    const constructionX = calculatePosition(x_pos);
+    const constructionY = calculatePosition(y_pos);
     maxX = Math.max(maxX, constructionX);
     maxY = Math.max(maxY, constructionY);
 
-    var content = document.createElement("div");
+    const content = document.createElement("div");
     content.className = "text-label";
     content.innerHTML = `pos: ${x_pos}, ${y_pos}<br>${Object.entries(construction).map(([key, value]) => `${key}: ${value}`).join('<br>')}`;
 
     createEntity(`entity construction ${construction.type}`, constructionX, constructionY, content);
   });
 
-  mapContainer.style.width = (maxX + gridSize * (visibleRadius * 2 )) + "px";
-  mapContainer.style.height = (maxY + gridSize * (visibleRadius * 2)) + "px";
+  mapContainer.style.width = (maxX + gridSize * (visibleRadius * 2 + 1)) + "px";
+  mapContainer.style.height = (maxY + gridSize * (visibleRadius * 2 + 1)) + "px";
 
-  for (var x = 0; x <= maxX + gridSize * (visibleRadius * 2); x += gridSize) {
+  for (let x = 0; x <= maxX + gridSize * (visibleRadius * 2); x += gridSize) {
     createEntity("grid-line", x, 0, document.createElement("div")).style.width = "1px";
     createEntity("grid-line", x, 0, document.createElement("div")).style.height = (maxY + gridSize * (visibleRadius * 2)) + "px";
   }
-  for (var y = 0; y <= maxY + gridSize * (visibleRadius * 2 ); y += gridSize) {
+  for (let y = 0; y <= maxY + gridSize * (visibleRadius * 2 ); y += gridSize) {
     createEntity("grid-line", 0, y, document.createElement("div")).style.height = "1px";
     createEntity("grid-line", 0, y, document.createElement("div")).style.width = (maxX + gridSize * (visibleRadius * 2)) + "px";
   }
@@ -431,58 +432,49 @@ function createMap(data) {
 
 function centerMapOnUser(data) {
   const userToCenter = data.users[currentUser];
-
-  if (userToCenter) {
-    const mapContainer = document.getElementById("map");
-
-    const ratioX = window.innerWidth / 3840;
-    const ratioY = window.innerHeight / 2160;
-
-    const centerOffsetX4K = 16.5;
-    const centerOffsetY4K = 9.85;
-
-    const centerOffsetX = centerOffsetX4K * ratioX;
-    const centerOffsetY = centerOffsetY4K * ratioY;
-
-    const userX = (userToCenter.x_pos) * gridSize;
-    const userY = (userToCenter.y_pos) * gridSize;
-
-    const offsetX = Math.round(window.innerWidth / 2 - userX - centerOffsetX * gridSize);
-    const offsetY = Math.round(window.innerHeight / 2 - userY - centerOffsetY * gridSize);
-
-    mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-  } else {
+  if (!userToCenter) {
     console.error("Current user not found in data");
+    return;
   }
+
+  const mapContainer = document.getElementById("map");
+  const userX = calculatePosition(userToCenter.x_pos);
+  const userY = calculatePosition(userToCenter.y_pos);
+  const offsetX = Math.round(window.innerWidth / 2 - userX - centerOffsetX * gridSize);
+  const offsetY = Math.round(window.innerHeight / 2 - userY - centerOffsetY * gridSize);
+
+  mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
 }
 
+const debouncedCenterMapOnUser = debounce(centerMapOnUser, 100);
+
 function groupEntitiesAndAddTooltips(mapContainer) {
-  var tileElements = mapContainer.querySelectorAll(".entity");
-  var entitiesOnTile = {};
-  tileElements.forEach(function (tileElement) {
-    var tileKey = tileElement.style.left + "," + tileElement.style.top;
+  const tileElements = mapContainer.querySelectorAll(".entity");
+  const entitiesOnTile = {};
+  tileElements.forEach((tileElement) => {
+    const tileKey = tileElement.style.left + "," + tileElement.style.top;
     if (!entitiesOnTile[tileKey]) {
       entitiesOnTile[tileKey] = [];
     }
     entitiesOnTile[tileKey].push(tileElement);
   });
 
-  Object.values(entitiesOnTile).forEach(function (entityGroup) {
+  Object.values(entitiesOnTile).forEach((entityGroup) => {
     if (entityGroup.length > 1) {
-      entityGroup.forEach(function (entity) {
-        var exclamationMark = document.createElement("div");
+      entityGroup.forEach((entity) => {
+        const exclamationMark = document.createElement("div");
         exclamationMark.className = "exclamation-mark";
         exclamationMark.innerHTML = "❗";
         entity.appendChild(exclamationMark);
 
-        var tooltip = document.createElement("div");
+        const tooltip = document.createElement("div");
         tooltip.className = "tooltip";
         document.body.appendChild(tooltip);
 
-        entity.addEventListener("mouseenter", function () {
+        entity.addEventListener("mouseenter", () => {
           showTooltip(entityGroup, tooltip);
         });
-        entity.addEventListener("mouseleave", function () {
+        entity.addEventListener("mouseleave", () => {
           tooltip.classList.remove("visible");
         });
       });
@@ -491,10 +483,10 @@ function groupEntitiesAndAddTooltips(mapContainer) {
 }
 
 function showTooltip(entityGroup, tooltip) {
-  var combinedLabel = entityGroup.map(entity => entity.querySelector(".text-label").innerHTML).join("<br>");
+  const combinedLabel = entityGroup.map(entity => entity.querySelector(".text-label").innerHTML).join("<br>");
   tooltip.innerHTML = combinedLabel;
 
-  var rect = entityGroup[0].getBoundingClientRect();
+  const rect = entityGroup[0].getBoundingClientRect();
   tooltip.style.position = 'fixed';
   tooltip.style.top = rect.top + "px";
   tooltip.style.left = (rect.right + 10) + "px";
@@ -505,20 +497,26 @@ function updateMap(data) {
   const mapContainer = document.getElementById("map");
   mapContainer.innerHTML = '';
   createMap(data);
-  centerMapOnUser(data);
+  debouncedCenterMapOnUser(data);
 }
 
 function addClickListenerToMap() {
   const mapContainer = document.getElementById("map");
-  mapContainer.addEventListener("click", function(event) {
+  mapContainer.addEventListener("click", (event) => {
     const rect = mapContainer.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
     const clickY = event.clientY - rect.top;
 
-    const tileX = Math.floor(clickX / gridSize);
-    const tileY = Math.floor(clickY / gridSize);
+    const mapCenterX = rect.width / 2;
+    const mapCenterY = rect.height / 2;
 
-    movePlayerToTile(tileX, tileY);
+    const deltaX = Math.round((clickX - mapCenterX) / gridSize);
+    const deltaY = Math.round((clickY - mapCenterY) / gridSize);
+
+    const targetX = jsonData.users[currentUser].x_pos + deltaX;
+    const targetY = jsonData.users[currentUser].y_pos + deltaY;
+
+    movePlayerToTile(targetX, targetY);
   });
 }
 
@@ -541,7 +539,7 @@ function movePlayerToTile(targetX, targetY) {
     else if (currentY < targetY) nextY++;
     else if (currentY > targetY) nextY--;
 
-    moveToPosition(nextX, nextY, function(success) {
+    moveToPosition(nextX, nextY, (success) => {
       if (success) {
         currentX = nextX;
         currentY = nextY;
@@ -585,12 +583,21 @@ function moveToPosition(x, y, callback) {
   });
 }
 
+function debounce(func, wait) {
+  let timeout;
+  return function(...args) {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), wait);
+  };
+}
+
 createMap(jsonData);
 centerMapOnUser(jsonData);
 addClickListenerToMap();
 
-document.addEventListener("keydown", function(event) {
-  var direction = null;
+document.addEventListener("keydown", (event) => {
+  let direction = null;
 
   switch (event.key) {
     case "ArrowLeft":
@@ -608,25 +615,25 @@ document.addEventListener("keydown", function(event) {
   }
 
   if (direction) {
-    var button = document.getElementById('btn' + direction.charAt(0).toUpperCase() + direction.slice(1));
+    const button = document.getElementById('btn' + direction.charAt(0).toUpperCase() + direction.slice(1));
     if (button) {
       button.click();
     }
   }
 });
 
-document.addEventListener("DOMContentLoaded", function() {
-  centerMapOnUser(jsonData);
+document.addEventListener("DOMContentLoaded", () => {
+  debouncedCenterMapOnUser(jsonData);
 });
 
-window.addEventListener("resize", function() {
-  centerMapOnUser(jsonData);
+window.addEventListener("resize", () => {
+  debouncedCenterMapOnUser(jsonData);
 });
 
 document.querySelectorAll('.btn-move').forEach(button => {
-  button.addEventListener('click', function(event) {
-    setTimeout(function() {
-      centerMapOnUser(jsonData);
+  button.addEventListener('click', () => {
+    setTimeout(() => {
+      debouncedCenterMapOnUser(jsonData);
     }, 100);
   });
 });
