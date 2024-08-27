@@ -132,17 +132,22 @@
         return tile;
       }
 
-      function createEntityLabel(entity, pos) {
+      function createEntityLabel(entity, pos, isPlayer, playerName) {
         const label = document.createElement("div");
         label.className = "entity-label";
-        let text = `${entity.type}`;
-        if (entity.level !== undefined) text += ` lvl ${entity.level}`;
+        let text = '';
+        if (isPlayer) {
+          text = `${playerName} Exp:${entity.exp} HP:${entity.hp}`;
+        } else {
+          text = `${entity.type}`;
+          if (entity.level !== undefined) text += ` Lvl${entity.level}`;
+        }
         text += ` (${pos.x},${pos.y})`;
         label.textContent = text;
         return label;
       }
 
-      function createEntity(className, x, y, entity) {
+      function createEntity(className, x, y, entity, isPlayer = false, playerName = '') {
         const element = document.createElement("div");
         element.className = `entity ${className}`;
         element.style.top = y * gridSize + "px";
@@ -152,7 +157,7 @@
           element.style.backgroundImage = `url('${entity.img}')`;
         }
 
-        const label = createEntityLabel(entity, {x: x+1, y: y+1});
+        const label = createEntityLabel(entity, {x: x+1, y: y+1}, isPlayer, playerName);
         element.appendChild(label);
 
         fragment.appendChild(element);
@@ -177,12 +182,12 @@
       createVisibleTiles();
 
       Object.entries(data.users).forEach(([username, user]) => {
-        createEntity(user.type.toLowerCase(), user.x_pos - 1, user.y_pos - 1, user);
+        createEntity(user.type.toLowerCase(), user.x_pos - 1, user.y_pos - 1, user, true, username);
       });
 
       Object.entries(data.construction).forEach(([key, entity]) => {
         const [x, y] = key.split(",").map(Number);
-        createEntity(entity.type.toLowerCase(), x - 1, y - 1, {...entity, x_pos: x, y_pos: y});
+        createEntity(entity.type.toLowerCase(), x - 1, y - 1, {...entity, x_pos: x, y_pos: y}, false);
       });
 
       mapContainer.appendChild(fragment);
