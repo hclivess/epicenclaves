@@ -3,10 +3,20 @@
 <head>
   <title>Epic Enclaves Map</title>
   <style>
-    .map {
-      position: relative;
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    .map-container {
       width: 100%;
-      height: 600px;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+    .map {
+      position: absolute;
       background-color: #f0f0f0;
     }
     .tile {
@@ -40,11 +50,6 @@
     }
     .text-label {
       text-align: center;
-    }
-    .map-container {
-      overflow: auto;
-      width: 100%;
-      height: 600px;
     }
   </style>
 </head>
@@ -130,7 +135,7 @@
       });
 
       mapContainer.appendChild(fragment);
-      adjustMapSize();
+      centerMapOnPlayer();
     }
 
     function updateMap(data) {
@@ -183,21 +188,21 @@
       });
     }
 
-    function adjustMapSize() {
+    function centerMapOnPlayer() {
       const currentUserData = jsonData.users[currentUser];
       if (currentUserData) {
         const { x_pos, y_pos } = currentUserData;
+        const mapContainer = document.querySelector('.map-container');
+        const map = document.getElementById('map');
 
-        if (x_pos > mapWidth / 2) {
-          mapWidth = x_pos * 2;
-        }
-        if (y_pos > mapHeight / 2) {
-          mapHeight = y_pos * 2;
-        }
+        const containerWidth = mapContainer.offsetWidth;
+        const containerHeight = mapContainer.offsetHeight;
 
-        const mapContainer = document.getElementById("map");
-        mapContainer.style.width = (mapWidth * gridSize) + "px";
-        mapContainer.style.height = (mapHeight * gridSize) + "px";
+        const leftOffset = (x_pos - 1) * gridSize - (containerWidth / 2) + (gridSize / 2);
+        const topOffset = (y_pos - 1) * gridSize - (containerHeight / 2) + (gridSize / 2);
+
+        map.style.left = `${-leftOffset}px`;
+        map.style.top = `${-topOffset}px`;
       }
     }
 
