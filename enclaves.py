@@ -198,6 +198,7 @@ class MapHandler(BaseHandler):
             visible_map_data[coord] = filtered_entity
 
         map_data = {"users": visible_users_data, "construction": visible_map_data}
+        print(map_data)
         self.render("templates/map.html", user=user, data=json.dumps(map_data))
 
 class ScoreboardHandler(BaseHandler):

@@ -368,8 +368,30 @@ function createMap(data) {
     return element;
   }
 
+  // Ensure we always create an entity for the current user
+  if (data.users[currentUser]) {
+    const user = data.users[currentUser];
+    var playerX = (user.x_pos - 1) * gridSize;
+    var playerY = (user.y_pos - 1) * gridSize;
+    maxX = Math.max(maxX, playerX);
+    maxY = Math.max(maxY, playerY);
+
+    var content = document.createElement("div");
+    var playerImg = document.createElement("img");
+    playerImg.src = user.img;
+    content.appendChild(playerImg);
+
+    var playerLabel = document.createElement("div");
+    playerLabel.className = "text-label";
+    playerLabel.innerHTML = `username: ${currentUser}<br>pos: ${user.x_pos}, ${user.y_pos}<br>exp: ${user.exp}<br>hp: ${user.hp}`;
+    content.appendChild(playerLabel);
+
+    createEntity("entity player current-user", playerX, playerY, content);
+  }
+
+  // Create entities for other users
   Object.entries(data.users).forEach(function ([username, user]) {
-    if (user.type === "player") {
+    if (user.type === "player" && username !== currentUser) {
       var playerX = (user.x_pos - 1) * gridSize;
       var playerY = (user.y_pos - 1) * gridSize;
       maxX = Math.max(maxX, playerX);
@@ -419,6 +441,33 @@ function createMap(data) {
   groupEntitiesAndAddTooltips(mapContainer);
 }
 
+function centerMapOnUser(data) {
+  const userToCenter = data.users[currentUser];
+
+  if (userToCenter) {
+    const mapContainer = document.getElementById("map");
+
+    const ratioX = window.innerWidth / 3840;
+    const ratioY = window.innerHeight / 2160;
+
+    const centerOffsetX4K = 13.10;
+    const centerOffsetY4K = 6.25;
+
+    const centerOffsetX = centerOffsetX4K * ratioX;
+    const centerOffsetY = centerOffsetY4K * ratioY;
+
+    const userX = (userToCenter.x_pos - 1) * gridSize;
+    const userY = (userToCenter.y_pos - 1) * gridSize;
+
+    const offsetX = Math.round(window.innerWidth / 2 - userX - centerOffsetX * gridSize);
+    const offsetY = Math.round(window.innerHeight / 2 - userY - centerOffsetY * gridSize);
+
+    mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+  } else {
+    console.error("Current user not found in data");
+  }
+}
+
 function groupEntitiesAndAddTooltips(mapContainer) {
   var tileElements = mapContainer.querySelectorAll(".entity");
   var entitiesOnTile = {};
@@ -462,31 +511,6 @@ function showTooltip(entityGroup, tooltip) {
   tooltip.style.top = rect.top + "px";
   tooltip.style.left = (rect.right + 10) + "px";
   tooltip.classList.add("visible");
-}
-
-function centerMapOnUser(data) {
-  const userToCenter = data.users[currentUser];
-
-  if (userToCenter) {
-    const mapContainer = document.getElementById("map");
-
-    const ratioX = window.innerWidth / 3840;
-    const ratioY = window.innerHeight / 2160;
-
-    const centerOffsetX4K = 13.10;
-    const centerOffsetY4K = 6.25;
-
-    const centerOffsetX = centerOffsetX4K * ratioX;
-    const centerOffsetY = centerOffsetY4K * ratioY;
-
-    const userX = (userToCenter.x_pos + 0.5) * gridSize;
-    const userY = (userToCenter.y_pos + 0.5) * gridSize;
-
-    const offsetX = Math.round(window.innerWidth / 2 - userX - centerOffsetX * gridSize);
-    const offsetY = Math.round(window.innerHeight / 2 - userY - centerOffsetY * gridSize);
-
-    mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-  }
 }
 
 function updateMap(data) {
