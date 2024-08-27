@@ -348,6 +348,7 @@ body {
 
 <script>
 const jsonData = {% raw data %};
+const currentUser = '{{ user }}';
 const gridSize = 125;
 const visibleRadius = 5;
 
@@ -415,37 +416,7 @@ function createMap(data) {
   }
 
   mapContainer.appendChild(fragment);
-  //createFogOfWar(mapContainer, maxX, maxY);
   groupEntitiesAndAddTooltips(mapContainer);
-}
-
-function createFogOfWar(mapContainer, maxX, maxY) {
-  for (var x = 0; x <= maxX + gridSize * (visibleRadius * 2 + 1); x += gridSize) {
-    for (var y = 0; y <= maxY + gridSize * (visibleRadius * 2 + 1); y += gridSize) {
-      var fogTile = document.createElement("div");
-      fogTile.className = "fog";
-      fogTile.style.left = x + "px";
-      fogTile.style.top = y + "px";
-      mapContainer.appendChild(fogTile);
-    }
-  }
-}
-
-function updateFogOfWar(playerX, playerY) {
-  var fogTiles = document.querySelectorAll(".fog");
-
-  fogTiles.forEach(function(tile) {
-    var tileX = parseInt(tile.style.left) / gridSize;
-    var tileY = parseInt(tile.style.top) / gridSize;
-
-    var distance = Math.sqrt(Math.pow(tileX - playerX, 2) + Math.pow(tileY - playerY, 2));
-
-    if (distance <= visibleRadius) {
-      tile.classList.add("revealed");
-    } else {
-      tile.classList.remove("revealed");
-    }
-  });
 }
 
 function groupEntitiesAndAddTooltips(mapContainer) {
@@ -493,48 +464,114 @@ function showTooltip(entityGroup, tooltip) {
   tooltip.classList.add("visible");
 }
 
-
 function centerMapOnUser(data) {
-  const userKey = '{{ user }}';
-  const userToCenter = data.users[userKey];
+  const userToCenter = data.users[currentUser];
 
   if (userToCenter) {
     const mapContainer = document.getElementById("map");
 
-    // Calculate the ratio based on the current window size
     const ratioX = window.innerWidth / 3840;
     const ratioY = window.innerHeight / 2160;
 
-    // Define the centering offset (in tiles) for 4K resolution
     const centerOffsetX4K = 13.10;
     const centerOffsetY4K = 6.25;
 
-    // Calculate the centering offsets for the current resolution
     const centerOffsetX = centerOffsetX4K * ratioX;
     const centerOffsetY = centerOffsetY4K * ratioY;
 
-    // Calculate the user's position in pixels
     const userX = (userToCenter.x_pos + 0.5) * gridSize;
     const userY = (userToCenter.y_pos + 0.5) * gridSize;
 
-    // Calculate the offset to center the user
     const offsetX = Math.round(window.innerWidth / 2 - userX - centerOffsetX * gridSize);
     const offsetY = Math.round(window.innerHeight / 2 - userY - centerOffsetY * gridSize);
 
-    // Apply the transformation
     mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-
-    // Update the fog of war
-    // Adjust by 1 tile to align with the center of the view
-    //updateFogOfWar(userToCenter.x_pos - 1, userToCenter.y_pos - 1);
   }
 }
 
-// Call this function whenever the map updates or the user moves
 function updateMap(data) {
+  const mapContainer = document.getElementById("map");
+  mapContainer.innerHTML = '';
+  createMap(data);
   centerMapOnUser(data);
 }
 
+function addClickListenerToMap() {
+  const mapContainer = document.getElementById("map");
+  mapContainer.addEventListener("click", function(event) {
+    const rect = mapContainer.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const clickY = event.clientY - rect.top;
+
+    const tileX = Math.floor(clickX / gridSize) + 1;
+    const tileY = Math.floor(clickY / gridSize) + 1;
+
+    movePlayerToTile(tileX, tileY);
+  });
+}
+
+function movePlayerToTile(targetX, targetY) {
+  const player = jsonData.users[currentUser];
+  let currentX = player.x_pos;
+  let currentY = player.y_pos;
+
+  if (currentX === targetX && currentY === targetY) {
+    console.log("Already at the target position.");
+    return;
+  }
+
+  function moveStep() {
+    let nextX = currentX;
+    let nextY = currentY;
+
+    if (currentX < targetX) nextX++;
+    else if (currentX > targetX) nextX--;
+    else if (currentY < targetY) nextY++;
+    else if (currentY > targetY) nextY--;
+
+    moveToPosition(nextX, nextY, function(success) {
+      if (success) {
+        currentX = nextX;
+        currentY = nextY;
+        if (currentX !== targetX || currentY !== targetY) {
+          setTimeout(moveStep, 100);
+        }
+      } else {
+        console.log("Movement blocked, stopping auto-move.");
+      }
+    });
+  }
+
+  moveStep();
+}
+
+function moveToPosition(x, y, callback) {
+  fetch(`/move_to?x=${x}&y=${y}&target=map`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+  .then(response => response.json())
+  .then(data => {
+    Object.assign(jsonData, data);
+    updateMap(jsonData);
+
+    if (data.message) {
+      const messageDisplay = document.getElementById('message-display');
+      if (messageDisplay) {
+        messageDisplay.textContent = data.message;
+      }
+    }
+
+    const success = data.message === "Moved successfully";
+    callback(success);
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+    callback(false);
+  });
+}
 
 createMap(jsonData);
 centerMapOnUser(jsonData);
@@ -581,100 +618,6 @@ document.querySelectorAll('.btn-move').forEach(button => {
     }, 100);
   });
 });
-
-
-///auto moves
-function addClickListenerToMap() {
-  const mapContainer = document.getElementById("map");
-  mapContainer.addEventListener("click", function(event) {
-    const rect = mapContainer.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const clickY = event.clientY - rect.top;
-
-    // Calculate the tile coordinates
-    const tileX = Math.floor(clickX / gridSize) + 1;
-    const tileY = Math.floor(clickY / gridSize) + 1;
-
-    movePlayerToTile(tileX, tileY);
-  });
-}
-
-function movePlayerToTile(targetX, targetY) {
-  const userKey = '{{ user }}';
-  const player = jsonData.users[userKey];
-  let currentX = player.x_pos;
-  let currentY = player.y_pos;
-
-  if (currentX === targetX && currentY === targetY) {
-    console.log("Already at the target position.");
-    return;
-  }
-
-  function moveStep() {
-    let nextX = currentX;
-    let nextY = currentY;
-
-    if (currentX < targetX) nextX++;
-    else if (currentX > targetX) nextX--;
-    else if (currentY < targetY) nextY++;
-    else if (currentY > targetY) nextY--;
-
-    moveToPosition(nextX, nextY, function(success) {
-      if (success) {
-        currentX = nextX;
-        currentY = nextY;
-        if (currentX !== targetX || currentY !== targetY) {
-          setTimeout(moveStep, 100); // Wait x ms before the next step
-        }
-      } else {
-        console.log("Movement blocked, stopping auto-move.");
-      }
-    });
-  }
-
-  moveStep();
-}
-
-function moveToPosition(x, y, callback) {
-  fetch(`/move_to?x=${x}&y=${y}&target=map`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-  .then(response => response.json())
-  .then(data => {
-    // Update the jsonData variable with the new data
-    Object.assign(jsonData, data);
-
-    // Clear the existing map
-    const mapContainer = document.getElementById("map");
-    mapContainer.innerHTML = '';
-
-    // Recreate the map with the updated data
-    createMap(jsonData);
-    centerMapOnUser(jsonData);
-
-    // Update any other UI elements as needed
-    if (data.message) {
-      // Assuming you have an element to display messages
-      const messageDisplay = document.getElementById('message-display');
-      if (messageDisplay) {
-        messageDisplay.textContent = data.message;
-      }
-    }
-
-    // Check if the move was successful
-    const success = data.message === "Moved successfully";
-    callback(success);
-  })
-  .catch((error) => {
-    console.error('Error:', error);
-    callback(false);
-  });
-}
-
-///auto moves
 </script>
 
 </body>
