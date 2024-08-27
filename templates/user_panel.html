@@ -280,13 +280,14 @@
                             <div class="card-body">
                                 {% for entry in on_tile_users %}
                                     <div class="item-card">
-                                        <img src="{{list(entry.values())[0].get('img')}}" alt="Profile Picture" class="menu-icon">
+                                        <img src="{{ list(entry.values())[0].get('img') }}" alt="Profile Picture" class="menu-icon">
                                         <div class="item-details">
-                                            <p><strong>Name:</strong> {{ list(entry.keys())[0] }}</p>
-                                            <p><strong>Type:</strong> {{ list(entry.values())[0].get("type") }}</p>
-                                            <p><strong>HP:</strong> {{ list(entry.values())[0].get("hp") }}</p>
+                                            <strong>Name:</strong> {{ list(entry.keys())[0] }}<br>
+                                            <strong>Type:</strong> {{ list(entry.values())[0].get('type') }}<br>
+                                            <strong>HP:</strong> {{ list(entry.values())[0].get('hp') }}<br>
                                             <div class="tile-actions">
-                                                {% for action in actions.get(entry) %}
+                                                {% set coord = list(entry.keys())[0] %}
+                                                {% for action in actions.get(coord, []) %}
                                                     <a href="{{ action['action'] }}" class="btn btn-secondary btn-sm">{{ action['name'] }}</a>
                                                 {% end %}
                                             </div>

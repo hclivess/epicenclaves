@@ -1,12 +1,22 @@
 import json
 import sqlite3
 import threading
-from typing import List, Dict, Any, Optional, Tuple
+import inspect
 
 from backend import get_user, map_lock
 from user import User, get_users_at_coords
-from buildings import Building
+
+from typing import List, Dict, Any, Optional, Tuple
+from user import User
 from entities import Enemy, Scenery
+from buildings import Building
+
+
+# Get all subclasses of Enemy and Scenery
+entity_types = {cls.__name__.lower(): cls for cls in Enemy.__subclasses__() + Scenery.__subclasses__()}
+
+# Get all subclasses of Building
+building_types = {cls.__name__.lower(): cls for cls in Building.__subclasses__()}
 
 def get_tile_map(x: int, y: int, mapdb: Dict[str, Any]) -> List[Dict[str, Any]]:
     map_entities = get_map_at_coords(x_pos=x, y_pos=y, map_data_dict=mapdb)
@@ -27,10 +37,34 @@ def get_tile_users(x: int, y: int, user: str, usersdb: Dict[str, Any]) -> List[D
         user_entities = [user_entities] if user_entities else []
     return user_entities
 
+
 def get_tile_actions(tile: Any, user: str) -> List[Dict[str, str]]:
-    if isinstance(tile, (Building, Enemy, Scenery, User)):
+    if isinstance(tile, dict):
+        # Check if the tile is a user entry (it will have a single key-value pair)
+        if len(tile) == 1:
+            username, user_data = next(iter(tile.items()))
+            return User(**user_data).get_actions(user)
+
+        tile_type = tile.get('type', '').lower()
+        if tile_type in entity_types:
+            cls = entity_types[tile_type]
+            valid_params = get_constructor_params(cls)
+            filtered_tile = {k: v for k, v in tile.items() if k in valid_params}
+            return cls(**filtered_tile).get_actions(user)
+        elif tile_type in building_types:
+            cls = building_types[tile_type]
+            valid_params = get_constructor_params(cls)
+            filtered_tile = {k: v for k, v in tile.items() if k in valid_params}
+            if 'building_id' not in filtered_tile:
+                filtered_tile['building_id'] = tile.get('id', 1)
+            return cls(**filtered_tile).get_actions(user)
+    elif isinstance(tile, (Building, Enemy, Scenery, User)):
         return tile.get_actions(user)
     return []
+
+
+def get_constructor_params(cls):
+    return set(inspect.signature(cls.__init__).parameters.keys()) - {'self'}
 
 def get_user_data(user: str, usersdb: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     data = get_user(user, usersdb)
