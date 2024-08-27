@@ -12,11 +12,8 @@ def unequip_item(username, usersdb, item_id):
     player['equipped'].remove(item_to_unequip)
     player['unequipped'].append(item_to_unequip)
 
-    # Determine the slot for the item
-    if item_to_unequip.get('class') == 'tool':
-        slot = item_to_unequip.get('slot', 'right_hand')
-    else:
-        slot = item_to_unequip.get('slot') if item_to_unequip.get('role') == 'armor' else 'right_hand'
+    # Get the slot from the item directly
+    slot = item_to_unequip.get('slot', 'right_hand')
 
     # If it's an armor item, update the player's total armor value
     if item_to_unequip.get('role') == 'armor':
@@ -26,7 +23,7 @@ def unequip_item(username, usersdb, item_id):
     empty_slot = {
         "type": "empty",
         "slot": slot,
-        "role": "armor" if item_to_unequip.get('role') == 'armor' else "right_hand",
+        "role": item_to_unequip.get('role', 'weapon'),
         "protection": 0
     }
     player['equipped'].append(empty_slot)
@@ -44,28 +41,26 @@ def equip_item(username, usersdb, item_id):
     if item_to_equip is None:
         return "Item not found in unequipped inventory."
 
-    # Determine the slot for the item
-    if item_to_equip.get('class') == 'tool':
-        slot = item_to_equip.get('slot', 'right_hand')
-    else:
-        slot = item_to_equip.get('slot') if item_to_equip.get('role') == 'armor' else 'right_hand'
+    # Get the slot from the item directly
+    slot = item_to_equip.get('slot', 'right_hand')
 
     # Find the currently equipped item in this slot
     for i, equipped_item in enumerate(player['equipped']):
-        equipped_slot = equipped_item.get('slot') if equipped_item.get('class') == 'tool' else \
-            (equipped_item.get('slot') if equipped_item.get('role') == 'armor' else 'right_hand')
-
-        if equipped_slot == slot:
+        if equipped_item.get('slot') == slot:
+            # Always swap out the old item, regardless of type
             if equipped_item.get('type') != 'empty':
                 player['unequipped'].append(equipped_item)
+                # If it's armor, update the player's armor value
                 if equipped_item.get('role') == 'armor':
                     player['armor'] -= equipped_item.get('protection', 0)
+            # Equip the new item
             player['equipped'][i] = item_to_equip
             break
     else:
+        # If no item was in that slot, simply add the new item
         player['equipped'].append(item_to_equip)
 
-    # Update player's armor if the item is armor
+    # Update player's armor if the new item is armor
     if item_to_equip.get('role') == 'armor':
         player['armor'] += item_to_equip.get('protection', 0)
 

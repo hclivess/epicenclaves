@@ -7,7 +7,8 @@ class Weapon:
         self.max_level = max_level
         self.level = self._generate_level()
         self.id = weapon_id
-        self.role = "right_hand"
+        self.role = "weapon"
+        self.slot = self.SLOT
         self._set_damage()
         self._set_attributes()
 
@@ -54,10 +55,12 @@ class Weapon:
             "level": self.level,
             "accuracy": self.accuracy,
             "crit_dmg_pct": self.crit_dmg_pct,
-            "crit_chance": self.crit_chance
+            "crit_chance": self.crit_chance,
+            "slot": self.slot
         }
 
 class Sword(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "A versatile melee weapon with balanced stats."
     BASE_DAMAGE = (3, 7)
     RANGE = "melee"
@@ -69,6 +72,7 @@ class Sword(Weapon):
     MAX_CRIT_CHANCE = 6
 
 class Bow(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "A ranged weapon with high critical chance and damage."
     BASE_DAMAGE = (4, 7)
     RANGE = "ranged"
@@ -80,6 +84,7 @@ class Bow(Weapon):
     MAX_CRIT_CHANCE = 16
 
 class Spear(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "A melee weapon with good reach and high accuracy."
     BASE_DAMAGE = (4, 6)
     RANGE = "melee"
@@ -91,6 +96,7 @@ class Spear(Weapon):
     MAX_CRIT_CHANCE = 4
 
 class Dagger(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "A fast melee weapon with high critical damage and chance."
     BASE_DAMAGE = (2, 5)
     RANGE = "melee"
@@ -102,6 +108,7 @@ class Dagger(Weapon):
     MAX_CRIT_CHANCE = 13
 
 class Mace(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "A heavy melee weapon with good damage and critical potential."
     BASE_DAMAGE = (4, 7)
     RANGE = "melee"
@@ -113,6 +120,7 @@ class Mace(Weapon):
     MAX_CRIT_CHANCE = 5
 
 class Axe(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "A powerful melee weapon with high damage and critical damage."
     BASE_DAMAGE = (5, 8)
     RANGE = "melee"
@@ -124,6 +132,7 @@ class Axe(Weapon):
     MAX_CRIT_CHANCE = 7
 
 class Crossbow(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "A strong ranged weapon with high base damage and good critical stats."
     BASE_DAMAGE = (6, 9)
     RANGE = "ranged"
@@ -135,6 +144,7 @@ class Crossbow(Weapon):
     MAX_CRIT_CHANCE = 14
 
 class Rapier(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "A precise melee weapon with high accuracy and good critical chance."
     BASE_DAMAGE = (2, 6)
     RANGE = "melee"
@@ -146,6 +156,7 @@ class Rapier(Weapon):
     MAX_CRIT_CHANCE = 10
 
 class WarHammer(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "A massive melee weapon with the highest base damage and critical damage."
     BASE_DAMAGE = (7, 10)
     RANGE = "melee"
@@ -157,6 +168,7 @@ class WarHammer(Weapon):
     MAX_CRIT_CHANCE = 4
 
 class Sling(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "A simple ranged weapon with low damage but extremely high critical potential."
     BASE_DAMAGE = (1, 4)
     RANGE = "ranged"
@@ -168,6 +180,7 @@ class Sling(Weapon):
     MAX_CRIT_CHANCE = 24
 
 class Katana(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "An elegant melee weapon with high damage and good critical stats."
     BASE_DAMAGE = (4, 8)
     RANGE = "melee"
@@ -179,6 +192,7 @@ class Katana(Weapon):
     MAX_CRIT_CHANCE = 9
 
 class ThrowingKnives(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "Ranged weapons with moderate damage but very high critical chance."
     BASE_DAMAGE = (2, 4)
     RANGE = "ranged"
@@ -190,6 +204,7 @@ class ThrowingKnives(Weapon):
     MAX_CRIT_CHANCE = 28
 
 class Halberd(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "A versatile melee weapon with good damage and balanced stats."
     BASE_DAMAGE = (5, 9)
     RANGE = "melee"
@@ -201,6 +216,7 @@ class Halberd(Weapon):
     MAX_CRIT_CHANCE = 6
 
 class Scythe(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "A menacing melee weapon with high damage and critical damage."
     BASE_DAMAGE = (6, 10)
     RANGE = "melee"
@@ -212,6 +228,7 @@ class Scythe(Weapon):
     MAX_CRIT_CHANCE = 8
 
 class Chakram(Weapon):
+    SLOT = "right_hand"
     DESCRIPTION = "A unique ranged weapon with moderate damage and high critical chance."
     BASE_DAMAGE = (3, 6)
     RANGE = "ranged"

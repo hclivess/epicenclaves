@@ -324,7 +324,7 @@
                             <p>Accuracy: {{item.get("accuracy", "N/A")}}%</p>
                             <p>Crit damage: {{item.get("crit_dmg_pct", "N/A")}}%</p>
                             <p>Crit chance: {{item.get("crit_chance", "N/A")}}%</p>
-                            <p>Slot: {{item.get("role", "N/A")}}</p>
+                            <p>Slot: {{item.get("slot", "N/A")}}</p>
                         {% end %}
                         {% for item_id, description in inventory_descriptions.items() %}
                           {% if item['id'] == item_id %}
@@ -347,6 +347,11 @@
         <h4 class="mb-0">Inventory</h4>
     </div>
     <div class="card-body">
+        <div class="mb-3">
+            <a href="/trash_weapons" class="btn btn-danger btn-sm mr-2">Trash Weapons</a>
+            <a href="/trash_armor" class="btn btn-danger btn-sm mr-2">Trash Armor</a>
+            <a href="/trash_all" class="btn btn-danger btn-sm">Trash All (Except Tools)</a>
+        </div>
         <div class="item-grid">
             {% for item in file["unequipped"] %} {% if item.get("type") != "empty" %}
                 <div class="item-card">
@@ -367,7 +372,7 @@
                             <p>Accuracy: {{item.get("accuracy")}}%</p>
                             <p>Crit damage: {{item.get("crit_dmg_pct", "N/A")}}%</p>
                             <p>Crit chance: {{item.get("crit_chance", "N/A")}}%</p>
-                            <p>Slot: {{item.get("role", "N/A")}}</p>
+                            <p>Slot: {{item.get("slot", "N/A")}}</p>
                         {% end %}
                         {% for item_id, description in inventory_descriptions.items() %}
                           {% if item['id'] == item_id %}

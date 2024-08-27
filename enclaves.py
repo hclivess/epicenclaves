@@ -42,7 +42,7 @@ from sqlite import create_game_database
 from user import create_users_db, create_user, save_users_from_memory, load_users_to_memory
 from wall_generator import generate_multiple_mazes
 from upgrade import upgrade
-from trash import trash_item
+from trash import trash_item, trash_armor, trash_all, trash_weapons
 from repair import repair_all_items
 
 max_size = 1000000
@@ -254,6 +254,29 @@ class TrashHandler(UserActionHandler):
     def _trash_item(self, user, user_data, item_id):
         return trash_item(usersdb, user, item_id)
 
+class TrashWeaponsHandler(UserActionHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        self.perform_action(user, self._trash_weapons)
+
+    def _trash_weapons(self, user, user_data):
+        return trash_weapons(usersdb, user)
+
+class TrashArmorHandler(UserActionHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        self.perform_action(user, self._trash_armor)
+
+    def _trash_armor(self, user, user_data):
+        return trash_armor(usersdb, user)
+
+class TrashAllHandler(UserActionHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        self.perform_action(user, self._trash_all)
+
+    def _trash_all(self, user, user_data):
+        return trash_all(usersdb, user)
 
 class DeployArmyHandler(UserActionHandler):
     def get(self, data):
@@ -503,6 +526,9 @@ def make_app():
         (r"/equip", EquipHandler),
         (r"/unequip", UnequipHandler),
         (r"/trash", TrashHandler),
+        (r"/trash_weapons", TrashWeaponsHandler),
+        (r"/trash_armor", TrashArmorHandler),
+        (r"/trash_all", TrashAllHandler),
         (r"/repair", RepairHandler),
         (r"/deploy(.*)", DeployArmyHandler),
         (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),

@@ -4,8 +4,10 @@ class Tool:
     def __init__(self, level=1):
         self.type = self.__class__.__name__.lower()
         self.level = level
-        self.role = "right_hand"  # Default slot for tools
-        self.accuracy = 100  # Default accuracy
+        self.slot = self.SLOT
+        self.role = "tool"
+        self.slot = self.SLOT
+        self.accuracy = 100
 
     def to_dict(self):
         return {
@@ -17,6 +19,7 @@ class Tool:
         }
 
 class Hatchet(Tool):
+    SLOT = "right_hand"
     BASE_DAMAGE = (1, 3)  # Minimum and maximum base damage
     DESCRIPTION = "A small, versatile axe for chopping wood and other materials."
 
@@ -30,9 +33,11 @@ class Hatchet(Tool):
         return min_damage, max_damage
 
     def to_dict(self):
-        tool_dict = super().to_dict()
-        tool_dict.update({
-            "min_damage": self.min_damage,
-            "max_damage": self.max_damage,
-        })
-        return tool_dict
+        return {
+            "type": self.type,
+            "level": self.level,
+            "role": self.role,
+            "accuracy": self.accuracy,
+            "description": getattr(self, 'DESCRIPTION', 'A useful tool.'),
+            "slot": self.slot
+        }

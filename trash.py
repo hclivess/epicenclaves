@@ -1,3 +1,31 @@
+def trash_weapons(usersdb, username):
+    player = usersdb[username]
+    trashed_count = 0
+    weapons_to_trash = [item for item in player['unequipped'] if item.get('role') == 'weapon']
+    for item in weapons_to_trash:
+        player['unequipped'].remove(item)
+        trashed_count += 1
+    return f"Trashed {trashed_count} weapons."
+
+def trash_armor(usersdb, username):
+    player = usersdb[username]
+    trashed_count = 0
+    armor_to_trash = [item for item in player['unequipped'] if item.get('role') == 'armor']
+    for item in armor_to_trash:
+        player['unequipped'].remove(item)
+        trashed_count += 1
+    return f"Trashed {trashed_count} armor pieces."
+
+def trash_all(usersdb, username):
+    player = usersdb[username]
+    trashed_count = 0
+    items_to_trash = [item for item in player['unequipped'] if item.get('role') != 'tool']
+    for item in items_to_trash:
+        player['unequipped'].remove(item)
+        trashed_count += 1
+    return f"Trashed {trashed_count} items (kept tools)."
+
+# The original trash_item function remains unchanged
 def trash_item(usersdb, username, item_id):
     player = usersdb[username]
 
