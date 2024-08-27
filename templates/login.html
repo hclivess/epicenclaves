@@ -26,30 +26,29 @@
             display: flex;
             justify-content: center;
             align-items: center;
-
             background-image: url('img/assets/init.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
+            padding: 1rem;
         }
 
         .container {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             max-width: 800px;
             width: 100%;
         }
 
-        .login-panel {
-        flex: 1;
-        margin-right: 6rem; /* Increased from 2rem to 4rem */
-        background-color: #2a2a2a;
-        border-radius: 8px;
-        padding: 2rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .login-panel, .description-panel {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
         }
 
-        h1 {
+        h1, h2 {
             font-family: 'Cinzel', serif;
             color: #4ecdc4;
             text-align: center;
@@ -100,23 +99,25 @@
             background-color: #45b7a0;
         }
 
-        .description-panel {
-            flex: 1;
-            background-color: #2a2a2a;
-            border-radius: 8px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .description-panel h2 {
-            font-family: 'Cinzel', serif;
-            color: #4ecdc4;
-            margin-bottom: 1rem;
-        }
-
         .description-panel p {
             margin-bottom: 1rem;
             line-height: 1.6;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            .login-panel, .description-panel {
+                flex: 1;
+                margin-right: 1rem;
+            }
+
+            .login-panel {
+                margin-right: 2rem;
+            }
         }
     </style>
 </head>
