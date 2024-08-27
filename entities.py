@@ -223,6 +223,151 @@ class DragonWhelp(Enemy):
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [{"name": "slay", "action": f"/fight?target={self.type}"}]
 
+class Bandit(Enemy):
+    type = "bandit"
+
+    def __init__(self, level=2):
+        super().__init__(base_hp=70,
+                         base_min_damage=8,
+                         base_max_damage=15,
+                         crit_chance=0.2,
+                         crit_damage=1.7,
+                         armor=2,
+                         level=level,
+                         experience=5,
+                         drop_chance=0.5,
+                         regular_drop={"gold": 10},
+                         probability=0.03,
+                         map_size=200,
+                         max_entities=25,
+                         max_entities_total=50,
+                         herd_probability=0.4)
+
+    def roll_damage(self):
+        damage_info = super().roll_damage()
+        if random.random() < 0.1:  # 10% chance to steal gold
+            damage_info["message"] += " and stole some gold"
+        return damage_info
+
+
+class Troll(Enemy):
+    type = "troll"
+
+    def __init__(self, level=3):
+        self.regeneration_rate = 5  # Set the regeneration rate before calling super().__init__
+        super().__init__(base_hp=200,
+                         base_min_damage=15,
+                         base_max_damage=30,
+                         crit_chance=0.1,
+                         crit_damage=2.0,
+                         armor=8,
+                         level=level,
+                         experience=20,
+                         drop_chance=0.7,
+                         regular_drop={"troll_hide": 1},
+                         probability=0.01,
+                         map_size=200,
+                         max_entities=10,
+                         max_entities_total=20,
+                         herd_probability=0.2)
+
+    def calculate_hp(self):
+        hp = super().calculate_hp()
+        return min(hp + self.regeneration_rate, self.base_hp * (1 + 0.1 * (self.level - 1)))  # Cap at max HP
+
+
+class Harpy(Enemy):
+    type = "harpy"
+
+    def __init__(self, level=2):
+        self.evasion_chance = 0.2  # Set evasion_chance before calling super().__init__
+        super().__init__(base_hp=90,
+                         base_min_damage=12,
+                         base_max_damage=18,
+                         crit_chance=0.3,
+                         crit_damage=1.6,
+                         armor=1,
+                         level=level,
+                         experience=8,
+                         drop_chance=0.6,
+                         regular_drop={"feather": 3},
+                         probability=0.02,
+                         map_size=200,
+                         max_entities=15,
+                         max_entities_total=30,
+                         herd_probability=0.5)
+
+    def roll_damage(self):
+        if random.random() < self.evasion_chance:
+            return {"damage": 0, "message": "evaded"}
+        return super().roll_damage()
+
+
+class Minotaur(Enemy):
+    type = "minotaur"
+
+    def __init__(self, level=4):
+        self.charge_cooldown = 0  # Set charge_cooldown before calling super().__init__
+        super().__init__(base_hp=300,
+                         base_min_damage=25,
+                         base_max_damage=40,
+                         crit_chance=0.15,
+                         crit_damage=2.2,
+                         armor=10,
+                         level=level,
+                         experience=30,
+                         drop_chance=0.8,
+                         regular_drop={"minotaur_horn": 1},
+                         probability=0.005,
+                         map_size=200,
+                         max_entities=5,
+                         max_entities_total=10,
+                         herd_probability=0.1)
+
+    def roll_damage(self):
+        if self.charge_cooldown == 0:
+            damage = random.randint(int(self.max_damage * 1.5), int(self.max_damage * 2.5))
+            self.charge_cooldown = 3
+            return {"damage": damage, "message": "charging attack"}
+        else:
+            damage_info = super().roll_damage()
+            self.charge_cooldown -= 1
+            return damage_info
+
+
+class Wraith(Enemy):
+    type = "wraith"
+
+    def __init__(self, level=3):
+        self.phase_chance = 0.3  # Set phase_chance before calling super().__init__
+        super().__init__(base_hp=120,
+                         base_min_damage=18,
+                         base_max_damage=25,
+                         crit_chance=0.25,
+                         crit_damage=1.9,
+                         armor=0,
+                         level=level,
+                         experience=15,
+                         drop_chance=0.7,
+                         regular_drop={"soul_essence": 1},
+                         probability=0.015,
+                         map_size=200,
+                         max_entities=12,
+                         max_entities_total=24,
+                         herd_probability=0.3)
+
+    def roll_damage(self):
+        damage_info = super().roll_damage()
+        if random.random() < self.phase_chance:
+            damage_info["damage"] = int(damage_info["damage"] * 1.5)  # Wraith phases through armor
+            damage_info["message"] += " (phased)"
+        return damage_info
+
+    def calculate_damage(self):
+        min_damage, max_damage = super().calculate_damage()
+        if random.random() < self.phase_chance:
+            return int(min_damage * 1.5), int(max_damage * 1.5)  # Wraith phases through armor
+        return min_damage, max_damage
 
 class Scenery:
     def __init__(self, hp):

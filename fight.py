@@ -179,7 +179,8 @@ def calculate_armor_effectiveness(armor: Dict, damage: int) -> int:
     return effective_protection
 
 
-def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dict], round_number: int) -> Tuple[int, int]:
+def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dict], round_number: int) -> Tuple[
+    int, int]:
     print(f"Applying armor protection. Initial damage: {initial_damage}")
     armor_protection = 0
     is_player = defender.get('name', 'You') == 'You'
@@ -193,7 +194,13 @@ def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dic
         if selected_armor.get("type") != "empty" and selected_armor["durability"] > 0:
             effective_protection = calculate_armor_effectiveness(selected_armor, initial_damage)
             armor_protection = min(initial_damage, effective_protection)
-            damage_reduction_percentage = (armor_protection / initial_damage) * 100
+
+            # Handle the case where initial_damage is zero
+            if initial_damage > 0:
+                damage_reduction_percentage = (armor_protection / initial_damage) * 100
+            else:
+                damage_reduction_percentage = 100 if armor_protection > 0 else 0
+
             armor_info = f"Your {selected_armor['type']}" if is_player else f"{defender['name']}'s {selected_armor['type']}"
             final_damage = max(0, initial_damage - armor_protection)
 
