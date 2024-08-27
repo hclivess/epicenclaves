@@ -3,6 +3,28 @@
 <head>
   <title>Epic Enclaves Map</title>
   <style>
+    .dragon { background: url('img/assets/dragon.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
+    .goblin { background: url('img/assets/goblin.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
+    .specter { background: url('img/assets/specter.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
+    .dragon_whelp { background: url('img/assets/dragon_whelp.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
+    .bandit { background: url('img/assets/bandit.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .troll { background: url('img/assets/troll.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .harpy { background: url('img/assets/harpy.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .minotaur { background: url('img/assets/minotaur.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .wraith { background: url('img/assets/wraith.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .boar { background: url('img/assets/boar.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .forest { background: url('img/assets/forest.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .mountain { background: url('img/assets/mountain.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .wall { background: url('img/assets/wall.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .wolf { background: url('img/assets/wolf.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .inn { background: url('img/assets/inn.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .barracks { background: url('img/assets/barracks.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .sawmill { background: url('img/assets/sawmill.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .house { background: url('img/assets/house.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .farm { background: url('img/assets/farm.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .mine { background: url('img/assets/mine.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .blacksmith { background: url('img/assets/blacksmith.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+
     html, body {
       height: 100%;
       margin: 0;
@@ -21,39 +43,33 @@
     }
     .tile {
       position: absolute;
-      width: 50px;
-      height: 50px;
+      width: 80px;
+      height: 80px;
       background-color: #fff;
       border: 1px solid #ccc;
+      border-radius: 10px;
       display: flex;
       justify-content: center;
       align-items: center;
       font-size: 12px;
       cursor: pointer;
+      overflow: hidden;
     }
     .entity {
       position: absolute;
-      width: 50px;
-      height: 50px;
-      background-color: #ccc;
+      width: 80px;
+      height: 80px;
       border: 1px solid #999;
+      border-radius: 10px;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-end;
       font-size: 12px;
       flex-direction: column;
-    }
-    .player { background-color: #8bc34a; }
-    .current-user { background-color: #ff9800; }
-    .forest { background-color: #4caf50; }
-    .mountain { background-color: #795548; }
-    .troll { background-color: #9c27b0; }
-    .wraith { background-color: #607d8b; }
-    .text-label {
-      text-align: center;
-      width: 100%;
-      font-size: 10px;
-      line-height: 1.2;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      overflow: hidden;
     }
   </style>
 </head>
@@ -65,14 +81,14 @@
   <script>
     const jsonData = {% raw data %};
     const currentUser = '{{ user }}';
-    const gridSize = 50;
-    const verticalTiles = 20; // Keep vertical size the same
+    const gridSize = 80;
+    const verticalTiles = 20;
 
     let horizontalTiles;
 
     function calculateHorizontalTiles() {
       const mapContainer = document.querySelector('.map-container');
-      horizontalTiles = Math.ceil(mapContainer.offsetWidth / gridSize) + 4; // Add extra tiles for smoother scrolling
+      horizontalTiles = Math.ceil(mapContainer.offsetWidth / gridSize) + 4;
     }
 
     function createMap(data) {
@@ -90,31 +106,30 @@
         return tile;
       }
 
-      function createEntity(className, x, y, content) {
+      function createEntity(className, x, y, imgUrl) {
         const element = document.createElement("div");
         element.className = `entity ${className}`;
         element.style.top = y * gridSize + "px";
         element.style.left = x * gridSize + "px";
-        element.appendChild(content);
+
+        if (imgUrl) {
+          element.style.backgroundImage = `url('${imgUrl}')`;
+        }
+
         fragment.appendChild(element);
         return element;
       }
 
-      function createEntityContent(entity, pos) {
-        const content = document.createElement("div");
-        content.className = "text-label";
-        let infoText = `${entity.type}`;
-        if (entity.level !== undefined) infoText += ` Lvl${entity.level}`;
-        if (entity.hp !== undefined) infoText += ` HP${entity.hp}`;
-        if (entity.exp !== undefined) infoText += ` Exp${entity.exp}`;
-        if (entity.armor !== undefined) infoText += ` Arm${entity.armor}`;
-        infoText += `\n(${pos.x},${pos.y})`;
-        content.innerText = infoText;
-        return content;
+      function getEntityClassName(entity, username) {
+        let className = entity.type.toLowerCase();
+        if (entity.type === 'player' && username === currentUser) {
+          className += ' current-user';
+        }
+        return className;
       }
 
       function createVisibleTiles() {
-        const currentUserData = jsonData.users[currentUser];
+        const currentUserData = data.users[currentUser];
         if (currentUserData) {
           const { x_pos, y_pos } = currentUserData;
           const halfWidth = Math.floor(horizontalTiles / 2);
@@ -131,15 +146,14 @@
       createVisibleTiles();
 
       Object.entries(data.users).forEach(([username, user]) => {
-        const content = createEntityContent(user, {x: user.x_pos, y: user.y_pos});
-        const className = `player ${username === currentUser ? 'current-user' : ''}`;
-        createEntity(className, user.x_pos - 1, user.y_pos - 1, content);
+        const className = getEntityClassName(user, username);
+        createEntity(className, user.x_pos - 1, user.y_pos - 1, user.img);
       });
 
       Object.entries(data.construction).forEach(([key, construction]) => {
         const [x_pos, y_pos] = key.split(",").map(Number);
-        const content = createEntityContent(construction, {x: x_pos, y: y_pos});
-        createEntity(construction.type, x_pos - 1, y_pos - 1, content);
+        const className = getEntityClassName(construction);
+        createEntity(className, x_pos - 1, y_pos - 1);
       });
 
       mapContainer.appendChild(fragment);
