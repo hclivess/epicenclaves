@@ -73,6 +73,48 @@
         .entity.player {
             border-color: #4CAF50;
             background-color: rgba(76, 175, 80, 0.1);
+            z-index: 1000; /* Ensure player is always on top */
+        }
+
+        .exclamation-mark {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            width: 30px;
+            height: 30px;
+            background-color: yellow;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 20px;
+            animation: glow 1s infinite alternate;
+            z-index: 1001;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px yellow;
+            }
+            to {
+                box-shadow: 0 0 20px yellow;
+            }
+        }
+
+        .popup {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 10px 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            z-index: 2000;
+            display: none;
+        }
         }
         .entity.npc {
             border-color: #FF9800;
@@ -156,6 +198,8 @@
         <div id="map" class="map"></div>
     </div>
 
+    <div id="popup" class="popup"></div>
+
     <script>
     const jsonData = {% raw data %};
     const currentUser = '{{ user }}';
@@ -212,6 +256,14 @@
                 const label = createEntityLabel(entity, {x: x+1, y: y+1}, isPlayer, playerName);
                 element.appendChild(label);
 
+                if (isPlayer) {
+                    const exclamationMark = document.createElement("div");
+                    exclamationMark.className = "exclamation-mark";
+                    exclamationMark.textContent = "!";
+                    exclamationMark.style.display = "none";
+                    element.appendChild(exclamationMark);
+                }
+
                 fragment.appendChild(element);
                 return element;
             }
@@ -246,39 +298,64 @@
             centerMapOnPlayer();
         }
 
-        function updateMap(data) {
-            const mapContainer = document.getElementById("map");
-            mapContainer.innerHTML = '';
-            createMap(data);
-        }
+    function updateMap(data) {
+        const mapContainer = document.getElementById("map");
+        mapContainer.innerHTML = '';
+        createMap(data);
+        checkPlayerPosition();
+    }
 
-        function moveToPosition(x, y, callback) {
-          fetch(`/move_to?x=${x}&y=${y}&target=map`, {
+         function checkPlayerPosition() {
+        const currentUserData = jsonData.users[currentUser];
+        if (currentUserData) {
+            const { x_pos, y_pos } = currentUserData;
+            const key = `${x_pos},${y_pos}`;
+            const entityOnTile = jsonData.construction[key];
+
+            const playerElement = document.querySelector('.entity.player');
+            const exclamationMark = playerElement.querySelector('.exclamation-mark');
+            const popup = document.getElementById('popup');
+
+            if (entityOnTile) {
+                exclamationMark.style.display = "flex";
+                popup.textContent = `You are standing on: ${entityOnTile.type}`;
+                popup.style.display = "block";
+            } else {
+                exclamationMark.style.display = "none";
+                popup.style.display = "none";
+            }
+        }
+    }
+
+    function moveToPosition(x, y, callback) {
+        fetch(`/move_to?x=${x}&y=${y}&target=map`, {
             method: 'GET',
             headers: {
-              'Content-Type': 'application/json',
+                'Content-Type': 'application/json',
             },
-          })
-          .then(response => response.json())
-          .then(data => {
+        })
+        .then(response => response.json())
+        .then(data => {
             Object.assign(jsonData, data);
             updateMap(jsonData);
 
             if (data.message) {
-              const messageDisplay = document.getElementById('message-display');
-              if (messageDisplay) {
-                messageDisplay.textContent = data.message;
-              }
+                const messageDisplay = document.getElementById('message-display');
+                if (messageDisplay) {
+                    messageDisplay.textContent = data.message;
+                }
             }
 
             const success = data.message === "Moved successfully";
             callback(success);
-          })
-          .catch((error) => {
+            checkPlayerPosition();
+        })
+        .catch((error) => {
             console.error('Error:', error);
             callback(false);
-          });
-        }
+        });
+    }
+
 
         function addClickListenerToMap() {
             const mapContainer = document.getElementById("map");
