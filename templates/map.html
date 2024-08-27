@@ -185,7 +185,7 @@ body {
   z-index: 1;
 }
 
-.blacksmith, .sawmill, .inn, .barracks, .house, .farm, .mine, .forest, .boar, .wolf, .mountain, .wall, .valenthis, .goblin, .specter, .dragon_whelp, .archery_range {
+.blacksmith, .sawmill, .inn, .barracks, .house, .farm, .mine, .forest, .boar, .wolf, .mountain, .wall, .dragon, .goblin, .specter, .dragon_whelp, .archery_range {
   color: #ffd700;
 }
 
@@ -270,15 +270,9 @@ body {
   opacity: 0.75; /* Adjust opacity as needed */
 }
 
-.blacksmith:before { content: "\2692"; }
-.sawmill:before { content: "\1FA9A"; }
-.barracks:before { content: "\2694"; }
-.house:before { content: "\1F3E0"; }
-.farm:before { content: "\1F33E"; }
-.mine:before { content: "\26CF"; }
 .archery_range:before { content: "\1F3F9"; }
 
-.valenthis { background: url('img/assets/valenthis.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
+.dragon { background: url('img/assets/dragon.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
 .goblin { background: url('img/assets/goblin.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
 .specter { background: url('img/assets/specter.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
 .dragon_whelp { background: url('img/assets/dragon_whelp.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
@@ -293,15 +287,13 @@ body {
 .wall { background: url('img/assets/wall.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
 .wolf { background: url('img/assets/wolf.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
 .inn { background: url('img/assets/inn.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+.barracks { background: url('img/assets/barracks.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+.sawmill { background: url('img/assets/sawmill.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+.house { background: url('img/assets/house.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+.farm { background: url('img/assets/farm.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+.mine { background: url('img/assets/mine.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+.blacksmith { background: url('img/assets/blacksmith.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
 
-/* Other entity backgrounds */
-.blacksmith { background: linear-gradient(to bottom, rgba(255, 0, 0, 0.5), rgba(255, 215, 0, 0.5)); }
-.sawmill { background: linear-gradient(to bottom, rgba(0, 0, 255, 0.5), rgba(0, 0, 0, 0.5)); }
-.farm { background: linear-gradient(to bottom, rgba(0, 255, 0, 0.5), rgba(0, 0, 0, 0.5)); }
-.barracks { background: linear-gradient(to bottom, rgba(255, 0, 0, 0.5), rgba(0, 0, 0, 0.5)); }
-.mine { background: linear-gradient(to bottom, rgba(181, 148, 16, 0.5), rgba(0, 0, 0, 0.5)); }
-.house { background: linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-.archery_range { background: linear-gradient(to bottom, rgba(139, 69, 19, 0.5), rgba(0, 0, 0, 0.5)); }
 
 /* Responsive font sizing */
 @media screen and (max-width: 1024px) {

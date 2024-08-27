@@ -69,8 +69,8 @@ class Enemy:
         return [{"name": "fight", "action": f"/fight?target={self.type}"}]
 
 
-class Valenthis(Enemy):
-    type = "valenthis"
+class Dragon(Enemy):
+    type = "dragon"
 
     def __init__(self, level=1):
         super().__init__(base_hp=350,
