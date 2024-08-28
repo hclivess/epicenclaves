@@ -380,15 +380,30 @@ class RestHandler(UserActionHandler):
         hours = int(self.get_argument("hours", default="1"))
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
 
+        message = self._rest(user, hours)
         if return_to_map:
-            message = attempt_rest(user, attempt_rest, hours, usersdb, mapdb)
             self.return_json({"message": message})
         else:
-            self.perform_action(user, attempt_rest, hours, usersdb, mapdb)
+            user_data = get_user_data(user, usersdb)
+            self.render_user_panel(user, user_data, message=message)
+
+    def _rest(self, user, hours):
+        user_data = get_user_data(user, usersdb)
+        return attempt_rest(user, user_data, hours, usersdb, mapdb)
 
     def return_json(self, data):
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(data))
+        self.finish()
+
+    def _rest(self, user, hours):
+        user_data = get_user_data(user, usersdb)
+        return attempt_rest(user, user_data, hours, usersdb, mapdb)
+
+    def return_json(self, data):
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps(data))
+        self.finish()
 
 class FightHandler(BaseHandler):
     def get(self):
