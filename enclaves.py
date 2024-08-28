@@ -564,16 +564,12 @@ class MoveToHandler(BaseHandler):
         filtered_map_data = {}
         for coord, entity in visible_map_data.items():
             filtered_entity = {"type": entity["type"]}
-            #if "name" in entity:
-                #filtered_entity["name"] = entity["name"]
             if "level" in entity:
                 filtered_entity["level"] = entity["level"]
             if "control" in entity:
                 filtered_entity["control"] = entity["control"]
             if "army" in entity:
                 filtered_entity["army"] = entity["army"]
-            #if "role" in entity:
-                #filtered_entity["role"] = entity["role"]
             filtered_map_data[coord] = filtered_entity
 
         tile_actions = {}
@@ -581,11 +577,12 @@ class MoveToHandler(BaseHandler):
             tile_actions[coord] = get_tile_actions(entity, user)
 
         map_data = {
-            "users": visible_users_data,
-            "construction": visible_map_data,
+            "users": filtered_users_data,
+            "construction": filtered_map_data,
             "actions": tile_actions,
             "x_pos": x_pos,
             "y_pos": y_pos,
+            "message": moved.get("message", "")  # Include the message from the move_to function
         }
 
         self.set_header("Content-Type", "application/json")
