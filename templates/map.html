@@ -482,22 +482,29 @@ function performFightAction(actionUrl) {
         });
     }
 
-    function performAction(actionUrl) {
-        fetch(actionUrl)
-            .then(response => response.json())
-            .then(data => {
-                Object.assign(jsonData, data);
-                updateMap(jsonData);
-                if (data.message) {
-                    displayMessage(data.message);
-                }
-                checkPlayerPosition();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                displayMessage('An error occurred while performing the action.');
-            });
-    }
+function performAction(actionUrl) {
+    fetch(actionUrl)
+        .then(response => response.json())
+        .then(data => {
+            Object.assign(jsonData, data);
+            updateMap(jsonData);
+            if (data.message) {
+                displayMessage(data.message);
+            }
+            checkPlayerPosition();
+
+            if (actionUrl.includes("rest")) {
+                // Reload the page after a short delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 0);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            displayMessage('An error occurred while performing the action.');
+        });
+}
 
     function displayMessage(message) {
         const messageDisplay = document.getElementById('message-display');
