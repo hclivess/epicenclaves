@@ -376,7 +376,20 @@ class MoveHandler(UserActionHandler):
                     #filtered_entity["role"] = entity["role"]
                 visible_map_data[coord] = filtered_entity
 
-            map_data = {"users": visible_users_data, "construction": visible_map_data}
+            # Generate actions for each tile
+            tile_actions = {}
+            for coord, entity in visible_map_data.items():
+                tile_actions[coord] = get_tile_actions(entity, user)
+
+            map_data = {
+                "users": visible_users_data,
+                "construction": visible_map_data,
+                "actions": tile_actions,
+                "x_pos": x_pos,
+                "y_pos": y_pos,
+                "message": moved["message"]
+            }
+
             self.render("templates/map.html", user=user, data=json.dumps(map_data), message=moved["message"])
         else:
             self.render_user_panel(user, user_data, message=moved["message"])
@@ -512,11 +525,18 @@ class MoveToHandler(BaseHandler):
                 #filtered_entity["role"] = entity["role"]
             filtered_map_data[coord] = filtered_entity
 
+        tile_actions = {}
+        for coord, entity in visible_map_data.items():
+            tile_actions[coord] = get_tile_actions(entity, user)
+
         map_data = {
-            "users": filtered_users_data,
-            "construction": filtered_map_data,
-            "message": moved["message"]
+            "users": visible_users_data,
+            "construction": visible_map_data,
+            "actions": tile_actions,
+            "x_pos": x_pos,
+            "y_pos": y_pos,
         }
+
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(map_data))
 

@@ -207,109 +207,110 @@
     <script>
     const jsonData = {% raw data %};
     const currentUser = '{{ user }}';
-        const gridSize = 80;
-        const verticalTiles = 20;
+    const gridSize = 80;
+    const verticalTiles = 20;
 
-        let horizontalTiles;
+    let horizontalTiles;
 
-        function calculateHorizontalTiles() {
-            const mapContainer = document.querySelector('.map-container');
-            horizontalTiles = Math.ceil(mapContainer.offsetWidth / gridSize) + 4;
+    function calculateHorizontalTiles() {
+        const mapContainer = document.querySelector('.map-container');
+        horizontalTiles = Math.ceil(mapContainer.offsetWidth / gridSize) + 4;
+    }
+
+    function createMap(data) {
+        const mapContainer = document.getElementById("map");
+        const fragment = document.createDocumentFragment();
+
+        function createTile(x, y) {
+            const tile = document.createElement("div");
+            tile.className = "tile";
+            tile.style.top = y * gridSize + "px";
+            tile.style.left = x * gridSize + "px";
+            tile.dataset.x = x;
+            tile.dataset.y = y;
+            fragment.appendChild(tile);
+            return tile;
         }
 
-        function createMap(data) {
-            const mapContainer = document.getElementById("map");
-            const fragment = document.createDocumentFragment();
+        function createEntityLabel(entity, pos, isPlayer, playerName) {
+            const label = document.createElement("div");
+            label.className = "entity-label";
+            let text = '';
+            if (isPlayer) {
+                text = `${playerName} Exp:${entity.exp} HP:${entity.hp}`;
+            } else {
+                text = `${entity.type}`;
+                if (entity.level !== undefined) text += ` Lvl${entity.level}`;
+            }
+            text += ` (${pos.x},${pos.y})`;
+            label.textContent = text;
+            return label;
+        }
 
-            function createTile(x, y) {
-                const tile = document.createElement("div");
-                tile.className = "tile";
-                tile.style.top = y * gridSize + "px";
-                tile.style.left = x * gridSize + "px";
-                tile.dataset.x = x;
-                tile.dataset.y = y;
-                fragment.appendChild(tile);
-                return tile;
+        function createEntity(className, x, y, entity, isPlayer = false, playerName = '') {
+            const element = document.createElement("div");
+            element.className = `entity ${className} ${isPlayer ? 'player' : 'npc'}`;
+            element.style.top = y * gridSize + "px";
+            element.style.left = x * gridSize + "px";
+
+            if (entity.img) {
+                element.style.backgroundImage = `url('${entity.img}')`;
             }
 
-            function createEntityLabel(entity, pos, isPlayer, playerName) {
-                const label = document.createElement("div");
-                label.className = "entity-label";
-                let text = '';
-                if (isPlayer) {
-                    text = `${playerName} Exp:${entity.exp} HP:${entity.hp}`;
-                } else {
-                    text = `${entity.type}`;
-                    if (entity.level !== undefined) text += ` Lvl${entity.level}`;
-                }
-                text += ` (${pos.x},${pos.y})`;
-                label.textContent = text;
-                return label;
+            const label = createEntityLabel(entity, {x: x+1, y: y+1}, isPlayer, playerName);
+            element.appendChild(label);
+
+            if (isPlayer) {
+                const exclamationMark = document.createElement("div");
+                exclamationMark.className = "exclamation-mark";
+                exclamationMark.textContent = "!";
+                exclamationMark.style.display = "none";
+                element.appendChild(exclamationMark);
             }
 
-            function createEntity(className, x, y, entity, isPlayer = false, playerName = '') {
-                const element = document.createElement("div");
-                element.className = `entity ${className} ${isPlayer ? 'player' : 'npc'}`;
-                element.style.top = y * gridSize + "px";
-                element.style.left = x * gridSize + "px";
+            fragment.appendChild(element);
+            return element;
+        }
 
-                if (entity.img) {
-                    element.style.backgroundImage = `url('${entity.img}')`;
-                }
+        function createVisibleTiles() {
+            const currentUserData = data.users[currentUser];
+            if (currentUserData) {
+                const { x_pos, y_pos } = currentUserData;
+                const halfWidth = Math.floor(horizontalTiles / 2);
+                const halfHeight = Math.floor(verticalTiles / 2);
 
-                const label = createEntityLabel(entity, {x: x+1, y: y+1}, isPlayer, playerName);
-                element.appendChild(label);
-
-                if (isPlayer) {
-                    const exclamationMark = document.createElement("div");
-                    exclamationMark.className = "exclamation-mark";
-                    exclamationMark.textContent = "!";
-                    exclamationMark.style.display = "none";
-                    element.appendChild(exclamationMark);
-                }
-
-                fragment.appendChild(element);
-                return element;
-            }
-
-            function createVisibleTiles() {
-                const currentUserData = data.users[currentUser];
-                if (currentUserData) {
-                    const { x_pos, y_pos } = currentUserData;
-                    const halfWidth = Math.floor(horizontalTiles / 2);
-                    const halfHeight = Math.floor(verticalTiles / 2);
-
-                    for (let y = Math.max(0, y_pos - halfHeight); y < y_pos + halfHeight; y++) {
-                        for (let x = Math.max(0, x_pos - halfWidth); x < x_pos + halfWidth; x++) {
-                            createTile(x, y);
-                        }
+                for (let y = Math.max(0, y_pos - halfHeight); y < y_pos + halfHeight; y++) {
+                    for (let x = Math.max(0, x_pos - halfWidth); x < x_pos + halfWidth; x++) {
+                        createTile(x, y);
                     }
                 }
             }
-
-            createVisibleTiles();
-
-            Object.entries(data.users).forEach(([username, user]) => {
-                createEntity(user.type.toLowerCase(), user.x_pos - 1, user.y_pos - 1, user, true, username);
-            });
-
-            Object.entries(data.construction).forEach(([key, entity]) => {
-                const [x, y] = key.split(",").map(Number);
-                createEntity(entity.type.toLowerCase(), x - 1, y - 1, {...entity, x_pos: x, y_pos: y}, false);
-            });
-
-            mapContainer.appendChild(fragment);
-            centerMapOnPlayer();
         }
+
+        createVisibleTiles();
+
+        Object.entries(data.users).forEach(([username, user]) => {
+            createEntity(user.type.toLowerCase(), user.x_pos - 1, user.y_pos - 1, user, true, username);
+        });
+
+        Object.entries(data.construction).forEach(([key, entity]) => {
+            const [x, y] = key.split(",").map(Number);
+            createEntity(entity.type.toLowerCase(), x - 1, y - 1, {...entity, x_pos: x, y_pos: y}, false);
+        });
+
+        mapContainer.appendChild(fragment);
+        centerMapOnPlayer();
+    }
 
     function updateMap(data) {
         const mapContainer = document.getElementById("map");
         mapContainer.innerHTML = '';
         createMap(data);
         checkPlayerPosition();
+        displayContextActions(data);
     }
 
-         function checkPlayerPosition() {
+    function checkPlayerPosition() {
         const currentUserData = jsonData.users[currentUser];
         if (currentUserData) {
             const { x_pos, y_pos } = currentUserData;
@@ -360,73 +361,142 @@
         });
     }
 
+    function addClickListenerToMap() {
+        const mapContainer = document.getElementById("map");
+        mapContainer.addEventListener("click", (event) => {
+            if (event.target.classList.contains("tile") || event.target.closest(".entity")) {
+                const clickedElement = event.target.classList.contains("tile") ? event.target : event.target.closest(".entity");
+                const clickX = parseInt(clickedElement.style.left) / gridSize + 1;
+                const clickY = parseInt(clickedElement.style.top) / gridSize + 1;
 
-        function addClickListenerToMap() {
-            const mapContainer = document.getElementById("map");
-            mapContainer.addEventListener("click", (event) => {
-                if (event.target.classList.contains("tile") || event.target.closest(".entity")) {
-                    const clickedElement = event.target.classList.contains("tile") ? event.target : event.target.closest(".entity");
-                    const clickX = parseInt(clickedElement.style.left) / gridSize + 1;
-                    const clickY = parseInt(clickedElement.style.top) / gridSize + 1;
+                moveToPosition(clickX, clickY, (success) => {
+                    if (success) {
+                        updateMap(jsonData);
+                    }
+                });
+            }
+        });
+    }
 
-                    moveToPosition(clickX, clickY, (success) => {
-                        if (success) {
-                            updateMap(jsonData);
-                        }
-                    });
-                }
+    function centerMapOnPlayer() {
+        const currentUserData = jsonData.users[currentUser];
+        if (currentUserData) {
+            const { x_pos, y_pos } = currentUserData;
+            const mapContainer = document.querySelector('.map-container');
+            const map = document.getElementById('map');
+
+            const containerWidth = mapContainer.offsetWidth;
+            const containerHeight = mapContainer.offsetHeight;
+
+            const leftOffset = (x_pos - 1) * gridSize - (containerWidth / 2) + (gridSize / 2);
+            const topOffset = (y_pos - 1) * gridSize - (containerHeight / 2) + (gridSize / 2);
+
+            map.style.left = `${-leftOffset}px`;
+            map.style.top = `${-topOffset}px`;
+        }
+    }
+
+    function displayContextActions(data) {
+        const { x_pos, y_pos, actions, construction } = data;
+        const currentTile = `${x_pos},${y_pos}`;
+        const tileActions = actions[currentTile] || [];
+        const tileType = construction[currentTile]?.type || 'Unknown';
+
+        // Remove existing context actions if any
+        const existingActions = document.querySelector('.context-actions');
+        if (existingActions) {
+            existingActions.remove();
+        }
+
+        // Create the context actions container
+        const container = document.createElement('div');
+        container.className = 'context-actions';
+        container.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            width: 200px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        `;
+
+        // Add title
+        const title = document.createElement('h3');
+        title.textContent = 'Context Actions';
+        title.style.cssText = 'margin-top: 0; margin-bottom: 10px; font-weight: bold;';
+        container.appendChild(title);
+
+        // Add current tile info
+        const tileInfo = document.createElement('p');
+        tileInfo.textContent = `You are standing on: ${tileType}`;
+        tileInfo.style.marginBottom = '10px';
+        container.appendChild(tileInfo);
+
+        // Add action buttons
+        if (tileActions.length > 0) {
+            tileActions.forEach(action => {
+                const button = document.createElement('button');
+                button.textContent = action.name;
+                button.style.cssText = `
+                    display: block;
+                    width: 100%;
+                    margin-bottom: 5px;
+                    padding: 5px;
+                    background-color: #007bff;
+                    color: white;
+                    border: none;
+                    border-radius: 3px;
+                    cursor: pointer;
+                `;
+                button.onclick = () => window.location.href = action.action;
+                container.appendChild(button);
             });
+        } else {
+            const noActions = document.createElement('p');
+            noActions.textContent = 'No actions available for this tile.';
+            container.appendChild(noActions);
         }
 
-        function centerMapOnPlayer() {
-            const currentUserData = jsonData.users[currentUser];
-            if (currentUserData) {
-                const { x_pos, y_pos } = currentUserData;
-                const mapContainer = document.querySelector('.map-container');
-                const map = document.getElementById('map');
+        // Add the container to the document
+        document.body.appendChild(container);
+    }
 
-                const containerWidth = mapContainer.offsetWidth;
-                const containerHeight = mapContainer.offsetHeight;
-
-                const leftOffset = (x_pos - 1) * gridSize - (containerWidth / 2) + (gridSize / 2);
-                const topOffset = (y_pos - 1) * gridSize - (containerHeight / 2) + (gridSize / 2);
-
-                map.style.left = `${-leftOffset}px`;
-                map.style.top = `${-topOffset}px`;
-            }
-        }
-
-        window.addEventListener('resize', () => {
-            calculateHorizontalTiles();
-            updateMap(jsonData);
-        });
-
+    window.addEventListener('resize', () => {
         calculateHorizontalTiles();
-        createMap(jsonData);
-        addClickListenerToMap();
+        updateMap(jsonData);
+    });
 
-                document.addEventListener('keydown', function(event) {
-            const key = event.key;
-            let direction;
-            switch (key) {
-                case 'ArrowUp':
-                    direction = 'up';
-                    break;
-                case 'ArrowDown':
-                    direction = 'down';
-                    break;
-                case 'ArrowLeft':
-                    direction = 'left';
-                    break;
-                case 'ArrowRight':
-                    direction = 'right';
-                    break;
-                default:
-                    return;
-            }
-            event.preventDefault();
-            window.location.href = `/move?direction=${direction}&target=map`;
-        });
-    </script>
+    calculateHorizontalTiles();
+    createMap(jsonData);
+    addClickListenerToMap();
+    displayContextActions(jsonData);
+
+    document.addEventListener('keydown', function(event) {
+        const key = event.key;
+        let direction;
+        switch (key) {
+            case 'ArrowUp':
+                direction = 'up';
+                break;
+            case 'ArrowDown':
+                direction = 'down';
+                break;
+            case 'ArrowLeft':
+                direction = 'left';
+                break;
+            case 'ArrowRight':
+                direction = 'right';
+                break;
+            default:
+                return;
+        }
+        event.preventDefault();
+        window.location.href = `/move?direction=${direction}&target=map`;
+    });
+</script>
 </body>
 </html>
