@@ -396,30 +396,39 @@
     }
 
     function updatePopupContent(x_pos, y_pos, tileType) {
-        const popup = document.getElementById('popup');
-        const currentTile = `${x_pos},${y_pos}`;
-        const tileActions = jsonData.actions[currentTile] || [];
+    const popup = document.getElementById('popup');
+    const currentTile = `${x_pos},${y_pos}`;
+    const tileActions = jsonData.actions[currentTile] || [];
 
-        let popupContent = `
-            <h3>Tile Information</h3>
-            <p>You arrive at <strong>${tileType}</strong></p>
-        `;
+    let popupContent = `
+        <h3>Tile Information</h3>
+        <p>You arrive at <strong>${tileType}</strong></p>
+    `;
 
-        if (tileActions.length > 0) {
-            tileActions.forEach(action => {
+    if (tileActions.length > 0) {
+        tileActions.forEach(action => {
+            if (action.name.toLowerCase().includes('fight')) {
+                popupContent += `<button onclick="performFightAction('${action.action}')">${action.name}</button>`;
+            } else {
                 const actionUrl = new URL(action.action, window.location.origin);
                 actionUrl.searchParams.append('return_to_map', 'true');
                 popupContent += `<button onclick="performAction('${actionUrl}')">${action.name}</button>`;
-            });
-        } else {
-            popupContent += `<p>No actions available for this tile.</p>`;
-        }
-
-        popupContent += `<div class="popup-close" onclick="closePopup()">X</div>`;
-
-        popup.innerHTML = popupContent;
-        popup.style.display = "block";
+            }
+        });
+    } else {
+        popupContent += `<p>No actions available for this tile.</p>`;
     }
+
+    popupContent += `<div class="popup-close" onclick="closePopup()">X</div>`;
+
+    popup.innerHTML = popupContent;
+    popup.style.display = "block";
+}
+
+function performFightAction(actionUrl) {
+    // Navigate to the fight page
+    window.location.href = actionUrl;
+}
 
     function closePopup() {
         const popup = document.getElementById('popup');
