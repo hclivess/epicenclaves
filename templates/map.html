@@ -311,6 +311,7 @@
         <a href="/logout" class="btn btn-danger">🌙 Logout</a>
     </div>
 
+    <div id="message-display"></div>
     <div class="map-container">
         <div id="map" class="map"></div>
     </div>
@@ -437,7 +438,7 @@
             tileActions.forEach(action => {
                 const actionUrl = new URL(action.action, window.location.origin);
                 actionUrl.searchParams.append('return_to_map', 'true');
-                popupContent += `<button onclick="window.location.href='${actionUrl}'">${action.name}</button>`;
+                popupContent += `<button onclick="performAction('${actionUrl}')">${action.name}</button>`;
             });
         } else {
             popupContent += `<p>No actions available for this tile.</p>`;
@@ -487,20 +488,48 @@
             updateMap(jsonData);
 
             if (data.message) {
-                const messageDisplay = document.getElementById('message-display');
-                if (messageDisplay) {
-                    messageDisplay.textContent = data.message;
-                }
+                displayMessage(data.message);
             }
 
-            const success = data.message === "Moved successfully";
+            const success = data.message && !data.message.includes("failed");
             callback(success);
             checkPlayerPosition();
         })
         .catch((error) => {
             console.error('Error:', error);
+            displayMessage('An error occurred while moving.');
             callback(false);
         });
+    }
+
+    function performAction(actionUrl) {
+        fetch(actionUrl)
+            .then(response => response.json())
+            .then(data => {
+                Object.assign(jsonData, data);
+                updateMap(jsonData);
+                if (data.message) {
+                    displayMessage(data.message);
+                }
+                checkPlayerPosition();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                displayMessage('An error occurred while performing the action.');
+            });
+    }
+
+    function displayMessage(message) {
+        const messageDisplay = document.getElementById('message-display');
+        if (messageDisplay) {
+            messageDisplay.textContent = message;
+            messageDisplay.style.display = 'block';
+            setTimeout(() => {
+                messageDisplay.style.display = 'none';
+            }, 5000); // Hide the message after 5 seconds
+        } else {
+            console.log("Message:", message);
+        }
     }
 
     function addClickListenerToMap() {
@@ -570,7 +599,20 @@
                 return;
         }
         event.preventDefault();
-        window.location.href = `/move?direction=${direction}&target=map`;
+        fetch(`/move?direction=${direction}&target=map`)
+            .then(response => response.json())
+            .then(data => {
+                Object.assign(jsonData, data);
+                updateMap(jsonData);
+                if (data.message) {
+                    displayMessage(data.message);
+                }
+                checkPlayerPosition();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                displayMessage('An error occurred while moving.');
+            });
     });
 </script>
 </body>

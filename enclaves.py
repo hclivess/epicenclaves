@@ -118,6 +118,10 @@ def get_tile_actions(tile: Any, user: str) -> List[Dict[str, str]]:
     return []
 
 class BaseHandler(tornado.web.RequestHandler):
+    def return_json(self, data):
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps(data))
+
     def write_error(self, status_code, **kwargs):
         self.render("templates/error.html")
 
@@ -388,20 +392,21 @@ class FightHandler(BaseHandler):
         message = get_fight_preconditions(user_data)
         if message:
             if return_to_map:
-                self.redirect("/map")
+                self.return_json({"message": message})
             else:
                 self.render_user_panel(user, user_data, message=message)
         else:
-            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
-            fight_result = fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb, mapdb)
+            fight_result = self._perform_fight(user, user_data, target, target_name)
             if return_to_map:
-                self.redirect("/map")
+                self.return_json({"message": fight_result.get("message", "Fight completed"), "battle_data": fight_result["battle_data"]})
             else:
                 self.render("templates/fight.html", battle_data=json.dumps(fight_result["battle_data"]),
                             profile_picture=usersdb[user]["img"], target=target)
 
-
+    def _perform_fight(self, user, user_data, target, target_name):
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
+        return fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb, mapdb)
 
 class ConquerHandler(UserActionHandler):
     def get(self):
@@ -410,7 +415,7 @@ class ConquerHandler(UserActionHandler):
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
         message = self._attempt_conquer(user, target)
         if return_to_map:
-            self.redirect("/map")
+            self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb)
             self.render_user_panel(user, user_data, message=message)
@@ -420,8 +425,6 @@ class ConquerHandler(UserActionHandler):
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
         return attempt_conquer(user, target, on_tile_map, usersdb, mapdb, user_data)
 
-
-
 class MineHandler(UserActionHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
@@ -429,7 +432,7 @@ class MineHandler(UserActionHandler):
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
         message = self._mine_mountain(user, mine_amount)
         if return_to_map:
-            self.redirect("/map")
+            self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb)
             self.render_user_panel(user, user_data, message=message)
@@ -445,7 +448,7 @@ class ChopHandler(UserActionHandler):
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
         message = self._chop_forest(user, chop_amount)
         if return_to_map:
-            self.redirect("/map")
+            self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb)
             self.render_user_panel(user, user_data, message=message)
@@ -462,7 +465,7 @@ class BuildHandler(UserActionHandler):
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
         message = self._build(user, entity, name)
         if return_to_map:
-            self.redirect("/map")
+            self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb)
             self.render_user_panel(user, user_data, message=message)
@@ -477,7 +480,7 @@ class UpgradeHandler(UserActionHandler):
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
         message = self._upgrade(user)
         if return_to_map:
-            self.redirect("/map")
+            self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb)
             self.render_user_panel(user, user_data, message=message)
@@ -500,7 +503,7 @@ class DeployArmyHandler(UserActionHandler):
             message = "No action specified."
 
         if return_to_map:
-            self.redirect("/map")
+            self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb)
             self.render_user_panel(user, user_data, message=message)
