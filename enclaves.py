@@ -197,9 +197,22 @@ class MapHandler(BaseHandler):
                 filtered_entity["army"] = entity["army"]
             visible_map_data[coord] = filtered_entity
 
-        map_data = {"users": visible_users_data, "construction": visible_map_data}
-        print(map_data)
+        # Generate actions for each tile
+        tile_actions = {}
+        for coord, entity in visible_map_data.items():
+            tile_actions[coord] = get_tile_actions(entity, user)
+        #for coord, user_info in visible_users_data.items():
+            #tile_actions[coord] = get_tile_actions(user_info, user) ?????????
+
+        map_data = {
+            "users": visible_users_data,
+            "construction": visible_map_data,
+            "actions": tile_actions,
+            "x_pos": x_pos,
+            "y_pos": y_pos
+        }
         self.render("templates/map.html", user=user, data=json.dumps(map_data))
+
 
 class ScoreboardHandler(BaseHandler):
     def get(self):
