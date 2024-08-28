@@ -80,45 +80,158 @@
             z-index: 1000; /* Ensure player is always on top */
         }
 
-        .exclamation-mark {
-            position: absolute;
-            top: -15px;
-            right: -15px;
-            width: 30px;
-            height: 30px;
-            background-color: yellow;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 20px;
-            animation: glow 1s infinite alternate;
-            z-index: 1001;
-        }
+   .exclamation-mark {
+        position: absolute;
+        top: -15px;
+        right: -15px;
+        width: 30px;
+        height: 30px;
+        background-color: #ffd700;
+        border: 2px solid #4b3621;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        font-size: 20px;
+        color: #4b3621;
+        animation: glow 1s infinite alternate;
+        z-index: 1001;
+    }
 
-        @keyframes glow {
-            from {
-                box-shadow: 0 0 5px yellow;
-            }
-            to {
-                box-shadow: 0 0 20px yellow;
-            }
+    @keyframes glow {
+        from {
+            box-shadow: 0 0 5px #ffd700;
         }
+        to {
+            box-shadow: 0 0 20px #ffd700, 0 0 30px #ff4da6;
+        }
+    }
 
-        .popup {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: white;
-            border: 2px solid #333;
-            border-radius: 10px;
-            padding: 10px 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
-            z-index: 2000;
-            display: none;
-        }
+    .popup-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 25px;
+        height: 25px;
+        background-color: #4b3621;
+        color: #ffd700;
+        border: 1px solid #d4af37;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .popup-close:hover {    .popup-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 25px;
+        height: 25px;
+        background-color: #4b3621;
+        color: #ffd700;
+        border: 1px solid #d4af37;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .popup-close:hover {
+        background-color: #654321;
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    }
+
+    .popup-close:active {
+        transform: scale(0.95);
+    }
+        background-color: #654321;
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    }
+
+    .popup-close:active {
+        transform: scale(0.95);
+    }
+
+
+    .popup {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(41, 41, 41, 0.95);
+        border: 2px solid #d4af37;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        z-index: 2000;
+        display: none;
+        max-width: 300px;
+        width: 100%;
+        color: #f0e68c;
+        font-family: 'Merriweather', serif;
+    }
+
+    .popup h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 18px;
+        color: #ffd700;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        border-bottom: 1px solid #d4af37;
+        padding-bottom: 5px;
+    }
+
+    .popup h4 {
+        margin-top: 15px;
+        margin-bottom: 10px;
+        font-size: 16px;
+        color: #daa520;
+    }
+
+    .popup p {
+        margin-bottom: 10px;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .popup button {
+        display: block;
+        width: 100%;
+        margin-bottom: 8px;
+        padding: 8px;
+        background-color: #4b3621;
+        color: #ffd700;
+        border: 1px solid #d4af37;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: 'Merriweather', serif;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .popup button:hover {
+        background-color: #654321;
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    }
+
+    .popup button:active {
+        transform: translateY(2px);
+    }
+
         }
         .entity.npc {
             border-color: #FF9800;
@@ -310,6 +423,35 @@
         checkPlayerPosition();
     }
 
+        function updatePopupContent(x_pos, y_pos, tileType) {
+        const popup = document.getElementById('popup');
+        const currentTile = `${x_pos},${y_pos}`;
+        const tileActions = jsonData.actions[currentTile] || [];
+
+        let popupContent = `
+            <h3>Tile Information</h3>
+            <p>You arrive at <strong>${tileType}</strong></p>
+        `;
+
+        if (tileActions.length > 0) {
+            tileActions.forEach(action => {
+                popupContent += `<button onclick="window.location.href='${action.action}'">${action.name}</button>`;
+            });
+        } else {
+            popupContent += `<p>No actions available for this tile.</p>`;
+        }
+
+        popupContent += `<div class="popup-close" onclick="closePopup()">X</div>`;
+
+        popup.innerHTML = popupContent;
+        popup.style.display = "block";
+    }
+
+    function closePopup() {
+        const popup = document.getElementById('popup');
+        popup.style.display = "none";
+    }
+
     function checkPlayerPosition() {
         const currentUserData = jsonData.users[currentUser];
         if (currentUserData) {
@@ -319,37 +461,15 @@
 
             const playerElement = document.querySelector('.entity.player');
             const exclamationMark = playerElement.querySelector('.exclamation-mark');
-            const popup = document.getElementById('popup');
 
             if (entityOnTile) {
                 exclamationMark.style.display = "flex";
                 updatePopupContent(x_pos, y_pos, entityOnTile.type);
-                popup.style.display = "block";
             } else {
                 exclamationMark.style.display = "none";
-                popup.style.display = "none";
+                closePopup();
             }
         }
-    }
-
-    function updatePopupContent(x_pos, y_pos, tileType) {
-        const popup = document.getElementById('popup');
-        const currentTile = `${x_pos},${y_pos}`;
-        const tileActions = jsonData.actions[currentTile] || [];
-
-        let popupContent = `<h3>Tile Information</h3>`;
-        popupContent += `<p>You are standing on: ${tileType}</p>`;
-
-        if (tileActions.length > 0) {
-            popupContent += `<h4>Available Actions:</h4>`;
-            tileActions.forEach(action => {
-                popupContent += `<button onclick="window.location.href='${action.action}'">${action.name}</button>`;
-            });
-        } else {
-            popupContent += `<p>No actions available for this tile.</p>`;
-        }
-
-        popup.innerHTML = popupContent;
     }
 
     function moveToPosition(x, y, callback) {
@@ -441,6 +561,9 @@
             case 'ArrowRight':
                 direction = 'right';
                 break;
+            case 'Escape':
+                closePopup();
+                return;
             default:
                 return;
         }
