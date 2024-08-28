@@ -414,6 +414,7 @@ class Mountain(Scenery):
 
 
 class Wall(Scenery):
+    type = "wall"
     def __init__(self):
         super().__init__(hp=200)
         self.type = "wall"
