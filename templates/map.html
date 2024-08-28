@@ -423,7 +423,7 @@
         checkPlayerPosition();
     }
 
-        function updatePopupContent(x_pos, y_pos, tileType) {
+    function updatePopupContent(x_pos, y_pos, tileType) {
         const popup = document.getElementById('popup');
         const currentTile = `${x_pos},${y_pos}`;
         const tileActions = jsonData.actions[currentTile] || [];
@@ -435,7 +435,9 @@
 
         if (tileActions.length > 0) {
             tileActions.forEach(action => {
-                popupContent += `<button onclick="window.location.href='${action.action}'">${action.name}</button>`;
+                const actionUrl = new URL(action.action, window.location.origin);
+                actionUrl.searchParams.append('return_to_map', 'true');
+                popupContent += `<button onclick="window.location.href='${actionUrl}'">${action.name}</button>`;
             });
         } else {
             popupContent += `<p>No actions available for this tile.</p>`;

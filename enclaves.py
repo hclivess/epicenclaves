@@ -292,35 +292,6 @@ class TrashAllHandler(UserActionHandler):
     def _trash_all(self, user, user_data):
         return trash_all(usersdb, user)
 
-class DeployArmyHandler(UserActionHandler):
-    def get(self, data):
-        action = self.get_argument("action")
-        user = tornado.escape.xhtml_escape(self.current_user)
-
-        if action == "add":
-            self.perform_action(user, self._deploy_army, mapdb, usersdb)
-        elif action == "remove":
-            self.perform_action(user, self._remove_army, mapdb, usersdb)
-        else:
-            user_data = get_user_data(user, usersdb=usersdb)
-            self.render_user_panel(user, user_data, message="No action specified.")
-
-    def _deploy_army(self, user, user_data, mapdb, usersdb):
-        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-        return deploy_army(user, on_tile_map, usersdb, mapdb, user_data)
-
-    def _remove_army(self, user, user_data, mapdb, usersdb):
-        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-        return remove_army(user, on_tile_map, usersdb, mapdb, user_data)
-
-
-class BuildHandler(UserActionHandler):
-    def get(self, data):
-        user = tornado.escape.xhtml_escape(self.current_user)
-        entity = self.get_argument("entity")
-        name = self.get_argument("name")
-        self.perform_action(user, build, entity, name, mapdb, usersdb)
-
 
 class UserActionHandler(BaseHandler):
     def perform_action(self, user, action_func, *args, **kwargs):
@@ -331,16 +302,6 @@ class UserActionHandler(BaseHandler):
         message = action_func(user, user_data, *args, **kwargs)
         user_data = get_user_data(user, usersdb)  # Refresh user data
         self.render_user_panel(user, user_data, message=message)
-
-
-class UpgradeHandler(UserActionHandler):
-    def get(self):
-        user = tornado.escape.xhtml_escape(self.current_user)
-        self.perform_action(user, self._upgrade)
-
-    def _upgrade(self, user, user_data):
-        return upgrade(user, mapdb, usersdb)
-
 
 class MoveHandler(UserActionHandler):
     def get(self, data):
@@ -422,47 +383,137 @@ class FightHandler(BaseHandler):
         user_data = get_user_data(user, usersdb)
         target = self.get_argument("target")
         target_name = self.get_argument("name", default=None)
+        return_to_map = self.get_argument("return_to_map", default="false") == "true"
 
         message = get_fight_preconditions(user_data)
         if message:
-            self.render_user_panel(user, user_data, message=message)
+            if return_to_map:
+                self.redirect("/map")
+            else:
+                self.render_user_panel(user, user_data, message=message)
         else:
             on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
             on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
             fight_result = fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb, mapdb)
-            self.render("templates/fight.html", battle_data=json.dumps(fight_result["battle_data"]),
-                        profile_picture=usersdb[user]["img"], target=target)
+            if return_to_map:
+                self.redirect("/map")
+            else:
+                self.render("templates/fight.html", battle_data=json.dumps(fight_result["battle_data"]),
+                            profile_picture=usersdb[user]["img"], target=target)
+
 
 
 class ConquerHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         target = self.get_argument("target", default="")
-        self.perform_action(user, self._attempt_conquer, target)
+        return_to_map = self.get_argument("return_to_map", default="false") == "true"
+        message = self._attempt_conquer(user, target)
+        if return_to_map:
+            self.redirect("/map")
+        else:
+            user_data = get_user_data(user, usersdb)
+            self.render_user_panel(user, user_data, message=message)
 
-    def _attempt_conquer(self, user, user_data, target):
+    def _attempt_conquer(self, user, target):
+        user_data = get_user_data(user, usersdb)
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
         return attempt_conquer(user, target, on_tile_map, usersdb, mapdb, user_data)
+
 
 
 class MineHandler(UserActionHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
         mine_amount = int(self.get_argument("amount", default="1"))
-        self.perform_action(user, self._mine_mountain, mine_amount)
+        return_to_map = self.get_argument("return_to_map", default="false") == "true"
+        message = self._mine_mountain(user, mine_amount)
+        if return_to_map:
+            self.redirect("/map")
+        else:
+            user_data = get_user_data(user, usersdb)
+            self.render_user_panel(user, user_data, message=message)
 
-    def _mine_mountain(self, user, user_data, mine_amount):
+    def _mine_mountain(self, user, mine_amount):
+        user_data = get_user_data(user, usersdb)
         return mine_mountain(user, mine_amount, user_data, usersdb, mapdb)
-
 
 class ChopHandler(UserActionHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
         chop_amount = int(self.get_argument("amount", default="1"))
-        self.perform_action(user, self._chop_forest, chop_amount)
+        return_to_map = self.get_argument("return_to_map", default="false") == "true"
+        message = self._chop_forest(user, chop_amount)
+        if return_to_map:
+            self.redirect("/map")
+        else:
+            user_data = get_user_data(user, usersdb)
+            self.render_user_panel(user, user_data, message=message)
 
-    def _chop_forest(self, user, user_data, chop_amount):
+    def _chop_forest(self, user, chop_amount):
+        user_data = get_user_data(user, usersdb)
         return chop_forest(user, chop_amount, user_data, usersdb, mapdb)
+
+class BuildHandler(UserActionHandler):
+    def get(self, data):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        entity = self.get_argument("entity")
+        name = self.get_argument("name")
+        return_to_map = self.get_argument("return_to_map", default="false") == "true"
+        message = self._build(user, entity, name)
+        if return_to_map:
+            self.redirect("/map")
+        else:
+            user_data = get_user_data(user, usersdb)
+            self.render_user_panel(user, user_data, message=message)
+
+    def _build(self, user, entity, name):
+        user_data = get_user_data(user, usersdb)
+        return build(user, entity, name, mapdb, usersdb)
+
+class UpgradeHandler(UserActionHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        return_to_map = self.get_argument("return_to_map", default="false") == "true"
+        message = self._upgrade(user)
+        if return_to_map:
+            self.redirect("/map")
+        else:
+            user_data = get_user_data(user, usersdb)
+            self.render_user_panel(user, user_data, message=message)
+
+    def _upgrade(self, user):
+        user_data = get_user_data(user, usersdb)
+        return upgrade(user, mapdb, usersdb)
+
+class DeployArmyHandler(UserActionHandler):
+    def get(self, data):
+        action = self.get_argument("action")
+        user = tornado.escape.xhtml_escape(self.current_user)
+        return_to_map = self.get_argument("return_to_map", default="false") == "true"
+
+        if action == "add":
+            message = self._deploy_army(user)
+        elif action == "remove":
+            message = self._remove_army(user)
+        else:
+            message = "No action specified."
+
+        if return_to_map:
+            self.redirect("/map")
+        else:
+            user_data = get_user_data(user, usersdb)
+            self.render_user_panel(user, user_data, message=message)
+
+    def _deploy_army(self, user):
+        user_data = get_user_data(user, usersdb)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        return deploy_army(user, on_tile_map, usersdb, mapdb, user_data)
+
+    def _remove_army(self, user):
+        user_data = get_user_data(user, usersdb)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+        return remove_army(user, on_tile_map, usersdb, mapdb, user_data)
 
 
 class RedirectToHTTPSHandler(tornado.web.RequestHandler):
