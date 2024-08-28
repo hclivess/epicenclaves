@@ -377,9 +377,18 @@ class ReviveHandler(UserActionHandler):
 class RestHandler(UserActionHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
-        hours = self.get_argument("hours", default="1")
-        self.perform_action(user, attempt_rest, hours, usersdb, mapdb)
+        hours = int(self.get_argument("hours", default="1"))
+        return_to_map = self.get_argument("return_to_map", default="false") == "true"
 
+        if return_to_map:
+            message = attempt_rest(user, attempt_rest, hours, usersdb, mapdb)
+            self.return_json({"message": message})
+        else:
+            self.perform_action(user, attempt_rest, hours, usersdb, mapdb)
+
+    def return_json(self, data):
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps(data))
 
 class FightHandler(BaseHandler):
     def get(self):
@@ -472,7 +481,11 @@ class BuildHandler(UserActionHandler):
 
     def _build(self, user, entity, name):
         user_data = get_user_data(user, usersdb)
-        return build(user, entity, name, mapdb, usersdb)
+        return build(user, user_data, entity, name, mapdb, usersdb)
+
+    def return_json(self, data):
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps(data))
 
 class UpgradeHandler(UserActionHandler):
     def get(self):
