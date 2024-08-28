@@ -300,6 +300,7 @@
 
         mapContainer.appendChild(fragment);
         centerMapOnPlayer();
+        checkPlayerPosition();
     }
 
     function updateMap(data) {
@@ -307,7 +308,6 @@
         mapContainer.innerHTML = '';
         createMap(data);
         checkPlayerPosition();
-        displayContextActions(data);
     }
 
     function checkPlayerPosition() {
@@ -323,13 +323,33 @@
 
             if (entityOnTile) {
                 exclamationMark.style.display = "flex";
-                popup.textContent = `You are standing on: ${entityOnTile.type}`;
+                updatePopupContent(x_pos, y_pos, entityOnTile.type);
                 popup.style.display = "block";
             } else {
                 exclamationMark.style.display = "none";
                 popup.style.display = "none";
             }
         }
+    }
+
+    function updatePopupContent(x_pos, y_pos, tileType) {
+        const popup = document.getElementById('popup');
+        const currentTile = `${x_pos},${y_pos}`;
+        const tileActions = jsonData.actions[currentTile] || [];
+
+        let popupContent = `<h3>Tile Information</h3>`;
+        popupContent += `<p>You are standing on: ${tileType}</p>`;
+
+        if (tileActions.length > 0) {
+            popupContent += `<h4>Available Actions:</h4>`;
+            tileActions.forEach(action => {
+                popupContent += `<button onclick="window.location.href='${action.action}'">${action.name}</button>`;
+            });
+        } else {
+            popupContent += `<p>No actions available for this tile.</p>`;
+        }
+
+        popup.innerHTML = popupContent;
     }
 
     function moveToPosition(x, y, callback) {
@@ -396,75 +416,6 @@
         }
     }
 
-    function displayContextActions(data) {
-        const { x_pos, y_pos, actions, construction } = data;
-        const currentTile = `${x_pos},${y_pos}`;
-        const tileActions = actions[currentTile] || [];
-        const tileType = construction[currentTile]?.type || 'Unknown';
-
-        // Remove existing context actions if any
-        const existingActions = document.querySelector('.context-actions');
-        if (existingActions) {
-            existingActions.remove();
-        }
-
-        // Create the context actions container
-        const container = document.createElement('div');
-        container.className = 'context-actions';
-        container.style.cssText = `
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 10px;
-            width: 200px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            z-index: 1000;
-        `;
-
-        // Add title
-        const title = document.createElement('h3');
-        title.textContent = 'Context Actions';
-        title.style.cssText = 'margin-top: 0; margin-bottom: 10px; font-weight: bold;';
-        container.appendChild(title);
-
-        // Add current tile info
-        const tileInfo = document.createElement('p');
-        tileInfo.textContent = `You are standing on: ${tileType}`;
-        tileInfo.style.marginBottom = '10px';
-        container.appendChild(tileInfo);
-
-        // Add action buttons
-        if (tileActions.length > 0) {
-            tileActions.forEach(action => {
-                const button = document.createElement('button');
-                button.textContent = action.name;
-                button.style.cssText = `
-                    display: block;
-                    width: 100%;
-                    margin-bottom: 5px;
-                    padding: 5px;
-                    background-color: #007bff;
-                    color: white;
-                    border: none;
-                    border-radius: 3px;
-                    cursor: pointer;
-                `;
-                button.onclick = () => window.location.href = action.action;
-                container.appendChild(button);
-            });
-        } else {
-            const noActions = document.createElement('p');
-            noActions.textContent = 'No actions available for this tile.';
-            container.appendChild(noActions);
-        }
-
-        // Add the container to the document
-        document.body.appendChild(container);
-    }
-
     window.addEventListener('resize', () => {
         calculateHorizontalTiles();
         updateMap(jsonData);
@@ -473,7 +424,6 @@
     calculateHorizontalTiles();
     createMap(jsonData);
     addClickListenerToMap();
-    displayContextActions(jsonData);
 
     document.addEventListener('keydown', function(event) {
         const key = event.key;
