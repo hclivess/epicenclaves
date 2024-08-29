@@ -76,8 +76,8 @@ class Bow(Weapon):
     DESCRIPTION = "A ranged weapon with high critical chance and damage."
     BASE_DAMAGE = (4, 7)
     RANGE = "ranged"
-    MIN_ACCURACY = 25
-    MAX_ACCURACY = 45
+    MIN_ACCURACY = 35
+    MAX_ACCURACY = 60
     MIN_CRIT_DMG = 100
     MAX_CRIT_DMG = 150
     MIN_CRIT_CHANCE = 10
@@ -134,7 +134,7 @@ class Axe(Weapon):
 class Crossbow(Weapon):
     SLOT = "right_hand"
     DESCRIPTION = "A strong ranged weapon with high base damage and good critical stats."
-    BASE_DAMAGE = (6, 9)
+    BASE_DAMAGE = (7, 10)
     RANGE = "ranged"
     MIN_ACCURACY = 35
     MAX_ACCURACY = 55
@@ -230,11 +230,11 @@ class Scythe(Weapon):
 class Chakram(Weapon):
     SLOT = "right_hand"
     DESCRIPTION = "A unique ranged weapon with moderate damage and high critical chance."
-    BASE_DAMAGE = (3, 6)
+    BASE_DAMAGE = (4, 7)
     RANGE = "ranged"
-    MIN_ACCURACY = 35
-    MAX_ACCURACY = 55
-    MIN_CRIT_DMG = 105
-    MAX_CRIT_DMG = 175
-    MIN_CRIT_CHANCE = 12
-    MAX_CRIT_CHANCE = 22
+    MIN_ACCURACY = 45
+    MAX_ACCURACY = 70
+    MIN_CRIT_DMG = 90
+    MAX_CRIT_DMG = 150
+    MIN_CRIT_CHANCE = 8
+    MAX_CRIT_CHANCE = 16
