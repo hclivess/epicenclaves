@@ -125,26 +125,30 @@ def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb:
     npc.alive = False
 
     if random.random() < npc.drop_chance:
+        min_item_level = max(1, npc.level - 15)  # Ensure minimum level is at least 1
         max_item_level = npc.level
-        new_item = generate_weapon(max_level=max_item_level) if random.random() < 0.5 else generate_armor(
-            max_level=max_item_level)
 
-        # Check if the item's level is at least 10 levels below the NPC's level
-        if new_item['level'] >= npc.level - 9:
-            battle_data["rounds"].append({
-                "round": round_number,
-                "player_hp": user_data["hp"],
-                "enemy_hp": 0,
-                "message": f"You found a level {new_item['level']} {new_item['type']}!"
-            })
-            user_data["unequipped"].append(new_item)
-        else:
-            battle_data["rounds"].append({
-                "round": round_number,
-                "player_hp": user_data["hp"],
-                "enemy_hp": 0,
-                "message": f"The defeated {npc.type} didn't drop any useful items."
-            })
+        # Use logarithmic_level to generate the item level
+        item_level = logarithmic_level(min_item_level, max_item_level)
+
+        new_item = generate_weapon(min_level=item_level,
+                                   max_level=item_level) if random.random() < 0.5 else generate_armor(
+            min_level=item_level, max_level=item_level)
+
+        battle_data["rounds"].append({
+            "round": round_number,
+            "player_hp": user_data["hp"],
+            "enemy_hp": 0,
+            "message": f"You found a level {new_item['level']} {new_item['type']}!"
+        })
+        user_data["unequipped"].append(new_item)
+    else:
+        battle_data["rounds"].append({
+            "round": round_number,
+            "player_hp": user_data["hp"],
+            "enemy_hp": 0,
+            "message": f"The defeated {npc.type} didn't drop any items."
+        })
 
     remove_from_map(entity_type=npc.type.lower(), coords=get_coords(entry), map_data_dict=mapdb)
 

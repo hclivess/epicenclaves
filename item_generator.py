@@ -11,16 +11,16 @@ def id_generator(length=10):
     return ''.join(random.choice(characters) for _ in range(length))
 
 
-def logarithmic_level(max_level):
+def logarithmic_level(min_level, max_level):
     # Generate a random number between 0 and 1
     r = random.random()
     # Use logarithmic distribution to skew towards lower levels
-    level = int(math.exp(r * math.log(max_level))) + 1
+    level = int(min_level + (math.exp(r * math.log(max_level - min_level + 1)) - 1))
     return min(level, max_level)  # Ensure we don't exceed max_level
 
 
-def generate_weapon(max_level=20, weapon_type=None):
-    level = logarithmic_level(max_level)
+def generate_weapon(min_level=1, max_level=20, weapon_type=None):
+    level = logarithmic_level(min_level, max_level)
     weapon_classes = [cls for cls in weapons.__dict__.values() if
                       isinstance(cls, type) and issubclass(cls, weapons.Weapon) and cls != weapons.Weapon]
 
@@ -35,8 +35,8 @@ def generate_weapon(max_level=20, weapon_type=None):
     return weapon.to_dict()  # Return the dictionary representation
 
 
-def generate_armor(max_level=20, slot=None):
-    level = logarithmic_level(max_level)
+def generate_armor(min_level=1, max_level=20, slot=None):
+    level = logarithmic_level(min_level, max_level)
     armor_classes = [cls for cls in armor.__dict__.values() if
                      isinstance(cls, type) and issubclass(cls, armor.Armor) and cls != armor.Armor]
 
@@ -52,7 +52,7 @@ def generate_armor(max_level=20, slot=None):
 
 
 def generate_tool(max_level=20, tool_type=None):
-    level = logarithmic_level(max_level)
+    level = logarithmic_level(1, max_level)
     tool_classes = [cls for cls in tools.__dict__.values() if
                     isinstance(cls, type) and issubclass(cls, tools.Tool) and cls != tools.Tool]
 
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     print("Level distribution test:")
     level_counts = {i: 0 for i in range(1, 21)}
     for _ in range(10000):
-        level = logarithmic_level(20)
+        level = logarithmic_level(1, 20)
         level_counts[level] += 1
 
     for level, count in level_counts.items():
@@ -86,15 +86,15 @@ if __name__ == "__main__":
 
     print("\nWeapon generation test:")
     for _ in range(10):
-        weapon = generate_weapon()
+        weapon = generate_weapon(min_level=5, max_level=15)
         print(f"Generated {weapon['type']} - Level: {weapon['level']}")
 
     print("\nArmor generation test:")
     for _ in range(10):
-        armor = generate_armor()
+        armor = generate_armor(min_level=3, max_level=18)
         print(f"Generated {armor['type']} - Level: {armor['level']}")
 
     print("\nTool generation test:")
     for _ in range(10):
-        tool = generate_tool()
+        tool = generate_tool(max_level=20)
         print(f"Generated {tool['type']} - Level: {tool['level']}")

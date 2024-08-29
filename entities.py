@@ -334,6 +334,33 @@ class Minotaur(Enemy):
             self.charge_cooldown -= 1
             return damage_info
 
+class Skeleton(Enemy):
+    type = "skeleton"
+
+    def __init__(self, level=2):
+        super().__init__(base_hp=50,
+                         base_min_damage=5,
+                         base_max_damage=10,
+                         crit_chance=0.2,
+                         crit_damage=1.5,
+                         armor=2,
+                         level=level,
+                         experience=4,
+                         drop_chance=0.5,
+                         regular_drop={"bone": 2},
+                         probability=0.04,
+                         map_size=200,
+                         max_entities=30,
+                         max_entities_total=60,
+                         herd_probability=0.4)
+        self.reassemble_chance = 0.2
+
+    def roll_damage(self):
+        damage_info = super().roll_damage()
+        if self.hp <= 0 and random.random() < self.reassemble_chance:
+            self.hp = self.calculate_hp() // 2  # Reassemble with half HP
+            damage_info["message"] += " (skeleton reassembled)"
+        return damage_info
 
 class Wraith(Enemy):
     type = "wraith"
