@@ -98,23 +98,24 @@ body {
 
 .battle-arena {
     position: relative;
-    height: 300px;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+    flex-wrap: wrap;
+    min-height: 200px;
 }
 
 .fighter {
     position: relative;
     width: 40%;
-    max-width: 150px;
-    height: 0;
-    padding-bottom: 40%;
-    max-height: 150px;
+    max-width: 200px;
+    height: 200px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center bottom;
+    margin-bottom: 20px;
+    margin-top: 30px;
 }
 
 .fighter.player {
