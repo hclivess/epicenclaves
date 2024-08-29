@@ -29,16 +29,15 @@ from login import login
 from typing import List, Dict, Any
 from turn_engine import TurnEngine
 from backend import get_user, update_user_data
-from map import (get_tile_map, get_tile_users, get_user_data, get_surrounding_map_and_user_data,
-                 create_map_database, save_map_from_memory, load_map_to_memory, strip_usersdb,
+from map import (get_tile_map, get_tile_users, get_user_data, save_map_from_memory, load_map_to_memory, strip_usersdb,
                  get_map_data_limit, get_users_data_limit)
 from rest import attempt_rest
 from move import move, move_to
 from build import build
 from entity_generator import spawn
 from auth import (auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db)
-from sqlite import create_game_database
-from user import create_users_db, create_user, save_users_from_memory, load_users_to_memory
+from sqlite import init_databases
+from user import create_user, save_users_from_memory, load_users_to_memory
 from wall_generator import generate_multiple_mazes
 from upgrade import upgrade
 from trash import trash_item, trash_armor, trash_all, trash_weapons
@@ -692,25 +691,8 @@ async def main():
 
     await shutdown_event.wait()
 
-
-def init_databases():
-    map_exists = os.path.exists("db/map_data.db")
-    game_exists = os.path.exists("db/game_data.db")
-    user_exists = os.path.exists("db/user_data.db")
-
-    if not map_exists:
-        create_map_database()
-    if not game_exists:
-        create_game_database()
-    if not user_exists:
-        create_users_db()
-
-    return {"map_exists": map_exists}
-
-
 def initialize_map_and_users():
     return load_map_to_memory(), load_users_to_memory()
-
 
 if __name__ == "__main__":
     db_status = init_databases()

@@ -2,6 +2,9 @@ import os
 import sqlite3
 from hashlib import blake2b
 
+from map import create_map_database
+from user import create_users_db
+
 if not os.path.exists("db"):
     os.mkdir("db")
 users_db = sqlite3.connect("db/auth.db")
@@ -71,3 +74,18 @@ class SQLiteConnectionPool:
 
 # Initialize a connection pool
 conn_pool = SQLiteConnectionPool("db/map_data.db")
+
+
+def init_databases():
+    map_exists = os.path.exists("db/map_data.db")
+    game_exists = os.path.exists("db/game_data.db")
+    user_exists = os.path.exists("db/user_data.db")
+
+    if not map_exists:
+        create_map_database()
+    if not game_exists:
+        create_game_database()
+    if not user_exists:
+        create_users_db()
+
+    return {"map_exists": map_exists}
