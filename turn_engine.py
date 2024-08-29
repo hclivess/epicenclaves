@@ -39,13 +39,13 @@ class TurnEngine(threading.Thread):
         self.mapdb = mapdb
 
     def save_databases(self):
-        for league in self.mapdb.copy().keys(): #todo dont copy
+        for league in self.mapdb.keys(): #todo dont copy
             save_map_from_memory(self.mapdb[league], league=league)
             save_users_from_memory(self.usersdb[league], league=league)
 
     def check_for_updates(self):
         self.update_latest_block()
-        for league in self.mapdb.copy().keys(): #todo dont copy
+        for league in self.mapdb.keys(): #todo dont copy
             if self.compare_block != self.latest_block:
                 self.save_databases()
                 self.update_users_data(league)
@@ -110,7 +110,7 @@ class TurnEngine(threading.Thread):
         return counts
 
     def spawn_entities(self):
-        for league in self.mapdb.copy().keys(): #todo dont copy
+        for league in self.mapdb.keys(): #todo dont copy
             spawn_all_entities(self.mapdb[league])
 
     def run(self):

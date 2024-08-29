@@ -617,7 +617,7 @@ class LoginHandler(BaseHandler):
         uploaded_file = self.request.files.get("profile_picture", None)
 
         message = login(password, uploaded_file, auth_exists_user, auth_add_user, create_user,
-                        save_users_from_memory, save_map_from_memory, auth_login_validate, usersdb[league], mapdb[league], user)
+                        save_users_from_memory, save_map_from_memory, auth_login_validate, usersdb, mapdb, user)
 
         if message.startswith("Welcome"):
             self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
@@ -701,7 +701,7 @@ if __name__ == "__main__":
     mapdb = {}
     usersdb = {}
 
-    leagues = ["game", "tour1"]
+    leagues = ["game"]
 
     for league in leagues:
         print(f"Working on {league}")

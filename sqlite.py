@@ -90,37 +90,46 @@ def load_users_to_memory(league="game") -> Dict[str, Any]:
     return user_data_dict
 
 
-def save_users_from_memory(user_data_dict: Dict[str, Any], league="game") -> None:
-    print(f"saving users to drive for league {league}")
-    conn_user = sqlite3.connect("db/user_data.db")
-    cursor_user = conn_user.cursor()
+def save_users_from_memory(user_data_dict: Dict[str, Dict[str, Any]], league="game") -> None:
+    print(f"Saving users to drive for league {league}")
+    conn_user = None
+    try:
+        conn_user = sqlite3.connect("db/user_data.db")
+        cursor_user = conn_user.cursor()
 
+        for username, user_data in user_data_dict.get(league, {}).items():
+            print(f"Processing user: {username}")
+            print(f"User data: {user_data}")
 
-    for username, user_data in user_data_dict.items():
-        x_pos = user_data["x_pos"]
-        y_pos = user_data["y_pos"]
+            x_pos = user_data.get("x_pos")
+            y_pos = user_data.get("y_pos")
 
-        data_copy = user_data.copy()
-        del data_copy["x_pos"]
-        del data_copy["y_pos"]
+            if x_pos is None or y_pos is None:
+                print(f"Warning: Missing x_pos or y_pos for user {username}. Using default values.")
+                x_pos = x_pos if x_pos is not None else 0
+                y_pos = y_pos if y_pos is not None else 0
 
-        data_str = json.dumps(data_copy)
+            data_copy = user_data.copy()
+            data_copy.pop("x_pos", None)
+            data_copy.pop("y_pos", None)
 
-        # Check if the user entry exists
-        cursor_user.execute(f"SELECT 1 FROM {league}_user_data WHERE username = ?", (username,))
-        exists = cursor_user.fetchone()
+            data_str = json.dumps(data_copy)
 
-        # Update the existing user entry if it exists, else insert a new entry
-        if exists:
-            cursor_user.execute(f"UPDATE {league}_user_data SET x_pos = ?, y_pos = ?, data = ? WHERE username = ?",
-                                (x_pos, y_pos, data_str, username))
-        else:
-            cursor_user.execute(f"INSERT INTO {league}_user_data (username, x_pos, y_pos, data) VALUES (?, ?, ?, ?)",
-                                (username, x_pos, y_pos, data_str))
+            cursor_user.execute(f"""
+                INSERT OR REPLACE INTO {league}_user_data (username, x_pos, y_pos, data)
+                VALUES (?, ?, ?, ?)
+            """, (username, x_pos, y_pos, data_str))
 
-    # Commit the changes and close the database connection
-    conn_user.commit()
-    conn_user.close()
+        conn_user.commit()
+        print(f"Saved data for {len(user_data_dict.get(league, {}))} users")
+
+    except sqlite3.Error as e:
+        print(f"SQLite error: {str(e)}")
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+    finally:
+        if conn_user:
+            conn_user.close()
 
 
 def create_users_db(league="game"):

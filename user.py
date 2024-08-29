@@ -96,9 +96,21 @@ def find_open_space(mapdb: Dict[str, Any]) -> tuple:
             if x > 2 ** 31:
                 raise Exception("No open space found within available range.")
 
-def create_user(user_data_dict: Dict[str, Any], user: str, mapdb: Dict[str, Any], profile_pic: str = "") -> None:
-    print(f"Creating {user}")
-    x_pos, y_pos = find_open_space(mapdb)
+
+def create_user(user_data_dict: Dict[str, Dict[str, Any]], user: str, mapdb: Dict[str, Any], profile_pic: str = "",
+                league="game") -> None:
+    print(f"Creating {user} in league {league}")
+
+    # Ensure the league exists in user_data_dict
+    if league not in user_data_dict:
+        user_data_dict[league] = {}
+
+    # Ensure the league exists in mapdb
+    if league not in mapdb:
+        print(f"Error: League {league} not found in mapdb")
+        return
+
+    x_pos, y_pos = find_open_space(mapdb[league])
 
     # Generate initial weak armor for each slot
     initial_armor = [generate_armor(max_level=1, slot=slot) for slot in ["head", "body", "arms", "legs", "feet"]]
@@ -116,9 +128,17 @@ def create_user(user_data_dict: Dict[str, Any], user: str, mapdb: Dict[str, Any]
     # Calculate total initial armor value
     new_user.armor = sum(armor["protection"] for armor in initial_armor)
 
-    # Insert or update user data in the passed dictionary
-    user_data_dict[user] = new_user.to_dict()
-    print("User created")
+    # Insert user data in the passed dictionary under the specified league
+    user_data_dict[league][user] = new_user.to_dict()
+
+    print(f"User {user} created in league {league}")
+    print(f"User data: {user_data_dict[league][user]}")
+
+    # Ensure the user is saved to the in-memory database
+    if user not in user_data_dict[league]:
+        print(f"Error: User {user} not saved to in-memory database")
+    else:
+        print(f"User {user} successfully saved to in-memory database")
 
 
 def get_users_at_coords(x_pos: int, y_pos: int, user: str, users_dict: Dict[str, Any], include_construction: bool = True, include_self: bool = True) -> List[Dict[str, Any]]:
