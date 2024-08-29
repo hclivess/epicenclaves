@@ -187,8 +187,8 @@ class Specter(Enemy):
         return damage_info
 
 
-class DragonWhelp(Enemy):
-    type = "dragon_whelp"
+class Hatchling(Enemy):
+    type = "Hatchling"
 
     def __init__(self, level=3):
         super().__init__(base_hp=150,
