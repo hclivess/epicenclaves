@@ -4,10 +4,12 @@
   "nado_node": "http://167.86.120.22:9173",
   "leagues": {
     "league1": {
-      "name": "League 1"
+      "name": "game",
+      "description": "For new players"
     },
     "league2": {
-      "name": "League 2"
+      "name": "tour1",
+      "description": "For experienced players"
     }
   }
 }
