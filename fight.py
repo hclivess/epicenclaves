@@ -280,7 +280,7 @@ def get_weapon_damage(attacker: Dict, exp_bonus_value: int) -> Dict:
 
     weapon = None
     for item in attacker.get("equipped", []):
-        if item.get("role") == "right_hand":
+        if item.get("slot") == "right_hand":
             weapon = item
             break
 
