@@ -702,7 +702,7 @@ if __name__ == "__main__":
     mapdb = {}
     usersdb = {}
 
-    leagues = ["game"]
+    leagues = ["game", "tour1"]
 
     for league in leagues:
         db_status = init_databases(league)

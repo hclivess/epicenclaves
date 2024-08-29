@@ -95,6 +95,7 @@ def save_users_from_memory(user_data_dict: Dict[str, Any], league="game") -> Non
     conn_user = sqlite3.connect("db/user_data.db")
     cursor_user = conn_user.cursor()
 
+
     for username, user_data in user_data_dict.items():
         x_pos = user_data["x_pos"]
         y_pos = user_data["y_pos"]
