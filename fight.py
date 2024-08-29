@@ -319,46 +319,39 @@ def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users:
         "rounds": []
     }
 
-    entity_class = get_entity_class(target)
-
-    if entity_class:
-        print(f"Found entity class: {entity_class.__name__}")
-    else:
-        print(f"No valid entity class found for: {target}")
-        battle_data["rounds"].append({"round": 0, "message": f"No valid target found: {target}"})
-        return {"battle_data": battle_data}
-
-    for entry in on_tile_map:
-        entry_type = get_values(entry).get("type")
-        print(f"Processing map entry. Type: {entry_type}")
-
-        if issubclass(entity_class, entities.Enemy):
-            print(f"Fighting NPC: {target}")
-            enemy = entity_class()
-            battle_data["enemy"]["max_hp"] = enemy.hp
-            battle_data["enemy"]["current_hp"] = enemy.hp
-            fight_result = fight_npc(entry, user_data, user, usersdb, mapdb, enemy)
-            battle_data.update(fight_result["battle_data"])
-        elif target == "player" and entry_type == "player":
-            print(f"Fighting player: {target_name}")
-            fight_result = fight_player(entry, target_name, user_data, user, usersdb)
-            battle_data.update(fight_result["battle_data"])
-
+    if target.lower() == "player":
+        # Handle PvP combat
         for entry in on_tile_users:
-            entry_type = get_values(entry).get("type")
             entry_name = get_coords(entry)
-            print(f"Processing user entry. Type: {entry_type}, Name: {entry_name}")
-
-            if target == "player" and entry_type == "player" and target_name == entry_name:
+            if entry_name == target_name:
                 print(f"Fighting player: {target_name}")
                 fight_result = fight_player(entry, target_name, user_data, user, usersdb)
                 battle_data.update(fight_result["battle_data"])
+                return {"battle_data": battle_data}
+    else:
+        # Handle NPC combat
+        entity_class = get_entity_class(target)
 
-        if not battle_data["rounds"]:
-            print(f"No valid target found for: {target}")
-            battle_data["rounds"].append({"round": 0, "message": f"No valid target found: {target}"})
+        if entity_class:
+            print(f"Found entity class: {entity_class.__name__}")
+            for entry in on_tile_map:
+                entry_type = get_values(entry).get("type")
+                print(f"Processing map entry. Type: {entry_type}")
 
-        return {"battle_data": battle_data}
+                if issubclass(entity_class, entities.Enemy):
+                    print(f"Fighting NPC: {target}")
+                    enemy = entity_class()
+                    battle_data["enemy"]["max_hp"] = enemy.hp
+                    battle_data["enemy"]["current_hp"] = enemy.hp
+                    fight_result = fight_npc(entry, user_data, user, usersdb, mapdb, enemy)
+                    battle_data.update(fight_result["battle_data"])
+                    return {"battle_data": battle_data}
+        else:
+            print(f"No valid entity class found for: {target}")
+
+    # If we reach here, no valid target was found
+    battle_data["rounds"].append({"round": 0, "message": f"No valid target found: {target}"})
+    return {"battle_data": battle_data}
 
 def fight_player(entry: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> Dict:
     target_data = entry[target_name]
