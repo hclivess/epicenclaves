@@ -307,6 +307,56 @@ class UserActionHandler(BaseHandler):
         user_data = get_user_data(user, usersdb)  # Refresh user data
         self.render_user_panel(user, user_data, message=message)
 
+class MoveToHandler(BaseHandler):
+    def get(self):
+        x = int(self.get_argument("x"))
+        y = int(self.get_argument("y"))
+        user = tornado.escape.xhtml_escape(self.current_user)
+        user_data = get_user_data(user, usersdb=usersdb)
+        moved = move_to(user, x, y, max_size, user_data, users_dict=usersdb, map_dict=mapdb)
+        user_data = get_user_data(user, usersdb=usersdb)  # Refresh user data
+
+        visible_distance = 10
+        x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
+        visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb, visible_distance)
+        visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb), visible_distance)
+
+        # Filter the data to include only essential information
+        filtered_users_data = {}
+        for username, user_info in visible_users_data.items():
+            essential_keys = ["x_pos", "y_pos", "type", "img", "exp", "hp", "armor"]
+            filtered_users_data[username] = {key: user_info[key] for key in essential_keys if key in user_info}
+
+        filtered_map_data = {}
+        for coord, entity in visible_map_data.items():
+            filtered_entity = {"type": entity["type"]}
+            if "level" in entity:
+                filtered_entity["level"] = entity["level"]
+            if "control" in entity:
+                filtered_entity["control"] = entity["control"]
+            if "army" in entity:
+                filtered_entity["army"] = entity["army"]
+            filtered_map_data[coord] = filtered_entity
+
+        tile_actions = {}
+        for coord, entity in visible_map_data.items():
+            tile_actions[coord] = get_tile_actions(entity, user)
+        for coord, user_info in visible_users_data.items():
+            user_obj = User(coord, **user_info)
+            tile_actions[coord] = user_obj.get_actions(user)
+
+        map_data = {
+            "users": filtered_users_data,
+            "construction": filtered_map_data,
+            "actions": tile_actions,
+            "x_pos": x_pos,
+            "y_pos": y_pos,
+            "message": moved.get("message", "")  # Include the message from the move_to function
+        }
+
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps(map_data))
+
 class MoveHandler(UserActionHandler):
     def get(self, data):
         target = self.get_argument("target", default="home")
@@ -323,23 +373,21 @@ class MoveHandler(UserActionHandler):
             visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb), visible_distance)
 
             # Filter the data to include only essential information
+            filtered_users_data = {}
             for username, user_info in visible_users_data.items():
                 essential_keys = ["x_pos", "y_pos", "type", "img", "exp", "hp", "armor"]
-                visible_users_data[username] = {key: user_info[key] for key in essential_keys if key in user_info}
+                filtered_users_data[username] = {key: user_info[key] for key in essential_keys if key in user_info}
 
+            filtered_map_data = {}
             for coord, entity in visible_map_data.items():
                 filtered_entity = {"type": entity["type"]}
-                #if "name" in entity:
-                    #filtered_entity["name"] = entity["name"]
                 if "level" in entity:
                     filtered_entity["level"] = entity["level"]
                 if "control" in entity:
                     filtered_entity["control"] = entity["control"]
                 if "army" in entity:
                     filtered_entity["army"] = entity["army"]
-                #if "role" in entity:
-                    #filtered_entity["role"] = entity["role"]
-                visible_map_data[coord] = filtered_entity
+                filtered_map_data[coord] = filtered_entity
 
             # Generate actions for each tile
             tile_actions = {}
@@ -350,17 +398,19 @@ class MoveHandler(UserActionHandler):
                 tile_actions[coord] = user_obj.get_actions(user)
 
             map_data = {
-                "users": visible_users_data,
-                "construction": visible_map_data,
+                "users": filtered_users_data,
+                "construction": filtered_map_data,
                 "actions": tile_actions,
                 "x_pos": x_pos,
                 "y_pos": y_pos,
                 "message": moved["message"]
             }
 
-            self.render("templates/map.html", user=user, data=json.dumps(map_data), message=moved["message"])
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(map_data))
         else:
             self.render_user_panel(user, user_data, message=moved["message"])
+
 
 class ReviveHandler(UserActionHandler):
     def get(self):
@@ -575,55 +625,7 @@ class LoginHandler(BaseHandler):
         else:
             self.render("templates/denied.html", message=message)
 
-class MoveToHandler(BaseHandler):
-    def get(self):
-        x = int(self.get_argument("x"))
-        y = int(self.get_argument("y"))
-        user = tornado.escape.xhtml_escape(self.current_user)
-        user_data = get_user_data(user, usersdb=usersdb)
-        moved = move_to(user, x, y, max_size, user_data, users_dict=usersdb, map_dict=mapdb)
-        user_data = get_user_data(user, usersdb=usersdb)  # Refresh user data
 
-        visible_distance = 10
-        x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
-        visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb, visible_distance)
-        visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb), visible_distance)
-
-        # Filter the data to include only essential information
-        filtered_users_data = {}
-        for username, user_info in visible_users_data.items():
-            essential_keys = ["x_pos", "y_pos", "type", "img", "exp", "hp", "armor"]
-            filtered_users_data[username] = {key: user_info[key] for key in essential_keys if key in user_info}
-
-        filtered_map_data = {}
-        for coord, entity in visible_map_data.items():
-            filtered_entity = {"type": entity["type"]}
-            if "level" in entity:
-                filtered_entity["level"] = entity["level"]
-            if "control" in entity:
-                filtered_entity["control"] = entity["control"]
-            if "army" in entity:
-                filtered_entity["army"] = entity["army"]
-            filtered_map_data[coord] = filtered_entity
-
-        tile_actions = {}
-        for coord, entity in visible_map_data.items():
-            tile_actions[coord] = get_tile_actions(entity, user)
-        for coord, user_info in visible_users_data.items():
-            user_obj = User(coord, **user_info)
-            tile_actions[coord] = user_obj.get_actions(user)
-
-        map_data = {
-            "users": filtered_users_data,
-            "construction": filtered_map_data,
-            "actions": tile_actions,
-            "x_pos": x_pos,
-            "y_pos": y_pos,
-            "message": moved.get("message", "")  # Include the message from the move_to function
-        }
-
-        self.set_header("Content-Type", "application/json")
-        self.write(json.dumps(map_data))
 
 def make_app():
     return tornado.web.Application([
