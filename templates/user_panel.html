@@ -7,6 +7,8 @@
     <title>Epic Enclaves - User Panel</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/user_panel.css" rel="stylesheet">
+    <script type="text/javascript" src="js/user_panel.js"></script>
+
 </head>
 <body>
     <div class="container mt-4">
@@ -273,30 +275,6 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script>
-        document.addEventListener('keydown', function(event) {
-            const key = event.key;
-            let direction;
-            switch (key) {
-                case 'ArrowUp':
-                    direction = 'up';
-                    break;
-                case 'ArrowDown':
-                    direction = 'down';
-                    break;
-                case 'ArrowLeft':
-                    direction = 'left';
-                    break;
-                case 'ArrowRight':
-                    direction = 'right';
-                    break;
-                default:
-                    return;
-            }
-            event.preventDefault();
-            window.location.href = `/move?direction=${direction}`;
-        });
-    </script>
 
 </body>
 </html>
