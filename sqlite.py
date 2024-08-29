@@ -97,7 +97,7 @@ def save_users_from_memory(user_data_dict: Dict[str, Dict[str, Any]], league="ga
         conn_user = sqlite3.connect("db/user_data.db")
         cursor_user = conn_user.cursor()
 
-        for username, user_data in user_data_dict[league].get(league, {}).items():
+        for username, user_data in user_data_dict[league].items():
             print(f"Processing user: {username}")
             print(f"User data: {user_data}")
 
@@ -121,7 +121,7 @@ def save_users_from_memory(user_data_dict: Dict[str, Dict[str, Any]], league="ga
             """, (username, x_pos, y_pos, data_str))
 
         conn_user.commit()
-        print(f"Saved data for {len(user_data_dict[league].get(league, {}))} users")
+        print(f"Saved data for {len(user_data_dict[league])} users")
 
     except sqlite3.Error as e:
         print(f"SQLite error: {str(e)}")
@@ -166,7 +166,7 @@ def save_map_from_memory(map_data_dict: Dict[str, Any], league="game") -> None:
         conn_map = sqlite3.connect("db/map_data.db")
         cursor_map = conn_map.cursor()
 
-        for key, data in map_data_dict.items():
+        for key, data in map_data_dict[league].items():
             x_map, y_map = map(int, key.split(','))
             data_str = json.dumps(data)
 

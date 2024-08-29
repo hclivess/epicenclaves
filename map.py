@@ -65,7 +65,7 @@ def get_constructor_params(cls):
     return set(inspect.signature(cls.__init__).parameters.keys()) - {'self'}
 
 def get_user_data(user: str, usersdb: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    data = get_user(user, usersdb)
+    data = get_user(user, usersdb, league="game")
     if data is None:
         return None
     username = list(data.keys())[0]

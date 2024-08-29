@@ -33,9 +33,10 @@ def login(password, uploaded_file, auth_exists_user, auth_add_user, create_user,
 
     if not auth_exists_user(user):
         auth_add_user(user, password)
-        create_user(user_data_dict=usersdb, user=user, profile_pic=profile_pic_path, mapdb=mapdb)
-        save_users_from_memory(usersdb[league])
-        save_map_from_memory(mapdb[league])
+        create_user(user_data_dict=usersdb, user=user, profile_pic=profile_pic_path, mapdb=mapdb, league=league)
+
+    save_users_from_memory(usersdb, league=league)
+    save_map_from_memory(mapdb, league=league)
 
     if auth_login_validate(user, password):
         return f"Welcome, {user}!"

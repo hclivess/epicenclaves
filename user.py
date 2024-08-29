@@ -101,15 +101,6 @@ def create_user(user_data_dict: Dict[str, Dict[str, Any]], user: str, mapdb: Dic
                 league="game") -> None:
     print(f"Creating {user} in league {league}")
 
-    # Ensure the league exists in user_data_dict
-    if league not in user_data_dict:
-        user_data_dict[league] = {}
-
-    # Ensure the league exists in mapdb
-    if league not in mapdb:
-        print(f"Error: League {league} not found in mapdb")
-        return
-
     x_pos, y_pos = find_open_space(mapdb[league])
 
     # Generate initial weak armor for each slot
@@ -128,17 +119,8 @@ def create_user(user_data_dict: Dict[str, Dict[str, Any]], user: str, mapdb: Dic
     # Calculate total initial armor value
     new_user.armor = sum(armor["protection"] for armor in initial_armor)
 
-    # Insert user data in the passed dictionary under the specified league
     user_data_dict[league][user] = new_user.to_dict()
 
-    print(f"User {user} created in league {league}")
-    print(f"User data: {user_data_dict[league][user]}")
-
-    # Ensure the user is saved to the in-memory database
-    if user not in user_data_dict[league]:
-        print(f"Error: User {user} not saved to in-memory database")
-    else:
-        print(f"User {user} successfully saved to in-memory database")
 
 
 def get_users_at_coords(x_pos: int, y_pos: int, user: str, users_dict: Dict[str, Any], include_construction: bool = True, include_self: bool = True) -> List[Dict[str, Any]]:

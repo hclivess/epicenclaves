@@ -162,7 +162,7 @@ class MainHandler(BaseHandler):
         else:
             league = "game"
             user = tornado.escape.xhtml_escape(self.current_user)
-            data = get_user(user, usersdb[league])
+            data = get_user(user, usersdb, league=league)
             user_data = data[list(data.keys())[0]]
             self.render_user_panel(user, user_data, message=f"Welcome back, {user}")
 
@@ -181,7 +181,7 @@ class MapHandler(BaseHandler):
             return
 
         visible_distance = 10
-        user_data = get_user_data(user, usersdb=usersdb[league])
+        user_data = get_user_data(user, usersdb=usersdb)
         x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
         visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb[league], visible_distance)
         visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb[league]), visible_distance)
@@ -619,9 +619,11 @@ class LoginHandler(BaseHandler):
         message = login(password, uploaded_file, auth_exists_user, auth_add_user, create_user,
                         save_users_from_memory, save_map_from_memory, auth_login_validate, usersdb, mapdb, user)
 
+
+
         if message.startswith("Welcome"):
             self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
-            user_data = get_user_data(user, usersdb[league])
+            user_data = get_user_data(user, usersdb)
             self.render_user_panel(user, user_data, message=message)
         else:
             self.render("templates/denied.html", message=message)
