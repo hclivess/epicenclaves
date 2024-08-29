@@ -428,7 +428,7 @@ class FightHandler(BaseHandler):
                 self.return_json({"message": fight_result.get("message", "Fight completed"), "battle_data": fight_result["battle_data"]})
             else:
                 self.render("templates/fight.html", battle_data=json.dumps(fight_result["battle_data"]),
-                            profile_picture=usersdb[user]["img"], target=target)
+                            profile_picture=usersdb[user]["img"],target_picture=f"img/assets/{target}.png",  target=target)
 
     def _perform_fight(self, user, user_data, target, target_name):
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)

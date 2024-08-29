@@ -4,7 +4,7 @@
 body {
     font-family: 'Merriweather', serif;
     background-color: #0a0a0a;
-    background-image: url('img/assets/background.png');
+    background-image: url('../img/assets/background.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -111,15 +111,7 @@ body {
     background-size: cover;
 }
 
-.player {
-    left: 20%;
-    background-image: url('{{profile_picture}}');
-}
 
-.enemy {
-    right: 20%;
-    background-image: url('img/assets/{{target}}.png');
-}
 
 .health-bar {
     position: absolute;
