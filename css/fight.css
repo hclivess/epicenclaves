@@ -1,5 +1,4 @@
-
-       @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
 
 body {
     font-family: 'Merriweather', serif;
@@ -101,21 +100,34 @@ body {
     position: relative;
     height: 300px;
     margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
 }
 
 .fighter {
-    position: absolute;
-    bottom: 40px;
-    width: 150px;
-    height: 150px;
-    background-size: cover;
+    position: relative;
+    width: 40%;
+    max-width: 150px;
+    height: 0;
+    padding-bottom: 40%;
+    max-height: 150px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center bottom;
 }
 
+.fighter.player {
+    left: 5%;
+}
 
+.fighter.enemy {
+    right: 5%;
+}
 
 .health-bar {
     position: absolute;
-    bottom: -10px;
+    bottom: -20px;
     width: 100%;
     height: 10px;
     background-color: #444;
@@ -136,6 +148,7 @@ body {
     font-weight: bold;
     color: #e0e0e0;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    font-size: 14px;
 }
 
 .pop-up-container {
@@ -173,7 +186,6 @@ body {
     color: #e0e0e0;
 }
 
-
 #battleLog {
     list-style-type: none;
     padding-left: 0;
@@ -182,31 +194,29 @@ body {
 .battle-message {
     padding: 5px 0;
     border-bottom: 1px solid #444;
-    background-color: #1a1a1a; /* Dark background for each message */
-    color: #e0e0e0; /* Light text color */
-    margin-bottom: 5px; /* Add some space between messages */
-    border-radius: 4px; /* Rounded corners for each message */
-    padding: 8px; /* Padding inside each message */
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    padding: 8px;
 }
 
 .battle-message:last-child {
     border-bottom: none;
 }
 
-/* Specific styles for different types of battle messages */
 .battle-message.player-attack {
-    background-color: rgba(0, 123, 255, 0.1); /* Slight blue tint for player attacks */
+    background-color: rgba(0, 123, 255, 0.1);
 }
 
 .battle-message.enemy-attack {
-    background-color: rgba(220, 53, 69, 0.1); /* Slight red tint for enemy attacks */
+    background-color: rgba(220, 53, 69, 0.1);
 }
 
 .battle-message.battle-result {
-    background-color: rgba(40, 167, 69, 0.1); /* Slight green tint for battle results */
+    background-color: rgba(40, 167, 69, 0.1);
 }
 
-/* Additional styles to ensure dark theme consistency */
 input, select, textarea {
     background-color: #2a2a2a;
     color: #e0e0e0;
@@ -231,3 +241,41 @@ a:hover {
     color: #7fbfff;
 }
 
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .battle-arena {
+        height: 200px;
+    }
+
+    .fighter {
+        width: 35%;
+        padding-bottom: 35%;
+    }
+
+    .hp-display {
+        font-size: 12px;
+    }
+
+    .pop-up {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .battle-arena {
+        height: 150px;
+    }
+
+    .fighter {
+        width: 30%;
+        padding-bottom: 30%;
+    }
+
+    .hp-display {
+        font-size: 10px;
+    }
+
+    .pop-up {
+        font-size: 14px;
+    }
+}
