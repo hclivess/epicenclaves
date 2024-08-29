@@ -222,7 +222,6 @@ class MapHandler(BaseHandler):
 class ScoreboardHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-        print(mapdb[league], usersdb[league])
         self.render("templates/scoreboard.html", mapdb=mapdb[league], usersdb=usersdb[league], ensure_ascii=False, user=user)
 
 
@@ -596,7 +595,7 @@ class DeployArmyHandler(UserActionHandler):
         return deploy_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
 
     def _remove_army(self, user):
-        user_data = get_user_data(user, usersdb)
+        user_data = get_user_data(user, usersdb[league])
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
         return remove_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
 
@@ -705,6 +704,7 @@ if __name__ == "__main__":
     leagues = ["game", "tour1"]
 
     for league in leagues:
+        print(f"Working on {league}")
         db_status = init_databases(league)
         mapdb[league], usersdb[league] = initialize_map_and_users()
 
