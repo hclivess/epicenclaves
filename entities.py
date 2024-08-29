@@ -49,10 +49,10 @@ class Enemy:
         self.min_damage, self.max_damage = self.calculate_damage()
 
     def calculate_hp(self):
-        return int(self.base_hp * (1 + 0.3 * (self.level - 1)))
+        return int(self.base_hp * (1 + 0.2 * (self.level - 1))) # 20% increase per level
 
     def calculate_damage(self):
-        scaling_factor = 1 + 0.15 * (self.level - 1)  # 5% increase per level
+        scaling_factor = 1 + 0.10 * (self.level - 1)  # 10% increase per level
         min_damage = int(self.base_min_damage * scaling_factor)
         max_damage = int(self.base_max_damage * scaling_factor)
         return min_damage, max_damage
