@@ -1,0 +1,5 @@
+- player HP does not scale
+- enemy HP scales
+- player damage experience bonus scales
+- enemy damage is static based on level and class
+- creature classes have different difficulty and there is some optimal progression though enemy classes
