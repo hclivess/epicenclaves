@@ -1,0 +1,26 @@
+{
+  "leagues": [
+    {
+      "name": "Novice",
+      "description": "For new players",
+      "requirements": {
+        "max_level": 10
+      }
+    },
+    {
+      "name": "Intermediate",
+      "description": "For experienced players",
+      "requirements": {
+        "min_level": 11,
+        "max_level": 30
+      }
+    },
+    {
+      "name": "Expert",
+      "description": "For advanced players",
+      "requirements": {
+        "min_level": 31
+      }
+    }
+  ]
+}

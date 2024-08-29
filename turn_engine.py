@@ -3,10 +3,8 @@ import random
 import blockchain
 import threading
 import time
-from sqlite import update_turn
-from user import save_users_from_memory
+from sqlite import save_users_from_memory, save_map_from_memory
 from backend import update_user_data, hashify
-from map import save_map_from_memory
 from entity_generator import spawn_all_entities
 import string
 import importlib
@@ -48,7 +46,6 @@ class TurnEngine(threading.Thread):
         self.update_latest_block()
         if self.compare_block != self.latest_block:
             self.save_databases()
-            self.update_turn()
             self.update_users_data()
             self.spawn_entities()
             print(f"Current turn: {self.turn}")
@@ -56,10 +53,6 @@ class TurnEngine(threading.Thread):
     def update_latest_block(self):
         self.latest_block = hashify(fake_hash()) if TEST else blockchain.last_bis_hash()
 
-    def update_turn(self):
-        self.turn += 1
-        self.compare_block = self.latest_block
-        update_turn(self.turn)
 
     def update_users_data(self):
         for username, user_data in self.usersdb.items():

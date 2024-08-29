@@ -1,8 +1,6 @@
-import json
-import sqlite3
 import random
 from typing import List, Dict, Any
-from item_generator import id_generator, generate_armor, generate_weapon, generate_tool
+from item_generator import generate_armor, generate_weapon, generate_tool
 import threading
 
 user_lock = threading.Lock()
@@ -70,14 +68,6 @@ class User:
             "construction": self.construction
         }
 
-def create_users_db():
-    with user_lock:
-        conn = sqlite3.connect("db/user_data.db")
-        cursor = conn.cursor()
-        cursor.execute(
-            "CREATE TABLE IF NOT EXISTS user_data (username TEXT PRIMARY KEY, x_pos INTEGER, y_pos INTEGER, data TEXT)")
-        conn.commit()
-        conn.close()
 
 def find_open_space(mapdb: Dict[str, Any]) -> tuple:
     x = random.randint(0, 100)
@@ -130,63 +120,6 @@ def create_user(user_data_dict: Dict[str, Any], user: str, mapdb: Dict[str, Any]
     user_data_dict[user] = new_user.to_dict()
     print("User created")
 
-def save_users_from_memory(user_data_dict: Dict[str, Any]) -> None:
-    print("saving users to drive")
-    conn_user = sqlite3.connect("db/user_data.db")
-    cursor_user = conn_user.cursor()
-
-    for username, user_data in user_data_dict.items():
-        x_pos = user_data["x_pos"]
-        y_pos = user_data["y_pos"]
-
-        data_copy = user_data.copy()
-        del data_copy["x_pos"]
-        del data_copy["y_pos"]
-
-        data_str = json.dumps(data_copy)
-
-        # Check if the user entry exists
-        cursor_user.execute("SELECT 1 FROM user_data WHERE username = ?", (username,))
-        exists = cursor_user.fetchone()
-
-        # Update the existing user entry if it exists, else insert a new entry
-        if exists:
-            cursor_user.execute("UPDATE user_data SET x_pos = ?, y_pos = ?, data = ? WHERE username = ?",
-                                (x_pos, y_pos, data_str, username))
-        else:
-            cursor_user.execute("INSERT INTO user_data (username, x_pos, y_pos, data) VALUES (?, ?, ?, ?)",
-                                (username, x_pos, y_pos, data_str))
-
-    # Commit the changes and close the database connection
-    conn_user.commit()
-    conn_user.close()
-
-def load_users_to_memory() -> Dict[str, Any]:
-    conn_user = sqlite3.connect("db/user_data.db")
-    cursor_user = conn_user.cursor()
-
-    cursor_user.execute("SELECT username, x_pos, y_pos, data FROM user_data")
-    all_users_results = cursor_user.fetchall()
-    conn_user.close()
-
-    if not all_users_results:
-        print("No users found")
-        return {}
-
-    user_data_dict = {}
-    for result_user in all_users_results:
-        username, x_pos, y_pos, data_str = result_user
-        data = json.loads(data_str)
-
-        user_data = {
-            "x_pos": x_pos,
-            "y_pos": y_pos,
-            **data
-        }
-
-        user_data_dict[username] = user_data
-
-    return user_data_dict
 
 def get_users_at_coords(x_pos: int, y_pos: int, user: str, users_dict: Dict[str, Any], include_construction: bool = True, include_self: bool = True) -> List[Dict[str, Any]]:
     """Returns a list of user data at a specific coordinate"""
