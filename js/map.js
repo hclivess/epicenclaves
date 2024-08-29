@@ -101,7 +101,7 @@ function updateMap(data) {
     checkPlayerPosition();
 }
 
-function updatePopupContent(x_pos, y_pos) {
+function updatePopupContent(x_pos, y_pos, tileType) {
     const popup = document.getElementById('popup');
     const currentTile = `${x_pos},${y_pos}`;
     let tileActions = jsonData.actions[currentTile] || [];
@@ -116,7 +116,7 @@ function updatePopupContent(x_pos, y_pos) {
 
     let popupContent = `
         <h3>Tile Information</h3>
-        <p>You are at (${x_pos}, ${y_pos})</p>
+        <p>You arrived at ${tileType} (${x_pos}, ${y_pos})</p>
     `;
 
     if (tileActions.length > 0) {
@@ -153,8 +153,14 @@ function checkPlayerPosition() {
         const exclamationMark = playerElement.querySelector('.exclamation-mark');
 
         if (entityOnTile || playersOnTile.length > 0) {
-            exclamationMark.style.display = "flex";
-            updatePopupContent(x_pos, y_pos);
+    exclamationMark.style.display = "flex";
+
+    if (entityOnTile) {
+        updatePopupContent(x_pos, y_pos, entityOnTile.type);
+    } else if (playersOnTile.length > 0) {
+        const playerType = playersOnTile[0].type; // Assuming the first player's type is used
+        updatePopupContent(x_pos, y_pos, playerType);
+    }
         } else {
             exclamationMark.style.display = "none";
             closePopup();
