@@ -101,14 +101,22 @@ function updateMap(data) {
     checkPlayerPosition();
 }
 
-function updatePopupContent(x_pos, y_pos, tileType) {
+function updatePopupContent(x_pos, y_pos) {
     const popup = document.getElementById('popup');
     const currentTile = `${x_pos},${y_pos}`;
-    const tileActions = jsonData.actions[currentTile] || [];
+    let tileActions = jsonData.actions[currentTile] || [];
+
+    // Check for player actions
+    Object.keys(jsonData.users).forEach(username => {
+        const user = jsonData.users[username];
+        if (user.x_pos === x_pos && user.y_pos === y_pos && username !== currentUser) {
+            tileActions = tileActions.concat(jsonData.actions[username] || []);
+        }
+    });
 
     let popupContent = `
         <h3>Tile Information</h3>
-        <p>You arrive at <strong>${tileType}</strong></p>
+        <p>You are at (${x_pos}, ${y_pos})</p>
     `;
 
     if (tileActions.length > 0) {
@@ -131,6 +139,29 @@ function updatePopupContent(x_pos, y_pos, tileType) {
     popup.style.display = "block";
 }
 
+function checkPlayerPosition() {
+    const currentUserData = jsonData.users[currentUser];
+    if (currentUserData) {
+        const { x_pos, y_pos } = currentUserData;
+        const key = `${x_pos},${y_pos}`;
+        const entityOnTile = jsonData.construction[key];
+        const playersOnTile = Object.values(jsonData.users).filter(user =>
+            user.x_pos === x_pos && user.y_pos === y_pos && user !== currentUserData
+        );
+
+        const playerElement = document.querySelector('.entity.player');
+        const exclamationMark = playerElement.querySelector('.exclamation-mark');
+
+        if (entityOnTile || playersOnTile.length > 0) {
+            exclamationMark.style.display = "flex";
+            updatePopupContent(x_pos, y_pos);
+        } else {
+            exclamationMark.style.display = "none";
+            closePopup();
+        }
+    }
+}
+
 function performFightAction(actionUrl) {
     // Navigate to the fight page
     window.location.href = actionUrl;
@@ -139,26 +170,6 @@ function performFightAction(actionUrl) {
 function closePopup() {
     const popup = document.getElementById('popup');
     popup.style.display = "none";
-}
-
-function checkPlayerPosition() {
-    const currentUserData = jsonData.users[currentUser];
-    if (currentUserData) {
-        const { x_pos, y_pos } = currentUserData;
-        const key = `${x_pos},${y_pos}`;
-        const entityOnTile = jsonData.construction[key];
-
-        const playerElement = document.querySelector('.entity.player');
-        const exclamationMark = playerElement.querySelector('.exclamation-mark');
-
-        if (entityOnTile) {
-            exclamationMark.style.display = "flex";
-            updatePopupContent(x_pos, y_pos, entityOnTile.type);
-        } else {
-            exclamationMark.style.display = "none";
-            closePopup();
-        }
-    }
 }
 
 function moveToPosition(x, y, callback) {

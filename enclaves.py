@@ -345,6 +345,9 @@ class MoveHandler(UserActionHandler):
             tile_actions = {}
             for coord, entity in visible_map_data.items():
                 tile_actions[coord] = get_tile_actions(entity, user)
+            for coord, user_info in visible_users_data.items():
+                user_obj = User(coord, **user_info)
+                tile_actions[coord] = user_obj.get_actions(user)
 
             map_data = {
                 "users": visible_users_data,
