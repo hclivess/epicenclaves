@@ -646,6 +646,7 @@ def make_app():
         (r"/deploy(.*)", DeployArmyHandler),
         (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),
         (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),
+        (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": "css"}),
     ])
 
 
