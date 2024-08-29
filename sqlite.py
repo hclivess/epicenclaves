@@ -11,28 +11,6 @@ users_db = sqlite3.connect("db/auth.db")
 users_db_cursor = users_db.cursor()
 
 
-def create_game_database(league="game"):
-    # Create the 'db' directory if it doesn't exist
-    if not os.path.exists('db'):
-        os.makedirs('db')
-
-    # Connect to the SQLite database
-    db_path = os.path.join('db', 'game_data.db')
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-
-    # Create the 'game' table with 'turn' column and insert default value
-    cursor.execute(f'''
-        CREATE TABLE IF NOT EXISTS {league} (
-            turn INTEGER DEFAULT 0
-        )
-    ''')
-
-    # Commit the changes and close the connection
-    conn.commit()
-    conn.close()
-
-
 def update_turn(turn_value, league="game"):
     # Connect to the SQLite database
     db_path = os.path.join('db', 'game_data.db')
@@ -83,8 +61,6 @@ def init_databases():
 
     if not map_exists:
         create_map_database()
-    if not game_exists:
-        create_game_database()
     if not user_exists:
         create_users_db()
 
