@@ -37,16 +37,16 @@ class TurnEngine(threading.Thread):
         self.running = True
         self.usersdb = usersdb
         self.mapdb = mapdb
-
+        self.league = "game"
     def save_databases(self):
-        save_map_from_memory(self.mapdb)
-        save_users_from_memory(self.usersdb)
+        save_map_from_memory(self.mapdb[self.league])
+        save_users_from_memory(self.usersdb[self.league])
 
     def check_for_updates(self):
         self.update_latest_block()
         if self.compare_block != self.latest_block:
             self.save_databases()
-            self.update_users_data()
+            self.update_users_data(self.league)
             self.spawn_entities()
             print(f"Current turn: {self.turn}")
 
@@ -54,8 +54,8 @@ class TurnEngine(threading.Thread):
         self.latest_block = hashify(fake_hash()) if TEST else blockchain.last_bis_hash()
 
 
-    def update_users_data(self):
-        for username, user_data in self.usersdb.items():
+    def update_users_data(self,league):
+        for username, user_data in self.usersdb[league].items():
             updated_values = self.calculate_updated_values(user_data)
 
             # Update action_points and age if "action_points" exists

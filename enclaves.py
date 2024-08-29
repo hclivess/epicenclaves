@@ -129,9 +129,9 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def render_user_panel(self, user, user_data, message="", on_tile_map=None, on_tile_users=None):
         if on_tile_map is None:
-            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
         if on_tile_users is None:
-            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
+            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[league])
 
         # Generate actions for each tile
         tile_actions = {}
@@ -160,8 +160,9 @@ class MainHandler(BaseHandler):
         if not self.current_user:
             self.render("templates/login.html")
         else:
+            league = "game"
             user = tornado.escape.xhtml_escape(self.current_user)
-            data = get_user(user, usersdb)
+            data = get_user(user, usersdb[league])
             user_data = data[list(data.keys())[0]]
             self.render_user_panel(user, user_data, message=f"Welcome back, {user}")
 
@@ -180,10 +181,10 @@ class MapHandler(BaseHandler):
             return
 
         visible_distance = 10
-        user_data = get_user_data(user, usersdb=usersdb)
+        user_data = get_user_data(user, usersdb=usersdb[league])
         x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
-        visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb, visible_distance)
-        visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb), visible_distance)
+        visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb[league], visible_distance)
+        visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb[league]), visible_distance)
 
         # Filter the data to include only essential information
         for username, user_info in visible_users_data.items():
@@ -221,18 +222,18 @@ class MapHandler(BaseHandler):
 class ScoreboardHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-        print(mapdb, usersdb)
-        self.render("templates/scoreboard.html", mapdb=mapdb, usersdb=usersdb, ensure_ascii=False, user=user)
+        print(mapdb[league], usersdb[league])
+        self.render("templates/scoreboard.html", mapdb=mapdb[league], usersdb=usersdb[league], ensure_ascii=False, user=user)
 
 
 class UserActionHandler(BaseHandler):
     def perform_action(self, user, action_func, *args, **kwargs):
-        user_data = get_user_data(user, usersdb)
+        user_data = get_user_data(user, usersdb[league])
         if user_data is None:
             self.render_user_panel(user, {}, message=f"User {user} not found.")
             return
         message = action_func(user, user_data, *args, **kwargs)
-        user_data = get_user_data(user, usersdb)  # Refresh user data
+        user_data = get_user_data(user, usersdb[league])  # Refresh user data
         self.render_user_panel(user, user_data, message=message)
 
 
@@ -243,7 +244,7 @@ class EquipHandler(UserActionHandler):
         self.perform_action(user, self._equip_item, id)
 
     def _equip_item(self, user, user_data, item_id):
-        return equip_item(user, usersdb, item_id)
+        return equip_item(user, usersdb[league], item_id)
 
 
 class UnequipHandler(UserActionHandler):
@@ -253,7 +254,7 @@ class UnequipHandler(UserActionHandler):
         self.perform_action(user, self._unequip_item, id)
 
     def _unequip_item(self, user, user_data, item_id):
-        return unequip_item(user, usersdb, item_id)
+        return unequip_item(user, usersdb[league], item_id)
 
 class RepairHandler(UserActionHandler):
     def get(self):
@@ -261,7 +262,7 @@ class RepairHandler(UserActionHandler):
         self.perform_action(user, self._repair_items)
 
     def _repair_items(self, user, user_data):
-        return repair_all_items(user, usersdb)
+        return repair_all_items(user, usersdb[league])
 
 class TrashHandler(UserActionHandler):
     def get(self):
@@ -270,7 +271,7 @@ class TrashHandler(UserActionHandler):
         self.perform_action(user, self._trash_item, id)
 
     def _trash_item(self, user, user_data, item_id):
-        return trash_item(usersdb, user, item_id)
+        return trash_item(usersdb[league], user, item_id)
 
 class TrashWeaponsHandler(UserActionHandler):
     def get(self):
@@ -278,7 +279,7 @@ class TrashWeaponsHandler(UserActionHandler):
         self.perform_action(user, self._trash_weapons)
 
     def _trash_weapons(self, user, user_data):
-        return trash_weapons(usersdb, user)
+        return trash_weapons(usersdb[league], user)
 
 class TrashArmorHandler(UserActionHandler):
     def get(self):
@@ -286,7 +287,7 @@ class TrashArmorHandler(UserActionHandler):
         self.perform_action(user, self._trash_armor)
 
     def _trash_armor(self, user, user_data):
-        return trash_armor(usersdb, user)
+        return trash_armor(usersdb[league], user)
 
 class TrashAllHandler(UserActionHandler):
     def get(self):
@@ -294,17 +295,17 @@ class TrashAllHandler(UserActionHandler):
         self.perform_action(user, self._trash_all)
 
     def _trash_all(self, user, user_data):
-        return trash_all(usersdb, user)
+        return trash_all(usersdb[league], user)
 
 
 class UserActionHandler(BaseHandler):
     def perform_action(self, user, action_func, *args, **kwargs):
-        user_data = get_user_data(user, usersdb)
+        user_data = get_user_data(user, usersdb[league])
         if user_data is None:
             self.render_user_panel(user, {}, message=f"User {user} not found.")
             return
         message = action_func(user, user_data, *args, **kwargs)
-        user_data = get_user_data(user, usersdb)  # Refresh user data
+        user_data = get_user_data(user, usersdb[league])  # Refresh user data
         self.render_user_panel(user, user_data, message=message)
 
 class MoveToHandler(BaseHandler):
@@ -312,14 +313,14 @@ class MoveToHandler(BaseHandler):
         x = int(self.get_argument("x"))
         y = int(self.get_argument("y"))
         user = tornado.escape.xhtml_escape(self.current_user)
-        user_data = get_user_data(user, usersdb=usersdb)
-        moved = move_to(user, x, y, max_size, user_data, users_dict=usersdb, map_dict=mapdb)
-        user_data = get_user_data(user, usersdb=usersdb)  # Refresh user data
+        user_data = get_user_data(user, usersdb=usersdb[league])
+        moved = move_to(user, x, y, max_size, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
+        user_data = get_user_data(user, usersdb=usersdb[league])  # Refresh user data
 
         visible_distance = 10
         x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
-        visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb, visible_distance)
-        visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb), visible_distance)
+        visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb[league], visible_distance)
+        visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb[league]), visible_distance)
 
         # Filter the data to include only essential information
         filtered_users_data = {}
@@ -362,15 +363,15 @@ class MoveHandler(UserActionHandler):
         target = self.get_argument("target", default="home")
         entry = self.get_argument("direction")
         user = tornado.escape.xhtml_escape(self.current_user)
-        user_data = get_user_data(user, usersdb=usersdb)
-        moved = move(user, entry, max_size, user_data, users_dict=usersdb, map_dict=mapdb)
-        user_data = get_user_data(user, usersdb=usersdb)  # Refresh user data
+        user_data = get_user_data(user, usersdb=usersdb[league])
+        moved = move(user, entry, max_size, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
+        user_data = get_user_data(user, usersdb=usersdb[league])  # Refresh user data
 
         if target == "map":
             visible_distance = 10
             x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
-            visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb, visible_distance)
-            visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb), visible_distance)
+            visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb[league], visible_distance)
+            visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb[league]), visible_distance)
 
             # Filter the data to include only essential information
             filtered_users_data = {}
@@ -415,15 +416,15 @@ class MoveHandler(UserActionHandler):
 class ReviveHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-        user_data = get_user_data(user, usersdb)
+        user_data = get_user_data(user, usersdb[league])
         if user_data.get("action_points") > 250:
             new_ap = user_data["action_points"] - 250
             update_user_data(user=user, updated_values={"alive": True, "hp": 100, "action_points": new_ap},
-                             user_data_dict=usersdb)
+                             user_data_dict=usersdb[league])
             message = "You awaken from the dead"
         else:
             message = "You do not have enough action points to revive"
-        user_data = get_user_data(user, usersdb)
+        user_data = get_user_data(user, usersdb[league])
         self.render_user_panel(user, user_data, message=message)
 
 
@@ -437,12 +438,12 @@ class RestHandler(UserActionHandler):
         if return_to_map:
             self.return_json({"message": message})
         else:
-            user_data = get_user_data(user, usersdb)
+            user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message)
 
     def _rest(self, user, hours):
-        user_data = get_user_data(user, usersdb)
-        return attempt_rest(user, user_data, hours, usersdb, mapdb)
+        user_data = get_user_data(user, usersdb[league])
+        return attempt_rest(user, user_data, hours, usersdb[league], mapdb[league])
 
     def return_json(self, data):
         self.set_header("Content-Type", "application/json")
@@ -450,8 +451,8 @@ class RestHandler(UserActionHandler):
         self.finish()
 
     def _rest(self, user, hours):
-        user_data = get_user_data(user, usersdb)
-        return attempt_rest(user, user_data, hours, usersdb, mapdb)
+        user_data = get_user_data(user, usersdb[league])
+        return attempt_rest(user, user_data, hours, usersdb[league], mapdb[league])
 
     def return_json(self, data):
         self.set_header("Content-Type", "application/json")
@@ -461,7 +462,7 @@ class RestHandler(UserActionHandler):
 class FightHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-        user_data = get_user_data(user, usersdb)
+        user_data = get_user_data(user, usersdb[league])
         target = self.get_argument("target")
         target_name = self.get_argument("name", default=None)
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
@@ -478,12 +479,12 @@ class FightHandler(BaseHandler):
                 self.return_json({"message": fight_result.get("message", "Fight completed"), "battle_data": fight_result["battle_data"]})
             else:
                 self.render("templates/fight.html", battle_data=json.dumps(fight_result["battle_data"]),
-                            profile_picture=usersdb[user]["img"],target_picture=f"img/assets/{target}.png",  target=target) #todo rework
+                            profile_picture=usersdb[league][user]["img"],target_picture=f"img/assets/{target}.png",  target=target) #todo rework
 
     def _perform_fight(self, user, user_data, target, target_name):
-        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-        on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb)
-        return fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb, mapdb)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
+        on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[league])
+        return fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb[league], mapdb[league])
 
 class ConquerHandler(UserActionHandler):
     def get(self):
@@ -494,13 +495,13 @@ class ConquerHandler(UserActionHandler):
         if return_to_map:
             self.return_json({"message": message})
         else:
-            user_data = get_user_data(user, usersdb)
+            user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message)
 
     def _attempt_conquer(self, user, target):
-        user_data = get_user_data(user, usersdb)
-        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-        return attempt_conquer(user, target, on_tile_map, usersdb, mapdb, user_data)
+        user_data = get_user_data(user, usersdb[league])
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
+        return attempt_conquer(user, target, on_tile_map, usersdb[league], mapdb[league], user_data)
 
 class MineHandler(UserActionHandler):
     def get(self, parameters):
@@ -511,12 +512,12 @@ class MineHandler(UserActionHandler):
         if return_to_map:
             self.return_json({"message": message})
         else:
-            user_data = get_user_data(user, usersdb)
+            user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message)
 
     def _mine_mountain(self, user, mine_amount):
-        user_data = get_user_data(user, usersdb)
-        return mine_mountain(user, mine_amount, user_data, usersdb, mapdb)
+        user_data = get_user_data(user, usersdb[league])
+        return mine_mountain(user, mine_amount, user_data, usersdb[league], mapdb[league])
 
 class ChopHandler(UserActionHandler):
     def get(self, parameters):
@@ -527,12 +528,12 @@ class ChopHandler(UserActionHandler):
         if return_to_map:
             self.return_json({"message": message})
         else:
-            user_data = get_user_data(user, usersdb)
+            user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message)
 
     def _chop_forest(self, user, chop_amount):
-        user_data = get_user_data(user, usersdb)
-        return chop_forest(user, chop_amount, user_data, usersdb, mapdb)
+        user_data = get_user_data(user, usersdb[league])
+        return chop_forest(user, chop_amount, user_data, usersdb[league], mapdb[league])
 
 class BuildHandler(UserActionHandler):
     def get(self, data):
@@ -544,12 +545,12 @@ class BuildHandler(UserActionHandler):
         if return_to_map:
             self.return_json({"message": message})
         else:
-            user_data = get_user_data(user, usersdb)
+            user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message)
 
     def _build(self, user, entity, name):
-        user_data = get_user_data(user, usersdb)
-        return build(user, user_data, entity, name, mapdb, usersdb)
+        user_data = get_user_data(user, usersdb[league])
+        return build(user, user_data, entity, name, mapdb[league], usersdb[league])
 
     def return_json(self, data):
         self.set_header("Content-Type", "application/json")
@@ -563,12 +564,12 @@ class UpgradeHandler(UserActionHandler):
         if return_to_map:
             self.return_json({"message": message})
         else:
-            user_data = get_user_data(user, usersdb)
+            user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message)
 
     def _upgrade(self, user):
-        user_data = get_user_data(user, usersdb)
-        return upgrade(user, mapdb, usersdb)
+        user_data = get_user_data(user, usersdb[league])
+        return upgrade(user, mapdb[league], usersdb[league])
 
 class DeployArmyHandler(UserActionHandler):
     def get(self, data):
@@ -586,18 +587,18 @@ class DeployArmyHandler(UserActionHandler):
         if return_to_map:
             self.return_json({"message": message})
         else:
-            user_data = get_user_data(user, usersdb)
+            user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message)
 
     def _deploy_army(self, user):
-        user_data = get_user_data(user, usersdb)
-        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-        return deploy_army(user, on_tile_map, usersdb, mapdb, user_data)
+        user_data = get_user_data(user, usersdb[league])
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
+        return deploy_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
 
     def _remove_army(self, user):
         user_data = get_user_data(user, usersdb)
-        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
-        return remove_army(user, on_tile_map, usersdb, mapdb, user_data)
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
+        return remove_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
 
 
 class RedirectToHTTPSHandler(tornado.web.RequestHandler):
@@ -612,15 +613,16 @@ class LoginHandler(BaseHandler):
             self.render("templates/denied.html", message="Username should consist of alphanumericals only!")
             return
 
+        league = "game"
         password = self.get_argument("password")
         uploaded_file = self.request.files.get("profile_picture", None)
 
         message = login(password, uploaded_file, auth_exists_user, auth_add_user, create_user,
-                        save_users_from_memory, save_map_from_memory, auth_login_validate, usersdb, mapdb, user)
+                        save_users_from_memory, save_map_from_memory, auth_login_validate, usersdb[league], mapdb[league], user)
 
         if message.startswith("Welcome"):
             self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
-            user_data = get_user_data(user, usersdb)
+            user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message)
         else:
             self.render("templates/denied.html", message=message)
@@ -693,22 +695,27 @@ async def main():
     await shutdown_event.wait()
 
 
-leagues = ["game", "game2"]
-def initialize_map_and_users():
-    return load_map_to_memory(), load_users_to_memory()
+def initialize_map_and_users(league="game"):
+    return load_map_to_memory(league), load_users_to_memory(league)
 
 if __name__ == "__main__":
-    db_status = init_databases()
-    mapdb, usersdb = initialize_map_and_users()
+    mapdb = {}
+    usersdb = {}
 
-    if not db_status["map_exists"]:
-        spawn(mapdb=mapdb, entity_class=entities.Forest, probability=1, map_size=200, max_entities=250, level=1,
-              herd_probability=0)
-        spawn(mapdb=mapdb, entity_class=entities.Mountain, probability=1, map_size=200, max_entities=250, level=1,
-              herd_probability=0)
-        spawn(mapdb=mapdb, entity_class=entities.Boar, probability=1, herd_size=15, max_entities=50, level=1,
-              herd_probability=1)
-        generate_multiple_mazes(mapdb, 20, 20, 10, 10, 0.1, 25, 200)
+    leagues = ["game"]
+
+    for league in leagues:
+        db_status = init_databases(league)
+        mapdb[league], usersdb[league] = initialize_map_and_users()
+
+        if not db_status["map_exists"]:
+            spawn(mapdb=mapdb[league], entity_class=entities.Forest, probability=1, map_size=200, max_entities=250, level=1,
+                  herd_probability=0)
+            spawn(mapdb=mapdb[league], entity_class=entities.Mountain, probability=1, map_size=200, max_entities=250, level=1,
+                  herd_probability=0)
+            spawn(mapdb=mapdb[league], entity_class=entities.Boar, probability=1, herd_size=15, max_entities=50, level=1,
+                  herd_probability=1)
+            generate_multiple_mazes(mapdb[league], 20, 20, 10, 10, 0.1, 25, 200)
 
     turn_engine = TurnEngine(usersdb, mapdb)
     turn_engine.start()
