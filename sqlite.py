@@ -8,7 +8,7 @@ users_db = sqlite3.connect("db/auth.db")
 users_db_cursor = users_db.cursor()
 
 
-def create_game_database():
+def create_game_database(league="game"):
     # Create the 'db' directory if it doesn't exist
     if not os.path.exists('db'):
         os.makedirs('db')
@@ -19,8 +19,8 @@ def create_game_database():
     cursor = conn.cursor()
 
     # Create the 'game' table with 'turn' column and insert default value
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS game (
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS {league} (
             turn INTEGER DEFAULT 0
         )
     ''')
@@ -30,15 +30,15 @@ def create_game_database():
     conn.close()
 
 
-def update_turn(turn_value):
+def update_turn(turn_value, league="game"):
     # Connect to the SQLite database
     db_path = os.path.join('db', 'game_data.db')
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Update the 'turn' value in the 'game' table
-    cursor.execute('''
-        UPDATE game
+    cursor.execute(f'''
+        UPDATE {league}
         SET turn = ?
     ''', (turn_value,))
 

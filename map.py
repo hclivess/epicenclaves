@@ -203,13 +203,13 @@ def save_map_data(map_data_dict: Dict[str, Any], x_pos: int, y_pos: int, data: D
     coord_key = f"{x_pos},{y_pos}"
     map_data_dict[coord_key] = data
 
-def create_map_database() -> None:
+def create_map_database(league="game") -> None:
     # Connect to the database or create one if it doesn't exist
     conn = sqlite3.connect("db/map_data.db")
     cursor = conn.cursor()
 
     # Create a table for the map data with columns: x_pos, y_pos, data
-    cursor.execute('''CREATE TABLE IF NOT EXISTS map_data (
+    cursor.execute(f'''CREATE TABLE IF NOT EXISTS {league} (
                         x_pos INTEGER,
                         y_pos INTEGER,
                         data TEXT,
@@ -233,7 +233,7 @@ def get_map_at_coords(x_pos: int, y_pos: int, map_data_dict: Dict[str, Any]) -> 
 
 sql_lock = threading.Lock()
 
-def save_map_from_memory(map_data_dict: Dict[str, Any]) -> None:
+def save_map_from_memory(map_data_dict: Dict[str, Any], league="game") -> None:
     with sql_lock:
         print("saving map to drive")
         conn_map = sqlite3.connect("db/map_data.db")
@@ -243,24 +243,24 @@ def save_map_from_memory(map_data_dict: Dict[str, Any]) -> None:
             x_map, y_map = map(int, key.split(','))
             data_str = json.dumps(data)
 
-            cursor_map.execute("SELECT 1 FROM map_data WHERE x_pos = ? AND y_pos = ?", (x_map, y_map))
+            cursor_map.execute(f"SELECT 1 FROM {league} WHERE x_pos = ? AND y_pos = ?", (x_map, y_map))
             exists = cursor_map.fetchone()
 
             if exists:
-                cursor_map.execute("UPDATE map_data SET data = ? WHERE x_pos = ? AND y_pos = ?", (data_str, x_map, y_map))
+                cursor_map.execute(f"UPDATE {league} SET data = ? WHERE x_pos = ? AND y_pos = ?", (data_str, x_map, y_map))
             else:
-                cursor_map.execute("INSERT INTO map_data (x_pos, y_pos, data) VALUES (?, ?, ?)", (x_map, y_map, data_str))
+                cursor_map.execute(f"INSERT INTO {league} (x_pos, y_pos, data) VALUES (?, ?, ?)", (x_map, y_map, data_str))
 
         conn_map.commit()
         conn_map.close()
 
-def load_map_to_memory() -> Dict[str, Any]:
+def load_map_to_memory(league="game") -> Dict[str, Any]:
     # Connect to the database and get a cursor
     conn_map = sqlite3.connect("db/map_data.db")
     cursor_map = conn_map.cursor()
 
     # Execute a query to fetch all records from the map_data table
-    cursor_map.execute("SELECT x_pos, y_pos, data FROM map_data")
+    cursor_map.execute(f"SELECT x_pos, y_pos, data FROM {league}")
 
     # Fetch all results
     results_map = cursor_map.fetchall()
