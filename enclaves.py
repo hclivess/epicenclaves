@@ -131,11 +131,11 @@ class BaseHandler(tornado.web.RequestHandler):
         self.render("templates/error.html")
 
     def render_user_panel(self, user, user_data, message="", on_tile_map=None, on_tile_users=None,
-                          selected_league=None):
+                          league=None):
         if on_tile_map is None:
-            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[selected_league])
+            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
         if on_tile_users is None:
-            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[selected_league])
+            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[league])
 
         # Generate actions for each tile
         tile_actions = {}
@@ -156,7 +156,7 @@ class BaseHandler(tornado.web.RequestHandler):
             actions=tile_actions,
             building_descriptions=building_descriptions,
             inventory_descriptions=inventory_descriptions,
-            league=selected_league
+            league=league
         )
 
 
@@ -170,7 +170,7 @@ class MainHandler(BaseHandler):
             user = tornado.escape.xhtml_escape(self.current_user)
             data = get_user(user, usersdb[league])
             user_data = data[list(data.keys())[0]]
-            self.render_user_panel(user, user_data, message=f"Welcome back, {user}")
+            self.render_user_panel(user, user_data, message=f"Welcome back, {user}", league=league)
 
 
 class LogoutHandler(BaseHandler):
@@ -235,11 +235,11 @@ class UserActionHandler(BaseHandler):
     def perform_action(self, user, action_func, *args, **kwargs):
         user_data = get_user_data(user, usersdb[league])
         if user_data is None:
-            self.render_user_panel(user, {}, message=f"User {user} not found.")
+            self.render_user_panel(user, {}, message=f"User {user} not found.", league=self.get_current_league())
             return
         message = action_func(user, user_data, *args, **kwargs)
         user_data = get_user_data(user, usersdb[league])  # Refresh user data
-        self.render_user_panel(user, user_data, message=message)
+        self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
 
 
 class EquipHandler(UserActionHandler):
@@ -307,11 +307,11 @@ class UserActionHandler(BaseHandler):
     def perform_action(self, user, action_func, *args, **kwargs):
         user_data = get_user_data(user, usersdb[league])
         if user_data is None:
-            self.render_user_panel(user, {}, message=f"User {user} not found.")
+            self.render_user_panel(user, {}, message=f"User {user} not found.", league=self.get_current_league())
             return
         message = action_func(user, user_data, *args, **kwargs)
         user_data = get_user_data(user, usersdb[league])  # Refresh user data
-        self.render_user_panel(user, user_data, message=message)
+        self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
 
 class MoveToHandler(BaseHandler):
     def get(self):
@@ -415,7 +415,7 @@ class MoveHandler(UserActionHandler):
             self.set_header("Content-Type", "application/json")
             self.write(json.dumps(map_data))
         else:
-            self.render_user_panel(user, user_data, message=moved["message"])
+            self.render_user_panel(user, user_data, message=moved["message"], league=self.get_current_league())
 
 
 class ReviveHandler(UserActionHandler):
@@ -430,7 +430,7 @@ class ReviveHandler(UserActionHandler):
         else:
             message = "You do not have enough action points to revive"
         user_data = get_user_data(user, usersdb[league])
-        self.render_user_panel(user, user_data, message=message)
+        self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
 
 
 class RestHandler(UserActionHandler):
@@ -444,7 +444,7 @@ class RestHandler(UserActionHandler):
             self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message)
+            self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
 
     def _rest(self, user, hours):
         user_data = get_user_data(user, usersdb[league])
@@ -477,7 +477,7 @@ class FightHandler(BaseHandler):
             if return_to_map:
                 self.return_json({"message": message})
             else:
-                self.render_user_panel(user, user_data, message=message)
+                self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
         else:
             fight_result = self._perform_fight(user, user_data, target, target_name)
             if return_to_map:
@@ -501,7 +501,7 @@ class ConquerHandler(UserActionHandler):
             self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message)
+            self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
 
     def _attempt_conquer(self, user, target):
         user_data = get_user_data(user, usersdb[league])
@@ -518,7 +518,7 @@ class MineHandler(UserActionHandler):
             self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message)
+            self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
 
     def _mine_mountain(self, user, mine_amount):
         user_data = get_user_data(user, usersdb[league])
@@ -534,7 +534,7 @@ class ChopHandler(UserActionHandler):
             self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message)
+            self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
 
     def _chop_forest(self, user, chop_amount):
         user_data = get_user_data(user, usersdb[league])
@@ -551,7 +551,7 @@ class BuildHandler(UserActionHandler):
             self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message)
+            self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
 
     def _build(self, user, entity, name):
         user_data = get_user_data(user, usersdb[league])
@@ -570,7 +570,7 @@ class UpgradeHandler(UserActionHandler):
             self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message)
+            self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
 
     def _upgrade(self, user):
         user_data = get_user_data(user, usersdb[league])
@@ -593,7 +593,7 @@ class DeployArmyHandler(UserActionHandler):
             self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message)
+            self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
 
     def _deploy_army(self, user):
         user_data = get_user_data(user, usersdb[league])
