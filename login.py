@@ -1,7 +1,12 @@
 import io
 import os
 from PIL import Image
+import json
 
+def get_leagues():
+    with open("config_enclaves.json", "r") as config_file:
+        config = json.load(config_file)
+    return config.get("leagues", {})
 
 def login(password, uploaded_file, auth_exists_user, auth_add_user, create_user, save_users_from_memory,
           save_map_from_memory, auth_login_validate, usersdb, mapdb, user, league="game"):
