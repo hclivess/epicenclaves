@@ -117,15 +117,18 @@ def get_tile_actions(tile: Any, user: str) -> List[Dict[str, str]]:
     return []
 
 class BaseHandler(tornado.web.RequestHandler):
+    def get_current_user(self):
+        return self.get_secure_cookie("user")
+
+    def get_current_league(self):
+        return self.get_secure_cookie("league").decode()
+
     def return_json(self, data):
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(data))
 
     def write_error(self, status_code, **kwargs):
         self.render("templates/error.html")
-
-    def get_current_user(self):
-        return self.get_secure_cookie("user")
 
     def render_user_panel(self, user, user_data, message="", on_tile_map=None, on_tile_users=None):
         if on_tile_map is None:
@@ -151,7 +154,8 @@ class BaseHandler(tornado.web.RequestHandler):
             on_tile_users=on_tile_users,
             actions=tile_actions,
             building_descriptions=building_descriptions,
-            inventory_descriptions=inventory_descriptions
+            inventory_descriptions=inventory_descriptions,
+            league=self.get_current_league()
         )
 
 
@@ -161,6 +165,7 @@ class MainHandler(BaseHandler):
             leagues = get_leagues()  # Get the leagues data
             self.render("templates/login.html", leagues=leagues)  # Pass leagues to the template
         else:
+            league = self.get_current_league()
             user = tornado.escape.xhtml_escape(self.current_user)
             data = get_user(user, usersdb[league])
             user_data = data[list(data.keys())[0]]

@@ -3,11 +3,11 @@
   "keyfile": "/etc/letsencrypt/live/epicenclaves.com/privkey.pem",
   "nado_node": "http://167.86.120.22:9173",
   "leagues": {
-    "league1": {
+    "game": {
       "name": "game",
       "description": "For new players"
     },
-    "league2": {
+    "tour1": {
       "name": "tour1",
       "description": "For experienced players"
     }
