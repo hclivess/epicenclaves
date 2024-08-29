@@ -38,28 +38,28 @@ class SQLiteConnectionPool:
 conn_pool = SQLiteConnectionPool("db/map_data.db")
 
 
-def init_databases():
+def init_databases(league="game"):
     map_exists = os.path.exists("db/map_data.db")
     user_exists = os.path.exists("db/user_data.db")
 
     if not map_exists:
-        create_map_database()
+        create_map_database(league)
     if not user_exists:
-        create_users_db()
+        create_users_db(league)
 
     return {"map_exists": map_exists}
 
 
-def load_users_to_memory() -> Dict[str, Any]:
+def load_users_to_memory(league="game") -> Dict[str, Any]:
     conn_user = sqlite3.connect("db/user_data.db")
     cursor_user = conn_user.cursor()
 
-    cursor_user.execute("SELECT username, x_pos, y_pos, data FROM user_data")
+    cursor_user.execute(f"SELECT username, x_pos, y_pos, data FROM {league}_user_data")
     all_users_results = cursor_user.fetchall()
     conn_user.close()
 
     if not all_users_results:
-        print("No users found")
+        print(f"No users found in league {league}")
         return {}
 
     user_data_dict = {}
@@ -78,8 +78,8 @@ def load_users_to_memory() -> Dict[str, Any]:
     return user_data_dict
 
 
-def save_users_from_memory(user_data_dict: Dict[str, Any]) -> None:
-    print("saving users to drive")
+def save_users_from_memory(user_data_dict: Dict[str, Any], league="game") -> None:
+    print(f"saving users to drive for league {league}")
     conn_user = sqlite3.connect("db/user_data.db")
     cursor_user = conn_user.cursor()
 
@@ -94,15 +94,15 @@ def save_users_from_memory(user_data_dict: Dict[str, Any]) -> None:
         data_str = json.dumps(data_copy)
 
         # Check if the user entry exists
-        cursor_user.execute("SELECT 1 FROM user_data WHERE username = ?", (username,))
+        cursor_user.execute(f"SELECT 1 FROM {league}_user_data WHERE username = ?", (username,))
         exists = cursor_user.fetchone()
 
         # Update the existing user entry if it exists, else insert a new entry
         if exists:
-            cursor_user.execute("UPDATE user_data SET x_pos = ?, y_pos = ?, data = ? WHERE username = ?",
+            cursor_user.execute(f"UPDATE {league}_user_data SET x_pos = ?, y_pos = ?, data = ? WHERE username = ?",
                                 (x_pos, y_pos, data_str, username))
         else:
-            cursor_user.execute("INSERT INTO user_data (username, x_pos, y_pos, data) VALUES (?, ?, ?, ?)",
+            cursor_user.execute(f"INSERT INTO {league}_user_data (username, x_pos, y_pos, data) VALUES (?, ?, ?, ?)",
                                 (username, x_pos, y_pos, data_str))
 
     # Commit the changes and close the database connection
@@ -110,12 +110,12 @@ def save_users_from_memory(user_data_dict: Dict[str, Any]) -> None:
     conn_user.close()
 
 
-def create_users_db():
+def create_users_db(league="game"):
     with user_lock:
         conn = sqlite3.connect("db/user_data.db")
         cursor = conn.cursor()
         cursor.execute(
-            "CREATE TABLE IF NOT EXISTS user_data (username TEXT PRIMARY KEY, x_pos INTEGER, y_pos INTEGER, data TEXT)")
+            f"CREATE TABLE IF NOT EXISTS {league}_user_data (username TEXT PRIMARY KEY, x_pos INTEGER, y_pos INTEGER, data TEXT)")
         conn.commit()
         conn.close()
 
@@ -140,7 +140,7 @@ def create_map_database(league="game") -> None:
 
 def save_map_from_memory(map_data_dict: Dict[str, Any], league="game") -> None:
     with sql_lock:
-        print("saving map to drive")
+        print(f"saving map to drive for league {league}")
         conn_map = sqlite3.connect("db/map_data.db")
         cursor_map = conn_map.cursor()
 
