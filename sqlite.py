@@ -38,16 +38,28 @@ class SQLiteConnectionPool:
 conn_pool = SQLiteConnectionPool("db/map_data.db")
 
 
+def check_table_exists(db_path, table_name):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}';")
+    table_exists = cursor.fetchone() is not None
+    conn.close()
+    return table_exists
+
+
 def init_databases(league="game"):
-    map_exists = os.path.exists("db/map_data.db")
-    user_exists = os.path.exists("db/user_data.db")
+    map_db_path = "db/map_data.db"
+    user_db_path = "db/user_data.db"
+
+    map_exists = os.path.exists(map_db_path) and check_table_exists(map_db_path, "league")
+    user_exists = os.path.exists(user_db_path) and check_table_exists(user_db_path, "league")
 
     if not map_exists:
         create_map_database(league)
     if not user_exists:
         create_users_db(league)
 
-    return {"map_exists": map_exists}
+    return {"map_exists": map_exists, "user_exists": user_exists}
 
 
 def load_users_to_memory(league="game") -> Dict[str, Any]:

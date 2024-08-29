@@ -692,6 +692,8 @@ async def main():
 
     await shutdown_event.wait()
 
+
+leagues = ["game", "game2"]
 def initialize_map_and_users():
     return load_map_to_memory(), load_users_to_memory()
 
