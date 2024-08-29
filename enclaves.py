@@ -130,11 +130,12 @@ class BaseHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, **kwargs):
         self.render("templates/error.html")
 
-    def render_user_panel(self, user, user_data, message="", on_tile_map=None, on_tile_users=None):
+    def render_user_panel(self, user, user_data, message="", on_tile_map=None, on_tile_users=None,
+                          selected_league=None):
         if on_tile_map is None:
-            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
+            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[selected_league])
         if on_tile_users is None:
-            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[league])
+            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[selected_league])
 
         # Generate actions for each tile
         tile_actions = {}
@@ -155,7 +156,7 @@ class BaseHandler(tornado.web.RequestHandler):
             actions=tile_actions,
             building_descriptions=building_descriptions,
             inventory_descriptions=inventory_descriptions,
-            league=self.get_current_league()
+            league=selected_league
         )
 
 
@@ -625,13 +626,11 @@ class LoginHandler(BaseHandler):
         message = login(password, uploaded_file, auth_exists_user, auth_add_user, create_user,
                         save_users_from_memory, save_map_from_memory, auth_login_validate, usersdb, mapdb, user)
 
-
-
         if message.startswith("Welcome"):
             self.set_secure_cookie("league", selected_league, expires_days=84)
             self.set_secure_cookie("user", self.get_argument("name"), expires_days=84)
-            user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message)
+            user_data = get_user_data(user, usersdb[selected_league])
+            self.render_user_panel(user, user_data, message=message, selected_league=selected_league)
         else:
             self.render("templates/denied.html", message=message)
 
