@@ -33,7 +33,7 @@ def has_item_equipped(data, item_type):
     return False
 
 
-def get_user(user, user_data_dict, get_construction=True, league="game"):
+def get_user(user, user_data_dict, get_construction=True):
     print(user_data_dict)
     if user not in user_data_dict:
         print(f"User {user} not found in the dictionary. (backend.py)")

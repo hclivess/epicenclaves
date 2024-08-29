@@ -161,9 +161,8 @@ class MainHandler(BaseHandler):
             leagues = get_leagues()  # Get the leagues data
             self.render("templates/login.html", leagues=leagues)  # Pass leagues to the template
         else:
-            league = self.get_argument("league")
             user = tornado.escape.xhtml_escape(self.current_user)
-            data = get_user(user, usersdb, league=league)
+            data = get_user(user, usersdb[league])
             user_data = data[list(data.keys())[0]]
             self.render_user_panel(user, user_data, message=f"Welcome back, {user}")
 
