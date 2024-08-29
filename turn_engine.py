@@ -40,8 +40,8 @@ class TurnEngine(threading.Thread):
 
     def save_databases(self):
         for league in self.mapdb.keys(): #todo dont copy
-            save_map_from_memory(self.mapdb[league], league=league)
-            save_users_from_memory(self.usersdb[league], league=league)
+            save_map_from_memory(self.mapdb, league=league)
+            save_users_from_memory(self.usersdb, league=league)
 
     def check_for_updates(self):
         self.update_latest_block()
