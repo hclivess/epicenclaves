@@ -35,11 +35,11 @@ def has_item_equipped(data, item_type):
 
 def get_user(user, user_data_dict, get_construction=True, league="game"):
     print(user_data_dict)
-    if user not in user_data_dict[league]:
+    if user not in user_data_dict:
         print(f"User {user} not found in the dictionary. (backend.py)")
         return None
 
-    user_entry = user_data_dict[league][user]
+    user_entry = user_data_dict[user]
 
     # Extract x_pos, y_pos, and other data from user_entry
     x_pos = user_entry.get("x_pos", 0)
