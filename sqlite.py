@@ -51,8 +51,8 @@ def init_databases(league="game"):
     map_db_path = "db/map_data.db"
     user_db_path = "db/user_data.db"
 
-    map_exists = os.path.exists(map_db_path) and check_table_exists(map_db_path, "league")
-    user_exists = os.path.exists(user_db_path) and check_table_exists(user_db_path, "league")
+    map_exists = os.path.exists(map_db_path) and check_table_exists(map_db_path, league)
+    user_exists = os.path.exists(user_db_path) and check_table_exists(user_db_path, league)
 
     if not map_exists:
         create_map_database(league)

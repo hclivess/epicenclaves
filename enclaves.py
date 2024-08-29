@@ -708,6 +708,7 @@ if __name__ == "__main__":
         db_status = init_databases(league)
         mapdb[league], usersdb[league] = initialize_map_and_users()
 
+        print(db_status)
         if not db_status["map_exists"]:
             spawn(mapdb=mapdb[league], entity_class=entities.Forest, probability=1, map_size=200, max_entities=250, level=1,
                   herd_probability=0)
