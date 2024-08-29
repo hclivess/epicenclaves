@@ -56,7 +56,6 @@ conn_pool = SQLiteConnectionPool("db/map_data.db")
 
 def init_databases():
     map_exists = os.path.exists("db/map_data.db")
-    game_exists = os.path.exists("db/game_data.db")
     user_exists = os.path.exists("db/user_data.db")
 
     if not map_exists:
