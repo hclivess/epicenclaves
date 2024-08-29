@@ -125,7 +125,7 @@ def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb:
     npc.alive = False
 
     if random.random() < npc.drop_chance:
-        min_item_level = max(1, npc.level - 15)  # Ensure minimum level is at least 1
+        min_item_level = max(1, npc.level - 9)  # Ensure minimum level is at least 1
         max_item_level = npc.level
 
         # Use logarithmic_level to generate the item level
