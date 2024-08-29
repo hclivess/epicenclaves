@@ -67,7 +67,7 @@ class TurnEngine(threading.Thread):
 
             # Update action_points and age if "action_points" exists
             if "action_points" in user_data:
-                updated_values["action_points"] = user_data["action_points"] + 5
+                updated_values["action_points"] = user_data["action_points"] + 10
                 updated_values["age"] = user_data["age"] + 1
 
             update_user_data(user=username, updated_values=updated_values, user_data_dict=self.usersdb)
