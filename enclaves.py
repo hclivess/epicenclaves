@@ -509,57 +509,57 @@ class FightHandler(BaseHandler):
 
 
 class ConquerHandler(UserActionHandler):
-    def get(self):
+    def get(self, *args, **kwargs):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         target = self.get_argument("target", default="")
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
-        message = self._attempt_conquer(user, target)
+        message = self.perform_action(user, self._attempt_conquer, league, target)
         if return_to_map:
             self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
+            self.render_user_panel(user, user_data, message=message, league=league)
 
-    def _attempt_conquer(self, user, target):
-        user_data = get_user_data(user, usersdb[league])
+    def _attempt_conquer(self, user, user_data, target):
+        league = self.get_current_league()
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
         return attempt_conquer(user, target, on_tile_map, usersdb[league], mapdb[league], user_data)
 
 
 class MineHandler(UserActionHandler):
-    def get(self, parameters):
+    def get(self, *args, **kwargs):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         mine_amount = int(self.get_argument("amount", default="1"))
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
-        message = self._mine_mountain(user, mine_amount)
+        message = self.perform_action(user, self._mine_mountain, league, mine_amount)
         if return_to_map:
             self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
+            self.render_user_panel(user, user_data, message=message, league=league)
 
-    def _mine_mountain(self, user, mine_amount):
-        user_data = get_user_data(user, usersdb[league])
+    def _mine_mountain(self, user, user_data, mine_amount):
+        league = self.get_current_league()
         return mine_mountain(user, mine_amount, user_data, usersdb[league], mapdb[league])
 
 
 class ChopHandler(UserActionHandler):
-    def get(self, parameters):
+    def get(self, *args, **kwargs):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         chop_amount = int(self.get_argument("amount", default="1"))
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
-        message = self._chop_forest(user, chop_amount)
+        message = self.perform_action(user, self._chop_forest, league, chop_amount)
         if return_to_map:
             self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
+            self.render_user_panel(user, user_data, message=message, league=league)
 
-    def _chop_forest(self, user, chop_amount):
-        user_data = get_user_data(user, usersdb[league])
+    def _chop_forest(self, user, user_data, chop_amount):
+        league = self.get_current_league()
         return chop_forest(user, chop_amount, user_data, usersdb[league], mapdb[league])
 
 
@@ -588,33 +588,33 @@ class BuildHandler(UserActionHandler):
         self.finish()
 
 class UpgradeHandler(UserActionHandler):
-    def get(self):
+    def get(self, *args, **kwargs):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
-        message = self._upgrade(user)
+        message = self.perform_action(user, self._upgrade, league)
         if return_to_map:
             self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
+            self.render_user_panel(user, user_data, message=message, league=league)
 
-    def _upgrade(self, user):
-        user_data = get_user_data(user, usersdb[league])
+    def _upgrade(self, user, user_data):
+        league = self.get_current_league()
         return upgrade(user, mapdb[league], usersdb[league])
 
 
 class DeployArmyHandler(UserActionHandler):
-    def get(self, data):
+    def get(self, *args, **kwargs):
         action = self.get_argument("action")
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
 
         if action == "add":
-            message = self._deploy_army(user)
+            message = self.perform_action(user, self._deploy_army, league)
         elif action == "remove":
-            message = self._remove_army(user)
+            message = self.perform_action(user, self._remove_army, league)
         else:
             message = "No action specified."
 
@@ -622,15 +622,15 @@ class DeployArmyHandler(UserActionHandler):
             self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
+            self.render_user_panel(user, user_data, message=message, league=league)
 
-    def _deploy_army(self, user):
-        user_data = get_user_data(user, usersdb[league])
+    def _deploy_army(self, user, user_data):
+        league = self.get_current_league()
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
         return deploy_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
 
-    def _remove_army(self, user):
-        user_data = get_user_data(user, usersdb[league])
+    def _remove_army(self, user, user_data):
+        league = self.get_current_league()
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
         return remove_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
 
