@@ -453,29 +453,33 @@ class ReviveHandler(UserActionHandler):
             message = "You do not have enough action points to revive"
         return message
 
+
 class RestHandler(UserActionHandler):
-    def get(self):
+    def get(self, *args, **kwargs):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         hours = int(self.get_argument("hours", default="1"))
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
 
-        message = self.perform_action(user, self._rest, league, hours)
+        message = self.perform_rest_action(user, self._rest, league, hours)
+
         if return_to_map:
-            self.return_json({"message": message})
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps({"message": message}))
         else:
             user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message, league=league)
 
+    def perform_rest_action(self, user, action_func, league, *args, **kwargs):
+        user_data = get_user_data(user, usersdb[league])
+        if user_data is None:
+            return f"User {user} not found."
+        return action_func(user, user_data, *args, **kwargs)
+
     def _rest(self, user, user_data, hours):
         league = self.get_current_league()
-        return attempt_rest(user, user_data, hours, usersdb[league], mapdb[league])
-
-    def return_json(self, data):
-        self.set_header("Content-Type", "application/json")
-        self.write(json.dumps(data))
-        self.finish()
-
+        result = attempt_rest(user, user_data, hours, usersdb[league], mapdb[league])
+        return result if isinstance(result, str) else result.get("message", "Rest action completed")
 
 class FightHandler(BaseHandler):
     def get(self):
