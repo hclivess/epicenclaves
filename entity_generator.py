@@ -8,7 +8,7 @@ entities = importlib.import_module('entities')
 
 def generate_random_level(base_level):
     """Generates a random level between `base_level` and 100, with exponentially decreasing probability."""
-    max_level = 100
+    max_level = 1000
     # Decay factor: higher values make high levels rarer
     decay = 0.05
 
