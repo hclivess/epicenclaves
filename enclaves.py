@@ -663,6 +663,7 @@ def make_app():
         (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),
         (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": "css"}),
         (r"/js/(.*)", tornado.web.StaticFileHandler, {"path": "js"}),
+
     ])
 
 
