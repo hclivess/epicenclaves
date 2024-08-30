@@ -57,16 +57,16 @@ class TurnEngine(threading.Thread):
         self.latest_block = hashify(fake_hash()) if TEST else blockchain.last_bis_hash()
 
 
-    def update_users_data(self,league):
+    def update_users_data(self, league):
         for username, user_data in self.usersdb[league].items():
             updated_values = self.calculate_updated_values(user_data)
 
-            # Update action_points and age if "action_points" exists
-            if "action_points" in user_data:
-                updated_values["action_points"] = user_data["action_points"] + 10
-                updated_values["age"] = user_data["age"] + 1
+            # Update action_points and age
+            updated_values["action_points"] = user_data.get("action_points", 0) + 10
+            updated_values["age"] = user_data.get("age", 0) + 1
 
-            update_user_data(user=username, updated_values=updated_values, user_data_dict=self.usersdb)
+            update_user_data(user=username, updated_values=updated_values, user_data_dict=self.usersdb[league])
+
 
     def calculate_updated_values(self, user_data):
         building_counts = self.count_buildings(user_data)
