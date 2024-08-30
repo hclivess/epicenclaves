@@ -518,12 +518,21 @@ class ConquerHandler(UserActionHandler):
         league = self.get_current_league()
         target = self.get_argument("target", default="")
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
-        message = self.perform_action(user, self._attempt_conquer, league, target)
+
+        message = self.perform_conquer_action(user, self._attempt_conquer, league, target)
+
         if return_to_map:
-            self.return_json({"message": message})
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps({"message": message}))
         else:
             user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message, league=league)
+
+    def perform_conquer_action(self, user, action_func, league, *args, **kwargs):
+        user_data = get_user_data(user, usersdb[league])
+        if user_data is None:
+            return f"User {user} not found."
+        return action_func(user, user_data, *args, **kwargs)
 
     def _attempt_conquer(self, user, user_data, target):
         league = self.get_current_league()
@@ -537,12 +546,21 @@ class MineHandler(UserActionHandler):
         league = self.get_current_league()
         mine_amount = int(self.get_argument("amount", default="1"))
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
-        message = self.perform_action(user, self._mine_mountain, league, mine_amount)
+
+        message = self.perform_mine_action(user, self._mine_mountain, league, mine_amount)
+
         if return_to_map:
-            self.return_json({"message": message})
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps({"message": message}))
         else:
             user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message, league=league)
+
+    def perform_mine_action(self, user, action_func, league, *args, **kwargs):
+        user_data = get_user_data(user, usersdb[league])
+        if user_data is None:
+            return f"User {user} not found."
+        return action_func(user, user_data, *args, **kwargs)
 
     def _mine_mountain(self, user, user_data, mine_amount):
         league = self.get_current_league()
@@ -555,12 +573,21 @@ class ChopHandler(UserActionHandler):
         league = self.get_current_league()
         chop_amount = int(self.get_argument("amount", default="1"))
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
-        message = self.perform_action(user, self._chop_forest, league, chop_amount)
+
+        message = self.perform_chop_action(user, self._chop_forest, league, chop_amount)
+
         if return_to_map:
-            self.return_json({"message": message})
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps({"message": message}))
         else:
             user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message, league=league)
+
+    def perform_chop_action(self, user, action_func, league, *args, **kwargs):
+        user_data = get_user_data(user, usersdb[league])
+        if user_data is None:
+            return f"User {user} not found."
+        return action_func(user, user_data, *args, **kwargs)
 
     def _chop_forest(self, user, user_data, chop_amount):
         league = self.get_current_league()
@@ -575,33 +602,46 @@ class BuildHandler(UserActionHandler):
         name = self.get_argument("name")
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
 
-        message = self.perform_action(user, self._build, league, entity, name)
+        message = self.perform_build_action(user, self._build, league, entity, name)
+
         if return_to_map:
-            self.return_json({"message": message})
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps({"message": message}))
         else:
             user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message, league=league)
+
+    def perform_build_action(self, user, action_func, league, *args, **kwargs):
+        user_data = get_user_data(user, usersdb[league])
+        if user_data is None:
+            return f"User {user} not found."
+        return action_func(user, user_data, *args, **kwargs)
 
     def _build(self, user, user_data, entity, name):
         league = self.get_current_league()
         return build(user, user_data, entity, name, mapdb[league], usersdb[league])
 
-    def return_json(self, data):
-        self.set_header("Content-Type", "application/json")
-        self.write(json.dumps(data))
-        self.finish()
 
 class UpgradeHandler(UserActionHandler):
     def get(self, *args, **kwargs):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
-        message = self.perform_action(user, self._upgrade, league)
+
+        message = self.perform_upgrade_action(user, self._upgrade, league)
+
         if return_to_map:
-            self.return_json({"message": message})
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps({"message": message}))
         else:
             user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message, league=league)
+
+    def perform_upgrade_action(self, user, action_func, league, *args, **kwargs):
+        user_data = get_user_data(user, usersdb[league])
+        if user_data is None:
+            return f"User {user} not found."
+        return action_func(user, user_data, *args, **kwargs)
 
     def _upgrade(self, user, user_data):
         league = self.get_current_league()
@@ -616,17 +656,24 @@ class DeployArmyHandler(UserActionHandler):
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
 
         if action == "add":
-            message = self.perform_action(user, self._deploy_army, league)
+            message = self.perform_deploy_action(user, self._deploy_army, league)
         elif action == "remove":
-            message = self.perform_action(user, self._remove_army, league)
+            message = self.perform_deploy_action(user, self._remove_army, league)
         else:
             message = "No action specified."
 
         if return_to_map:
-            self.return_json({"message": message})
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps({"message": message}))
         else:
             user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message, league=league)
+
+    def perform_deploy_action(self, user, action_func, league, *args, **kwargs):
+        user_data = get_user_data(user, usersdb[league])
+        if user_data is None:
+            return f"User {user} not found."
+        return action_func(user, user_data, *args, **kwargs)
 
     def _deploy_army(self, user, user_data):
         league = self.get_current_league()
