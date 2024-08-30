@@ -6,7 +6,7 @@ from map import get_tile_map, get_user_data, insert_map_data
 from buildings import building_types
 
 def upgrade(user: str, mapdb: Any, usersdb: Any) -> str:
-    user_data = get_user_data(user[league], usersdb[league])
+    user_data = get_user_data(user, usersdb)
     on_tile = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
 
     if user_data["action_points"] < 1:
