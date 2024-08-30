@@ -66,9 +66,12 @@ def get_all_subclasses(cls):
     return set(cls.__subclasses__()).union(
         [s for c in cls.__subclasses__() for s in get_all_subclasses(c)])
 
+
 # Dynamically gather all entity and building types
-entity_types = {cls.__name__.lower(): cls for cls in get_all_subclasses(entities.Enemy) | get_all_subclasses(entities.Scenery)}
+entity_types = {cls.__name__.lower(): cls for cls in
+                get_all_subclasses(entities.Enemy) | get_all_subclasses(entities.Scenery)}
 building_types = {cls.__name__.lower(): cls for cls in get_all_subclasses(buildings.Building)}
+
 
 def generate_inventory_descriptions(user_data):
     inventory_descriptions = {}
@@ -115,6 +118,7 @@ def get_tile_actions(tile: Any, user: str) -> List[Dict[str, str]]:
     if hasattr(tile, 'get_actions'):
         return tile.get_actions(user)
     return []
+
 
 class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
@@ -166,8 +170,8 @@ class MainHandler(BaseHandler):
             leagues = get_leagues()  # Get the leagues data
             self.render("templates/login.html", leagues=leagues)  # Pass leagues to the template
         else:
-            league = self.get_current_league()
             user = tornado.escape.xhtml_escape(self.current_user)
+            league = self.get_current_league()
             data = get_user(user, usersdb[league])
             user_data = data[list(data.keys())[0]]
             self.render_user_panel(user, user_data, message=f"Welcome back, {user}", league=league)
@@ -182,6 +186,7 @@ class LogoutHandler(BaseHandler):
 class MapHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         if not user:
             self.redirect("/")
             return
@@ -228,7 +233,9 @@ class MapHandler(BaseHandler):
 class ScoreboardHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
-        self.render("templates/scoreboard.html", mapdb=mapdb[league], usersdb=usersdb[league], ensure_ascii=False, user=user)
+        league = self.get_current_league()
+        self.render("templates/scoreboard.html", mapdb=mapdb[league], usersdb=usersdb[league], ensure_ascii=False,
+                    user=user)
 
 
 class UserActionHandler(BaseHandler):
@@ -246,6 +253,7 @@ class EquipHandler(UserActionHandler):
     def get(self):
         id = self.get_argument("id")
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         self.perform_action(user, self._equip_item, id)
 
     def _equip_item(self, user, user_data, item_id):
@@ -256,47 +264,58 @@ class UnequipHandler(UserActionHandler):
     def get(self):
         id = self.get_argument("id")
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         self.perform_action(user, self._unequip_item, id)
 
     def _unequip_item(self, user, user_data, item_id):
         return unequip_item(user, usersdb[league], item_id)
 
+
 class RepairHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         self.perform_action(user, self._repair_items)
 
     def _repair_items(self, user, user_data):
         return repair_all_items(user, usersdb[league])
 
+
 class TrashHandler(UserActionHandler):
     def get(self):
         id = self.get_argument("id")
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         self.perform_action(user, self._trash_item, id)
 
     def _trash_item(self, user, user_data, item_id):
         return trash_item(usersdb[league], user, item_id)
 
+
 class TrashWeaponsHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         self.perform_action(user, self._trash_weapons)
 
     def _trash_weapons(self, user, user_data):
         return trash_weapons(usersdb[league], user)
 
+
 class TrashArmorHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         self.perform_action(user, self._trash_armor)
 
     def _trash_armor(self, user, user_data):
         return trash_armor(usersdb[league], user)
 
+
 class TrashAllHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         self.perform_action(user, self._trash_all)
 
     def _trash_all(self, user, user_data):
@@ -313,11 +332,13 @@ class UserActionHandler(BaseHandler):
         user_data = get_user_data(user, usersdb[league])  # Refresh user data
         self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
 
+
 class MoveToHandler(BaseHandler):
     def get(self):
         x = int(self.get_argument("x"))
         y = int(self.get_argument("y"))
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         user_data = get_user_data(user, usersdb=usersdb[league])
         moved = move_to(user, x, y, max_size, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
         user_data = get_user_data(user, usersdb=usersdb[league])  # Refresh user data
@@ -363,11 +384,13 @@ class MoveToHandler(BaseHandler):
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(map_data))
 
+
 class MoveHandler(UserActionHandler):
     def get(self, data):
         target = self.get_argument("target", default="home")
         entry = self.get_argument("direction")
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         user_data = get_user_data(user, usersdb=usersdb[league])
         moved = move(user, entry, max_size, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
         user_data = get_user_data(user, usersdb=usersdb[league])  # Refresh user data
@@ -421,6 +444,7 @@ class MoveHandler(UserActionHandler):
 class ReviveHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         user_data = get_user_data(user, usersdb[league])
         if user_data.get("action_points") > 250:
             new_ap = user_data["action_points"] - 250
@@ -436,6 +460,7 @@ class ReviveHandler(UserActionHandler):
 class RestHandler(UserActionHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         hours = int(self.get_argument("hours", default="1"))
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
 
@@ -464,9 +489,11 @@ class RestHandler(UserActionHandler):
         self.write(json.dumps(data))
         self.finish()
 
+
 class FightHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         user_data = get_user_data(user, usersdb[league])
         target = self.get_argument("target")
         target_name = self.get_argument("name", default=None)
@@ -481,19 +508,23 @@ class FightHandler(BaseHandler):
         else:
             fight_result = self._perform_fight(user, user_data, target, target_name)
             if return_to_map:
-                self.return_json({"message": fight_result.get("message", "Fight completed"), "battle_data": fight_result["battle_data"]})
+                self.return_json({"message": fight_result.get("message", "Fight completed"),
+                                  "battle_data": fight_result["battle_data"]})
             else:
                 self.render("templates/fight.html", battle_data=json.dumps(fight_result["battle_data"]),
-                            profile_picture=usersdb[league][user]["img"],target_picture=f"img/assets/{target}.png",  target=target) #todo rework
+                            profile_picture=usersdb[league][user]["img"], target_picture=f"img/assets/{target}.png",
+                            target=target)  # todo rework
 
     def _perform_fight(self, user, user_data, target, target_name):
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
         on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[league])
         return fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb[league], mapdb[league])
 
+
 class ConquerHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         target = self.get_argument("target", default="")
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
         message = self._attempt_conquer(user, target)
@@ -508,9 +539,11 @@ class ConquerHandler(UserActionHandler):
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
         return attempt_conquer(user, target, on_tile_map, usersdb[league], mapdb[league], user_data)
 
+
 class MineHandler(UserActionHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         mine_amount = int(self.get_argument("amount", default="1"))
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
         message = self._mine_mountain(user, mine_amount)
@@ -524,9 +557,11 @@ class MineHandler(UserActionHandler):
         user_data = get_user_data(user, usersdb[league])
         return mine_mountain(user, mine_amount, user_data, usersdb[league], mapdb[league])
 
+
 class ChopHandler(UserActionHandler):
     def get(self, parameters):
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         chop_amount = int(self.get_argument("amount", default="1"))
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
         message = self._chop_forest(user, chop_amount)
@@ -540,9 +575,11 @@ class ChopHandler(UserActionHandler):
         user_data = get_user_data(user, usersdb[league])
         return chop_forest(user, chop_amount, user_data, usersdb[league], mapdb[league])
 
+
 class BuildHandler(UserActionHandler):
     def get(self, data):
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         entity = self.get_argument("entity")
         name = self.get_argument("name")
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
@@ -561,9 +598,11 @@ class BuildHandler(UserActionHandler):
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(data))
 
+
 class UpgradeHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
         message = self._upgrade(user)
         if return_to_map:
@@ -576,10 +615,12 @@ class UpgradeHandler(UserActionHandler):
         user_data = get_user_data(user, usersdb[league])
         return upgrade(user, mapdb[league], usersdb[league])
 
+
 class DeployArmyHandler(UserActionHandler):
     def get(self, data):
         action = self.get_argument("action")
         user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
 
         if action == "add":
@@ -707,6 +748,7 @@ async def main():
 def initialize_map_and_users(league="game"):
     return load_map_to_memory(league), load_users_to_memory(league)
 
+
 if __name__ == "__main__":
     mapdb = {}
     usersdb = {}
@@ -720,11 +762,14 @@ if __name__ == "__main__":
 
         print(db_status)
         if not db_status["map_exists"]:
-            spawn(mapdb=mapdb[league], entity_class=entities.Forest, probability=1, map_size=200, max_entities=250, level=1,
+            spawn(mapdb=mapdb[league], entity_class=entities.Forest, probability=1, map_size=200, max_entities=250,
+                  level=1,
                   herd_probability=0)
-            spawn(mapdb=mapdb[league], entity_class=entities.Mountain, probability=1, map_size=200, max_entities=250, level=1,
+            spawn(mapdb=mapdb[league], entity_class=entities.Mountain, probability=1, map_size=200, max_entities=250,
+                  level=1,
                   herd_probability=0)
-            spawn(mapdb=mapdb[league], entity_class=entities.Boar, probability=1, herd_size=15, max_entities=50, level=1,
+            spawn(mapdb=mapdb[league], entity_class=entities.Boar, probability=1, herd_size=15, max_entities=50,
+                  level=1,
                   herd_probability=1)
             generate_multiple_mazes(mapdb[league], 20, 20, 10, 10, 0.1, 25, 200)
 
