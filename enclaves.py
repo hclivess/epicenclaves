@@ -239,14 +239,14 @@ class ScoreboardHandler(BaseHandler):
 
 
 class UserActionHandler(BaseHandler):
-    def perform_action(self, user, action_func, *args, **kwargs):
+    def perform_action(self, user, action_func, league, *args, **kwargs):
         user_data = get_user_data(user, usersdb[league])
         if user_data is None:
-            self.render_user_panel(user, {}, message=f"User {user} not found.", league=self.get_current_league())
+            self.render_user_panel(user, {}, message=f"User {user} not found.", league=league)
             return
         message = action_func(user, user_data, *args, **kwargs)
         user_data = get_user_data(user, usersdb[league])  # Refresh user data
-        self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
+        self.render_user_panel(user, user_data, message=message, league=league)
 
 
 class EquipHandler(UserActionHandler):
@@ -254,9 +254,10 @@ class EquipHandler(UserActionHandler):
         id = self.get_argument("id")
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
-        self.perform_action(user, self._equip_item, id)
+        self.perform_action(user, self._equip_item, league, id)
 
     def _equip_item(self, user, user_data, item_id):
+        league = self.get_current_league()
         return equip_item(user, usersdb[league], item_id)
 
 
@@ -265,9 +266,10 @@ class UnequipHandler(UserActionHandler):
         id = self.get_argument("id")
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
-        self.perform_action(user, self._unequip_item, id)
+        self.perform_action(user, self._unequip_item, league, id)
 
     def _unequip_item(self, user, user_data, item_id):
+        league = self.get_current_league()
         return unequip_item(user, usersdb[league], item_id)
 
 
@@ -275,9 +277,10 @@ class RepairHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
-        self.perform_action(user, self._repair_items)
+        self.perform_action(user, self._repair_items, league)
 
     def _repair_items(self, user, user_data):
+        league = self.get_current_league()
         return repair_all_items(user, usersdb[league])
 
 
@@ -286,9 +289,10 @@ class TrashHandler(UserActionHandler):
         id = self.get_argument("id")
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
-        self.perform_action(user, self._trash_item, id)
+        self.perform_action(user, self._trash_item, league, id)
 
     def _trash_item(self, user, user_data, item_id):
+        league = self.get_current_league()
         return trash_item(usersdb[league], user, item_id)
 
 
@@ -296,9 +300,10 @@ class TrashWeaponsHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
-        self.perform_action(user, self._trash_weapons)
+        self.perform_action(user, self._trash_weapons, league)
 
     def _trash_weapons(self, user, user_data):
+        league = self.get_current_league()
         return trash_weapons(usersdb[league], user)
 
 
@@ -306,9 +311,10 @@ class TrashArmorHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
-        self.perform_action(user, self._trash_armor)
+        self.perform_action(user, self._trash_armor, league)
 
     def _trash_armor(self, user, user_data):
+        league = self.get_current_league()
         return trash_armor(usersdb[league], user)
 
 
@@ -316,22 +322,11 @@ class TrashAllHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
-        self.perform_action(user, self._trash_all)
+        self.perform_action(user, self._trash_all, league)
 
     def _trash_all(self, user, user_data):
+        league = self.get_current_league()
         return trash_all(usersdb[league], user)
-
-
-class UserActionHandler(BaseHandler):
-    def perform_action(self, user, action_func, *args, **kwargs):
-        user_data = get_user_data(user, usersdb[league])
-        if user_data is None:
-            self.render_user_panel(user, {}, message=f"User {user} not found.", league=self.get_current_league())
-            return
-        message = action_func(user, user_data, *args, **kwargs)
-        user_data = get_user_data(user, usersdb[league])  # Refresh user data
-        self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
-
 
 class MoveToHandler(BaseHandler):
     def get(self):
