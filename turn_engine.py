@@ -45,6 +45,7 @@ class TurnEngine(threading.Thread):
 
     def check_for_updates(self):
         self.update_latest_block()
+        self.turn += 1
         for league in self.mapdb.keys():
             if self.compare_block != self.latest_block:
                 self.save_databases()
