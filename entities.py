@@ -20,7 +20,7 @@ class Enemy:
                  regular_drop=None,
                  drop_chance=0.1,
                  probability=0.01,
-                 map_size=101,
+                 map_size=1000,
                  max_entities=None,
                  max_entities_total=None,
                  herd_probability=0.5):
@@ -84,9 +84,9 @@ class Dragon(Enemy):
                          drop_chance=1,
                          regular_drop={"bismuth": 50},
                          probability=0.001,
-                         map_size=200,
-                         max_entities=1,
-                         max_entities_total=1,
+                         map_size=1000,
+                         max_entities=10,
+                         max_entities_total=10,
                          herd_probability=0)
 
 
@@ -105,9 +105,9 @@ class Boar(Enemy):
                          drop_chance=0.2,
                          regular_drop={"food": 1},
                          probability=0.05,
-                         map_size=200,
-                         max_entities=50,
-                         max_entities_total=100,
+                         map_size=1000,
+                         max_entities=500,
+                         max_entities_total=1000,
                          herd_probability=0.7)
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
@@ -129,9 +129,9 @@ class Wolf(Enemy):
                          drop_chance=0.3,
                          regular_drop={"food": 1},
                          probability=0.03,
-                         map_size=200,
-                         max_entities=30,
-                         max_entities_total=60,
+                         map_size=1000,
+                         max_entities=300,
+                         max_entities_total=600,
                          herd_probability=0.8)
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
@@ -153,9 +153,9 @@ class Goblin(Enemy):
                          drop_chance=0.4,
                          regular_drop={"gold": 5},
                          probability=0.02,
-                         map_size=200,
-                         max_entities=20,
-                         max_entities_total=40,
+                         map_size=1000,
+                         max_entities=200,
+                         max_entities_total=400,
                          herd_probability=0.6)
 
 
@@ -174,9 +174,9 @@ class Specter(Enemy):
                          drop_chance=0.6,
                          regular_drop={"ectoplasm": 1},
                          probability=0.01,
-                         map_size=200,
-                         max_entities=10,
-                         max_entities_total=20,
+                         map_size=1000,
+                         max_entities=100,
+                         max_entities_total=200,
                          herd_probability=0.3)
 
     def roll_damage(self):
@@ -202,9 +202,9 @@ class Hatchling(Enemy):
                          drop_chance=0.8,
                          regular_drop={"dragon_scale": 1},
                          probability=0.005,
-                         map_size=200,
-                         max_entities=5,
-                         max_entities_total=10,
+                         map_size=1000,
+                         max_entities=50,
+                         max_entities_total=100,
                          herd_probability=0.2)
         self.breath_attack_cooldown = 0
 
@@ -238,9 +238,9 @@ class Bandit(Enemy):
                          drop_chance=0.5,
                          regular_drop={"gold": 10},
                          probability=0.03,
-                         map_size=200,
-                         max_entities=25,
-                         max_entities_total=50,
+                         map_size=1000,
+                         max_entities=250,
+                         max_entities_total=500,
                          herd_probability=0.4)
 
     def roll_damage(self):
@@ -266,9 +266,9 @@ class Troll(Enemy):
                          drop_chance=0.7,
                          regular_drop={"troll_hide": 1},
                          probability=0.01,
-                         map_size=200,
-                         max_entities=10,
-                         max_entities_total=20,
+                         map_size=1000,
+                         max_entities=100,
+                         max_entities_total=200,
                          herd_probability=0.2)
 
     def calculate_hp(self):
@@ -292,9 +292,9 @@ class Harpy(Enemy):
                          drop_chance=0.6,
                          regular_drop={"feather": 3},
                          probability=0.02,
-                         map_size=200,
-                         max_entities=15,
-                         max_entities_total=30,
+                         map_size=1000,
+                         max_entities=150,
+                         max_entities_total=300,
                          herd_probability=0.5)
 
     def roll_damage(self):
@@ -319,9 +319,9 @@ class Minotaur(Enemy):
                          drop_chance=0.8,
                          regular_drop={"minotaur_horn": 1},
                          probability=0.005,
-                         map_size=200,
-                         max_entities=5,
-                         max_entities_total=10,
+                         map_size=1000,
+                         max_entities=50,
+                         max_entities_total=100,
                          herd_probability=0.1)
 
     def roll_damage(self):
@@ -349,9 +349,9 @@ class Skeleton(Enemy):
                          drop_chance=0.5,
                          regular_drop={"bone": 2},
                          probability=0.04,
-                         map_size=200,
-                         max_entities=30,
-                         max_entities_total=60,
+                         map_size=1000,
+                         max_entities=300,
+                         max_entities_total=600,
                          herd_probability=0.4)
         self.reassemble_chance = 0.2
 
@@ -378,9 +378,9 @@ class Wraith(Enemy):
                          drop_chance=0.7,
                          regular_drop={"soul_essence": 1},
                          probability=0.015,
-                         map_size=200,
-                         max_entities=12,
-                         max_entities_total=24,
+                         map_size=1000,
+                         max_entities=120,
+                         max_entities_total=240,
                          herd_probability=0.3)
 
     def roll_damage(self):

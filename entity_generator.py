@@ -31,14 +31,14 @@ def spawn_all_entities(mapdb):
             probability=getattr(entity_instance, 'probability', 1),
             mapdb=mapdb,
             level=generate_random_level(getattr(entity_instance, 'level', 1)),
-            map_size=getattr(entity_instance, 'map_size', 101),
+            map_size=getattr(entity_instance, 'map_size', 1000),
             max_entities=getattr(entity_instance, 'max_entities', None),
             max_entities_total=getattr(entity_instance, 'max_entities_total', None),
             herd_probability=getattr(entity_instance, 'herd_probability', 0.5)
         )
 
 
-def spawn(entity_class, probability, mapdb, level, map_size=101, max_entities=None, max_entities_total=None,
+def spawn(entity_class, probability, mapdb, level, map_size=20, max_entities=None, max_entities_total=None,
           herd_size=15, herd_radius=5, herd_probability=0.5):
     total_entities = 0
     total_tiles = map_size * map_size

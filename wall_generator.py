@@ -21,14 +21,14 @@ def generate_maze(width, height, offset_x, offset_y):
                 maze[f'{neighbor_x},{y}'] = {'type': 'wall'}
     return maze
 
-def generate_multiple_mazes(mapdb, width, height, initial_offset_x, initial_offset_y, spawn_prob, total_max_mazes, size):
+def generate_multiple_mazes(mapdb, width, height, initial_offset_x, initial_offset_y, spawn_prob, total_max_mazes, map_size):
     print("generating maze")
     offset_x = initial_offset_x
     offset_y = initial_offset_y
     total_maze_count = 0
 
     while total_maze_count < total_max_mazes:
-        if offset_x + width > size or offset_y + height > size:
+        if offset_x + width > map_size or offset_y + height > map_size:
             break
 
         if random.random() <= spawn_prob:
@@ -36,7 +36,7 @@ def generate_multiple_mazes(mapdb, width, height, initial_offset_x, initial_offs
             mapdb.update(maze)
 
         offset_x += width + initial_offset_x
-        if offset_x + width > size:
+        if offset_x + width > map_size:
             offset_x = initial_offset_x
             offset_y += height + initial_offset_y
 
