@@ -440,7 +440,10 @@ class ReviveHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
-        user_data = get_user_data(user, usersdb[league])
+        self.perform_action(user, self._revive, league)
+
+    def _revive(self, user, user_data):
+        league = self.get_current_league()
         if user_data.get("action_points") > 250:
             new_ap = user_data["action_points"] - 250
             update_user_data(user=user, updated_values={"alive": True, "hp": 100, "action_points": new_ap},
@@ -448,35 +451,24 @@ class ReviveHandler(UserActionHandler):
             message = "You awaken from the dead"
         else:
             message = "You do not have enough action points to revive"
-        user_data = get_user_data(user, usersdb[league])
-        self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
-
+        return message
 
 class RestHandler(UserActionHandler):
-    def get(self, parameters):
+    def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         hours = int(self.get_argument("hours", default="1"))
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
 
-        message = self._rest(user, hours)
+        message = self.perform_action(user, self._rest, league, hours)
         if return_to_map:
             self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
+            self.render_user_panel(user, user_data, message=message, league=league)
 
-    def _rest(self, user, hours):
-        user_data = get_user_data(user, usersdb[league])
-        return attempt_rest(user, user_data, hours, usersdb[league], mapdb[league])
-
-    def return_json(self, data):
-        self.set_header("Content-Type", "application/json")
-        self.write(json.dumps(data))
-        self.finish()
-
-    def _rest(self, user, hours):
-        user_data = get_user_data(user, usersdb[league])
+    def _rest(self, user, user_data, hours):
+        league = self.get_current_league()
         return attempt_rest(user, user_data, hours, usersdb[league], mapdb[league])
 
     def return_json(self, data):
@@ -572,27 +564,28 @@ class ChopHandler(UserActionHandler):
 
 
 class BuildHandler(UserActionHandler):
-    def get(self, data):
+    def get(self, *args, **kwargs):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         entity = self.get_argument("entity")
         name = self.get_argument("name")
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
-        message = self._build(user, entity, name)
+
+        message = self.perform_action(user, self._build, league, entity, name)
         if return_to_map:
             self.return_json({"message": message})
         else:
             user_data = get_user_data(user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
+            self.render_user_panel(user, user_data, message=message, league=league)
 
-    def _build(self, user, entity, name):
-        user_data = get_user_data(user, usersdb[league])
+    def _build(self, user, user_data, entity, name):
+        league = self.get_current_league()
         return build(user, user_data, entity, name, mapdb[league], usersdb[league])
 
     def return_json(self, data):
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(data))
-
+        self.finish()
 
 class UpgradeHandler(UserActionHandler):
     def get(self):
