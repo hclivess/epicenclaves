@@ -14,18 +14,19 @@
 .league-select select {
     width: 100%;
     padding: 8px 12px;
-    font-size: 16px;
-    border: 1px solid #ccc;
+    font-size: 14px;
+    border: 1px solid #444; /* Changed border color to a darker shade */
     border-radius: 4px;
-    background-color: #fff;
+    background-color: #333;
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background-image: url("data:image/svg+xml;utf8,<svg fill='%23333' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
     background-repeat: no-repeat;
     background-position: right 8px top 50%;
     background-size: 16px auto;
     cursor: pointer;
+    color: white;
+    font-family: 'Merriweather', serif;
 }
 
 .league-select select:hover {
@@ -148,6 +149,41 @@
                 margin-right: 2rem;
             }
         }
+
+input[type="file"] {
+    padding-left: 120px; /* Adjust this value as needed */
+    position: relative;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+    visibility: hidden;
+    display: none;
+}
+
+input[type="file"]::before {
+    content: 'Choose file';
+    display: inline-block;
+    background: #4ecdc4;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 8px;
+    outline: none;
+    white-space: nowrap;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    line-height: normal; /* Reset line-height for the button */
+}
+
+input[type="file"]:hover::before {
+    background-color: #45b7a0;
+}
+
     </style>
 </head>
 <body>
