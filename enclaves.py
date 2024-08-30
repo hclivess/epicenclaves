@@ -506,7 +506,7 @@ class FightHandler(BaseHandler):
             else:
                 self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
         else:
-            fight_result = self._perform_fight(user, user_data, target, target_name)
+            fight_result = self._perform_fight(user, user_data, target, target_name, league)
             if return_to_map:
                 self.return_json({"message": fight_result.get("message", "Fight completed"),
                                   "battle_data": fight_result["battle_data"]})
@@ -515,7 +515,7 @@ class FightHandler(BaseHandler):
                             profile_picture=usersdb[league][user]["img"], target_picture=f"img/assets/{target}.png",
                             target=target)  # todo rework
 
-    def _perform_fight(self, user, user_data, target, target_name):
+    def _perform_fight(self, user, user_data, target, target_name, league):
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
         on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[league])
         return fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb[league], mapdb[league])
