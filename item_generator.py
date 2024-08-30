@@ -12,11 +12,9 @@ def id_generator(length=10):
 
 
 def logarithmic_level(min_level, max_level):
-    # Generate a random number between 0 and 1
     r = random.random()
-    # Use logarithmic distribution to skew towards lower levels
-    level = int(min_level + (math.exp(r * math.log(max_level - min_level + 1)) - 1))
-    return min(level, max_level)  # Ensure we don't exceed max_level
+    level = min_level + int((math.exp(r * math.log(max_level - min_level + 1)) - 1))
+    return max(min_level, min(level, max_level))
 
 
 def generate_weapon(min_level=1, max_level=20, weapon_type=None):
