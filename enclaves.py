@@ -758,7 +758,7 @@ if __name__ == "__main__":
     for league in leagues:
         print(f"Working on {league}")
         db_status = init_databases(league)
-        mapdb[league], usersdb[league] = initialize_map_and_users()
+        mapdb[league], usersdb[league] = initialize_map_and_users(league=league)
 
         print(db_status)
         if not db_status["map_exists"]:
