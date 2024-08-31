@@ -188,7 +188,7 @@ class Specter(Enemy):
 
 
 class Hatchling(Enemy):
-    type = "Hatchling"
+    type = "hatchling"
 
     def __init__(self, level=3):
         super().__init__(base_hp=150,

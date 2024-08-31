@@ -1,7 +1,7 @@
     .dragon { background: url('../img/assets/dragon.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
     .goblin { background: url('../img/assets/goblin.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
     .specter { background: url('../img/assets/specter.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
-    .dragon_whelp { background: url('../img/assets/dragon_whelp.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
+    .hatchling { background: url('../img/assets/hatchling.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
     .bandit { background: url('../img/assets/bandit.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .troll { background: url('../img/assets/troll.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .harpy { background: url('../img/assets/harpy.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
