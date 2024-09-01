@@ -1,11 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
 
-.defeat-message { color: red; font-weight: bold; }
-.escape-message { color: orange; font-style: italic; }
-.loot-message { color: gold; }
-.no-loot-message { color: gray; }
-.exp-gain-message { color: green; }
-.armor-message { color: #4da6ff; font-style: italic; }
+#battleLog .battle-message.defeat-message { color: red !important; font-weight: bold !important; }
+#battleLog .battle-message.escape-message { color: orange !important; font-style: italic !important; }
+#battleLog .battle-message.loot-message { color: gold !important; }
+#battleLog .battle-message.no-loot-message { color: gray !important; }
+#battleLog .battle-message.exp-gain-message { color: green !important; }
+#battleLog .battle-message.armor-message { color: #4da6ff !important; font-style: italic !important; }
+#battleLog .battle-message.player-attack { color: #4da6ff !important; }
+#battleLog .battle-message.enemy-attack { color: #ff6b6b !important; }
 
 body {
     font-family: 'Merriweather', serif;
@@ -199,7 +201,7 @@ body {
     padding-left: 0;
 }
 
-.battle-message {
+#battleLog .battle-message {
     padding: 5px 0;
     border-bottom: 1px solid #444;
     background-color: #1a1a1a;
@@ -209,19 +211,19 @@ body {
     padding: 8px;
 }
 
-.battle-message:last-child {
+#battleLog .battle-message:last-child {
     border-bottom: none;
 }
 
-.battle-message.player-attack {
+#battleLog .battle-message.player-attack {
     background-color: rgba(0, 123, 255, 0.1);
 }
 
-.battle-message.enemy-attack {
+#battleLog .battle-message.enemy-attack {
     background-color: rgba(220, 53, 69, 0.1);
 }
 
-.battle-message.battle-result {
+#battleLog .battle-message.battle-result {
     background-color: rgba(40, 167, 69, 0.1);
 }
 

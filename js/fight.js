@@ -45,9 +45,69 @@ function animateAttack(attacker, target) {
 function addLogMessage(message, className) {
     const li = document.createElement('li');
     li.textContent = message;
-    li.classList.add(className);
-    battleLog.appendChild(li);
-    battleLog.scrollTop = battleLog.scrollHeight;
+    li.classList.add('battle-message');
+
+    // Add specific class based on the message type
+    switch(className) {
+        case 'defeat':
+            li.classList.add('defeat-message');
+            break;
+        case 'escape':
+            li.classList.add('escape-message');
+            break;
+        case 'loot':
+            li.classList.add('loot-message');
+            break;
+        case 'no_loot':
+            li.classList.add('no-loot-message');
+            break;
+        case 'exp_gain':
+            li.classList.add('exp-gain-message');
+            break;
+        case 'armor':
+        case 'armor_break':
+        case 'armor_miss':
+        case 'no_armor':
+            li.classList.add('armor-message');
+            break;
+        case 'attack':
+            if (message.toLowerCase().startsWith('you')) {
+                li.classList.add('player-attack');
+            } else {
+                li.classList.add('enemy-attack');
+            }
+            break;
+    }
+
+    // Insert the new message at the top of the battle log
+    battleLog.insertBefore(li, battleLog.firstChild);
+
+    // Use requestAnimationFrame to scroll after the browser has updated the layout
+    requestAnimationFrame(() => {
+        battleLog.scrollTop = 0;
+    });
+}
+
+function skipAnimation() {
+    isAnimationSkipped = true;
+    battleLog.innerHTML = ''; // Clear the battle log before repopulating
+
+    battleData.rounds.forEach((round) => {
+        round.actions.forEach((action) => {
+            addLogMessage(action.message, action.type);
+            if (action.type === 'defeat' || action.type === 'escape') {
+                isBattleOver = true;
+            }
+        });
+        if (isBattleOver) return;
+    });
+
+    // Update health displays to final values
+    const finalRound = battleData.rounds[battleData.rounds.length - 1];
+    updateHealth(finalRound.player_hp, battleData.player.max_hp, playerHealth, playerHpDisplay);
+    updateHealth(finalRound.enemy_hp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
+
+    skipButton.disabled = true;
 }
 
 async function processAction(action, playerHp, enemyHp) {
@@ -81,29 +141,6 @@ async function processRound(roundData) {
         await processAction(action, roundData.player_hp, roundData.enemy_hp);
         if (isBattleOver) break;
     }
-}
-
-function skipAnimation() {
-    isAnimationSkipped = true;
-    battleLog.innerHTML = ''; // Clear the battle log before repopulating
-
-    battleData.rounds.forEach((round) => {
-        round.actions.forEach((action) => {
-            addLogMessage(action.message, action.type);
-            if (action.type === 'defeat' || action.type === 'escape') {
-                isBattleOver = true;
-            }
-        });
-        if (isBattleOver) return;
-    });
-
-    // Update health displays to final values
-    const finalRound = battleData.rounds[battleData.rounds.length - 1];
-    updateHealth(finalRound.player_hp, battleData.player.max_hp, playerHealth, playerHpDisplay);
-    updateHealth(finalRound.enemy_hp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
-
-    battleLog.scrollTop = battleLog.scrollHeight;
-    skipButton.disabled = true;
 }
 
 async function startBattle() {
