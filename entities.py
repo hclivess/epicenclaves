@@ -39,7 +39,7 @@ class Enemy:
         self.crit_chance = crit_chance
         self.crit_damage = crit_damage
         self.role = role
-        self.experience = int(self.level * 0.1)  # Default experience calculation
+        self.experience = max(1, int(self.level * 0.1))  # Default experience calculation
         self.regular_drop = regular_drop
         self.drop_chance = drop_chance
         self.probability = probability
