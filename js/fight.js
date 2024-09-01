@@ -35,6 +35,7 @@ function updateHealth(health, maxHealth, healthElement, hpDisplayElement) {
 
 // Show damage pop-up
 function showDamagePopUp(damage, isPlayer, crit = false) {
+    console.log(`Showing damage popup: ${damage} to ${isPlayer ? 'player' : 'enemy'}`);
     const popUpContainer = document.querySelector(isPlayer ? '.player-pop-up' : '.enemy-pop-up');
     const popUp = document.createElement('div');
     popUp.className = 'pop-up';
@@ -72,6 +73,10 @@ function animateAttack(attacker, target) {
 
 // Process a single round
 async function processRound(roundData, previousPlayerHp, previousEnemyHp) {
+    console.log(`Processing round: ${currentRoundIndex}`);
+    console.log(`Previous Player HP: ${previousPlayerHp}, Previous Enemy HP: ${previousEnemyHp}`);
+    console.log(`Current round data:`, roundData);
+
     const li = document.createElement('li');
     li.className = 'list-group-item battle-message';
     li.textContent = roundData.message;
@@ -79,6 +84,7 @@ async function processRound(roundData, previousPlayerHp, previousEnemyHp) {
     if (roundData.message.includes("You hit") || roundData.message.includes("You critical hit")) {
         li.classList.add('player-attack');
         const damage = previousEnemyHp - roundData.enemy_hp;
+        console.log(`Player attack damage: ${damage}`);
         showDamagePopUp(damage, false, roundData.message.includes("critical hit"));
         await animateAttack(document.querySelector('.player'), document.querySelector('.enemy'));
         enemyCurrentHealth = roundData.enemy_hp;
@@ -86,6 +92,7 @@ async function processRound(roundData, previousPlayerHp, previousEnemyHp) {
     } else if (roundData.message.includes("hit you")) {
         li.classList.add('enemy-attack');
         const damage = previousPlayerHp - roundData.player_hp;
+        console.log(`Enemy attack damage: ${damage}`);
         showDamagePopUp(damage, true);
         await animateAttack(document.querySelector('.enemy'), document.querySelector('.player'));
         playerCurrentHealth = roundData.player_hp;
@@ -105,8 +112,8 @@ function skipAnimation() {
     isAnimationSkipped = true;
     clearInterval(animationInterval);
 
-    let prevPlayerHp = playerMaxHealth;
-    let prevEnemyHp = enemyMaxHealth;
+    let prevPlayerHp = playerCurrentHealth;
+    let prevEnemyHp = enemyCurrentHealth;
 
     while (currentRoundIndex < battleData.rounds.length) {
         const roundData = battleData.rounds[currentRoundIndex];
@@ -121,9 +128,14 @@ function skipAnimation() {
 
 // Start battle
 async function startBattle() {
-    // Initialize health with max values
-    playerCurrentHealth = playerMaxHealth;
-    enemyCurrentHealth = enemyMaxHealth;
+    console.log("Starting battle");
+    console.log(`Player Max HP: ${playerMaxHealth}, Enemy Max HP: ${enemyMaxHealth}`);
+
+    // Initialize health with values from the first round of battle data
+    playerCurrentHealth = battleData.rounds[0].player_hp;
+    enemyCurrentHealth = battleData.rounds[0].enemy_hp;
+
+    console.log(`Initial Player HP: ${playerCurrentHealth}, Initial Enemy HP: ${enemyCurrentHealth}`);
 
     updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth, playerHpDisplay);
     updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth, enemyHpDisplay);
@@ -134,8 +146,11 @@ async function startBattle() {
 
         if (currentRoundIndex < battleData.rounds.length) {
             const roundData = battleData.rounds[currentRoundIndex];
-            const prevPlayerHp = currentRoundIndex === 0 ? playerMaxHealth : battleData.rounds[currentRoundIndex - 1].player_hp;
-            const prevEnemyHp = currentRoundIndex === 0 ? enemyMaxHealth : battleData.rounds[currentRoundIndex - 1].enemy_hp;
+            const prevPlayerHp = currentRoundIndex === 0 ? playerCurrentHealth : battleData.rounds[currentRoundIndex - 1].player_hp;
+            const prevEnemyHp = currentRoundIndex === 0 ? enemyCurrentHealth : battleData.rounds[currentRoundIndex - 1].enemy_hp;
+
+            console.log(`Processing round ${currentRoundIndex + 1}`);
+            console.log(`Previous Player HP: ${prevPlayerHp}, Previous Enemy HP: ${prevEnemyHp}`);
 
             await processRound(roundData, prevPlayerHp, prevEnemyHp);
 
@@ -154,6 +169,8 @@ async function startBattle() {
 
 // Initialize
 window.onload = function () {
+    console.log("Window loaded");
+    console.log("Battle data:", battleData);
     startBattle();
     skipButton.addEventListener('click', skipAnimation);
 };
