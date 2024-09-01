@@ -328,6 +328,8 @@ class Wraith(Enemy):
         return min_damage, max_damage
 
 class Scenery:
+    probability = 0
+
     def __init__(self, hp):
         self.hp = hp
         self.type = "scenery"
@@ -350,7 +352,6 @@ class Forest(Scenery):
         super().__init__(hp=100)
         self.type = "forest"
         self.role = "scenery"
-        self.probability = 0
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [
