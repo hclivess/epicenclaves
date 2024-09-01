@@ -434,7 +434,7 @@ def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, vict
                 "round": round_number,
                 "player_hp": defeated["hp"],
                 "enemy_hp": defeated["hp"],
-                "message": f"{victor_name} looted a {dropped_item['type']} from {defeated_name}'s territory!"
+                "message": f"{victor_name} looted a {dropped_item['type']} from {defeated_name}'s mutilated body!"
             })
             update_user_data(victor_name, {"unequipped": victor["unequipped"], "equipped": victor["equipped"]}, usersdb)
 
