@@ -5,7 +5,7 @@ from item_generator import generate_weapon, generate_armor
 import math
 import random
 from typing import Dict, List, Tuple, Optional
-
+from player import calculate_total_hp
 
 def get_entity_class(target: str) -> Optional[type]:
     """
@@ -37,11 +37,15 @@ def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dic
     npc.max_hp = entity_data.get('max_hp', npc.hp)
     npc.min_damage, npc.max_damage = npc.calculate_damage()
 
+    max_base_hp = 100
+    max_total_hp = calculate_total_hp(max_base_hp, user_data["exp"])
+
     battle_data = {
-        "player": {"name": user, "max_hp": user_data["hp"], "current_hp": user_data["hp"]},
+        "player": {"name": user, "max_hp": max_total_hp, "current_hp": user_data["hp"]},
         "enemy": {"name": npc.type, "max_hp": npc.max_hp, "current_hp": npc.hp, "level": npc.level},
         "rounds": []
     }
+
 
     round_number = 0
     while npc.alive and user_data["alive"]:
@@ -303,8 +307,13 @@ def get_weapon_damage(attacker: Dict, exp_bonus_value: int) -> Dict:
 def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users: List[Dict], user_data: Dict, user: str,
           usersdb: Dict, mapdb: Dict) -> Dict:
     print(f"Starting fight. Target: {target}, Target name: {target_name}")
+
+    # Calculate the player's max HP
+    max_base_hp = 100  # The maximum base HP is always 100
+    max_total_hp = calculate_total_hp(max_base_hp, user_data["exp"])
+
     battle_data = {
-        "player": {"name": user, "max_hp": user_data["hp"], "current_hp": user_data["hp"]},
+        "player": {"name": user, "max_hp": max_total_hp, "current_hp": user_data["hp"]},
         "enemy": {"name": target, "max_hp": 0, "current_hp": 0},
         "rounds": []
     }
@@ -343,15 +352,21 @@ def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users:
     battle_data["rounds"].append({"round": 0, "message": f"No valid target found: {target}"})
     return {"battle_data": battle_data}
 
+
 def fight_player(entry: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> Dict:
     target_data = get_user(target_name, usersdb)
     if not target_data:
         return {"battle_data": {"rounds": [{"message": f"Target player {target_name} not found"}]}}
 
     target_data = target_data[target_name]
+
+    max_base_hp = 100
+    user_max_total_hp = calculate_total_hp(max_base_hp, user_data["exp"])
+    target_max_total_hp = calculate_total_hp(max_base_hp, target_data["exp"])
+
     battle_data = {
-        "player": {"name": user, "max_hp": user_data["hp"], "current_hp": user_data["hp"]},
-        "enemy": {"name": target_name, "max_hp": target_data["hp"], "current_hp": target_data["hp"]},
+        "player": {"name": user, "max_hp": user_max_total_hp, "current_hp": user_data["hp"]},
+        "enemy": {"name": target_name, "max_hp": target_max_total_hp, "current_hp": target_data["hp"]},
         "rounds": [{
             "round": 0,
             "player_hp": user_data["hp"],
