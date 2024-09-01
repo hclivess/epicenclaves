@@ -5,7 +5,6 @@ from hashlib import blake2b
 from typing import Dict, Any
 
 from map import sql_lock
-from user import user_lock
 
 if not os.path.exists("db"):
     os.mkdir("db")
@@ -133,13 +132,12 @@ def save_users_from_memory(user_data_dict: Dict[str, Dict[str, Any]], league="ga
 
 
 def create_users_db(league="game"):
-    with user_lock:
-        conn = sqlite3.connect("db/user_data.db")
-        cursor = conn.cursor()
-        cursor.execute(
-            f"CREATE TABLE IF NOT EXISTS {league}_user_data (username TEXT PRIMARY KEY, x_pos INTEGER, y_pos INTEGER, data TEXT)")
-        conn.commit()
-        conn.close()
+    conn = sqlite3.connect("db/user_data.db")
+    cursor = conn.cursor()
+    cursor.execute(
+        f"CREATE TABLE IF NOT EXISTS {league}_user_data (username TEXT PRIMARY KEY, x_pos INTEGER, y_pos INTEGER, data TEXT)")
+    conn.commit()
+    conn.close()
 
 
 def create_map_database(league="game") -> None:

@@ -13,7 +13,7 @@ import tornado.escape
 
 from buildings import Building
 import buildings
-from user import User
+from player import User
 
 import entities
 from leagues import load_leagues
@@ -39,7 +39,7 @@ from entity_generator import spawn
 from auth import (auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db)
 from sqlite import init_databases, load_users_to_memory, save_users_from_memory, save_map_from_memory, \
     load_map_to_memory
-from user import create_user
+from player import create_user
 from wall_generator import generate_multiple_mazes
 from upgrade import upgrade
 from trash import trash_item, trash_armor, trash_all, trash_weapons

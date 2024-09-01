@@ -2,10 +2,10 @@ import threading
 import inspect
 
 from backend import get_user, map_lock
-from user import get_users_at_coords
+from player import get_users_at_coords
 
 from typing import List, Dict, Any, Optional
-from user import User
+from player import User
 from entities import Enemy, Scenery
 from buildings import Building
 

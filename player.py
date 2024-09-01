@@ -3,8 +3,6 @@ from typing import List, Dict, Any
 from item_generator import generate_armor, generate_weapon, generate_tool
 import threading
 
-user_lock = threading.Lock()
-
 class User:
     def __init__(self, username: str, x_pos: int, y_pos: int, profile_pic: str = "", **kwargs):
         self.username = username
@@ -16,7 +14,7 @@ class User:
         self.exp = 0
         self.units = []
         self.research = 0
-        self.hp = 100
+        self.base_hp = 100  # Base HP value
         self.armor = 0
         self.action_points = 500
         self.army_deployed = 0
@@ -35,6 +33,14 @@ class User:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+    def calculate_total_hp(self):
+        return self.base_hp + self.calculate_hp_bonus()
+
+    def calculate_hp_bonus(self):
+        # This is a simple linear increase. You might want to adjust this formula
+        # to balance your game mechanics.
+        return int(self.exp / 10)  # 1 extra HP for every 10 exp
+
     def get_actions(self, current_user: str) -> List[Dict[str, str]]:
         if self.username != current_user:
             return [{"name": "challenge", "action": f"/fight?target=player&name={self.username}"}]
@@ -51,7 +57,8 @@ class User:
             "exp": self.exp,
             "units": self.units,
             "research": self.research,
-            "hp": self.hp,
+            "hp": self.calculate_total_hp(),  # Use the method here
+            "base_hp": self.base_hp,
             "armor": self.armor,
             "action_points": self.action_points,
             "army_deployed": self.army_deployed,
