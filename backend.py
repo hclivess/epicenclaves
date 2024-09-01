@@ -35,7 +35,7 @@ def has_item_equipped(data, item_type):
 
 
 def get_user(user, user_data_dict, get_construction=True):
-    print(user_data_dict)
+    #print(user_data_dict)
     if user not in user_data_dict:
         print(f"User {user} not found in the dictionary. (backend.py)")
         return None
@@ -65,7 +65,7 @@ def get_user(user, user_data_dict, get_construction=True):
     return user_data
 
 def update_user_data(user, updated_values, user_data_dict):
-    print("update_user_data", user, updated_values)
+    #print("update_user_data", user, updated_values)
 
     if user not in user_data_dict:
         print("User not found")
