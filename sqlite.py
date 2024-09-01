@@ -164,7 +164,7 @@ def save_map_from_memory(map_data_dict: Dict[str, Any], league="game") -> None:
         conn_map = sqlite3.connect("db/map_data.db")
         cursor_map = conn_map.cursor()
 
-        for key, data in map_data_dict[league].items():
+        for key, data in map_data_dict[league].copy().items():
             x_map, y_map = map(int, key.split(','))
             data_str = json.dumps(data)
 
