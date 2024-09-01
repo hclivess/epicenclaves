@@ -5,6 +5,7 @@
 .loot-message { color: gold; }
 .no-loot-message { color: gray; }
 .exp-gain-message { color: green; }
+.armor-message { color: #4da6ff; font-style: italic; }
 
 body {
     font-family: 'Merriweather', serif;

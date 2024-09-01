@@ -67,7 +67,8 @@ def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dic
         # Enemy's turn
         if npc.hp > 0:
             npc_dmg = npc.roll_damage()
-            final_damage, absorbed_damage = apply_armor_protection(user_data, npc_dmg["damage"], [], round_number)
+            final_damage, absorbed_damage = apply_armor_protection(user_data, npc_dmg["damage"], round_data,
+                                                                   round_number)
             user_data["hp"] -= final_damage
             round_data["actions"].append({
                 "actor": "enemy",
@@ -199,7 +200,7 @@ def calculate_armor_effectiveness(armor: Dict, damage: int) -> int:
 
     return effective_protection
 
-def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dict], round_number: int) -> Tuple[int, int]:
+def apply_armor_protection(defender: Dict, initial_damage: int, round_data: Dict, round_number: int) -> Tuple[int, int]:
     print(f"Applying armor protection. Initial damage: {initial_damage}")
     armor_protection = 0
     is_player = defender.get('name', 'You') == 'You'
@@ -223,10 +224,9 @@ def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dic
             armor_info = f"Your {selected_armor['type']}" if is_player else f"{defender['name']}'s {selected_armor['type']}"
             final_damage = max(0, initial_damage - armor_protection)
 
-            rounds.append({
-                "round": round_number,
-                "player_hp": defender["hp"],
-                "enemy_hp": defender["hp"],
+            round_data["actions"].append({
+                "actor": "system",
+                "type": "armor",
                 "message": (
                     f"{armor_info} (Base Protection: {selected_armor['protection']}, "
                     f"Efficiency: {selected_armor['efficiency']}%, "
@@ -241,29 +241,26 @@ def apply_armor_protection(defender: Dict, initial_damage: int, rounds: List[Dic
 
             if selected_armor["durability"] <= 0:
                 message = f"Your {selected_armor['type']} has broken and is no longer usable!" if is_player else f"{defender['name']}'s {selected_armor['type']} has broken and is no longer usable!"
-                rounds.append({
-                    "round": round_number,
-                    "player_hp": defender["hp"],
-                    "enemy_hp": defender["hp"],
+                round_data["actions"].append({
+                    "actor": "system",
+                    "type": "armor_break",
                     "message": message
                 })
                 defender["equipped"] = [item for item in defender["equipped"] if item != selected_armor]
         else:
             message = "The attack hit an unprotected area!" if is_player else f"The attack hit an unprotected area on {defender['name']}!"
-            rounds.append({
-                "round": round_number,
-                "player_hp": defender["hp"],
-                "enemy_hp": defender["hp"],
+            round_data["actions"].append({
+                "actor": "system",
+                "type": "armor_miss",
                 "message": message
             })
             final_damage = initial_damage
     else:
         final_damage = initial_damage
         message = "You have no armor equipped!" if is_player else f"{defender['name']} has no armor equipped!"
-        rounds.append({
-            "round": round_number,
-            "player_hp": defender["hp"],
-            "enemy_hp": defender["hp"],
+        round_data["actions"].append({
+            "actor": "system",
+            "type": "no_armor",
             "message": message
         })
 

@@ -59,6 +59,12 @@ async function processAction(action, playerHp, enemyHp) {
                 updateHealth(playerHp, battleData.player.max_hp, playerHealth, playerHpDisplay);
             }
             break;
+        case 'armor':
+        case 'armor_break':
+        case 'armor_miss':
+        case 'no_armor':
+            li.classList.add('armor-message');
+            break;
         case 'defeat':
             li.classList.add('defeat-message');
             break;
@@ -67,7 +73,6 @@ async function processAction(action, playerHp, enemyHp) {
             break;
         case 'loot':
             li.classList.add('loot-message');
-            // You could add more detailed item display here if needed
             break;
         case 'no_loot':
             li.classList.add('no-loot-message');
