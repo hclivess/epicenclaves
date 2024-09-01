@@ -16,6 +16,7 @@ import buildings
 from player import User, calculate_total_hp
 
 import entities
+from demolish import demolish
 from leagues import load_leagues
 from weapons import Weapon
 from armor import Armor
@@ -707,6 +708,30 @@ class RedirectToHTTPSHandler(tornado.web.RequestHandler):
     def get(self, parameters):
         self.redirect(self.request.full_url().replace('http://', 'https://'), permanent=True)
 
+class DemolishHandler(UserActionHandler):
+    def get(self, *args, **kwargs):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
+        return_to_map = self.get_argument("return_to_map", default="false") == "true"
+
+        message = self.perform_destroy_action(user, self._destroy_building, league)
+
+        if return_to_map:
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps({"message": message}))
+        else:
+            user_data = get_user_data(user, usersdb[league])
+            self.render_user_panel(user, user_data, message=message, league=league)
+
+    def perform_destroy_action(self, user, action_func, league, *args, **kwargs):
+        user_data = get_user_data(user, usersdb[league])
+        if user_data is None:
+            return f"User {user} not found."
+        return action_func(user, user_data, *args, **kwargs)
+
+    def _destroy_building(self, user, user_data):
+        league = self.get_current_league()
+        return demolish(user, user_data, usersdb[league], mapdb[league])
 
 class LoginHandler(BaseHandler):
     def post(self, data):
@@ -754,6 +779,7 @@ def make_app():
         (r"/equip", EquipHandler),
         (r"/unequip", UnequipHandler),
         (r"/trash", TrashHandler),
+        (r"/demolish", DemolishHandler),
         (r"/trash_weapons", TrashWeaponsHandler),
         (r"/trash_armor", TrashArmorHandler),
         (r"/trash_all", TrashAllHandler),

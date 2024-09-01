@@ -72,13 +72,13 @@ def get_user_data(user: str, usersdb: Dict[str, Any]) -> Optional[Dict[str, Any]
     user_data = data[username]
     return user_data
 
-def occupied_by(x: int, y: int, what: str, mapdb: Dict[str, Any]) -> bool:
+def occupied_by(x: int, y: int, what: str, mapdb: Dict[str, Any], method="type") -> bool:
     entity_map = get_map_at_coords(x_pos=x, y_pos=y, map_data_dict=mapdb)
 
     if entity_map:
         entity = entity_map.get(f"{x},{y}")
 
-        if entity and entity.get("type") == what:
+        if entity and entity.get(method) == what:
             return True
 
     return False

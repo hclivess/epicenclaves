@@ -33,6 +33,7 @@ class Building:
             {"name": "remove army", "action": f"/deploy?type=soldiers&action=remove"},
             {"name": "upgrade", "action": f"/upgrade"},
             {"name": "conquer", "action": f"/conquer?target={self.type}"},
+            {"name": "demolish", "action": f"/demolish"},
         ]
 
 class House(Building):
