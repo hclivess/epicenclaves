@@ -111,7 +111,6 @@ class Boar(Enemy):
                          max_entities=500,
                          max_entities_total=1000,
                          herd_probability=0.7)
-        self.experience = 1  # Override the default experience for Boar
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [{"name": "hunt", "action": f"/fight?target={self.type}"}]

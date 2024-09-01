@@ -105,18 +105,19 @@ def get_values(entry):
     return list(entry.values())[0]
 
 
-def calculate_level(min_level, max_level):
-
+def calculate_level(min_level, max_level, bias=1.5):
     if min_level >= max_level:
         return min_level
 
     # Generate a random value between 0 and 1
     random_value = random.random()
 
-    # Calculate the logarithmic distribution
-    result = int(min_level * math.exp(random_value * math.log(max_level / min_level)))
-    print("log level roll", min_level, max_level, result)
-    if result < min_level:
-        return min_level
+    # Adjust the random value with a bias factor to skew the distribution
+    biased_random_value = random_value ** (1 / bias)
 
-    return result
+    # Calculate the logarithmic distribution with the biased random value
+    result = int(min_level * math.exp(biased_random_value * math.log(max_level / min_level)))
+    print("log level roll", min_level, max_level, result)
+
+    # Ensure the result is not lower than the min_level
+    return max(result, min_level)

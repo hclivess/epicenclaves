@@ -155,18 +155,17 @@ def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb:
 
     remove_from_map(entity_type=npc.type.lower(), coords=get_coords(entry), map_data_dict=mapdb)
 
-    scaled_experience = calculate_scaled_stat(npc.experience, npc.level, scaling_factor=0.1)
 
     defeat_round["actions"].append({
         "actor": "system",
         "type": "exp_gain",
-        "message": f"You gained {scaled_experience} experience points.",
-        "exp_gained": scaled_experience
+        "message": f"You gained {npc.experience} experience points.",
+        "exp_gained": npc.experience
     })
 
     updated_values = {
         "action_points": user_data["action_points"] - 1,
-        "exp": user_data["exp"] + scaled_experience,
+        "exp": user_data["exp"] + npc.experience,
         "hp": user_data["hp"],
         "unequipped": user_data["unequipped"],
         **{key: user_data.get(key, 0) + value for key, value in npc.regular_drop.items()}
@@ -175,9 +174,6 @@ def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb:
     update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
 
     return defeat_round
-
-def calculate_scaled_stat(base_stat, level, scaling_factor=0.1):
-    return math.floor(base_stat * (1 + math.log(level, 2) * scaling_factor))
 
 def exp_bonus(value: int, base: int = 10) -> int:
     if value <= 0:
