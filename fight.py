@@ -125,11 +125,11 @@ def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb:
     npc.alive = False
 
     if random.random() < npc.drop_chance:
-        min_item_level = max(1, npc.level - 9)  # Ensure minimum level is at least 1
+        min_item_level = max(1, npc.level - 20)  # Ensure minimum level is at least 1
         max_item_level = npc.level
 
-        # Use logarithmic_level to generate the item level
-        item_level = logarithmic_level(min_item_level, max_item_level)
+        # Use logarithmic_level to generate the item level, but enforce the minimum level
+        item_level = max(min_item_level, logarithmic_level(min_item_level, max_item_level))
 
         new_item = generate_weapon(min_level=item_level,
                                    max_level=item_level) if random.random() < 0.5 else generate_armor(
@@ -163,6 +163,7 @@ def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb:
     }
 
     update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
+
 
 
 def calculate_scaled_stat(base_stat, level, scaling_factor=0.1):
