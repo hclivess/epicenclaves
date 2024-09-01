@@ -141,12 +141,12 @@ body {
     left: 0;
     width: 100%;
     height: 20px;
-    background-color: #e0e0e0;
+    background-color: gray;
 }
 
 .health {
     height: 100%;
-    background-color: #76c7c0;
+    background-color: #29ff52;
     width: 100%;
 }
 
