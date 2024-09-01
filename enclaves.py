@@ -482,6 +482,7 @@ class RestHandler(UserActionHandler):
         result = attempt_rest(user, user_data, hours, usersdb[league], mapdb[league])
         return result if isinstance(result, str) else result.get("message", "Rest action completed")
 
+
 class FightHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
@@ -503,9 +504,17 @@ class FightHandler(BaseHandler):
                 self.return_json({"message": fight_result.get("message", "Fight completed"),
                                   "battle_data": fight_result["battle_data"]})
             else:
-                self.render("templates/fight.html", battle_data=json.dumps(fight_result["battle_data"]),
-                            profile_picture=usersdb[league][user]["img"], target_picture=f"img/assets/{target}.png",
-                            target=target)  # todo rework
+                # For player targets, use the target's image from usersdb
+                if target.lower() == "player" and target_name in usersdb[league]:
+                    target_picture = usersdb[league][target_name]["img"]
+                else:
+                    target_picture = f"img/assets/{target}.png"
+
+                self.render("templates/fight.html",
+                            battle_data=json.dumps(fight_result["battle_data"]),
+                            profile_picture=user_data["img"],
+                            target_picture=target_picture,
+                            target=target)
 
     def _perform_fight(self, user, user_data, target, target_name, league):
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])

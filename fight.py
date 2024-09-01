@@ -1,4 +1,4 @@
-from backend import update_user_data, get_values
+from backend import update_user_data, get_values, get_user, user_lock, has_item_equipped
 from map import remove_from_map, get_coords
 import entities
 from item_generator import generate_weapon, generate_armor, logarithmic_level
@@ -354,7 +354,11 @@ def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users:
     return {"battle_data": battle_data}
 
 def fight_player(entry: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> Dict:
-    target_data = entry[target_name]
+    target_data = get_user(target_name, usersdb)
+    if not target_data:
+        return {"battle_data": {"rounds": [{"message": f"Target player {target_name} not found"}]}}
+
+    target_data = target_data[target_name]
     battle_data = {
         "player": {"name": user, "max_hp": user_data["hp"], "current_hp": user_data["hp"]},
         "enemy": {"name": target_name, "max_hp": target_data["hp"], "current_hp": target_data["hp"]},
@@ -386,32 +390,83 @@ def fight_player(entry: Dict, target_name: str, user_data: Dict, user: str, user
             break
 
         if target_data["hp"] <= 0:
-            experience = user_data["exp"] + 10 + target_data["exp"] / 10
-            update_user_data(user=user, updated_values={"exp": experience}, user_data_dict=usersdb)
-            process_defeat(target_data, target_name, 0.5, usersdb, battle_data["rounds"], round_number)
+            experience = user_data["exp"] + 10 + target_data["exp"] // 10
+            update_user_data(user, {"exp": experience}, usersdb)
+            process_player_defeat(target_data, target_name, user_data, user, 0.5, usersdb, battle_data["rounds"], round_number)
             break
         elif user_data["hp"] <= 0:
-            experience = target_data["exp"] + 10 + user_data["exp"] / 10
-            update_user_data(user=target_name, updated_values={"exp": experience}, user_data_dict=usersdb)
-            process_defeat(user_data, user, 0.5, usersdb, battle_data["rounds"], round_number)
+            experience = target_data["exp"] + 10 + user_data["exp"] // 10
+            update_user_data(target_name, {"exp": experience}, usersdb)
+            process_player_defeat(user_data, user, target_data, target_name, 0.5, usersdb, battle_data["rounds"], round_number)
             break
 
     return {"battle_data": battle_data}
 
-def player_attack(attacker: Dict, defender: Dict, attacker_name: str, rounds: List[Dict],
-                  round_number: int) -> None:
-    print(f"{attacker_name} attacking {defender.get('name', 'opponent')}")
+def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, victor_name: str, death_chance: float, usersdb: Dict, rounds: List[Dict], round_number: int) -> None:
+    with user_lock:
+        if random.random() < death_chance:
+            message = f"{defeated_name} is defeated."
+            new_data = {"alive": False, "hp": 0, "action_points": 0}
+        else:
+            message = f"{defeated_name} barely managed to escape."
+            new_data = {"action_points": defeated["action_points"] - 1, "hp": 1}
+
+        rounds.append({
+            "round": round_number,
+            "player_hp": defeated["hp"],
+            "enemy_hp": defeated["hp"],
+            "message": message
+        })
+
+        # Add item drop mechanic
+        if random.random() < 0.3:  # 30% chance to drop an item
+            dropped_item, slot = drop_random_item(defeated)
+            if dropped_item:
+                if slot == "unequipped":
+                    victor["unequipped"].append(dropped_item)
+                else:
+                    # If it's an equipped item, we need to handle it differently
+                    if not has_item_equipped(victor, dropped_item["type"]):
+                        victor["equipped"].append(dropped_item)
+                    else:
+                        victor["unequipped"].append(dropped_item)
+
+                rounds.append({
+                    "round": round_number,
+                    "player_hp": defeated["hp"],
+                    "enemy_hp": defeated["hp"],
+                    "message": f"{victor_name} looted a {dropped_item['type']} from {defeated_name}'s territory!"
+                })
+                update_user_data(victor_name, {"unequipped": victor["unequipped"], "equipped": victor["equipped"]}, usersdb)
+
+        update_user_data(defeated_name, new_data, usersdb)
+
+
+def drop_random_item(player: Dict) -> Tuple[Optional[Dict], Optional[str]]:
+    inventory = player.get("unequipped", [])
+    equipped_items = [item for item in player.get("equipped", []) if item["type"] != "empty"]
+
+    all_items = inventory + equipped_items
+    if not all_items:
+        return None, None
+
+    dropped_item = random.choice(all_items)
+    if dropped_item in inventory:
+        player["unequipped"].remove(dropped_item)
+        return dropped_item, "unequipped"
+    else:
+        player["equipped"] = [item for item in player["equipped"] if item != dropped_item]
+        return dropped_item, dropped_item["slot"]
+
+def player_attack(attacker: Dict, defender: Dict, attacker_name: str, rounds: List[Dict], round_number: int) -> None:
     if attacker["hp"] <= 0:
-        print(f"{attacker_name} has 0 HP, cannot attack")
         return
 
     exp_bonus_value = exp_bonus(attacker["exp"])
     damage_dict = get_weapon_damage(attacker, exp_bonus_value)
-    final_damage, absorbed_damage = apply_armor_protection(defender, damage_dict['damage'], rounds,
-                                                           round_number)
+    final_damage, absorbed_damage = apply_armor_protection(defender, damage_dict['damage'], rounds, round_number)
 
     defender["hp"] -= final_damage
-    print(f"Defender's HP reduced to {defender['hp']}")
 
     if attacker_name == "You":
         message = (f"You {damage_dict['message']} for {final_damage} damage "
@@ -428,6 +483,7 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, rounds: Li
         "enemy_hp": defender["hp"] if attacker_name == "You" else attacker["hp"],
         "message": message
     })
+
 
 def process_defeat(entity: Dict, entity_name: str, chance: float, usersdb: Dict, rounds: List[Dict],
                    round_number: int) -> None:
