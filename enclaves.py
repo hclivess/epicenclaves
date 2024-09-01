@@ -13,7 +13,7 @@ import tornado.escape
 
 from buildings import Building
 import buildings
-from player import User
+from player import User, calculate_total_hp
 
 import entities
 from leagues import load_leagues
@@ -135,8 +135,7 @@ class BaseHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, **kwargs):
         self.render("templates/error.html")
 
-    def render_user_panel(self, user, user_data, message="", on_tile_map=None, on_tile_users=None,
-                          league=None):
+    def render_user_panel(self, user, user_data, message="", on_tile_map=None, on_tile_users=None, league=None):
         if on_tile_map is None:
             on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
         if on_tile_users is None:
@@ -151,6 +150,12 @@ class BaseHandler(tornado.web.RequestHandler):
 
         inventory_descriptions = generate_inventory_descriptions(user_data)
 
+        # Calculate current and max total HP
+        current_hp = user_data.get("hp", 0)
+        exp = user_data.get("exp", 0)
+        current_total_hp = calculate_total_hp(current_hp, exp)
+        max_total_hp = calculate_total_hp(100, exp)  # Assuming 100 is the base max HP
+
         self.render(
             "templates/user_panel.html",
             user=user,
@@ -161,7 +166,9 @@ class BaseHandler(tornado.web.RequestHandler):
             actions=tile_actions,
             building_descriptions=building_descriptions,
             inventory_descriptions=inventory_descriptions,
-            league=league
+            league=league,
+            current_total_hp=current_total_hp,
+            max_total_hp=max_total_hp
         )
 
 

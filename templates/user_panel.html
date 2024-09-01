@@ -45,7 +45,7 @@
                             <p class="mb-1">League: {{ league }}</p>
                             <p class="mb-1">Experience: {{ file.get("exp", "N/A") }}</p>
                             <p class="mb-1">Research Points: {{ file.get("research", "N/A") }}</p>
-                            <p class="mb-1">Health Points: {{ file.get("hp", "N/A") }} (Base: {{ file.get("base_hp", "N/A") }})</p>
+                            <p class="mb-1">Health Points: {{ file.get("hp", "N/A") }}/ {{ max_total_hp }}</p>
                             <p class="mb-1">Armor: {{ file.get("armor", "N/A") }}</p>
                             <p class="mb-1">Population limit: {{ file.get("pop_lim", "N/A") }}</p>
                             <p class="mb-1">Peasants: {{ file.get("peasants", "N/A") }}</p>

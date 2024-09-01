@@ -4,6 +4,8 @@ from item_generator import generate_armor, generate_weapon, generate_tool
 import threading
 
 class User:
+    HP_BONUS_PER_EXP = 100
+
     def __init__(self, username: str, x_pos: int, y_pos: int, profile_pic: str = "", **kwargs):
         self.username = username
         self.x_pos = x_pos
@@ -33,13 +35,11 @@ class User:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    def calculate_total_hp(self):
-        return self.base_hp + self.calculate_hp_bonus()
+    def get_hp_bonus(self):
+        return int(self.exp / self.HP_BONUS_PER_EXP)
 
-    def calculate_hp_bonus(self):
-        # This is a simple linear increase. You might want to adjust this formula
-        # to balance your game mechanics.
-        return int(self.exp / 10)  # 1 extra HP for every 10 exp
+    def get_total_hp(self):
+        return self.base_hp + self.get_hp_bonus()
 
     def get_actions(self, current_user: str) -> List[Dict[str, str]]:
         if self.username != current_user:
@@ -57,7 +57,7 @@ class User:
             "exp": self.exp,
             "units": self.units,
             "research": self.research,
-            "hp": self.calculate_total_hp(),  # Use the method here
+            "hp": self.get_total_hp(),
             "base_hp": self.base_hp,
             "armor": self.armor,
             "action_points": self.action_points,
@@ -74,7 +74,6 @@ class User:
             "online": self.online,
             "construction": self.construction
         }
-
 
 def find_open_space(mapdb: Dict[str, Any]) -> tuple:
     x = random.randint(0, 100)
@@ -103,7 +102,6 @@ def find_open_space(mapdb: Dict[str, Any]) -> tuple:
             if x > 2 ** 31:
                 raise Exception("No open space found within available range.")
 
-
 def create_user(user_data_dict: Dict[str, Dict[str, Any]], user: str, mapdb: Dict[str, Any], profile_pic: str = "",
                 league="game") -> None:
     print(f"Creating {user} in league {league}")
@@ -128,8 +126,6 @@ def create_user(user_data_dict: Dict[str, Dict[str, Any]], user: str, mapdb: Dic
 
     user_data_dict[league][user] = new_user.to_dict()
 
-
-
 def get_users_at_coords(x_pos: int, y_pos: int, user: str, users_dict: Dict[str, Any], include_construction: bool = True, include_self: bool = True) -> List[Dict[str, Any]]:
     """Returns a list of user data at a specific coordinate"""
 
@@ -148,3 +144,6 @@ def get_users_at_coords(x_pos: int, y_pos: int, user: str, users_dict: Dict[str,
 
     # Return the list of users at the given coordinates (may be empty if no users found)
     return users_at_coords
+
+def calculate_total_hp(base_hp: int, exp: int) -> int:
+    return base_hp + int(exp / User.HP_BONUS_PER_EXP)
