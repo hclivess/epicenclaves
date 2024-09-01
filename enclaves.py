@@ -818,15 +818,15 @@ if __name__ == "__main__":
 
         print(db_status)
         if not db_status["map_exists"]:
+            spawn(mapdb=mapdb[league], entity_class=entities.Boar, probability=1, map_size=1000, max_entities=2500,
+                  min_level=1, max_level=5,
+                  herd_probability=1)
             spawn(mapdb=mapdb[league], entity_class=entities.Forest, probability=1, map_size=1000, max_entities=2500,
-                  level=1,
+                  min_level=1, max_level=1,
                   herd_probability=0)
             spawn(mapdb=mapdb[league], entity_class=entities.Mountain, probability=1, map_size=1000, max_entities=2500,
-                  level=1,
+                  min_level=1, max_level=1,
                   herd_probability=0)
-            spawn(mapdb=mapdb[league], entity_class=entities.Boar, probability=1, map_size=1000, max_entities=2500,
-                  level=1,
-                  herd_probability=1)
             generate_multiple_mazes(mapdb[league], 20, 20, 10, 10, 0.1, 250, 1000)
 
     turn_engine = TurnEngine(usersdb, mapdb)

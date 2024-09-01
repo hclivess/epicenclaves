@@ -1,4 +1,6 @@
+import math
 import os
+import random
 from hashlib import blake2b
 
 if not os.path.exists("db"):
@@ -103,3 +105,18 @@ def get_values(entry):
     return list(entry.values())[0]
 
 
+def calculate_level(min_level, max_level):
+
+    if min_level >= max_level:
+        return min_level
+
+    # Generate a random value between 0 and 1
+    random_value = random.random()
+
+    # Calculate the logarithmic distribution
+    result = int(min_level * math.exp(random_value * math.log(max_level / min_level)))
+    print("log level roll", min_level, max_level, result)
+    if result < min_level:
+        return min_level
+
+    return result

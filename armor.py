@@ -1,44 +1,39 @@
 import random
 import math
+from backend import calculate_level
 
 class Armor:
-    def __init__(self, max_level, armor_id, level):
+    def __init__(self, min_level, max_level, armor_id, level=None):
         self.type = self.__class__.__name__.lower()
         self.slot = self.SLOT
+        self.min_level = min_level
         self.max_level = max_level
-        self.level =  self._generate_level() if not level else level
+        self.level = level if level else calculate_level(min_level, max_level)
         self.id = armor_id
         self.role = "armor"
         self._set_attributes()
 
-    def _generate_level(self):
-        r = random.random()
-        level = int(math.exp(r * math.log(self.max_level))) + 1
-        return min(level, self.max_level)
-
-    def _log_scale(self, min_val, max_val):
-        if self.level == 1:
-            return min_val
-        log_factor = math.log(self.level, 2) / math.log(self.max_level, 2)
-        return min_val + int((max_val - min_val) * log_factor)
-
     def _set_attributes(self):
-        # Calculate protection using logarithmic scaling
-        if self.max_level == 1:
-            log_factor = 1
+        # Handle the case where min_level and max_level are the same
+        if self.min_level == self.max_level:
+            level_factor = 1
         else:
-            log_factor = math.log(self.level, 2) / math.log(self.max_level, 2)
-        base_protection = int(self.BASE_PROTECTION * (1 + log_factor * (self.max_level - 1)) * random.uniform(0.8, 1.2))
+            level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
+
+        # Calculate protection
+        base_protection = int(self.BASE_PROTECTION * (1 + level_factor * (self.max_level - self.min_level)) * random.uniform(0.8, 1.2))
         self.protection = max(1, base_protection)  # Ensure minimum protection is 1
 
-        # Calculate durability using logarithmic scaling
+        # Calculate durability
         min_durability = 30
         max_durability = 50 * self.max_level
-        self.durability = self._log_scale(min_durability, max_durability)
+        self.durability = min_durability + int((max_durability - min_durability) * level_factor)
         self.max_durability = self.durability
 
-        # Calculate efficiency using logarithmic scaling
-        self.efficiency = self._log_scale(20, 100)
+        # Calculate efficiency
+        min_efficiency = 20
+        max_efficiency = 100
+        self.efficiency = min_efficiency + int((max_efficiency - min_efficiency) * level_factor)
 
     def to_dict(self):
         return {

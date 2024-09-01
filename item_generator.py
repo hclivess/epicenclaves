@@ -5,27 +5,13 @@ import armor
 import tools
 import math
 
+from backend import calculate_level
+
 
 def id_generator(length=10):
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for _ in range(length))
 
-
-def calculate_level(min_level, max_level):
-
-    if min_level >= max_level:
-        return min_level
-
-    # Generate a random value between 0 and 1
-    random_value = random.random()
-
-    # Calculate the logarithmic distribution
-    result = int(min_level * math.exp(random_value * math.log(max_level / min_level)))
-    print("log level roll", min_level, max_level, result)
-    if result < min_level:
-        return min_level
-
-    return result
 
 def generate_weapon(min_level=1, max_level=20, weapon_type=None):
     print("generating weapon", min_level, max_level)
@@ -40,7 +26,7 @@ def generate_weapon(min_level=1, max_level=20, weapon_type=None):
     else:
         selected_class = random.choice(weapon_classes)
 
-    weapon = selected_class(level, id_generator(), level=level)
+    weapon = selected_class(min_level=1, weapon_id=id_generator(), max_level=level)
     print(weapon.to_dict())
     return weapon.to_dict()  # Return the dictionary representation
 
@@ -58,7 +44,7 @@ def generate_armor(min_level=1, max_level=20, slot=None):
     else:
         selected_class = random.choice(armor_classes)
 
-    armor_piece = selected_class(level, id_generator(), level=level)
+    armor_piece = selected_class(min_level=1, armor_id=id_generator(), max_level=level)
     print(armor_piece.to_dict())
     return armor_piece.to_dict()  # Return the dictionary representation
 

@@ -1,7 +1,7 @@
-from backend import update_user_data, get_values, get_user, has_item_equipped
+from backend import update_user_data, get_values, get_user, has_item_equipped, calculate_level
 from map import remove_from_map, get_coords
 import entities
-from item_generator import generate_weapon, generate_armor, calculate_level
+from item_generator import generate_weapon, generate_armor
 import math
 import random
 from typing import Dict, List, Tuple, Optional

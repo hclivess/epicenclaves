@@ -2,7 +2,7 @@ import random
 import math
 from typing import List, Dict
 import inspect
-
+from backend import calculate_level
 
 class Enemy:
     def __init__(self,
@@ -11,12 +11,12 @@ class Enemy:
                  base_max_damage,
                  armor,
                  role="enemy",
-                 level=1,
+                 min_level=1,
+                 max_level=25,
                  crit_chance=0.0,
-                 crit_damage=0,
+                 crit_damage=0.0,
                  alive=True,
                  kill_chance=0.01,
-                 experience=1,
                  regular_drop=None,
                  drop_chance=0.1,
                  probability=0.01,
@@ -32,12 +32,14 @@ class Enemy:
         self.base_max_damage = base_max_damage
         self.armor = armor
         self.alive = alive
-        self.level = level
+        self.min_level = min_level
+        self.max_level = max_level
+        self.level = calculate_level(min_level, max_level)
         self.kill_chance = kill_chance
         self.crit_chance = crit_chance
         self.crit_damage = crit_damage
         self.role = role
-        self.experience = experience
+        self.experience = int(self.level * 0.1)  # Default experience calculation
         self.regular_drop = regular_drop
         self.drop_chance = drop_chance
         self.probability = probability
@@ -72,15 +74,15 @@ class Enemy:
 class Dragon(Enemy):
     type = "dragon"
 
-    def __init__(self, level=1):
+    def __init__(self, min_level=1, max_level=1000):
         super().__init__(base_hp=350,
                          base_min_damage=20,
                          base_max_damage=30,
                          crit_chance=0.4,
                          crit_damage=2.0,
                          armor=0,
-                         level=level,
-                         experience=100,
+                         min_level=min_level,
+                         max_level=max_level,
                          drop_chance=1,
                          regular_drop={"bismuth": 50},
                          probability=0.001,
@@ -93,15 +95,15 @@ class Dragon(Enemy):
 class Boar(Enemy):
     type = "boar"
 
-    def __init__(self, level=1):
+    def __init__(self, min_level=1, max_level=25):
         super().__init__(base_hp=30,
                          base_min_damage=1,
                          base_max_damage=3,
                          crit_chance=0.1,
                          crit_damage=1.5,
                          armor=0,
-                         level=level,
-                         experience=1,
+                         min_level=min_level,
+                         max_level=max_level,
                          drop_chance=0.2,
                          regular_drop={"food": 1},
                          probability=0.05,
@@ -109,6 +111,7 @@ class Boar(Enemy):
                          max_entities=500,
                          max_entities_total=1000,
                          herd_probability=0.7)
+        self.experience = 1  # Override the default experience for Boar
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [{"name": "hunt", "action": f"/fight?target={self.type}"}]
@@ -117,15 +120,15 @@ class Boar(Enemy):
 class Wolf(Enemy):
     type = "wolf"
 
-    def __init__(self, level=1):
+    def __init__(self, min_level=1, max_level=50):
         super().__init__(base_hp=60,
                          base_min_damage=2,
                          base_max_damage=6,
                          crit_chance=0.25,
                          crit_damage=1.8,
                          armor=0,
-                         level=level,
-                         experience=2,
+                         min_level=min_level,
+                         max_level=max_level,
                          drop_chance=0.3,
                          regular_drop={"food": 1},
                          probability=0.03,
@@ -141,15 +144,15 @@ class Wolf(Enemy):
 class Goblin(Enemy):
     type = "goblin"
 
-    def __init__(self, level=1):
+    def __init__(self, min_level=1, max_level=75):
         super().__init__(base_hp=40,
                          base_min_damage=4,
                          base_max_damage=6,
                          crit_chance=0.15,
                          crit_damage=1.6,
                          armor=1,
-                         level=level,
-                         experience=3,
+                         min_level=min_level,
+                         max_level=max_level,
                          drop_chance=0.4,
                          regular_drop={"gold": 5},
                          probability=0.02,
@@ -162,15 +165,15 @@ class Goblin(Enemy):
 class Specter(Enemy):
     type = "specter"
 
-    def __init__(self, level=2):
+    def __init__(self, min_level=2, max_level=200):
         super().__init__(base_hp=80,
                          base_min_damage=10,
                          base_max_damage=20,
                          crit_chance=0.3,
                          crit_damage=2.0,
                          armor=0,
-                         level=level,
-                         experience=10,
+                         min_level=min_level,
+                         max_level=max_level,
                          drop_chance=0.6,
                          regular_drop={"ectoplasm": 1},
                          probability=0.01,
@@ -190,15 +193,15 @@ class Specter(Enemy):
 class Hatchling(Enemy):
     type = "hatchling"
 
-    def __init__(self, level=3):
+    def __init__(self, min_level=3, max_level=400):
         super().__init__(base_hp=150,
                          base_min_damage=20,
                          base_max_damage=40,
                          crit_chance=0.2,
                          crit_damage=1.8,
                          armor=5,
-                         level=level,
-                         experience=25,
+                         min_level=min_level,
+                         max_level=max_level,
                          drop_chance=0.8,
                          regular_drop={"dragon_scale": 1},
                          probability=0.005,
@@ -226,15 +229,15 @@ class Hatchling(Enemy):
 class Bandit(Enemy):
     type = "bandit"
 
-    def __init__(self, level=2):
+    def __init__(self, min_level=2, max_level=240):
         super().__init__(base_hp=70,
                          base_min_damage=8,
                          base_max_damage=15,
                          crit_chance=0.2,
                          crit_damage=1.7,
                          armor=2,
-                         level=level,
-                         experience=5,
+                         min_level=min_level,
+                         max_level=max_level,
                          drop_chance=0.5,
                          regular_drop={"gold": 10},
                          probability=0.03,
@@ -253,7 +256,7 @@ class Bandit(Enemy):
 class Troll(Enemy):
     type = "troll"
 
-    def __init__(self, level=3):
+    def __init__(self, min_level=3, max_level=800):
         self.regeneration_rate = 5  # Set the regeneration rate before calling super().__init__
         super().__init__(base_hp=200,
                          base_min_damage=15,
@@ -261,8 +264,8 @@ class Troll(Enemy):
                          crit_chance=0.1,
                          crit_damage=2.0,
                          armor=8,
-                         level=level,
-                         experience=20,
+                         min_level=min_level,
+                         max_level=max_level,
                          drop_chance=0.7,
                          regular_drop={"troll_hide": 1},
                          probability=0.01,
@@ -279,7 +282,7 @@ class Troll(Enemy):
 class Harpy(Enemy):
     type = "harpy"
 
-    def __init__(self, level=2):
+    def __init__(self, min_level=2, max_level=300):
         self.evasion_chance = 0.2  # Set evasion_chance before calling super().__init__
         super().__init__(base_hp=90,
                          base_min_damage=12,
@@ -287,8 +290,8 @@ class Harpy(Enemy):
                          crit_chance=0.3,
                          crit_damage=1.6,
                          armor=1,
-                         level=level,
-                         experience=8,
+                         min_level=min_level,
+                         max_level=max_level,
                          drop_chance=0.6,
                          regular_drop={"feather": 3},
                          probability=0.02,
@@ -306,7 +309,7 @@ class Harpy(Enemy):
 class Minotaur(Enemy):
     type = "minotaur"
 
-    def __init__(self, level=4):
+    def __init__(self, min_level=4, max_level=400):
         self.charge_cooldown = 0  # Set charge_cooldown before calling super().__init__
         super().__init__(base_hp=300,
                          base_min_damage=25,
@@ -314,8 +317,8 @@ class Minotaur(Enemy):
                          crit_chance=0.15,
                          crit_damage=2.2,
                          armor=10,
-                         level=level,
-                         experience=30,
+                         min_level=min_level,
+                         max_level=max_level,
                          drop_chance=0.8,
                          regular_drop={"minotaur_horn": 1},
                          probability=0.005,
@@ -337,15 +340,15 @@ class Minotaur(Enemy):
 class Skeleton(Enemy):
     type = "skeleton"
 
-    def __init__(self, level=2):
+    def __init__(self, min_level=2, max_level=120):
         super().__init__(base_hp=50,
                          base_min_damage=5,
                          base_max_damage=10,
                          crit_chance=0.2,
                          crit_damage=1.5,
                          armor=2,
-                         level=level,
-                         experience=4,
+                         min_level=min_level,
+                         max_level=max_level,
                          drop_chance=0.5,
                          regular_drop={"bone": 2},
                          probability=0.04,
@@ -365,7 +368,7 @@ class Skeleton(Enemy):
 class Wraith(Enemy):
     type = "wraith"
 
-    def __init__(self, level=3):
+    def __init__(self, min_level=3, max_level=600):
         self.phase_chance = 0.3  # Set phase_chance before calling super().__init__
         super().__init__(base_hp=120,
                          base_min_damage=18,
@@ -373,8 +376,8 @@ class Wraith(Enemy):
                          crit_chance=0.25,
                          crit_damage=1.9,
                          armor=0,
-                         level=level,
-                         experience=15,
+                         min_level=min_level,
+                         max_level=max_level,
                          drop_chance=0.7,
                          regular_drop={"soul_essence": 1},
                          probability=0.015,
@@ -383,18 +386,18 @@ class Wraith(Enemy):
                          max_entities_total=240,
                          herd_probability=0.3)
 
-    def roll_damage(self):
-        damage_info = super().roll_damage()
-        if random.random() < self.phase_chance:
-            damage_info["damage"] = int(damage_info["damage"] * 1.5)  # Wraith phases through armor
-            damage_info["message"] += " (phased)"
-        return damage_info
+        def roll_damage(self):
+            damage_info = super().roll_damage()
+            if random.random() < self.phase_chance:
+                damage_info["damage"] = int(damage_info["damage"] * 1.5)  # Wraith phases through armor
+                damage_info["message"] += " (phased)"
+            return damage_info
 
-    def calculate_damage(self):
-        min_damage, max_damage = super().calculate_damage()
-        if random.random() < self.phase_chance:
-            return int(min_damage * 1.5), int(max_damage * 1.5)  # Wraith phases through armor
-        return min_damage, max_damage
+        def calculate_damage(self):
+            min_damage, max_damage = super().calculate_damage()
+            if random.random() < self.phase_chance:
+                return int(min_damage * 1.5), int(max_damage * 1.5)  # Wraith phases through armor
+            return min_damage, max_damage
 
 class Scenery:
     def __init__(self, hp):
@@ -404,7 +407,6 @@ class Scenery:
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return []
-
 
 class Forest(Scenery):
     type = "forest"
@@ -422,7 +424,6 @@ class Forest(Scenery):
             {"name": "conquer", "action": f"/conquer?target={self.type}"},
         ]
 
-
 class Mountain(Scenery):
     type = "mountain"
 
@@ -439,15 +440,14 @@ class Mountain(Scenery):
             {"name": "conquer", "action": f"/conquer?target={self.type}"},
         ]
 
-
 class Wall(Scenery):
     type = "wall"
+
     def __init__(self):
         super().__init__(hp=200)
         self.type = "wall"
         self.role = "obstacle"
         self.probability = 0
-
 
 # Dictionary to store all entity types
 # Automatically collect all entity classes

@@ -1,48 +1,44 @@
 import random
 import math
+from backend import calculate_level
 
 class Weapon:
-    def __init__(self, max_level, weapon_id, level=None):
+    def __init__(self, min_level, max_level, weapon_id, level=None):
         self.type = self.__class__.__name__.lower()
+        self.min_level = min_level
         self.max_level = max_level
-        self.level = self._generate_level() if not level else level
+        self.level = level if level else calculate_level(min_level, max_level)
         self.id = weapon_id
         self.role = "weapon"
         self.slot = self.SLOT
         self._set_damage()
         self._set_attributes()
 
-    def _generate_level(self):
-        r = random.random()
-        level = int(math.exp(r * math.log(self.max_level))) + 1
-        return min(level, self.max_level)
-
-    def _log_scale(self, min_val, max_val):
-        if self.level == 1:
-            return min_val
-        log_factor = math.log(self.level, 2) / math.log(self.max_level, 2)
-        return min_val + int((max_val - min_val) * log_factor)
-
     def _set_damage(self):
         base_min, base_max = self.BASE_DAMAGE
 
-        if self.max_level == 1:
-            log_factor = 1
+        if self.min_level == self.max_level:
+            level_factor = 1
         else:
-            log_factor = math.log(self.level, 2) / math.log(self.max_level, 2)
+            level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
 
-        self.min_damage = int(base_min * (1 + log_factor * (self.max_level - 1)) * random.uniform(0.8, 1.2))
-        self.max_damage = int(base_max * (1 + log_factor * (self.max_level - 1)) * random.uniform(0.8, 1.2))
+        self.min_damage = int(base_min * (1 + level_factor * (self.max_level - self.min_level)) * random.uniform(0.8, 1.2))
+        self.max_damage = int(base_max * (1 + level_factor * (self.max_level - self.min_level)) * random.uniform(0.8, 1.2))
 
         if self.max_damage <= self.min_damage:
             self.max_damage = self.min_damage + 1
 
     def _set_attributes(self):
-        self.accuracy = self._log_scale(self.MIN_ACCURACY, self.MAX_ACCURACY)
-        self.crit_dmg_pct = self._log_scale(self.MIN_CRIT_DMG, self.MAX_CRIT_DMG)
-        self.crit_chance = self._log_scale(self.MIN_CRIT_CHANCE, self.MAX_CRIT_CHANCE)
+        if self.min_level == self.max_level:
+            level_factor = 1
+        else:
+            level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
+
+        self.accuracy = self.MIN_ACCURACY + int((self.MAX_ACCURACY - self.MIN_ACCURACY) * level_factor)
+        self.crit_dmg_pct = self.MIN_CRIT_DMG + int((self.MAX_CRIT_DMG - self.MIN_CRIT_DMG) * level_factor)
+        self.crit_chance = self.MIN_CRIT_CHANCE + int((self.MAX_CRIT_CHANCE - self.MIN_CRIT_CHANCE) * level_factor)
         if self.RANGE == "ranged":
-            self.crit_chance = min(self.crit_chance * 2, 100)  # Double crit chance for ranged weapons, capped at 100%
+            self.crit_chance = min(self.crit_chance * 2, 100)
 
     def to_dict(self):
         return {
