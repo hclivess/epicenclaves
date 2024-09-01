@@ -117,13 +117,51 @@ function skipAnimation() {
 
     while (currentRoundIndex < battleData.rounds.length) {
         const roundData = battleData.rounds[currentRoundIndex];
-        processRound(roundData, prevPlayerHp, prevEnemyHp);
+
+        // Process the round synchronously without animation or delays
+        processRoundWithoutAnimation(roundData, prevPlayerHp, prevEnemyHp);
+
         prevPlayerHp = roundData.player_hp;
         prevEnemyHp = roundData.enemy_hp;
         currentRoundIndex++;
     }
 
     skipButton.disabled = true;
+}
+
+// Process a single round without animation
+function processRoundWithoutAnimation(roundData, previousPlayerHp, previousEnemyHp) {
+    console.log(`Processing round: ${currentRoundIndex}`);
+    console.log(`Previous Player HP: ${previousPlayerHp}, Previous Enemy HP: ${previousEnemyHp}`);
+    console.log(`Current round data:`, roundData);
+
+    const li = document.createElement('li');
+    li.className = 'list-group-item battle-message';
+    li.textContent = roundData.message;
+
+    if (roundData.message.includes("You hit") || roundData.message.includes("You critical hit")) {
+        li.classList.add('player-attack');
+        const damage = previousEnemyHp - roundData.enemy_hp;
+        console.log(`Player attack damage: ${damage}`);
+        // Skip the animation and directly update the health and log
+        enemyCurrentHealth = roundData.enemy_hp;
+        updateHealth(enemyCurrentHealth, enemyMaxHealth, enemyHealth, enemyHpDisplay);
+    } else if (roundData.message.includes("hit you")) {
+        li.classList.add('enemy-attack');
+        const damage = previousPlayerHp - roundData.player_hp;
+        console.log(`Enemy attack damage: ${damage}`);
+        // Skip the animation and directly update the health and log
+        playerCurrentHealth = roundData.player_hp;
+        updateHealth(playerCurrentHealth, playerMaxHealth, playerHealth, playerHpDisplay);
+    } else if (roundData.message.includes("defeated") || roundData.message.includes("escaped")) {
+        li.classList.add('battle-result');
+    }
+
+    battleLog.appendChild(li);
+
+    // Ensure the log scrolls to the bottom after each entry
+    const battleLogContainer = document.querySelector('.battle-log-container');
+    battleLogContainer.scrollTop = battleLogContainer.scrollHeight;
 }
 
 // Start battle
