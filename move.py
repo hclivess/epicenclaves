@@ -34,30 +34,33 @@ def move_to(user, target_x, target_y, axis_limit, user_data, users_dict, map_dic
                 y -= 1
             path.append((x, y))
 
-        # Check each step in the path
-        for step_x, step_y in path:
-            coord_key = f"{step_x},{step_y}"
-            current_coord_key = f"{x},{y}"
+        # Check current position and target position
+        current_coord_key = f"{current_x},{current_y}"
+        target_coord_key = f"{target_x},{target_y}"
+        current_control = map_dict.get(current_coord_key, {}).get("control")
+        target_control = map_dict.get(target_coord_key, {}).get("control")
 
-            current_control = map_dict.get(current_coord_key, {}).get("control")
-            new_spot_control = map_dict.get(coord_key, {}).get("control")
-
-            if map_dict.get(coord_key, {}).get("type") == "wall":
-                return_message["message"] = f"Cannot move through a wall at {coord_key}"
-                break
-            elif current_control and current_control != user and new_spot_control and new_spot_control != user:
-                return_message["message"] = f"Cannot move deeper into enemy territory at {coord_key}"
-                break
+        # Check if moving from one enemy tile to another
+        if current_control and current_control != user and target_control and target_control != user:
+            return_message["message"] = "Cannot move from one enemy tile to another"
         else:
-            # If the loop completed without breaking, the move is valid
-            return_message["success"] = True
-            return_message["message"] = "Moved successfully"
+            # Check each step in the path
+            for step_x, step_y in path:
+                coord_key = f"{step_x},{step_y}"
 
-            update_user_data(
-                user,
-                {"x_pos": target_x, "y_pos": target_y, "action_points": user_data["action_points"] - distance},
-                users_dict,
-            )
+                if map_dict.get(coord_key, {}).get("type") == "wall":
+                    return_message["message"] = f"Cannot move through a wall at {coord_key}"
+                    break
+            else:
+                # If the loop completed without breaking, the move is valid
+                return_message["success"] = True
+                return_message["message"] = "Moved successfully"
+
+                update_user_data(
+                    user,
+                    {"x_pos": target_x, "y_pos": target_y, "action_points": user_data["action_points"] - distance},
+                    users_dict,
+                )
 
     return return_message
 def move(user, entry, axis_limit, user_data, users_dict, map_dict):
@@ -83,19 +86,14 @@ def move(user, entry, axis_limit, user_data, users_dict, map_dict):
 
         if not user_data.get("alive"):
             return_message["message"] = "Cannot move while dead"
-
         elif user_data.get("action_points", 0) <= 0:
             return_message["message"] = "Out of action points"
-
         elif new_pos < 1 or new_pos > axis_limit:
             return_message["message"] = "Out of bounds"
-
         elif map_dict.get(coord_key, {}).get("type") == "wall":
             return_message["message"] = "Cannot move into a wall"
-
         elif current_control and current_control != user and new_spot_control and new_spot_control != user:
-            return_message["message"] = "Cannot move deeper into enemy territory"
-
+            return_message["message"] = "Cannot move from one enemy tile to another"
         else:
             return_message["success"] = True
             return_message["message"] = "Moved successfully"
@@ -107,4 +105,3 @@ def move(user, entry, axis_limit, user_data, users_dict, map_dict):
             )
 
     return return_message
-
