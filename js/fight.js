@@ -5,6 +5,8 @@ const enemyHealth = document.getElementById('enemyHealth');
 const playerHpDisplay = document.getElementById('playerHpDisplay');
 const enemyHpDisplay = document.getElementById('enemyHpDisplay');
 const skipButton = document.getElementById('skipAnimation');
+const playerPicture = document.querySelector('.player');
+const enemyPicture = document.querySelector('.enemy');
 
 let currentRoundIndex = 0;
 let isAnimationSkipped = false;
@@ -35,10 +37,23 @@ function showDamagePopUp(damage, isPlayer) {
 function animateAttack(attacker, target) {
     return new Promise((resolve) => {
         gsap.timeline({onComplete: resolve})
-            .to(attacker, {x: attacker === playerHealth.parentElement ? 50 : -50, duration: 0.2})
+            .to(attacker, {x: attacker.classList.contains('player') ? 50 : -50, duration: 0.2})
             .to(attacker, {x: 0, duration: 0.2})
-            .to(target, {x: target === playerHealth.parentElement ? -25 : 25, duration: 0.1}, "-=0.2")
+            .to(target, {x: target.classList.contains('player') ? -25 : 25, duration: 0.1}, "-=0.2")
             .to(target, {x: 0, duration: 0.1});
+    });
+}
+
+function animateProfilePicture(pictureElement, isDamageTaken) {
+    return new Promise((resolve) => {
+        const tl = gsap.timeline({onComplete: resolve});
+        if (isDamageTaken) {
+            tl.to(pictureElement, {scale: 1.2, duration: 0.1})
+              .to(pictureElement, {scale: 1, duration: 0.1});
+        } else {
+            tl.to(pictureElement, {x: 10, duration: 0.1})
+              .to(pictureElement, {x: 0, duration: 0.1});
+        }
     });
 }
 
@@ -47,7 +62,6 @@ function addLogMessage(message, className) {
     li.textContent = message;
     li.classList.add('battle-message');
 
-    // Add specific class based on the message type
     switch(className) {
         case 'defeat':
             li.classList.add('defeat-message');
@@ -79,10 +93,7 @@ function addLogMessage(message, className) {
             break;
     }
 
-    // Insert the new message at the top of the battle log
     battleLog.insertBefore(li, battleLog.firstChild);
-
-    // Use requestAnimationFrame to scroll after the browser has updated the layout
     requestAnimationFrame(() => {
         battleLog.scrollTop = 0;
     });
@@ -90,7 +101,7 @@ function addLogMessage(message, className) {
 
 function skipAnimation() {
     isAnimationSkipped = true;
-    battleLog.innerHTML = ''; // Clear the battle log before repopulating
+    battleLog.innerHTML = '';
 
     battleData.rounds.forEach((round) => {
         round.actions.forEach((action) => {
@@ -102,7 +113,6 @@ function skipAnimation() {
         if (isBattleOver) return;
     });
 
-    // Update health displays to final values
     const finalRound = battleData.rounds[battleData.rounds.length - 1];
     updateHealth(finalRound.player_hp, battleData.player.max_hp, playerHealth, playerHpDisplay);
     updateHealth(finalRound.enemy_hp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
@@ -116,11 +126,13 @@ async function processAction(action, playerHp, enemyHp) {
     if (action.type === 'attack') {
         if (action.actor === 'player') {
             showDamagePopUp(action.damage, false);
-            if (!isAnimationSkipped) await animateAttack(playerHealth.parentElement, enemyHealth.parentElement);
+            if (!isAnimationSkipped) await animateAttack(playerPicture, enemyPicture);
+            await animateProfilePicture(enemyPicture, true);
             updateHealth(enemyHp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
         } else {
             showDamagePopUp(action.damage, true);
-            if (!isAnimationSkipped) await animateAttack(enemyHealth.parentElement, playerHealth.parentElement);
+            if (!isAnimationSkipped) await animateAttack(enemyPicture, playerPicture);
+            await animateProfilePicture(playerPicture, true);
             updateHealth(playerHp, battleData.player.max_hp, playerHealth, playerHpDisplay);
         }
     }
