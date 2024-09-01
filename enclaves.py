@@ -704,9 +704,7 @@ class DeployArmyHandler(UserActionHandler):
         return remove_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
 
 
-class RedirectToHTTPSHandler(tornado.web.RequestHandler):
-    def get(self, parameters):
-        self.redirect(self.request.full_url().replace('http://', 'https://'), permanent=True)
+
 
 class DemolishHandler(UserActionHandler):
     def get(self, *args, **kwargs):
@@ -714,7 +712,7 @@ class DemolishHandler(UserActionHandler):
         league = self.get_current_league()
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
 
-        message = self.perform_destroy_action(user, self._destroy_building, league)
+        message = self.perform_demolish_action(user, self._demolish, league)
 
         if return_to_map:
             self.set_header("Content-Type", "application/json")
@@ -723,15 +721,19 @@ class DemolishHandler(UserActionHandler):
             user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message, league=league)
 
-    def perform_destroy_action(self, user, action_func, league, *args, **kwargs):
+    def perform_demolish_action(self, user, action_func, league, *args, **kwargs):
         user_data = get_user_data(user, usersdb[league])
         if user_data is None:
             return f"User {user} not found."
         return action_func(user, user_data, *args, **kwargs)
 
-    def _destroy_building(self, user, user_data):
+    def _demolish(self, user, user_data):
         league = self.get_current_league()
         return demolish(user, user_data, usersdb[league], mapdb[league])
+
+class RedirectToHTTPSHandler(tornado.web.RequestHandler):
+    def get(self, parameters):
+        self.redirect(self.request.full_url().replace('http://', 'https://'), permanent=True)
 
 class LoginHandler(BaseHandler):
     def post(self, data):
