@@ -2,10 +2,10 @@ import random
 import math
 
 class Weapon:
-    def __init__(self, max_level, weapon_id):
+    def __init__(self, max_level, weapon_id, level=None):
         self.type = self.__class__.__name__.lower()
         self.max_level = max_level
-        self.level = self._generate_level()
+        self.level = self._generate_level() if not level else level
         self.id = weapon_id
         self.role = "weapon"
         self.slot = self.SLOT

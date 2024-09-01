@@ -2,11 +2,11 @@ import random
 import math
 
 class Armor:
-    def __init__(self, max_level, armor_id):
+    def __init__(self, max_level, armor_id, level):
         self.type = self.__class__.__name__.lower()
         self.slot = self.SLOT
         self.max_level = max_level
-        self.level = self._generate_level()
+        self.level =  self._generate_level() if not level else level
         self.id = armor_id
         self.role = "armor"
         self._set_attributes()

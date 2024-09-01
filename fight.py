@@ -1,7 +1,7 @@
 from backend import update_user_data, get_values, get_user, has_item_equipped
 from map import remove_from_map, get_coords
 import entities
-from item_generator import generate_weapon, generate_armor, logarithmic_level
+from item_generator import generate_weapon, generate_armor, calculate_level
 import math
 import random
 from typing import Dict, List, Tuple, Optional
@@ -101,19 +101,6 @@ def fight_npc(entry: Dict, user_data: Dict, user: str, usersdb: Dict, mapdb: Dic
 
     return {"battle_data": battle_data}
 
-
-def determine_item_level(max_level: int) -> int:
-    """
-    Determine item level using a logarithmic distribution.
-    Higher levels are progressively harder to obtain.
-    """
-    if max_level <= 1:
-        return 1
-    r = random.random()
-    level = int(math.exp(r * math.log(max_level))) + 1
-    return min(level, max_level)
-
-
 def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict, entry: Dict,
                        battle_data: Dict, round_number: int) -> None:
     battle_data["rounds"].append({
@@ -125,15 +112,13 @@ def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb:
     npc.alive = False
 
     if random.random() < npc.drop_chance:
-        min_item_level = max(1, npc.level - 9)  # Minimum level is at least 1
+        min_item_level = max(1, npc.level - 20)  # Minimum level is at least 1
         max_item_level = npc.level
 
-        # Ensure item levels follow a logarithmic distribution, but don't fall below min_item_level
-        while True:
-            item_level = logarithmic_level(min_item_level, max_item_level)
-            if item_level >= min_item_level:
-                break
+        # Generate item level logarithmically within the range [min_item_level, max_item_level]
+        item_level = calculate_level(min_item_level, max_item_level)
 
+        # Randomly decide between generating a weapon or armor
         new_item = generate_weapon(min_level=item_level,
                                    max_level=item_level) if random.random() < 0.5 else generate_armor(
             min_level=item_level, max_level=item_level)

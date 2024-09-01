@@ -11,14 +11,25 @@ def id_generator(length=10):
     return ''.join(random.choice(characters) for _ in range(length))
 
 
-def logarithmic_level(min_level, max_level):
-    r = random.random()
-    level = min_level + int((math.exp(r * math.log(max_level - min_level + 1)) - 1))
-    return max(min_level, min(level, max_level))
+def calculate_level(min_level, max_level):
 
+    if min_level >= max_level:
+        return min_level
+
+    # Generate a random value between 0 and 1
+    random_value = random.random()
+
+    # Calculate the logarithmic distribution
+    result = int(min_level * math.exp(random_value * math.log(max_level / min_level)))
+    print("log level roll", min_level, max_level, result)
+    if result < min_level:
+        return min_level
+
+    return result
 
 def generate_weapon(min_level=1, max_level=20, weapon_type=None):
-    level = logarithmic_level(min_level, max_level)
+    print("generating weapon", min_level, max_level)
+    level = calculate_level(min_level, max_level)
     weapon_classes = [cls for cls in weapons.__dict__.values() if
                       isinstance(cls, type) and issubclass(cls, weapons.Weapon) and cls != weapons.Weapon]
 
@@ -29,12 +40,14 @@ def generate_weapon(min_level=1, max_level=20, weapon_type=None):
     else:
         selected_class = random.choice(weapon_classes)
 
-    weapon = selected_class(level, id_generator())
+    weapon = selected_class(level, id_generator(), level=level)
+    print(weapon.to_dict())
     return weapon.to_dict()  # Return the dictionary representation
 
 
 def generate_armor(min_level=1, max_level=20, slot=None):
-    level = logarithmic_level(min_level, max_level)
+    print("generating armor", min_level, max_level)
+    level = calculate_level(min_level, max_level)
     armor_classes = [cls for cls in armor.__dict__.values() if
                      isinstance(cls, type) and issubclass(cls, armor.Armor) and cls != armor.Armor]
 
@@ -45,12 +58,13 @@ def generate_armor(min_level=1, max_level=20, slot=None):
     else:
         selected_class = random.choice(armor_classes)
 
-    armor_piece = selected_class(level, id_generator())
+    armor_piece = selected_class(level, id_generator(), level=level)
+    print(armor_piece.to_dict())
     return armor_piece.to_dict()  # Return the dictionary representation
 
 
 def generate_tool(max_level=20, tool_type=None):
-    level = logarithmic_level(1, max_level)
+    level = calculate_level(1, max_level)
     tool_classes = [cls for cls in tools.__dict__.values() if
                     isinstance(cls, type) and issubclass(cls, tools.Tool) and cls != tools.Tool]
 
@@ -76,7 +90,7 @@ if __name__ == "__main__":
     print("Level distribution test:")
     level_counts = {i: 0 for i in range(1, 21)}
     for _ in range(10000):
-        level = logarithmic_level(1, 20)
+        level = calculate_level(1, 20)
         level_counts[level] += 1
 
     for level, count in level_counts.items():
