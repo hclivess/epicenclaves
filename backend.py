@@ -7,7 +7,6 @@ if not os.path.exists("db"):
 from threading import Lock
 
 # Initialize locks
-user_lock = Lock()
 map_lock = Lock()
 
 
@@ -64,42 +63,40 @@ def get_user(user, user_data_dict, get_construction=True):
     return user_data
 
 def update_user_data(user, updated_values, user_data_dict):
-    with user_lock:
-        print("update_user_data", user, updated_values)
+    print("update_user_data", user, updated_values)
 
-        if user not in user_data_dict:
-            print("User not found")
-            return
+    if user not in user_data_dict:
+        print("User not found")
+        return
 
-        user_entry = user_data_dict[user]
+    user_entry = user_data_dict[user]
 
-        for key, value in updated_values.items():
-            if value is None:
-                continue  # Skip keys with None value to preserve existing data
+    for key, value in updated_values.items():
+        if value is None:
+            continue  # Skip keys with None value to preserve existing data
 
-            if (
-                key == "construction"
-                and "construction" in user_entry
-                and isinstance(value, dict)
-            ):
-                for coord, construction_info in value.items():
-                    user_entry["construction"][coord] = construction_info
-            else:
-                user_entry[key] = value
+        if (
+            key == "construction"
+            and "construction" in user_entry
+            and isinstance(value, dict)
+        ):
+            for coord, construction_info in value.items():
+                user_entry["construction"][coord] = construction_info
+        else:
+            user_entry[key] = value
 
 
 def remove_from_user(user, construction_coordinates, user_data_dict):
-    with user_lock:
-        key = f"{construction_coordinates['x_pos']},{construction_coordinates['y_pos']}"
+    key = f"{construction_coordinates['x_pos']},{construction_coordinates['y_pos']}"
 
-        if user not in user_data_dict:
-            print("User not found")
-            return
+    if user not in user_data_dict:
+        print("User not found")
+        return
 
-        user_data = user_data_dict[user]
+    user_data = user_data_dict[user]
 
-        if "construction" in user_data and isinstance(user_data["construction"], dict):
-            user_data["construction"].pop(key, None)
+    if "construction" in user_data and isinstance(user_data["construction"], dict):
+        user_data["construction"].pop(key, None)
 
 
 def get_values(entry):

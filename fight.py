@@ -1,4 +1,4 @@
-from backend import update_user_data, get_values, get_user, user_lock, has_item_equipped
+from backend import update_user_data, get_values, get_user, has_item_equipped
 from map import remove_from_map, get_coords
 import entities
 from item_generator import generate_weapon, generate_armor, logarithmic_level
@@ -403,43 +403,42 @@ def fight_player(entry: Dict, target_name: str, user_data: Dict, user: str, user
     return {"battle_data": battle_data}
 
 def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, victor_name: str, death_chance: float, usersdb: Dict, rounds: List[Dict], round_number: int) -> None:
-    with user_lock:
-        if random.random() < death_chance:
-            message = f"{defeated_name} is defeated."
-            new_data = {"alive": False, "hp": 0, "action_points": 0}
-        else:
-            message = f"{defeated_name} barely managed to escape."
-            new_data = {"action_points": defeated["action_points"] - 1, "hp": 1}
+    if random.random() < death_chance:
+        message = f"{defeated_name} is defeated."
+        new_data = {"alive": False, "hp": 0, "action_points": 0}
+    else:
+        message = f"{defeated_name} barely managed to escape."
+        new_data = {"action_points": defeated["action_points"] - 1, "hp": 1}
 
-        rounds.append({
-            "round": round_number,
-            "player_hp": defeated["hp"],
-            "enemy_hp": defeated["hp"],
-            "message": message
-        })
+    rounds.append({
+        "round": round_number,
+        "player_hp": defeated["hp"],
+        "enemy_hp": defeated["hp"],
+        "message": message
+    })
 
-        # Add item drop mechanic
-        if random.random() < 0.3:  # 30% chance to drop an item
-            dropped_item, slot = drop_random_item(defeated)
-            if dropped_item:
-                if slot == "unequipped":
-                    victor["unequipped"].append(dropped_item)
+    # Add item drop mechanic
+    if random.random() < 0.3:  # 30% chance to drop an item
+        dropped_item, slot = drop_random_item(defeated)
+        if dropped_item:
+            if slot == "unequipped":
+                victor["unequipped"].append(dropped_item)
+            else:
+                # If it's an equipped item, we need to handle it differently
+                if not has_item_equipped(victor, dropped_item["type"]):
+                    victor["equipped"].append(dropped_item)
                 else:
-                    # If it's an equipped item, we need to handle it differently
-                    if not has_item_equipped(victor, dropped_item["type"]):
-                        victor["equipped"].append(dropped_item)
-                    else:
-                        victor["unequipped"].append(dropped_item)
+                    victor["unequipped"].append(dropped_item)
 
-                rounds.append({
-                    "round": round_number,
-                    "player_hp": defeated["hp"],
-                    "enemy_hp": defeated["hp"],
-                    "message": f"{victor_name} looted a {dropped_item['type']} from {defeated_name}'s territory!"
-                })
-                update_user_data(victor_name, {"unequipped": victor["unequipped"], "equipped": victor["equipped"]}, usersdb)
+            rounds.append({
+                "round": round_number,
+                "player_hp": defeated["hp"],
+                "enemy_hp": defeated["hp"],
+                "message": f"{victor_name} looted a {dropped_item['type']} from {defeated_name}'s territory!"
+            })
+            update_user_data(victor_name, {"unequipped": victor["unequipped"], "equipped": victor["equipped"]}, usersdb)
 
-        update_user_data(defeated_name, new_data, usersdb)
+    update_user_data(defeated_name, new_data, usersdb)
 
 
 def drop_random_item(player: Dict) -> Tuple[Optional[Dict], Optional[str]]:
