@@ -8,6 +8,7 @@ const skipButton = document.getElementById('skipAnimation');
 
 let currentRoundIndex = 0;
 let isAnimationSkipped = false;
+let isBattleOver = false;
 
 function updateHealth(health, maxHealth, healthElement, hpDisplayElement) {
     const healthPercentage = Math.max(0, Math.min((health / maxHealth) * 100, 100));
@@ -41,73 +42,66 @@ function animateAttack(attacker, target) {
     });
 }
 
-async function processAction(action, playerHp, enemyHp) {
+function addLogMessage(message, className) {
     const li = document.createElement('li');
-    li.textContent = action.message;
-
-    switch (action.type) {
-        case 'attack':
-            if (action.actor === 'player') {
-                li.classList.add('player-attack');
-                showDamagePopUp(action.damage, false);
-                await animateAttack(playerHealth.parentElement, enemyHealth.parentElement);
-                updateHealth(enemyHp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
-            } else {
-                li.classList.add('enemy-attack');
-                showDamagePopUp(action.damage, true);
-                await animateAttack(enemyHealth.parentElement, playerHealth.parentElement);
-                updateHealth(playerHp, battleData.player.max_hp, playerHealth, playerHpDisplay);
-            }
-            break;
-        case 'armor':
-        case 'armor_break':
-        case 'armor_miss':
-        case 'no_armor':
-            li.classList.add('armor-message');
-            break;
-        case 'defeat':
-            li.classList.add('defeat-message');
-            break;
-        case 'escape':
-            li.classList.add('escape-message');
-            break;
-        case 'loot':
-            li.classList.add('loot-message');
-            break;
-        case 'no_loot':
-            li.classList.add('no-loot-message');
-            break;
-        case 'exp_gain':
-            li.classList.add('exp-gain-message');
-            break;
-    }
-
+    li.textContent = message;
+    li.classList.add(className);
     battleLog.appendChild(li);
     battleLog.scrollTop = battleLog.scrollHeight;
+}
 
-    // Add a small delay between actions for readability
-    await new Promise(resolve => setTimeout(resolve, 500));
+async function processAction(action, playerHp, enemyHp) {
+    if (isBattleOver) return;
+
+    addLogMessage(action.message, action.type);
+
+    if (action.type === 'attack') {
+        if (action.actor === 'player') {
+            showDamagePopUp(action.damage, false);
+            if (!isAnimationSkipped) await animateAttack(playerHealth.parentElement, enemyHealth.parentElement);
+            updateHealth(enemyHp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
+        } else {
+            showDamagePopUp(action.damage, true);
+            if (!isAnimationSkipped) await animateAttack(enemyHealth.parentElement, playerHealth.parentElement);
+            updateHealth(playerHp, battleData.player.max_hp, playerHealth, playerHpDisplay);
+        }
+    }
+
+    if (action.type === 'defeat' || action.type === 'escape') {
+        isBattleOver = true;
+    }
+
+    if (!isAnimationSkipped) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
 }
 
 async function processRound(roundData) {
     for (const action of roundData.actions) {
         await processAction(action, roundData.player_hp, roundData.enemy_hp);
+        if (isBattleOver) break;
     }
 }
 
 function skipAnimation() {
     isAnimationSkipped = true;
-    currentRoundIndex = battleData.rounds.length - 1;
-    const finalRound = battleData.rounds[currentRoundIndex];
+    battleLog.innerHTML = ''; // Clear the battle log before repopulating
+
+    battleData.rounds.forEach((round) => {
+        round.actions.forEach((action) => {
+            addLogMessage(action.message, action.type);
+            if (action.type === 'defeat' || action.type === 'escape') {
+                isBattleOver = true;
+            }
+        });
+        if (isBattleOver) return;
+    });
+
+    // Update health displays to final values
+    const finalRound = battleData.rounds[battleData.rounds.length - 1];
     updateHealth(finalRound.player_hp, battleData.player.max_hp, playerHealth, playerHpDisplay);
     updateHealth(finalRound.enemy_hp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
-    battleData.rounds.forEach(round => {
-        round.actions.forEach(action => {
-            const li = document.createElement('li');
-            li.textContent = action.message;
-            battleLog.appendChild(li);
-        });
-    });
+
     battleLog.scrollTop = battleLog.scrollHeight;
     skipButton.disabled = true;
 }
@@ -117,13 +111,15 @@ async function startBattle() {
     updateHealth(battleData.enemy.current_hp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
 
     async function processNextRound() {
-        if (isAnimationSkipped) return;
+        if (isAnimationSkipped || isBattleOver) return;
 
         if (currentRoundIndex < battleData.rounds.length) {
             const roundData = battleData.rounds[currentRoundIndex];
             await processRound(roundData);
             currentRoundIndex++;
-            setTimeout(processNextRound, 1000);
+            if (!isBattleOver) {
+                setTimeout(processNextRound, 1000);
+            }
         } else {
             skipButton.disabled = true;
         }
