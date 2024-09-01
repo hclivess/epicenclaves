@@ -1,15 +1,7 @@
 from backend import update_user_data
 from map import occupied_by, owned_by
+from player import calculate_total_hp
 
-
-def calculate_total_hp(base_hp: int, exp: int) -> int:
-    # This function should be the same as the one we defined earlier
-    hp_bonus = int(exp / 10)  # 1 extra HP for every 10 exp
-    return base_hp + hp_bonus
-
-def calculate_total_hp(base_hp: int, exp: int) -> int:
-    hp_bonus = int(exp / 10)  # 1 extra HP for every 10 exp
-    return base_hp + hp_bonus
 
 def attempt_rest(user, user_data, hours_arg, usersdb, mapdb):
     hours = int(hours_arg)
