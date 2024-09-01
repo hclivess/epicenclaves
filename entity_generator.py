@@ -1,31 +1,35 @@
 import random
 import importlib
-import math
 from backend import calculate_level
 
 # Import all entities from a separate module
 entities = importlib.import_module('entities')
 
-
 def spawn_all_entities(mapdb):
     entity_classes = [cls for name, cls in entities.__dict__.items() if isinstance(cls, type) and hasattr(cls, 'type')]
     for entity_class in entity_classes:
-        entity_instance = entity_class()
-        spawn(
-            entity_class=entity_class,
-            probability=getattr(entity_instance, 'probability', 1),
-            mapdb=mapdb,
-            min_level=getattr(entity_instance, 'min_level', 1),
-            max_level=getattr(entity_instance, 'max_level', 1000),
-            map_size=getattr(entity_instance, 'map_size', 1000),
-            max_entities=getattr(entity_instance, 'max_entities', None),
-            max_entities_total=getattr(entity_instance, 'max_entities_total', None),
-            herd_probability=getattr(entity_instance, 'herd_probability', 0.5)
-        )
-
+        probability = getattr(entity_class, 'probability', 1)
+        if probability > 0:  # Only attempt to spawn if probability is greater than 0
+            spawn(
+                entity_class=entity_class,
+                probability=probability,
+                mapdb=mapdb,
+                min_level=getattr(entity_class, 'min_level', 1),
+                max_level=getattr(entity_class, 'max_level', 1000),
+                map_size=getattr(entity_class, 'map_size', 1000),
+                max_entities=getattr(entity_class, 'max_entities', None),
+                max_entities_total=getattr(entity_class, 'max_entities_total', None),
+                herd_probability=getattr(entity_class, 'herd_probability', 0.5)
+            )
+        else:
+            print(f"Skipping spawn for {entity_class.type} due to zero probability")
 
 def spawn(entity_class, probability, mapdb, min_level, max_level, map_size=20, max_entities=None, max_entities_total=None,
           herd_size=15, herd_radius=5, herd_probability=0.5):
+    if probability <= 0:
+        print(f"Skipping spawn for {entity_class.type} due to zero or negative probability")
+        return
+
     total_entities = 0
     total_tiles = map_size * map_size
     existing_entities = sum(1 for value in mapdb.values() if value.get('type') == entity_class.type)
@@ -41,7 +45,7 @@ def spawn(entity_class, probability, mapdb, min_level, max_level, map_size=20, m
 
     while True:
         if random.random() > probability:
-            print(f"Spawn attempt for {entity_class.type} skipped due to low probability ({probability})")
+            print(f"Spawn attempt for {entity_class.type} skipped due to probability check")
             break
 
         if max_entities is not None and total_entities >= max_entities:
@@ -99,37 +103,20 @@ def spawn(entity_class, probability, mapdb, min_level, max_level, map_size=20, m
 
     print(f"Spawn attempt for {entity_class.type} complete. Total new entities: {total_entities}")
 
-
 def create_entity_data(entity_class, level):
     if issubclass(entity_class, entities.Enemy):
-        entity_instance = entity_class(min_level=level, max_level=level)
-        return {
-            "type": entity_class.type,
-            "level": level,
-            "hp": entity_instance.hp,
-            "max_hp": entity_instance.hp,
-            "armor": entity_instance.armor,
-            "max_damage": entity_instance.max_damage,
-            "role": entity_instance.role,
-        }
+        entity_instance = entity_class(level)
     else:
         entity_instance = entity_class()
-        return {
-            "type": entity_class.type,
-            "role": getattr(entity_instance, 'role', 'scenery'),
-            "hp": getattr(entity_instance, 'hp', None),
-        }
-
+    return entity_instance.to_dict()
 
 def save_map_data(map_data_dict, x_pos, y_pos, data):
     # Use a string coordinate key like 'x,y'
     coord_key = f"{x_pos},{y_pos}"
     map_data_dict[coord_key] = data
 
-
 def count_entities_of_type(mapdb, entity_type):
     return sum(1 for data in mapdb.values() if "type" in data and data["type"] == entity_type)
-
 
 if __name__ == "__main__":
     # Test the entity generation

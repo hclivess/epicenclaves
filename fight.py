@@ -22,7 +22,7 @@ def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users:
     }
 
     if target.lower() == "player":
-        # Handle PvP combat
+        # Handle PvP combat (unchanged)
         target_data = next((entry for entry in on_tile_users if get_coords(entry) == target_name), None)
         if target_data:
             target_user_data = target_data[target_name]
@@ -44,26 +44,14 @@ def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users:
                 battle_data["rounds"].append({"round": 0, "message": f"Unknown enemy type: {npc_data['type']}"})
                 return {"battle_data": battle_data}
 
-            # Create a temporary enemy instance to get its base attributes
-            temp_enemy = enemy_class(min_level=npc_data['level'], max_level=npc_data['level'])
+            # Create an enemy instance with the level from the map
+            enemy = enemy_class(npc_data['level'])
 
-            # Calculate enemy stats based on its level
-            max_hp = int(temp_enemy.base_hp * (1 + 0.2 * (npc_data['level'] - 1)))
-            npc_data.update({
-                'hp': max_hp,
-                'max_hp': max_hp,
-                'min_damage': int(temp_enemy.base_min_damage * (1 + 0.1 * (npc_data['level'] - 1))),
-                'max_damage': int(temp_enemy.base_max_damage * (1 + 0.1 * (npc_data['level'] - 1))),
-                'crit_chance': temp_enemy.crit_chance,
-                'crit_damage': temp_enemy.crit_damage,
-                'kill_chance': temp_enemy.kill_chance,
-                'experience': max(1, int(npc_data['level'] * 0.1)),
-                'drop_chance': temp_enemy.drop_chance,
-                'regular_drop': temp_enemy.regular_drop
-            })
+            # Update npc_data with the enemy instance's attributes
+            npc_data.update(enemy.to_dict())
 
-            battle_data["enemy"]["max_hp"] = max_hp
-            battle_data["enemy"]["current_hp"] = max_hp
+            battle_data["enemy"]["max_hp"] = npc_data['max_hp']
+            battle_data["enemy"]["current_hp"] = npc_data['hp']
             fight_result = fight_npc(npc_data, coords, user_data, user, usersdb, mapdb)
             battle_data.update(fight_result["battle_data"])
             return {"battle_data": battle_data}
