@@ -96,7 +96,7 @@ def save_users_from_memory(user_data_dict: Dict[str, Dict[str, Any]], league="ga
         conn_user = sqlite3.connect("db/user_data.db")
         cursor_user = conn_user.cursor()
 
-        for username, user_data in user_data_dict[league].items():
+        for username, user_data in user_data_dict[league].copy().items():
             print(f"Processing user: {username}")
             print(f"User data: {user_data}")
 
