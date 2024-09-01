@@ -217,10 +217,10 @@ function performAction(actionUrl) {
             checkPlayerPosition();
 
             if (actionUrl.includes("rest")) {
-                // Reload the page after a short delay
+                // Delay the reload by 1 second
                 setTimeout(() => {
                     window.location.reload();
-                }, 0);
+                }, 1000);
             }
         })
         .catch(error => {

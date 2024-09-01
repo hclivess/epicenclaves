@@ -16,6 +16,7 @@ import buildings
 from user import User
 
 import entities
+from leagues import load_leagues
 from weapons import Weapon
 from armor import Armor
 from tools import Tool
@@ -792,7 +793,7 @@ if __name__ == "__main__":
     mapdb = {}
     usersdb = {}
 
-    leagues = ["game", "tour1"]
+    leagues = load_leagues()
 
     for league in leagues:
         print(f"Working on {league}")
