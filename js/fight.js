@@ -111,8 +111,6 @@ function skipAnimation() {
 }
 
 async function processAction(action, playerHp, enemyHp) {
-    if (isBattleOver) return;
-
     addLogMessage(action.message, action.type);
 
     if (action.type === 'attack') {
@@ -127,10 +125,6 @@ async function processAction(action, playerHp, enemyHp) {
         }
     }
 
-    if (action.type === 'defeat' || action.type === 'escape') {
-        isBattleOver = true;
-    }
-
     if (!isAnimationSkipped) {
         await new Promise(resolve => setTimeout(resolve, 500));
     }
@@ -139,7 +133,6 @@ async function processAction(action, playerHp, enemyHp) {
 async function processRound(roundData) {
     for (const action of roundData.actions) {
         await processAction(action, roundData.player_hp, roundData.enemy_hp);
-        if (isBattleOver) break;
     }
 }
 
@@ -148,15 +141,13 @@ async function startBattle() {
     updateHealth(battleData.enemy.current_hp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
 
     async function processNextRound() {
-        if (isAnimationSkipped || isBattleOver) return;
+        if (isAnimationSkipped) return;
 
         if (currentRoundIndex < battleData.rounds.length) {
             const roundData = battleData.rounds[currentRoundIndex];
             await processRound(roundData);
             currentRoundIndex++;
-            if (!isBattleOver) {
-                setTimeout(processNextRound, 1000);
-            }
+            processNextRound();
         } else {
             skipButton.disabled = true;
         }
