@@ -195,7 +195,7 @@ async function startBattle() {
             playerCurrentHealth = roundData.player_hp;
             enemyCurrentHealth = roundData.enemy_hp;
             currentRoundIndex++;
-            setTimeout(processNextRound, 2000);  // 2-second delay between rounds
+            setTimeout(processNextRound, 500);
         } else {
             skipButton.disabled = true;
         }
