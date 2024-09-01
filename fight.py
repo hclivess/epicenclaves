@@ -133,11 +133,15 @@ def process_npc_defeat(npc: entities.Enemy, user_data: Dict, user: str, usersdb:
 
     npc.alive = False
 
+    print("npc.drop_chance", npc.drop_chance)
+    print("npc.level", npc.level)
+    print("npc.experience", npc.experience)
+
     if random.random() < npc.drop_chance:
+
         min_item_level = max(1, npc.level - 20)
         max_item_level = npc.level
-        item_level = calculate_level(min_item_level, max_item_level)
-        new_item = generate_weapon(min_level=item_level, max_level=item_level) if random.random() < 0.5 else generate_armor(min_level=item_level, max_level=item_level)
+        new_item = generate_weapon(min_level=min_item_level, max_level=max_item_level) if random.random() < 0.5 else generate_armor(min_level=min_item_level, max_level=max_item_level)
 
         defeat_round["actions"].append({
             "actor": "system",

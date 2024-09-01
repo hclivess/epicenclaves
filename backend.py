@@ -105,7 +105,7 @@ def get_values(entry):
     return list(entry.values())[0]
 
 
-def calculate_level(min_level, max_level, bias=1.5):
+def calculate_level(min_level, max_level, bias=3):
     if min_level >= max_level:
         return min_level
 
