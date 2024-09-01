@@ -101,22 +101,11 @@ function addLogMessage(message, className) {
 
 function skipAnimation() {
     isAnimationSkipped = true;
-    battleLog.innerHTML = '';
 
-    battleData.rounds.forEach((round) => {
-        round.actions.forEach((action) => {
-            addLogMessage(action.message, action.type);
-            if (action.type === 'defeat' || action.type === 'escape') {
-                isBattleOver = true;
-            }
-        });
-        if (isBattleOver) return;
-    });
+    // Increase GSAP's global timeline speed for faster animations
+    gsap.globalTimeline.timeScale(10); // Speeds up animations by 10x
 
-    const finalRound = battleData.rounds[battleData.rounds.length - 1];
-    updateHealth(finalRound.player_hp, battleData.player.max_hp, playerHealth, playerHpDisplay);
-    updateHealth(finalRound.enemy_hp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
-
+    // Disable the button after it's clicked
     skipButton.disabled = true;
 }
 
@@ -139,6 +128,8 @@ async function processAction(action, playerHp, enemyHp) {
 
     if (!isAnimationSkipped) {
         await new Promise(resolve => setTimeout(resolve, 500));
+    } else {
+        await new Promise(resolve => setTimeout(resolve, 50)); // Reduce delay in fast-forward mode
     }
 }
 
@@ -153,8 +144,6 @@ async function startBattle() {
     updateHealth(battleData.enemy.current_hp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
 
     async function processNextRound() {
-        if (isAnimationSkipped) return;
-
         if (currentRoundIndex < battleData.rounds.length) {
             const roundData = battleData.rounds[currentRoundIndex];
             await processRound(roundData);
