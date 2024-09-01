@@ -170,9 +170,9 @@ async function startBattle() {
     console.log("Starting battle");
     console.log(`Player Max HP: ${playerMaxHealth}, Enemy Max HP: ${enemyMaxHealth}`);
 
-    // Initialize health with max values from battle data
-    playerCurrentHealth = playerMaxHealth;
-    enemyCurrentHealth = enemyMaxHealth;
+    // Initialize health with values from the first round of battle data
+    playerCurrentHealth = battleData.rounds[0].player_hp;
+    enemyCurrentHealth = battleData.rounds[0].enemy_hp;
 
     console.log(`Initial Player HP: ${playerCurrentHealth}, Initial Enemy HP: ${enemyCurrentHealth}`);
 
@@ -185,8 +185,8 @@ async function startBattle() {
 
         if (currentRoundIndex < battleData.rounds.length) {
             const roundData = battleData.rounds[currentRoundIndex];
-            const prevPlayerHp = currentRoundIndex === 0 ? playerMaxHealth : battleData.rounds[currentRoundIndex - 1].player_hp;
-            const prevEnemyHp = currentRoundIndex === 0 ? enemyMaxHealth : battleData.rounds[currentRoundIndex - 1].enemy_hp;
+            const prevPlayerHp = currentRoundIndex === 0 ? playerCurrentHealth : battleData.rounds[currentRoundIndex - 1].player_hp;
+            const prevEnemyHp = currentRoundIndex === 0 ? enemyCurrentHealth : battleData.rounds[currentRoundIndex - 1].enemy_hp;
 
             console.log(`Processing round ${currentRoundIndex + 1}`);
             console.log(`Previous Player HP: ${prevPlayerHp}, Previous Enemy HP: ${prevEnemyHp}`);
