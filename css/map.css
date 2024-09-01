@@ -246,16 +246,30 @@ body, html {
         background-color: #c82333;
         border-color: #bd2130;
     }
-    #message-display {
-        color: #ffd700;
-        font-weight: bold;
-        padding: 6px 12px;
-        border-radius: 4px;
-        background-color: rgba(0, 0, 0, 0.5);
-        margin-left: auto;
-        max-width: 300px;
-        text-align: right;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+#message-display {
+    position: fixed;
+    top: 60px; /* Adjust based on your navigation bar height */
+    left: 0;
+    right: 0;
+    color: #ffd700;
+    font-weight: bold;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.8);
+    text-align: center;
+    white-space: normal;
+    overflow: hidden;
+    z-index: 2001;
+    font-size: 18px;
+    max-width: none;
+    width: 100%;
+    box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+}
+
+#message-display:not(:empty) {
+    opacity: 1;
+    visibility: visible;
+}
+

@@ -231,14 +231,26 @@ function performAction(actionUrl) {
 
 function displayMessage(message) {
     const messageDisplay = document.getElementById('message-display');
-    if (messageDisplay) {
+
+    if (message && message.trim() !== '') {
         messageDisplay.textContent = message;
-        messageDisplay.style.display = 'block';
+        messageDisplay.style.opacity = '1';
+        messageDisplay.style.visibility = 'visible';
+
+        // Fade out the message after 5 seconds
         setTimeout(() => {
-            messageDisplay.style.display = 'none';
-        }, 5000); // Hide the message after 5 seconds
+            messageDisplay.style.opacity = '0';
+            messageDisplay.style.visibility = 'hidden';
+        }, 5000);
+
+        // Clear the message after fade out
+        setTimeout(() => {
+            messageDisplay.textContent = '';
+        }, 5300);
     } else {
-        console.log("Message:", message);
+        messageDisplay.textContent = '';
+        messageDisplay.style.opacity = '0';
+        messageDisplay.style.visibility = 'hidden';
     }
 }
 
