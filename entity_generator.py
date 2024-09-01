@@ -74,7 +74,7 @@ def spawn(entity_class, probability, mapdb, min_level, max_level, map_size=20, m
                 if max_entities_total is not None and existing_entities + total_entities >= max_entities_total:
                     print(f"Reached maximum total entities ({max_entities_total}) during herd spawn for {entity_class.type}")
                     return
-                entity_level = random.randint(min_level, max_level)
+                entity_level = calculate_level(min_level, max_level)
                 x_offset = random.randint(-herd_radius, herd_radius)
                 y_offset = random.randint(-herd_radius, herd_radius)
                 new_x = x_pos + x_offset
@@ -91,7 +91,7 @@ def spawn(entity_class, probability, mapdb, min_level, max_level, map_size=20, m
                     print(f"Failed to spawn herd member at {new_x}, {new_y} for {entity_class.type}")
             print(f"Herd spawn complete: {herd_spawned}/{herd_size} {entity_class.type} entities spawned")
         else:
-            entity_level = random.randint(min_level, max_level)
+            entity_level = calculate_level(min_level, max_level)
             entity_data = create_entity_data(entity_class, entity_level)
             print(f"Generating single {entity_class.type} (Level {entity_level}) at {x_pos}, {y_pos}")
             save_map_data(x_pos=x_pos, y_pos=y_pos, data=entity_data, map_data_dict=mapdb)

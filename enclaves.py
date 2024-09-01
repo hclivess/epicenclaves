@@ -819,7 +819,7 @@ if __name__ == "__main__":
         print(db_status)
         if not db_status["map_exists"]:
             spawn(mapdb=mapdb[league], entity_class=entities.Boar, probability=1, map_size=1000, max_entities=2500,
-                  min_level=1, max_level=5,
+                  min_level=1, max_level=10,
                   herd_probability=1)
             spawn(mapdb=mapdb[league], entity_class=entities.Forest, probability=1, map_size=1000, max_entities=2500,
                   min_level=1, max_level=1,
