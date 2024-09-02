@@ -129,10 +129,14 @@ body {
 
 .fighter.player {
     left: 5%;
+        animation: fadeInRight 1s ease-out;
+
 }
 
 .fighter.enemy {
     right: 5%;
+        animation: fadeInRight 1s ease-out;
+
 }
 
 .health-bar {

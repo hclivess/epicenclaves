@@ -50,7 +50,7 @@ def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users:
             # Update npc_data with the enemy instance's attributes
             npc_data.update(enemy.to_dict())
 
-            battle_data["enemy"]["max_hp"] = npc_data['max_hp']
+            battle_data["enemy"]["max_hp"] = npc_data['hp']
             battle_data["enemy"]["current_hp"] = npc_data['hp']
             fight_result = fight_npc(npc_data, coords, user_data, user, usersdb, mapdb)
             battle_data.update(fight_result["battle_data"])
@@ -66,7 +66,7 @@ def fight_npc(npc_data: Dict[str, Any], coords: str, user_data: Dict, user: str,
         "player": {"name": user, "max_hp": user_data["hp"], "current_hp": user_data["hp"]},
         "enemy": {
             "name": npc_data['type'],
-            "max_hp": npc_data['max_hp'],
+            "max_hp": npc_data['hp'],
             "current_hp": npc_data['hp'],
             "level": npc_data['level']
         },
@@ -89,7 +89,7 @@ def fight_npc(npc_data: Dict[str, Any], coords: str, user_data: Dict, user: str,
                 "damage": user_dmg['damage'],
                 "message": f"You {user_dmg['message']} the level {npc_data['level']} {npc_data['type']} for {user_dmg['damage']} damage "
                            f"(Base: {user_dmg['base_damage']}, Exp bonus: {user_dmg['exp_bonus']}). "
-                           f"It has {npc_data['hp']}/{npc_data['max_hp']} HP left"
+                           f"It has {npc_data['hp']}/{npc_data['hp']} HP left"
             })
 
         # Enemy's turn
