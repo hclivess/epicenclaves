@@ -60,16 +60,6 @@ class Enemy:
         return {
             "type": self.type,
             "level": self.level,
-            "hp": self.hp,
-            "max_hp": self.max_hp,
-            "min_damage": self.min_damage,
-            "max_damage": self.max_damage,
-            "armor": self.armor,
-            "crit_chance": self.crit_chance,
-            "crit_damage": self.crit_damage,
-            "drop_chance": self.drop_chance,
-            "regular_drop": self.regular_drop,
-            "experience": self.experience,
         }
 
 class Boar(Enemy):
