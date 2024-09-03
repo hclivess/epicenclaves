@@ -12,6 +12,10 @@ let currentRoundIndex = 0;
 let isAnimationSkipped = false;
 let isBattleOver = false;
 
+// New variables to track current HP
+let currentPlayerHp;
+let currentEnemyHp;
+
 function updateHealth(health, maxHealth, healthElement, hpDisplayElement) {
     const healthPercentage = Math.max(0, Math.min((health / maxHealth) * 100, 100));
     healthElement.style.width = `${healthPercentage}%`;
@@ -101,47 +105,50 @@ function addLogMessage(message, className) {
 
 function skipAnimation() {
     isAnimationSkipped = true;
-
-    // Increase GSAP's global timeline speed for faster animations
-    gsap.globalTimeline.timeScale(10); // Speeds up animations by 10x
-
-    // Disable the button after it's clicked
+    gsap.globalTimeline.timeScale(10);
     skipButton.disabled = true;
 }
 
-async function processAction(action, playerHp, enemyHp) {
+async function processAction(action) {
     addLogMessage(action.message, action.type);
 
     if (action.type === 'attack') {
         if (action.actor === 'player') {
+            currentEnemyHp -= action.damage;
             showDamagePopUp(action.damage, false);
             if (!isAnimationSkipped) await animateAttack(playerPicture, enemyPicture);
             await animateProfilePicture(enemyPicture, true);
-            updateHealth(enemyHp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
+            updateHealth(currentEnemyHp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
         } else {
+            currentPlayerHp -= action.damage;
             showDamagePopUp(action.damage, true);
             if (!isAnimationSkipped) await animateAttack(enemyPicture, playerPicture);
             await animateProfilePicture(playerPicture, true);
-            updateHealth(playerHp, battleData.player.max_hp, playerHealth, playerHpDisplay);
+            updateHealth(currentPlayerHp, battleData.player.max_hp, playerHealth, playerHpDisplay);
         }
     }
 
     if (!isAnimationSkipped) {
         await new Promise(resolve => setTimeout(resolve, 500));
     } else {
-        await new Promise(resolve => setTimeout(resolve, 50)); // Reduce delay in fast-forward mode
+        await new Promise(resolve => setTimeout(resolve, 50));
     }
 }
 
 async function processRound(roundData) {
     for (const action of roundData.actions) {
-        await processAction(action, roundData.player_hp, roundData.enemy_hp);
+        await processAction(action);
     }
 }
 
 async function startBattle() {
-    updateHealth(battleData.player.current_hp, battleData.player.max_hp, playerHealth, playerHpDisplay);
-    updateHealth(battleData.enemy.current_hp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
+    // Initialize current HP with the starting values
+    currentPlayerHp = battleData.player.current_hp;
+    currentEnemyHp = battleData.enemy.current_hp;
+
+    // Update initial health displays
+    updateHealth(currentPlayerHp, battleData.player.max_hp, playerHealth, playerHpDisplay);
+    updateHealth(currentEnemyHp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
 
     async function processNextRound() {
         if (currentRoundIndex < battleData.rounds.length) {
