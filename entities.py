@@ -2,7 +2,6 @@ import random
 from typing import Dict, List, Any
 import inspect
 
-
 class Enemy:
     type = "enemy"
     base_hp = 100
@@ -19,27 +18,33 @@ class Enemy:
     max_entities = None
     max_entities_total = None
     herd_probability = 0.5
+    min_level = 1
+    max_level = 100
+    experience_value = 10
 
     def __init__(self, level: int):
-        self.level = level
+        self.level = max(self.min_level, min(level, self.max_level))
         self.max_hp = self.calculate_hp()
         self.hp = self.max_hp
         self.min_damage, self.max_damage = self.calculate_damage()
         self.armor = self.calculate_armor()
         self.alive = True
-        self.experience = max(1, int(self.level * 0.1))
+        self.experience = self.calculate_experience()
 
     def calculate_hp(self):
-        return int(self.base_hp * (1 + 0.2 * (self.level - 1)))  # 20% increase per level
+        return int(self.base_hp * (1 + 0.1 * (self.level - 1)))  # 10% increase per level
 
     def calculate_damage(self):
-        scaling_factor = 1 + 0.10 * (self.level - 1)  # 10% increase per level
+        scaling_factor = 1 + 0.05 * (self.level - 1)  # 5% increase per level
         min_damage = int(self.base_min_damage * scaling_factor)
         max_damage = int(self.base_max_damage * scaling_factor)
         return min_damage, max_damage
 
     def calculate_armor(self):
-        return self.base_armor  # Can be overridden for more complex armor scaling
+        return self.base_armor + int(0.5 * (self.level - 1))  # 0.5 armor increase per level
+
+    def calculate_experience(self):
+        return int(self.experience_value * (1 + 0.1 * (self.level - 1)))  # 10% increase per level
 
     def roll_damage(self):
         damage = random.randint(self.min_damage, self.max_damage)
@@ -69,33 +74,22 @@ class Enemy:
             "experience": self.experience,
         }
 
-class Dragon(Enemy):
-    type = "dragon"
-    base_hp = 350
-    base_min_damage = 20
-    base_max_damage = 30
-    crit_chance = 0.4
-    crit_damage = 2.0
-    drop_chance = 1.0
-    regular_drop = {"bismuth": 50}
-    probability = 0.001
-    max_entities = 10
-    max_entities_total = 10
-    herd_probability = 0
-
 class Boar(Enemy):
     type = "boar"
     base_hp = 30
-    base_min_damage = 1
-    base_max_damage = 3
+    base_min_damage = 2
+    base_max_damage = 4
     crit_chance = 0.1
     crit_damage = 1.5
     drop_chance = 0.2
     regular_drop = {"food": 1}
-    probability = 0.05
+    probability = 0.08
     max_entities = 500
     max_entities_total = 1000
     herd_probability = 0.7
+    min_level = 1
+    max_level = 15
+    experience_value = 8
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [{"name": "hunt", "action": f"/fight?target={self.type}"}]
@@ -103,16 +97,19 @@ class Boar(Enemy):
 class Wolf(Enemy):
     type = "wolf"
     base_hp = 60
-    base_min_damage = 2
-    base_max_damage = 6
+    base_min_damage = 3
+    base_max_damage = 7
     crit_chance = 0.25
     crit_damage = 1.8
     drop_chance = 0.3
-    regular_drop = {"food": 1}
-    probability = 0.03
+    regular_drop = {"wolf_pelt": 1}
+    probability = 0.06
     max_entities = 300
     max_entities_total = 600
     herd_probability = 0.8
+    min_level = 5
+    max_level = 25
+    experience_value = 15
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [{"name": "hunt", "action": f"/fight?target={self.type}"}]
@@ -127,10 +124,13 @@ class Goblin(Enemy):
     crit_damage = 1.6
     drop_chance = 0.4
     regular_drop = {"gold": 5}
-    probability = 0.02
+    probability = 0.07
     max_entities = 200
     max_entities_total = 400
     herd_probability = 0.6
+    min_level = 3
+    max_level = 20
+    experience_value = 12
 
 class Specter(Enemy):
     type = "specter"
@@ -141,10 +141,13 @@ class Specter(Enemy):
     crit_damage = 2.0
     drop_chance = 0.6
     regular_drop = {"ectoplasm": 1}
-    probability = 0.01
+    probability = 0.03
     max_entities = 100
     max_entities_total = 200
     herd_probability = 0.3
+    min_level = 20
+    max_level = 50
+    experience_value = 40
 
     def roll_damage(self):
         damage_info = super().roll_damage()
@@ -156,17 +159,20 @@ class Specter(Enemy):
 class Hatchling(Enemy):
     type = "hatchling"
     base_hp = 150
-    base_min_damage = 20
-    base_max_damage = 40
+    base_min_damage = 15
+    base_max_damage = 25
     base_armor = 5
     crit_chance = 0.2
     crit_damage = 1.8
     drop_chance = 0.8
     regular_drop = {"dragon_scale": 1}
-    probability = 0.005
+    probability = 0.02
     max_entities = 50
     max_entities_total = 100
     herd_probability = 0.2
+    min_level = 30
+    max_level = 70
+    experience_value = 80
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -184,9 +190,6 @@ class Hatchling(Enemy):
             self.breath_attack_cooldown -= 1
             return damage_info
 
-    def get_actions(self, user: str) -> List[Dict[str, str]]:
-        return [{"name": "slay", "action": f"/fight?target={self.type}"}]
-
 class Bandit(Enemy):
     type = "bandit"
     base_hp = 70
@@ -197,10 +200,13 @@ class Bandit(Enemy):
     crit_damage = 1.7
     drop_chance = 0.5
     regular_drop = {"gold": 10}
-    probability = 0.03
+    probability = 0.05
     max_entities = 250
     max_entities_total = 500
     herd_probability = 0.4
+    min_level = 10
+    max_level = 35
+    experience_value = 25
 
     def roll_damage(self):
         damage_info = super().roll_damage()
@@ -218,15 +224,18 @@ class Troll(Enemy):
     crit_damage = 2.0
     drop_chance = 0.7
     regular_drop = {"troll_hide": 1}
-    probability = 0.01
+    probability = 0.02
     max_entities = 100
     max_entities_total = 200
     herd_probability = 0.2
+    min_level = 25
+    max_level = 60
+    experience_value = 70
     regeneration_rate = 5
 
     def calculate_hp(self):
         hp = super().calculate_hp()
-        return min(hp + self.regeneration_rate, self.base_hp * (1 + 0.1 * (self.level - 1)))  # Cap at max HP
+        return hp + self.regeneration_rate * (self.level - 1)  # Additional HP from regeneration
 
 class Harpy(Enemy):
     type = "harpy"
@@ -238,10 +247,13 @@ class Harpy(Enemy):
     crit_damage = 1.6
     drop_chance = 0.6
     regular_drop = {"feather": 3}
-    probability = 0.02
+    probability = 0.04
     max_entities = 150
     max_entities_total = 300
     herd_probability = 0.5
+    min_level = 15
+    max_level = 45
+    experience_value = 35
     evasion_chance = 0.2
 
     def roll_damage(self):
@@ -259,10 +271,13 @@ class Minotaur(Enemy):
     crit_damage = 2.2
     drop_chance = 0.8
     regular_drop = {"minotaur_horn": 1}
-    probability = 0.005
+    probability = 0.01
     max_entities = 50
     max_entities_total = 100
     herd_probability = 0.1
+    min_level = 35
+    max_level = 80
+    experience_value = 100
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -288,10 +303,13 @@ class Skeleton(Enemy):
     crit_damage = 1.5
     drop_chance = 0.5
     regular_drop = {"bone": 2}
-    probability = 0.04
+    probability = 0.06
     max_entities = 300
     max_entities_total = 600
     herd_probability = 0.4
+    min_level = 5
+    max_level = 30
+    experience_value = 20
     reassemble_chance = 0.2
 
     def roll_damage(self):
@@ -310,10 +328,13 @@ class Wraith(Enemy):
     crit_damage = 1.9
     drop_chance = 0.7
     regular_drop = {"soul_essence": 1}
-    probability = 0.015
+    probability = 0.02
     max_entities = 120
     max_entities_total = 240
     herd_probability = 0.3
+    min_level = 30
+    max_level = 70
+    experience_value = 75
     phase_chance = 0.3
 
     def roll_damage(self):
@@ -323,11 +344,39 @@ class Wraith(Enemy):
             damage_info["message"] += " (phased)"
         return damage_info
 
-    def calculate_damage(self):
-        min_damage, max_damage = super().calculate_damage()
-        if random.random() < self.phase_chance:
-            return int(min_damage * 1.5), int(max_damage * 1.5)  # Wraith phases through armor
-        return min_damage, max_damage
+class Dragon(Enemy):
+    type = "dragon"
+    base_hp = 500
+    base_min_damage = 40
+    base_max_damage = 60
+    base_armor = 20
+    crit_chance = 0.2
+    crit_damage = 2.5
+    drop_chance = 1.0
+    regular_drop = {"dragon_scale": 3, "dragon_tooth": 1}
+    probability = 0.005
+    max_entities = 10
+    max_entities_total = 20
+    herd_probability = 0
+    min_level = 60
+    max_level = 100
+    experience_value = 500
+
+    def __init__(self, level: int):
+        super().__init__(level)
+        self.breath_attack_cooldown = 0
+
+    def roll_damage(self):
+        if self.breath_attack_cooldown == 0:
+            # Use breath attack
+            damage = random.randint(int(self.max_damage * 2), int(self.max_damage * 3))
+            self.breath_attack_cooldown = 3
+            return {"damage": damage, "message": "devastating breath attack"}
+        else:
+            # Normal attack
+            damage_info = super().roll_damage()
+            self.breath_attack_cooldown -= 1
+            return damage_info
 
 class Scenery:
     probability = 0
@@ -349,6 +398,7 @@ class Scenery:
 
 class Forest(Scenery):
     type = "forest"
+    probability = 0.1
 
     def __init__(self):
         super().__init__(hp=100)
@@ -371,12 +421,12 @@ class Forest(Scenery):
 
 class Mountain(Scenery):
     type = "mountain"
+    probability = 0.05
 
     def __init__(self):
-        super().__init__(hp=100)
+        super().__init__(hp=200)
         self.type = "mountain"
         self.role = "scenery"
-        self.probability = 0
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [
@@ -394,12 +444,12 @@ class Mountain(Scenery):
 
 class Wall(Scenery):
     type = "wall"
+    probability = 0.01
 
     def __init__(self):
-        super().__init__(hp=200)
+        super().__init__(hp=500)
         self.type = "wall"
         self.role = "obstacle"
-        self.probability = 0
 
     def to_dict(self) -> Dict[str, Any]:
         base_dict = super().to_dict()
@@ -407,7 +457,6 @@ class Wall(Scenery):
             "probability": self.probability
         })
         return base_dict
-
 
 def get_all_subclasses(cls):
     return set(cls.__subclasses__()).union(
