@@ -22,7 +22,8 @@ class Enemy:
 
     def __init__(self, level: int):
         self.level = level
-        self.hp = self.calculate_hp()
+        self.max_hp = self.calculate_hp()
+        self.hp = self.max_hp
         self.min_damage, self.max_damage = self.calculate_damage()
         self.armor = self.calculate_armor()
         self.alive = True
@@ -56,6 +57,7 @@ class Enemy:
             "type": self.type,
             "level": self.level,
             "hp": self.hp,
+            "max_hp": self.max_hp,
             "min_damage": self.min_damage,
             "max_damage": self.max_damage,
             "armor": self.armor,

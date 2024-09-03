@@ -44,6 +44,14 @@ def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users:
             enemy = enemy_class(npc_data['level'])
             npc_data.update(enemy.to_dict())
 
+            # The max_hp and hp are now correctly set by the Enemy class
+            battle_data["enemy"].update({
+                "name": npc_data['type'],
+                "max_hp": npc_data['max_hp'],
+                "current_hp": npc_data['hp'],
+                "level": npc_data['level']
+            })
+
             fight_npc(battle_data, npc_data, coords, user_data, user, usersdb, mapdb)
 
     if not battle_data["rounds"]:
