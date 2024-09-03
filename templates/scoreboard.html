@@ -86,9 +86,9 @@
         <div class="section">
             <h2>Map</h2>
             <div class="card-grid">
-                {% for position, terrain_info in mapdb.items() %}
+                {% for position, item in mapdb.items() %}
                 <div class="card">
-                    <p><strong>Pos:</strong> {{ position }} <strong>Type:</strong> {{ terrain_info.get('type') }} <strong>Role:</strong> {{ terrain_info.get('role') }}</p>
+                    <p><strong>Pos:</strong> {{ position }} <strong>Type:</strong> {{ item.get('type') }} <strong>Role:</strong> {{ item.get('role') }}</p>
                 </div>
                 {% end %}
             </div>

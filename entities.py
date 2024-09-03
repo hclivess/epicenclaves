@@ -443,10 +443,8 @@ class Dragon(Enemy):
 class Scenery:
     probability = 0
 
-    def __init__(self, hp):
-        self.hp = hp
-        self.type = "scenery"
-        self.role = "scenery"
+    def __init__(self):
+        self.hp = 100  # Default HP, can be overridden in subclasses
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return []
@@ -460,11 +458,12 @@ class Scenery:
 
 class Forest(Scenery):
     type = "forest"
+    role = "scenery"
+    probability = 0
 
     def __init__(self):
-        super().__init__(hp=100)
-        self.type = "forest"
-        self.role = "scenery"
+        super().__init__()
+        self.hp = 100
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [
@@ -473,20 +472,14 @@ class Forest(Scenery):
             {"name": "conquer", "action": f"/conquer?target={self.type}"},
         ]
 
-    def to_dict(self) -> Dict[str, Any]:
-        base_dict = super().to_dict()
-        base_dict.update({
-            "probability": self.probability
-        })
-        return base_dict
-
 class Mountain(Scenery):
     type = "mountain"
+    role = "scenery"
+    probability = 0
 
     def __init__(self):
-        super().__init__(hp=200)
-        self.type = "mountain"
-        self.role = "scenery"
+        super().__init__()
+        self.hp = 200  # Specific HP for Mountain
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [
@@ -495,27 +488,14 @@ class Mountain(Scenery):
             {"name": "conquer", "action": f"/conquer?target={self.type}"},
         ]
 
-    def to_dict(self) -> Dict[str, Any]:
-        base_dict = super().to_dict()
-        base_dict.update({
-            "probability": self.probability
-        })
-        return base_dict
-
 class Wall(Scenery):
     type = "wall"
+    role = "obstacle"
+    probability = 0
 
     def __init__(self):
-        super().__init__(hp=500)
-        self.type = "wall"
-        self.role = "obstacle"
-
-    def to_dict(self) -> Dict[str, Any]:
-        base_dict = super().to_dict()
-        base_dict.update({
-            "probability": self.probability
-        })
-        return base_dict
+        super().__init__()
+        self.hp = 500
 
 def get_all_subclasses(cls):
     return set(cls.__subclasses__()).union(
