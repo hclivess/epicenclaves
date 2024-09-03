@@ -10,7 +10,6 @@ class Enemy:
     base_armor = 0
     crit_chance = 0.05
     crit_damage = 1.5
-    kill_chance = 0.01
     drop_chance = 0.1
     regular_drop: Dict[str, int] = {}
     probability = 0
@@ -68,7 +67,6 @@ class Enemy:
             "armor": self.armor,
             "crit_chance": self.crit_chance,
             "crit_damage": self.crit_damage,
-            "kill_chance": self.kill_chance,
             "drop_chance": self.drop_chance,
             "regular_drop": self.regular_drop,
             "experience": self.experience,
@@ -443,27 +441,18 @@ class Dragon(Enemy):
 class Scenery:
     probability = 0
 
-    def __init__(self):
-        self.hp = 100  # Default HP, can be overridden in subclasses
-
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return []
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "type": self.type,
-            "role": self.role,
-            "hp": self.hp
+            "role": self.role
         }
 
 class Forest(Scenery):
     type = "forest"
     role = "scenery"
-    probability = 0
-
-    def __init__(self):
-        super().__init__()
-        self.hp = 100
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [
@@ -475,11 +464,6 @@ class Forest(Scenery):
 class Mountain(Scenery):
     type = "mountain"
     role = "scenery"
-    probability = 0
-
-    def __init__(self):
-        super().__init__()
-        self.hp = 200  # Specific HP for Mountain
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [
@@ -491,11 +475,6 @@ class Mountain(Scenery):
 class Wall(Scenery):
     type = "wall"
     role = "obstacle"
-    probability = 0
-
-    def __init__(self):
-        super().__init__()
-        self.hp = 500
 
 def get_all_subclasses(cls):
     return set(cls.__subclasses__()).union(
