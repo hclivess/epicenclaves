@@ -152,10 +152,10 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
         round_number += 1
 
         player_attack(target_data, user_data, target_name, battle_data["rounds"], round_number)
-        battle_data["enemy"]["current_hp"] = target_data["hp"]
+        #battle_data["enemy"]["current_hp"] = target_data["hp"]
 
         player_attack(user_data, target_data, "You", battle_data["rounds"], round_number)
-        battle_data["player"]["current_hp"] = user_data["hp"]
+        #battle_data["player"]["current_hp"] = user_data["hp"]
 
         if 0 < target_data["hp"] < 10:
             battle_data["rounds"].append({
