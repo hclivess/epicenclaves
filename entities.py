@@ -436,13 +436,11 @@ class Scenery:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            "type": self.type,
-            "role": self.role
+            "type": self.type
         }
 
 class Forest(Scenery):
     type = "forest"
-    role = "scenery"
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [
@@ -453,7 +451,6 @@ class Forest(Scenery):
 
 class Mountain(Scenery):
     type = "mountain"
-    role = "scenery"
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [
@@ -464,7 +461,6 @@ class Mountain(Scenery):
 
 class Wall(Scenery):
     type = "wall"
-    role = "obstacle"
 
 def get_all_subclasses(cls):
     return set(cls.__subclasses__()).union(
