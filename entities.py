@@ -279,6 +279,33 @@ class Orc(Enemy):
     max_level = 50
     experience_value = 50
 
+class Spider(Enemy):
+    type = "spider"
+    base_hp = 65
+    base_min_damage = 6
+    base_max_damage = 12
+    base_armor = 2
+    crit_chance = 0.18
+    crit_damage = 1.7
+    drop_chance = 0.5
+    regular_drop = {"spider_silk": 1, "venom_sac": 1}
+    probability = 0.06
+    max_entities = 180
+    max_entities_total = 360
+    herd_probability = 0.6
+    min_level = 12
+    max_level = 40
+    experience_value = 30
+    poison_chance = 0.15
+    poison_duration = 3
+    poison_damage = 2
+
+    def roll_damage(self):
+        damage_info = super().roll_damage()
+        if random.random() < self.poison_chance:
+            damage_info["message"] += f" and poisoned for {self.poison_damage} damage over {self.poison_duration} turns"
+        return damage_info
+
 class Rat(Enemy):
     type = "rat"
     base_hp = 20
