@@ -127,7 +127,7 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
                 update_user_data(user=user, updated_values={"action_points": user_data["action_points"] - 1, "hp": 1}, user_data_dict=usersdb)
             break
 
-    battle_data["player"]["current_hp"] = user_data["hp"]
+    #battle_data["player"]["current_hp"] = user_data["hp"]
     #battle_data["enemy"]["current_hp"] = npc_data['hp']
 
 def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> None:
