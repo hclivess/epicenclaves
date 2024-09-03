@@ -13,7 +13,7 @@ class Enemy:
     kill_chance = 0.01
     drop_chance = 0.1
     regular_drop: Dict[str, int] = {}
-    probability = 0.01
+    probability = 0
     map_size = 1000
     max_entities = None
     max_entities_total = None
@@ -460,7 +460,6 @@ class Scenery:
 
 class Forest(Scenery):
     type = "forest"
-    probability = 0.1
 
     def __init__(self):
         super().__init__(hp=100)
@@ -483,7 +482,6 @@ class Forest(Scenery):
 
 class Mountain(Scenery):
     type = "mountain"
-    probability = 0.05
 
     def __init__(self):
         super().__init__(hp=200)
@@ -506,7 +504,6 @@ class Mountain(Scenery):
 
 class Wall(Scenery):
     type = "wall"
-    probability = 0.01
 
     def __init__(self):
         super().__init__(hp=500)

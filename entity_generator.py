@@ -6,7 +6,7 @@ from backend import calculate_level
 entities = importlib.import_module('entities')
 
 def spawn_all_entities(mapdb):
-    entity_classes = [cls for name, cls in entities.__dict__.items() if isinstance(cls, type) and hasattr(cls, 'type') and cls != entities.Enemy]
+    entity_classes = [cls for name, cls in entities.__dict__.items() if isinstance(cls, type) and hasattr(cls, 'type')]
     for entity_class in entity_classes:
         spawn(entity_class, mapdb)
 
@@ -31,13 +31,13 @@ def spawn(entity_class, mapdb, probability=None, min_level=None, max_level=None,
     existing_entities = sum(1 for value in mapdb.values() if value.get('type') == entity_class.type)
 
     print(f"Attempting to spawn {entity_class.type} entities:")
-    print(f"  - Probability: {probability}")
-    print(f"  - Min level: {min_level}")
-    print(f"  - Max level: {max_level}")
-    print(f"  - Max entities per spawn: {max_entities if max_entities is not None else 'Unlimited'}")
-    print(f"  - Max total entities: {max_entities_total if max_entities_total is not None else 'Unlimited'}")
+    #print(f"  - Probability: {probability}")
+    #print(f"  - Min level: {min_level}")
+    #print(f"  - Max level: {max_level}")
+    #print(f"  - Max entities per spawn: {max_entities if max_entities is not None else 'Unlimited'}")
+    #print(f"  - Max total entities: {max_entities_total if max_entities_total is not None else 'Unlimited'}")
     print(f"  - Current entities on map: {existing_entities}")
-    print(f"  - Map size: {map_size}x{map_size}")
+    #print(f"  - Map size: {map_size}x{map_size}")
 
     while True:
         if random.random() > probability:
