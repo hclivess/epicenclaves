@@ -76,7 +76,7 @@ class Enemy:
 
 class Boar(Enemy):
     type = "boar"
-    base_hp = 30
+    base_hp = 35
     base_min_damage = 2
     base_max_damage = 4
     crit_chance = 0.1
@@ -87,9 +87,9 @@ class Boar(Enemy):
     max_entities = 500
     max_entities_total = 1000
     herd_probability = 0.7
-    min_level = 1
-    max_level = 15
-    experience_value = 8
+    min_level = 3
+    max_level = 18
+    experience_value = 10
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [{"name": "hunt", "action": f"/fight?target={self.type}"}]
@@ -107,7 +107,7 @@ class Wolf(Enemy):
     max_entities = 300
     max_entities_total = 600
     herd_probability = 0.8
-    min_level = 5
+    min_level = 8
     max_level = 25
     experience_value = 15
 
@@ -116,7 +116,7 @@ class Wolf(Enemy):
 
 class Goblin(Enemy):
     type = "goblin"
-    base_hp = 40
+    base_hp = 45
     base_min_damage = 4
     base_max_damage = 6
     base_armor = 1
@@ -128,8 +128,8 @@ class Goblin(Enemy):
     max_entities = 200
     max_entities_total = 400
     herd_probability = 0.6
-    min_level = 3
-    max_level = 20
+    min_level = 5
+    max_level = 22
     experience_value = 12
 
 class Specter(Enemy):
@@ -260,6 +260,41 @@ class Harpy(Enemy):
         if random.random() < self.evasion_chance:
             return {"damage": 0, "message": "evaded"}
         return super().roll_damage()
+
+class Orc(Enemy):
+    type = "orc"
+    base_hp = 120
+    base_min_damage = 10
+    base_max_damage = 18
+    base_armor = 4
+    crit_chance = 0.12
+    crit_damage = 1.8
+    drop_chance = 0.6
+    regular_drop = {"orc_tusk": 1}
+    probability = 0.04
+    max_entities = 150
+    max_entities_total = 300
+    herd_probability = 0.4
+    min_level = 20
+    max_level = 50
+    experience_value = 50
+
+class Rat(Enemy):
+    type = "rat"
+    base_hp = 20
+    base_min_damage = 1
+    base_max_damage = 2
+    crit_chance = 0.05
+    crit_damage = 1.3
+    drop_chance = 0.2
+    regular_drop = {"rat_tail": 1}
+    probability = 0.1
+    max_entities = 1000
+    max_entities_total = 2000
+    herd_probability = 0.8
+    min_level = 1
+    max_level = 10
+    experience_value = 5
 
 class Minotaur(Enemy):
     type = "minotaur"

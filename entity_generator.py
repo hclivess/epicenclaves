@@ -8,27 +8,23 @@ entities = importlib.import_module('entities')
 def spawn_all_entities(mapdb):
     entity_classes = [cls for name, cls in entities.__dict__.items() if isinstance(cls, type) and hasattr(cls, 'type')]
     for entity_class in entity_classes:
-        probability = getattr(entity_class, 'probability', 1)
-        if probability > 0:  # Only attempt to spawn if probability is greater than 0
-            spawn(
-                entity_class=entity_class,
-                probability=probability,
-                mapdb=mapdb,
-                min_level=getattr(entity_class, 'min_level', 1),
-                max_level=getattr(entity_class, 'max_level', 1000),
-                map_size=getattr(entity_class, 'map_size', 1000),
-                max_entities=getattr(entity_class, 'max_entities', None),
-                max_entities_total=getattr(entity_class, 'max_entities_total', None),
-                herd_probability=getattr(entity_class, 'herd_probability', 0.5)
-            )
-        else:
-            print(f"Skipping spawn for {entity_class.type} due to zero probability")
+        spawn(entity_class, mapdb)
 
-def spawn(entity_class, probability, mapdb, min_level, max_level, map_size=20, max_entities=None, max_entities_total=None,
-          herd_size=15, herd_radius=5, herd_probability=0.5):
+def spawn(entity_class, mapdb, probability=None, min_level=None, max_level=None, map_size=None, max_entities=None,
+          max_entities_total=None, herd_size=None, herd_radius=None, herd_probability=None):
+    probability = probability if probability is not None else getattr(entity_class, 'probability', 1)
     if probability <= 0:
         print(f"Skipping spawn for {entity_class.type} due to zero or negative probability")
         return
+
+    min_level = min_level if min_level is not None else getattr(entity_class, 'min_level', 1)
+    max_level = max_level if max_level is not None else getattr(entity_class, 'max_level', 2)
+    map_size = map_size if map_size is not None else getattr(entity_class, 'map_size', 1000)
+    max_entities = max_entities if max_entities is not None else getattr(entity_class, 'max_entities', None)
+    max_entities_total = max_entities_total if max_entities_total is not None else getattr(entity_class, 'max_entities_total', None)
+    herd_size = herd_size if herd_size is not None else getattr(entity_class, 'herd_size', 15)
+    herd_radius = herd_radius if herd_radius is not None else getattr(entity_class, 'herd_radius', 5)
+    herd_probability = herd_probability if herd_probability is not None else getattr(entity_class, 'herd_probability', 0.5)
 
     total_entities = 0
     total_tiles = map_size * map_size
