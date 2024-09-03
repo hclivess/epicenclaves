@@ -6,7 +6,7 @@ from backend import calculate_level
 entities = importlib.import_module('entities')
 
 def spawn_all_entities(mapdb):
-    entity_classes = [cls for name, cls in entities.__dict__.items() if isinstance(cls, type) and hasattr(cls, 'type')]
+    entity_classes = [cls for name, cls in entities.__dict__.items() if isinstance(cls, type) and hasattr(cls, 'type') and cls != entities.Enemy]
     for entity_class in entity_classes:
         spawn(entity_class, mapdb)
 
