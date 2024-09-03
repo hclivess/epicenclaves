@@ -98,7 +98,7 @@ def save_users_from_memory(user_data_dict: Dict[str, Dict[str, Any]], league="ga
 
         for username, user_data in user_data_dict[league].copy().items():
             print(f"Processing user: {username}")
-            print(f"User data: {user_data}")
+            #print(f"User data: {user_data}")
 
             x_pos = user_data.get("x_pos")
             y_pos = user_data.get("y_pos")
