@@ -4,7 +4,7 @@ from item_generator import generate_armor, generate_weapon, generate_tool
 import threading
 
 class User:
-    HP_BONUS_PER_EXP = 100
+    HP_BONUS_PER_EXP = 500
 
     def __init__(self, username: str, x_pos: int, y_pos: int, profile_pic: str = "", **kwargs):
         self.username = username
