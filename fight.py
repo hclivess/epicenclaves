@@ -128,7 +128,7 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
             break
 
     battle_data["player"]["current_hp"] = user_data["hp"]
-    battle_data["enemy"]["current_hp"] = npc_data['hp']
+    #battle_data["enemy"]["current_hp"] = npc_data['hp']
 
 def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> None:
     max_base_hp = 100

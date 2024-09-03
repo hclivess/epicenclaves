@@ -508,6 +508,7 @@ class FightHandler(BaseHandler):
                 self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
         else:
             fight_result = self._perform_fight(user, user_data, target, target_name, league)
+            print("fight_result", fight_result)
             if return_to_map:
                 self.return_json({"message": fight_result.get("message", "Fight completed"),
                                   "battle_data": fight_result["battle_data"]})
