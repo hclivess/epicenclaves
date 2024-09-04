@@ -428,6 +428,130 @@ class Dragon(Enemy):
             self.breath_attack_cooldown -= 1
             return damage_info
 
+
+class Lizarian(Enemy):
+    type = "lizarian"
+    base_hp = 400
+    base_min_damage = 35
+    base_max_damage = 55
+    base_armor = 15
+    crit_chance = 0.2
+    crit_damage = 2.2
+    drop_chance = 0.9
+    regular_drop = {"lizard_scale": 2, "magic_essence": 1}
+    probability = 0.15
+    max_entities = 75
+    max_entities_total = 150
+    herd_probability = 0.1
+    min_level = 55
+    max_level = 90
+    experience_value = 300
+
+    def __init__(self, level: int):
+        super().__init__(level)
+        self.spell_charges = 3
+
+    def roll_damage(self):
+        if self.spell_charges > 0:
+            spell_type = random.choice(["fireball", "ice_shard", "lightning_bolt"])
+            damage = random.randint(int(self.max_damage * 1.5), int(self.max_damage * 2.5))
+            self.spell_charges -= 1
+            return {"damage": damage, "message": f"cast {spell_type}"}
+        else:
+            damage_info = super().roll_damage()
+            if random.random() < 0.2:  # 20% chance to regain a spell charge
+                self.spell_charges = min(self.spell_charges + 1, 3)
+                damage_info["message"] += " (regained spell charge)"
+            return damage_info
+
+
+class Golem(Enemy):
+    type = "golem"
+    base_hp = 600
+    base_min_damage = 45
+    base_max_damage = 70
+    base_armor = 30
+    crit_chance = 0.1
+    crit_damage = 2.0
+    drop_chance = 0.95
+    regular_drop = {"golem_core": 1, "enchanted_stone": 3}
+    probability = 0.12
+    max_entities = 60
+    max_entities_total = 120
+    herd_probability = 0.05
+    min_level = 65
+    max_level = 95
+    experience_value = 400
+
+    def __init__(self, level: int):
+        super().__init__(level)
+        self.elemental_state = "neutral"
+        self.state_duration = 0
+
+    def roll_damage(self):
+        if self.state_duration <= 0:
+            self.elemental_state = random.choice(["fire", "ice", "lightning"])
+            self.state_duration = 3
+
+        damage_info = super().roll_damage()
+
+        if self.elemental_state == "fire":
+            damage_info["damage"] = int(damage_info["damage"] * 1.3)
+            damage_info["message"] += " (fire enhanced)"
+        elif self.elemental_state == "ice":
+            self.armor += 10
+            damage_info["message"] += " (ice armored)"
+        elif self.elemental_state == "lightning":
+            if random.random() < 0.3:
+                damage_info["damage"] *= 2
+                damage_info["message"] += " (lightning strike)"
+
+        self.state_duration -= 1
+        return damage_info
+
+    def calculate_armor(self):
+        return super().calculate_armor() + int(0.2 * self.level)  # Additional armor scaling
+
+
+class Zombie(Enemy):
+    type = "zombie"
+    base_hp = 450
+    base_min_damage = 40
+    base_max_damage = 60
+    base_armor = 10
+    crit_chance = 0.15
+    crit_damage = 1.8
+    drop_chance = 0.85
+    regular_drop = {"rotten_flesh": 2, "zombie_brain": 1}
+    probability = 0.18
+    max_entities = 100
+    max_entities_total = 200
+    herd_probability = 0.4
+    min_level = 50
+    max_level = 85
+    experience_value = 250
+
+    def __init__(self, level: int):
+        super().__init__(level)
+        self.infection_chance = 0.2
+        self.frenzy_threshold = 0.3
+
+    def roll_damage(self):
+        damage_info = super().roll_damage()
+
+        if random.random() < self.infection_chance:
+            damage_info["damage"] += int(self.max_damage * 0.5)
+            damage_info["message"] += " (infected)"
+
+        if self.hp / self.max_hp <= self.frenzy_threshold:
+            damage_info["damage"] = int(damage_info["damage"] * 1.5)
+            damage_info["message"] += " (frenzy)"
+
+        return damage_info
+
+    def calculate_hp(self):
+        return super().calculate_hp() + int(2 * self.level)
+
 class Scenery:
     probability = 0
 
