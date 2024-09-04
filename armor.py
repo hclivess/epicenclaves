@@ -19,13 +19,13 @@ class Armor:
         else:
             level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
 
-        # Calculate base protection with aggressive scaling
-        base_protection = self.BASE_PROTECTION * (1 + level_factor) ** 2
+        # Exponential scaling factor
+        scaling_factor = 1.1 ** (self.level - 1)
 
-        # Apply randomness (maintaining the original 20% variation)
-        protection = base_protection * random.uniform(0.8, 1.2)
+        base_protection = self.BASE_PROTECTION * scaling_factor
 
-        self.protection = max(1, int(protection))  # Ensure minimum protection is 1
+        # Apply randomness (maintaining the 20% variation)
+        self.protection = max(1, int(base_protection * random.uniform(0.9, 1.1)))
 
         # Calculate durability and efficiency (unchanged)
         min_durability = 30

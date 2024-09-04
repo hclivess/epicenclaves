@@ -22,18 +22,17 @@ class Weapon:
         else:
             level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
 
-        # Apply aggressive scaling
-        scaling_factor = (1 + level_factor) ** 2
+        # Exponential scaling factor
+        scaling_factor = 1.15 ** (self.level - 1)
 
         min_damage = base_min * scaling_factor
         max_damage = base_max * scaling_factor
 
-        # Apply randomness (maintaining the original 20% variation)
-        self.min_damage = int(min_damage * random.uniform(0.8, 1.2))
-        self.max_damage = int(max_damage * random.uniform(0.8, 1.2))
+        # Apply randomness (maintaining the 20% variation)
+        self.min_damage = int(min_damage * random.uniform(0.9, 1.1))
+        self.max_damage = int(max_damage * random.uniform(0.9, 1.1))
 
-        # Ensure minimum damage is at least 1 and max_damage is greater than min_damage
-        self.min_damage = max(1, self.min_damage)
+        # Ensure max_damage is greater than min_damage
         self.max_damage = max(self.min_damage + 1, self.max_damage)
 
     def _set_attributes(self):
@@ -42,20 +41,14 @@ class Weapon:
         else:
             level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
 
-        # Apply more aggressive scaling to attributes
-        scaling_factor = (1 + level_factor) ** 1.5  # Less aggressive than damage, but still curved
-
-        self.accuracy = self.MIN_ACCURACY + int((self.MAX_ACCURACY - self.MIN_ACCURACY) * scaling_factor)
-        self.crit_dmg_pct = self.MIN_CRIT_DMG + int((self.MAX_CRIT_DMG - self.MIN_CRIT_DMG) * scaling_factor)
-        self.crit_chance = self.MIN_CRIT_CHANCE + int((self.MAX_CRIT_CHANCE - self.MIN_CRIT_CHANCE) * scaling_factor)
-
-        # Cap attributes at their maximum values
-        self.accuracy = min(self.accuracy, self.MAX_ACCURACY)
-        self.crit_dmg_pct = min(self.crit_dmg_pct, self.MAX_CRIT_DMG)
-        self.crit_chance = min(self.crit_chance, self.MAX_CRIT_CHANCE)
+        # Linear scaling for attributes
+        self.accuracy = self.MIN_ACCURACY + int((self.MAX_ACCURACY - self.MIN_ACCURACY) * level_factor)
+        self.crit_dmg_pct = self.MIN_CRIT_DMG + int((self.MAX_CRIT_DMG - self.MIN_CRIT_DMG) * level_factor)
+        self.crit_chance = self.MIN_CRIT_CHANCE + int((self.MAX_CRIT_CHANCE - self.MIN_CRIT_CHANCE) * level_factor)
 
         if self.RANGE == "ranged":
             self.crit_chance = min(self.crit_chance * 2, 100)
+
 
     def to_dict(self):
         return {
