@@ -17,17 +17,20 @@ class Weapon:
     def _set_damage(self):
         base_min, base_max = self.BASE_DAMAGE
 
-        # Calculate potential damage range
-        min_potential = base_min * (1.15 ** (self.level - 1))
-        max_potential = base_max * (1.15 ** (self.level - 1)) * 1.5  # Allowing for some exceptional rolls
+        # Reduce the scaling factor to decrease overall damage
+        scaling_factor = 1.09 ** (self.level - 1)  # Reduced from 1.15
+
+        # Calculate potential damage range with 40% reduction
+        min_potential = base_min * scaling_factor * 0.6
+        max_potential = base_max * scaling_factor * 0.9  # Reduced maximum potential
 
         # Use logarithmic distribution for damage
         self.min_damage = calculate_level(int(min_potential), int(max_potential))
         self.max_damage = calculate_level(self.min_damage + 1, int(max_potential))
 
-        # Occasional chance for truly exceptional items
+        # Occasional chance for exceptional items (slightly reduced boost)
         if random.random() < 0.01:  # 1% chance
-            exceptional_boost = random.uniform(1.2, 1.5)
+            exceptional_boost = random.uniform(1.1, 1.3)  # Reduced from (1.2, 1.5)
             self.min_damage = int(self.min_damage * exceptional_boost)
             self.max_damage = int(self.max_damage * exceptional_boost)
 
