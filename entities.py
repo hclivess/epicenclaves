@@ -71,7 +71,7 @@ class Boar(Enemy):
     crit_damage = 1.5
     drop_chance = 0.2
     regular_drop = {"food": 1}
-    probability = 0.08
+    probability = 0.1
     max_entities = 500
     max_entities_total = 1000
     herd_probability = 0.7
@@ -91,7 +91,7 @@ class Wolf(Enemy):
     crit_damage = 1.8
     drop_chance = 0.3
     regular_drop = {"wolf_pelt": 1}
-    probability = 0.1
+    probability = 0.2
     max_entities = 300
     max_entities_total = 600
     herd_probability = 0.8
@@ -112,7 +112,7 @@ class Goblin(Enemy):
     crit_damage = 1.6
     drop_chance = 0.4
     regular_drop = {"gold": 5}
-    probability = 0.12
+    probability = 0.24
     max_entities = 200
     max_entities_total = 400
     herd_probability = 0.5
@@ -129,7 +129,7 @@ class Specter(Enemy):
     crit_damage = 2.0
     drop_chance = 0.6
     regular_drop = {"ectoplasm": 1}
-    probability = 0.12
+    probability = 0.24
     max_entities = 100
     max_entities_total = 200
     herd_probability = 0.3
@@ -154,7 +154,7 @@ class Hatchling(Enemy):
     crit_damage = 1.8
     drop_chance = 0.8
     regular_drop = {"dragon_scale": 1}
-    probability = 0.12
+    probability = 0.24
     max_entities = 50
     max_entities_total = 100
     herd_probability = 0.2
@@ -188,7 +188,7 @@ class Bandit(Enemy):
     crit_damage = 1.7
     drop_chance = 0.5
     regular_drop = {"gold": 10}
-    probability = 0.1
+    probability = 0.24
     max_entities = 250
     max_entities_total = 500
     herd_probability = 0.4
@@ -212,7 +212,7 @@ class Troll(Enemy):
     crit_damage = 2.0
     drop_chance = 0.7
     regular_drop = {"troll_hide": 1}
-    probability = 0.07
+    probability = 0.24
     max_entities = 100
     max_entities_total = 200
     herd_probability = 0.2
@@ -235,7 +235,7 @@ class Harpy(Enemy):
     crit_damage = 1.6
     drop_chance = 0.6
     regular_drop = {"feather": 3}
-    probability = 0.12
+    probability = 0.24
     max_entities = 150
     max_entities_total = 300
     herd_probability = 0.5
@@ -259,7 +259,7 @@ class Orc(Enemy):
     crit_damage = 1.8
     drop_chance = 0.6
     regular_drop = {"orc_tusk": 1}
-    probability = 0.12
+    probability = 0.24
     max_entities = 150
     max_entities_total = 300
     herd_probability = 0.4
@@ -277,7 +277,7 @@ class Spider(Enemy):
     crit_damage = 1.7
     drop_chance = 0.5
     regular_drop = {"spider_silk": 1, "venom_sac": 1}
-    probability = 0.12
+    probability = 0.24
     max_entities = 180
     max_entities_total = 360
     herd_probability = 0.6
@@ -303,7 +303,7 @@ class Rat(Enemy):
     crit_damage = 1.3
     drop_chance = 0.2
     regular_drop = {"rat_tail": 1}
-    probability = 0.07
+    probability = 0.24
     max_entities = 1000
     max_entities_total = 2000
     herd_probability = 0.8
@@ -321,7 +321,7 @@ class Minotaur(Enemy):
     crit_damage = 2.2
     drop_chance = 0.8
     regular_drop = {"minotaur_horn": 1}
-    probability = 0.12
+    probability = 0.24
     max_entities = 50
     max_entities_total = 100
     herd_probability = 0.1
@@ -353,7 +353,7 @@ class Skeleton(Enemy):
     crit_damage = 1.5
     drop_chance = 0.5
     regular_drop = {"bone": 2}
-    probability = 0.12
+    probability = 0.24
     max_entities = 300
     max_entities_total = 600
     herd_probability = 0.4
@@ -378,7 +378,7 @@ class Wraith(Enemy):
     crit_damage = 1.9
     drop_chance = 0.7
     regular_drop = {"soul_essence": 1}
-    probability = 0.12
+    probability = 0.24
     max_entities = 120
     max_entities_total = 240
     herd_probability = 0.3
@@ -404,7 +404,7 @@ class Dragon(Enemy):
     crit_damage = 2.5
     drop_chance = 1.0
     regular_drop = {"dragon_scale": 3, "dragon_tooth": 1}
-    probability = 0.05
+    probability = 0.12
     max_entities = 10
     max_entities_total = 20
     herd_probability = 0
