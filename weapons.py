@@ -7,7 +7,7 @@ class Weapon:
         self.type = self.__class__.__name__.lower()
         self.min_level = min_level
         self.max_level = max_level
-        self.level = level if level else calculate_level(min_level, max_level)
+        self.level = level if level else random.randint(min_level, max_level)
         self.id = weapon_id
         self.role = "weapon"
         self.slot = self.SLOT
@@ -17,29 +17,22 @@ class Weapon:
     def _set_damage(self):
         base_min, base_max = self.BASE_DAMAGE
 
-        if self.min_level == self.max_level:
-            level_factor = 1
-        else:
-            level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
+        # Calculate potential damage range
+        min_potential = base_min * (1.15 ** (self.level - 1))
+        max_potential = base_max * (1.15 ** (self.level - 1)) * 1.5  # Allowing for some exceptional rolls
 
-        # Exponential scaling factor
-        scaling_factor = 1.15 ** (self.level - 1)
+        # Use logarithmic distribution for damage
+        self.min_damage = calculate_level(int(min_potential), int(max_potential))
+        self.max_damage = calculate_level(self.min_damage + 1, int(max_potential))
 
-        min_damage = base_min * scaling_factor
-        max_damage = base_max * scaling_factor
-
-        # Apply randomness (maintaining the 20% variation)
-        self.min_damage = int(min_damage * random.uniform(0.9, 1.1))
-        self.max_damage = int(max_damage * random.uniform(0.9, 1.1))
-
-        # Ensure max_damage is greater than min_damage
-        self.max_damage = max(self.min_damage + 1, self.max_damage)
+        # Occasional chance for truly exceptional items
+        if random.random() < 0.01:  # 1% chance
+            exceptional_boost = random.uniform(1.2, 1.5)
+            self.min_damage = int(self.min_damage * exceptional_boost)
+            self.max_damage = int(self.max_damage * exceptional_boost)
 
     def _set_attributes(self):
-        if self.min_level == self.max_level:
-            level_factor = 1
-        else:
-            level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
+        level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
 
         # Linear scaling for attributes
         self.accuracy = self.MIN_ACCURACY + int((self.MAX_ACCURACY - self.MIN_ACCURACY) * level_factor)

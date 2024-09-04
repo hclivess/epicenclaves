@@ -2,32 +2,34 @@ import random
 import math
 from backend import calculate_level
 
+
 class Armor:
     def __init__(self, min_level, max_level, armor_id, level=None):
         self.type = self.__class__.__name__.lower()
-        self.slot = self.SLOT
         self.min_level = min_level
         self.max_level = max_level
-        self.level = level if level else calculate_level(min_level, max_level)
+        self.level = level if level else random.randint(min_level, max_level)
         self.id = armor_id
         self.role = "armor"
+        self.slot = self.SLOT
         self._set_attributes()
 
     def _set_attributes(self):
-        if self.min_level == self.max_level:
-            level_factor = 1
-        else:
-            level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
+        # Calculate potential protection range
+        min_potential = self.BASE_PROTECTION * (1.1 ** (self.level - 1))
+        max_potential = self.BASE_PROTECTION * (1.1 ** (self.level - 1)) * 1.5  # Allowing for some exceptional rolls
 
-        # Exponential scaling factor
-        scaling_factor = 1.1 ** (self.level - 1)
+        # Use logarithmic distribution for protection
+        self.protection = calculate_level(int(min_potential), int(max_potential))
 
-        base_protection = self.BASE_PROTECTION * scaling_factor
+        # Occasional chance for truly exceptional items
+        if random.random() < 0.01:  # 1% chance
+            exceptional_boost = random.uniform(1.2, 1.5)
+            self.protection = int(self.protection * exceptional_boost)
 
-        # Apply randomness (maintaining the 20% variation)
-        self.protection = max(1, int(base_protection * random.uniform(0.9, 1.1)))
+        # Calculate durability and efficiency
+        level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
 
-        # Calculate durability and efficiency (unchanged)
         min_durability = 30
         max_durability = 50 * self.max_level
         self.durability = min_durability + int((max_durability - min_durability) * level_factor)
