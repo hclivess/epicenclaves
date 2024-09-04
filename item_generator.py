@@ -13,8 +13,9 @@ def id_generator(length=10):
     return ''.join(random.choice(characters) for _ in range(length))
 
 
+
 def generate_weapon(min_level=1, max_level=20, weapon_type=None):
-    print("generating weapon", min_level, max_level)
+    print(f"Generating weapon: min_level={min_level}, max_level={max_level}")
     level = calculate_level(min_level, max_level)
     weapon_classes = [cls for cls in weapons.__dict__.values() if
                       isinstance(cls, type) and issubclass(cls, weapons.Weapon) and cls != weapons.Weapon]
@@ -26,13 +27,12 @@ def generate_weapon(min_level=1, max_level=20, weapon_type=None):
     else:
         selected_class = random.choice(weapon_classes)
 
-    weapon = selected_class(min_level=1, weapon_id=id_generator(), max_level=level)
-    print(weapon.to_dict())
+    weapon = selected_class(min_level=min_level, weapon_id=id_generator(), max_level=level)
+    print(f"Generated weapon: {weapon.to_dict()}")
     return weapon.to_dict()  # Return the dictionary representation
 
-
 def generate_armor(min_level=1, max_level=20, slot=None):
-    print("generating armor", min_level, max_level)
+    print(f"Generating armor: min_level={min_level}, max_level={max_level}")
     level = calculate_level(min_level, max_level)
     armor_classes = [cls for cls in armor.__dict__.values() if
                      isinstance(cls, type) and issubclass(cls, armor.Armor) and cls != armor.Armor]
@@ -44,13 +44,14 @@ def generate_armor(min_level=1, max_level=20, slot=None):
     else:
         selected_class = random.choice(armor_classes)
 
-    armor_piece = selected_class(min_level=1, armor_id=id_generator(), max_level=level)
-    print(armor_piece.to_dict())
+    armor_piece = selected_class(min_level=min_level, armor_id=id_generator(), max_level=level)
+    print(f"Generated armor: {armor_piece.to_dict()}")
     return armor_piece.to_dict()  # Return the dictionary representation
 
 
-def generate_tool(max_level=20, tool_type=None):
-    level = calculate_level(1, max_level)
+def generate_tool(min_level=1, max_level=20, tool_type=None):
+    print(f"Generating tool: min_level={min_level}, max_level={max_level}")
+    level = calculate_level(min_level, max_level)
     tool_classes = [cls for cls in tools.__dict__.values() if
                     isinstance(cls, type) and issubclass(cls, tools.Tool) and cls != tools.Tool]
 
@@ -61,10 +62,11 @@ def generate_tool(max_level=20, tool_type=None):
     else:
         selected_class = random.choice(tool_classes)
 
-    tool = selected_class()
+    tool = selected_class(min_level=min_level, max_level=level)
     tool_dict = tool.to_dict()
     tool_dict['id'] = id_generator()
     tool_dict['level'] = level
+    print(f"Generated tool: {tool_dict}")
     return tool_dict
 
 
