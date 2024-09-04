@@ -16,14 +16,15 @@ class Weapon:
 
     def _set_damage(self):
         base_min, base_max = self.BASE_DAMAGE
+        level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
 
-        if self.min_level == self.max_level:
-            level_factor = 1
-        else:
-            level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
+        min_damage = base_min * (1 + level_factor * (self.max_level - self.min_level))
+        max_damage = base_max * (1 + level_factor * (self.max_level - self.min_level))
 
-        self.min_damage = int(base_min * (1 + level_factor * (self.max_level - self.min_level)) * random.uniform(0.8, 1.2))
-        self.max_damage = int(base_max * (1 + level_factor * (self.max_level - self.min_level)) * random.uniform(0.8, 1.2))
+        # Apply randomness within a smaller range
+        variation = 0.1  # 10% variation
+        self.min_damage = int(min_damage * (1 + random.uniform(-variation, variation)))
+        self.max_damage = int(max_damage * (1 + random.uniform(-variation, variation)))
 
         if self.max_damage <= self.min_damage:
             self.max_damage = self.min_damage + 1
