@@ -92,8 +92,8 @@ class Wolf(Enemy):
     drop_chance = 0.3
     regular_drop = {"wolf_pelt": 1}
     probability = 0.2
-    max_entities = 300
-    max_entities_total = 600
+    max_entities = 500
+    max_entities_total = 500
     herd_probability = 0.8
     min_level = 8
     max_level = 25
@@ -114,7 +114,7 @@ class Goblin(Enemy):
     regular_drop = {"gold": 5}
     probability = 0.24
     max_entities = 200
-    max_entities_total = 400
+    max_entities_total = 500
     herd_probability = 0.5
     min_level = 5
     max_level = 22
@@ -131,7 +131,7 @@ class Specter(Enemy):
     regular_drop = {"ectoplasm": 1}
     probability = 0.24
     max_entities = 100
-    max_entities_total = 200
+    max_entities_total = 500
     herd_probability = 0.3
     min_level = 20
     max_level = 50
@@ -156,7 +156,7 @@ class Hatchling(Enemy):
     regular_drop = {"dragon_scale": 1}
     probability = 0.24
     max_entities = 50
-    max_entities_total = 100
+    max_entities_total = 500
     herd_probability = 0.2
     min_level = 30
     max_level = 70
@@ -214,7 +214,7 @@ class Troll(Enemy):
     regular_drop = {"troll_hide": 1}
     probability = 0.24
     max_entities = 100
-    max_entities_total = 200
+    max_entities_total = 500
     herd_probability = 0.2
     min_level = 25
     max_level = 60
@@ -237,7 +237,7 @@ class Harpy(Enemy):
     regular_drop = {"feather": 3}
     probability = 0.24
     max_entities = 150
-    max_entities_total = 300
+    max_entities_total = 500
     herd_probability = 0.5
     min_level = 15
     max_level = 45
@@ -261,7 +261,7 @@ class Orc(Enemy):
     regular_drop = {"orc_tusk": 1}
     probability = 0.24
     max_entities = 150
-    max_entities_total = 300
+    max_entities_total = 500
     herd_probability = 0.4
     min_level = 20
     max_level = 50
@@ -279,7 +279,7 @@ class Spider(Enemy):
     regular_drop = {"spider_silk": 1, "venom_sac": 1}
     probability = 0.24
     max_entities = 180
-    max_entities_total = 360
+    max_entities_total = 500
     herd_probability = 0.6
     min_level = 12
     max_level = 40
@@ -305,7 +305,7 @@ class Rat(Enemy):
     regular_drop = {"rat_tail": 1}
     probability = 0.24
     max_entities = 1000
-    max_entities_total = 2000
+    max_entities_total = 1000
     herd_probability = 0.8
     min_level = 1
     max_level = 10
@@ -323,7 +323,7 @@ class Minotaur(Enemy):
     regular_drop = {"minotaur_horn": 1}
     probability = 0.24
     max_entities = 50
-    max_entities_total = 100
+    max_entities_total = 500
     herd_probability = 0.1
     min_level = 35
     max_level = 80
@@ -355,7 +355,7 @@ class Skeleton(Enemy):
     regular_drop = {"bone": 2}
     probability = 0.24
     max_entities = 300
-    max_entities_total = 600
+    max_entities_total = 500
     herd_probability = 0.4
     min_level = 5
     max_level = 30
@@ -380,7 +380,7 @@ class Wraith(Enemy):
     regular_drop = {"soul_essence": 1}
     probability = 0.24
     max_entities = 120
-    max_entities_total = 240
+    max_entities_total = 500
     herd_probability = 0.3
     min_level = 30
     max_level = 70
@@ -405,8 +405,8 @@ class Dragon(Enemy):
     drop_chance = 1.0
     regular_drop = {"dragon_scale": 3, "dragon_tooth": 1}
     probability = 0.12
-    max_entities = 10
-    max_entities_total = 20
+    max_entities = 50
+    max_entities_total = 100
     herd_probability = 0
     min_level = 60
     max_level = 100
