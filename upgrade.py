@@ -40,8 +40,9 @@ def upgrade(user: str, mapdb: Any, usersdb: Any) -> str:
     if not has_resources(user_data, upgrade_cost):
         return f"Not enough resources to upgrade {right_entity['type']}"
 
-    for resource, amount in upgrade_cost.items():
-        user_data[resource] -= amount
+    ingredients = user_data.get("ingredients", {})
+    for resource, amount in upgrade_cost["ingredients"].items():
+        ingredients[resource] -= amount
     right_entity["level"] = next_level
 
     if right_entity["type"].lower() == "house":
@@ -49,13 +50,9 @@ def upgrade(user: str, mapdb: Any, usersdb: Any) -> str:
 
     updated_values = {
         "action_points": user_data["action_points"] - 1,
-        "wood": user_data["wood"],
-        "bismuth": user_data["bismuth"],
+        "ingredients": ingredients,
         "pop_lim": user_data.get("pop_lim", 0),
     }
-
-    # Filter out None values
-    updated_values = {k: v for k, v in updated_values.items() if v is not None}
 
     print("updated_values", updated_values)
     update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
