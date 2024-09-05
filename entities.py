@@ -75,8 +75,9 @@ class Enemy:
         return random.random() < self.block
 
     def take_damage(self, damage: int) -> Dict[str, Any]:
-        self.hp -= damage
-        message = f"The {self.type} took {damage} damage."
+        mitigated_damage = max(0, damage - self.armor)
+        self.hp -= mitigated_damage
+        message = f"The {self.type} took {mitigated_damage} damage."
         special_effect = self.process_special_effects()
         if special_effect:
             message += f" {special_effect}"
