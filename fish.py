@@ -24,13 +24,13 @@ def fish_pond(user, user_data, usersdb, mapdb, fish_amount=1):
     # Perform fishing with 10% success rate
     successful_attempts = 0
     for _ in range(fish_amount):
-        if random.random() < 0.1:  # 10% chance of success
+        if random.random() < 0.5:  # 50% chance of success
             successful_attempts += 1
 
     # Update user's data
     ingredients = user_data.get("ingredients", {})
-    new_fish = ingredients.get("food", 0) + successful_attempts
-    ingredients["food"] = new_fish
+    new_fish = ingredients.get("fish", 0) + successful_attempts
+    ingredients["fish"] = new_fish
     new_ap = user_data["action_points"] - fish_amount  # Deduct action points
 
     updated_values = {"action_points": new_ap, "ingredients": ingredients}
@@ -41,6 +41,6 @@ def fish_pond(user, user_data, usersdb, mapdb, fish_amount=1):
     )
 
     if successful_attempts > 0:
-        return f"Fishing partially successful. You caught {successful_attempts} fish!"
+        return f"Fishing successful. You caught {successful_attempts} fish!"
     else:
         return "Fishing unsuccessful. Better luck next time!"
