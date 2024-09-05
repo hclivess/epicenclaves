@@ -35,7 +35,7 @@ class Weapon:
             self.max_damage = int(self.max_damage * exceptional_boost)
 
     def _set_attributes(self):
-        level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
+        level_factor = max(1, (self.level - self.min_level) / (self.max_level - self.min_level))
 
         # Linear scaling for attributes
         self.accuracy = self.MIN_ACCURACY + int((self.MAX_ACCURACY - self.MIN_ACCURACY) * level_factor)

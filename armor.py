@@ -31,7 +31,7 @@ class Armor:
             self.protection = int(self.protection * exceptional_boost)
 
         # Calculate durability and efficiency (unchanged)
-        level_factor = (self.level - self.min_level) / (self.max_level - self.min_level)
+        level_factor = max(1, (self.level - self.min_level) / (self.max_level - self.min_level))
 
         min_durability = 30
         max_durability = 50 * self.max_level
