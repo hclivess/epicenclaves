@@ -652,6 +652,15 @@ class Forest(Scenery):
             {"name": "conquer", "action": f"/conquer?target={self.type}"},
         ]
 
+class Pond(Scenery):
+    type = "pond"
+
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        return [
+            {"name": "fish", "action": "/fish"},
+            {"name": "conquer", "action": f"/conquer?target={self.type}"},
+        ]
+
 class Mountain(Scenery):
     type = "mountain"
 

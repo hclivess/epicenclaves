@@ -27,11 +27,13 @@ def chop_forest(user, chop_amount, user_data, usersdb, mapdb):
         return "Not enough action points to chop"
 
     # Perform wood chopping
-    new_wood = user_data["wood"] + chop_amount
+    ingredients = user_data.get("ingredients", {})
+    new_wood = ingredients.get("wood", 0) + chop_amount
+    ingredients["wood"] = new_wood
     new_ap = user_data["action_points"] - chop_amount  # Deduct action points
 
     # Update user's data
-    updated_values = {"action_points": new_ap, "wood": new_wood}
+    updated_values = {"action_points": new_ap, "ingredients": ingredients}
     update_user_data(
         user=user,
         updated_values=updated_values,
