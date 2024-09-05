@@ -62,13 +62,13 @@ def generate_tool(min_level=1, max_level=20, tool_type=None):
     else:
         selected_class = random.choice(tool_classes)
 
-    tool = selected_class(min_level=min_level, max_level=level)
+    tool_id = id_generator()  # Generate a unique ID for the tool
+    tool = selected_class(min_level=min_level, max_level=level, tool_id=tool_id)
     tool_dict = tool.to_dict()
-    tool_dict['id'] = id_generator()
+    tool_dict['id'] = tool_id
     tool_dict['level'] = level
     print(f"Generated tool: {tool_dict}")
     return tool_dict
-
 
 def calculate_stat(base_stat, level, scaling_factor=0.1):
     return math.floor(base_stat * (1 + math.log(level, 2) * scaling_factor))
