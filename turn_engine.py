@@ -17,8 +17,10 @@ if os.path.exists("test"):
 else:
     TEST = 0
 
+
 def fake_hash():
     return "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(36))
+
 
 def interruptible_sleep(seconds, interval=1, stop_condition=None):
     total_time_slept = 0
@@ -27,6 +29,7 @@ def interruptible_sleep(seconds, interval=1, stop_condition=None):
             break
         time.sleep(interval)
         total_time_slept += interval
+
 
 class TurnEngine(threading.Thread):
     def __init__(self, usersdb, mapdb):
@@ -56,17 +59,10 @@ class TurnEngine(threading.Thread):
     def update_latest_block(self):
         self.latest_block = hashify(fake_hash()) if TEST else blockchain.last_bis_hash()
 
-
     def update_users_data(self, league):
         for username, user_data in self.usersdb[league].items():
             updated_values = self.calculate_updated_values(user_data)
-
-            # Update action_points and age
-            updated_values["action_points"] = user_data.get("action_points", 0) + 10
-            updated_values["age"] = user_data.get("age", 0) + 1
-
             update_user_data(user=username, updated_values=updated_values, user_data_dict=self.usersdb[league])
-
 
     def calculate_updated_values(self, user_data):
         building_counts = self.count_buildings(user_data)
@@ -75,20 +71,23 @@ class TurnEngine(threading.Thread):
         research_increment = building_counts['laboratory']
         updated_values["research"] = max(0, user_data["research"] + research_increment)
 
+        ingredients = user_data.get("ingredients", {})
+
         wood_increment = min(building_counts['sawmill'], building_counts['forest'])
-        updated_values["wood"] = max(0, user_data["wood"] + wood_increment)
+        updated_values["ingredients"] = ingredients.copy()
+        updated_values["ingredients"]["wood"] = max(0, ingredients.get("wood", 0) + wood_increment)
 
         bis_increment = min(building_counts['mine'], building_counts['mountain'])
-        updated_values["bismuth"] = max(0, user_data["bismuth"] + bis_increment)
+        updated_values["ingredients"]["bismuth"] = max(0, ingredients.get("bismuth", 0) + bis_increment)
 
         current_population = user_data["peasants"] + user_data.get("army_free", 0) + user_data.get("army_deployed", 0)
         available_pop_space = max(0, user_data["pop_lim"] - current_population)
 
         # Calculate the potential new army
-        potential_army_free = min(user_data["food"] // 2, user_data["peasants"], building_counts['barracks'],
+        potential_army_free = min(ingredients.get("food", 0) // 2, user_data["peasants"], building_counts['barracks'],
                                   available_pop_space)
         updated_values["army_free"] = max(0, user_data.get("army_free", 0) + potential_army_free)
-        updated_values["food"] = max(0, user_data["food"] - 2 * potential_army_free)
+        updated_values["ingredients"]["food"] = max(0, ingredients.get("food", 0) - 2 * potential_army_free)
 
         # Update available population space after army calculations
         current_population = user_data["peasants"] + updated_values["army_free"] + user_data.get("army_deployed", 0)
@@ -97,10 +96,15 @@ class TurnEngine(threading.Thread):
         potential_peasants_addition = min(building_counts['farm'], available_pop_space)
         updated_values["peasants"] = max(0, user_data["peasants"] + potential_peasants_addition)
 
+        # Update action_points and age
+        updated_values["action_points"] = user_data.get("action_points", 0) + 10
+        updated_values["age"] = user_data.get("age", 0) + 1
+
         return updated_values
 
     def count_buildings(self, user_data):
-        counts = {'sawmill': 0, 'forest': 0, 'barracks': 0, 'farm': 0, 'house': 0, 'mine': 0, 'mountain': 0, 'laboratory': 0}
+        counts = {'sawmill': 0, 'forest': 0, 'barracks': 0, 'farm': 0, 'house': 0, 'mine': 0, 'mountain': 0,
+                  'laboratory': 0}
 
         for building_data in user_data.get("construction", {}).values():
             building_type = building_data['type']
@@ -123,6 +127,7 @@ class TurnEngine(threading.Thread):
 
     def stop(self):
         self.running = False
+
 
 if __name__ == "__main__":
     turn_engine = TurnEngine({}, {})

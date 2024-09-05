@@ -34,8 +34,10 @@ def build(user, user_data, entity, name, mapdb, usersdb):
         return f"Not enough resources to build {building_data['display_name']}"
 
     # Deduct resources
-    for resource, amount in building_data["cost"].items():
-        user_data[resource] -= amount
+    ingredients = user_data.get("ingredients", {})
+    for resource, amount in building_data["cost"]["ingredients"].items():
+        if resource in ingredients:
+            ingredients[resource] -= amount
 
     # Special case for house
     if entity == "house":
@@ -44,8 +46,7 @@ def build(user, user_data, entity, name, mapdb, usersdb):
     # Update user data
     updated_values = {
         "action_points": user_data["action_points"] - 1,
-        "wood": user_data["wood"],
-        "bismuth": user_data["bismuth"],
+        "ingredients": ingredients,
         "pop_lim": user_data.get("pop_lim"),
     }
     update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)

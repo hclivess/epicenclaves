@@ -63,9 +63,20 @@
                         <h4 class="mb-0">Available Resources</h4>
                     </div>
                     <div class="card-body">
-                        <p class="mb-1">🪵 Wood: {{file.get("wood", "N/A")}}</p>
-                        <p class="mb-1">🥩 Food: {{file.get("food", "N/A")}}</p>
-                        <p class="mb-1">🪨 Bismuth: {{file.get("bismuth", "N/A")}}</p>
+                    {% if file.get("ingredients") %}
+                        {% for ingredient, amount in file["ingredients"].items() %}
+                            <p class="mb-1">
+                                {% if ingredient == "wood" %}🪵
+                                {% elif ingredient == "food" %}🥩
+                                {% elif ingredient == "bismuth" %}🪨
+                                {% else %}📦
+                                {% end %}
+                                {{ ingredient.capitalize() }}: {{ amount }}
+                            </p>
+                        {% end %}
+                    {% else %}
+                        <p class="mb-1">No ingredients available.</p>
+                    {% end %}
                         <p class="mb-1">🧪 Research: {{file.get("research", "N/A")}}</p>
                     </div>
                 </div>

@@ -22,9 +22,11 @@ class User:
         self.army_deployed = 0
         self.army_free = 0
         self.peasants = 0
-        self.wood = 500
-        self.food = 500
-        self.bismuth = 500
+        self.ingredients = {
+            "wood": 500,
+            "food": 500,
+            "bismuth": 500
+        }
         self.equipped = []
         self.unequipped = []
         self.pop_lim = 0
@@ -64,9 +66,7 @@ class User:
             "army_deployed": self.army_deployed,
             "army_free": self.army_free,
             "peasants": self.peasants,
-            "wood": self.wood,
-            "food": self.food,
-            "bismuth": self.bismuth,
+            "ingredients": self.ingredients,
             "equipped": self.equipped,
             "unequipped": self.unequipped,
             "pop_lim": self.pop_lim,
@@ -74,7 +74,6 @@ class User:
             "online": self.online,
             "construction": self.construction
         }
-
 def find_open_space(mapdb: Dict[str, Any]) -> tuple:
     x = random.randint(0, 100)
     y = random.randint(0, 100)
