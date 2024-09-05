@@ -64,20 +64,25 @@
                     </div>
                     <div class="card-body">
                     {% if file.get("ingredients") %}
-                        {% for ingredient, amount in file["ingredients"].items() %}
-                            <p class="mb-1">
-                                {% if ingredient == "wood" %}🪵
-                                {% elif ingredient == "food" %}🥩
-                                {% elif ingredient == "bismuth" %}🪨
-                                {% else %}📦
-                                {% end %}
-                                {{ ingredient.capitalize() }}: {{ amount }}
-                            </p>
-                        {% end %}
+                {% for ingredient, amount in file["ingredients"].items() %}
+    <p class="mb-1">
+        {% if ingredient == "wood" %}
+            <img src="img/assets/wood.png" alt="Wood" class="ingredient-icon" width="32" height="32">
+        {% elif ingredient == "food" %}
+            <img src="img/assets/food.png" alt="Food" class="ingredient-icon" width="32" height="32">
+        {% elif ingredient == "bismuth" %}
+            <img src="img/assets/bismuth.png" alt="Bismuth" class="ingredient-icon" width="32" height="32">
+        {% else %}
+            <img src="img/assets/default.png" alt="Default" class="ingredient-icon" width="32" height="32">
+        {% end %}
+        {{ ingredient.capitalize() }}: {{ amount }}
+    </p>
+{% end %}
                     {% else %}
                         <p class="mb-1">No ingredients available.</p>
                     {% end %}
-                        <p class="mb-1">🧪 Research: {{file.get("research", "N/A")}}</p>
+                        <p class="mb-1"><img src="img/assets/research.png" alt="Default" class="ingredient-icon" width="32" height="32">
+                        Research: {{file.get("research", "N/A")}}</p>
                     </div>
                 </div>
             </div>
