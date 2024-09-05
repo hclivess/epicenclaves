@@ -7,6 +7,7 @@ from backend import update_user_data
 from item_generator import generate_weapon, generate_armor
 from entities import entity_types, Enemy
 
+
 def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users: List[Dict], user_data: Dict, user: str,
           usersdb: Dict, mapdb: Dict) -> Dict:
     print(f"Starting fight. Target: {target}, Target name: {target_name}")
@@ -44,7 +45,9 @@ def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users:
     print("Final battle_data", battle_data)
     return {"battle_data": battle_data}
 
-def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict) -> None:
+
+def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_data: Dict, user: str, usersdb: Dict,
+              mapdb: Dict) -> None:
     enemy_class = entity_types.get(npc_data['type'].lower())
     if enemy_class is None:
         battle_data["rounds"].append({"round": 0, "message": f"Unknown enemy type: {npc_data['type']}"})
@@ -67,19 +70,48 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
         if user_data["hp"] > 0:
             exp_bonus_value = exp_bonus(user_data["exp"])
             user_dmg = get_weapon_damage(user_data, exp_bonus_value)
-            enemy.hp -= user_dmg['damage']
-            round_data["actions"].append({
-                "actor": "player",
-                "type": "attack",
-                "damage": user_dmg['damage'],
-                "message": f"You {user_dmg['message']} the level {enemy.level} {enemy.type} for {user_dmg['damage']} damage "
-                           f"(Base: {user_dmg['base_damage']}, Exp bonus: {user_dmg['exp_bonus']}). "
-                           f"It has {enemy.hp}/{enemy.max_hp} HP left"
-            })
+
+            if user_dmg['damage'] > 0:  # Only attempt evasion or blocking if there's actual damage
+                if enemy.attempt_evasion():
+                    round_data["actions"].append({
+                        "actor": "enemy",
+                        "type": "evasion",
+                        "message": f"The level {enemy.level} {enemy.type} evaded your attack!"
+                    })
+                    damage_dealt = 0
+                elif enemy.attempt_block():
+                    blocked_damage = int(user_dmg['damage'] * enemy.block_reduction)
+                    damage_dealt = max(0, user_dmg['damage'] - blocked_damage)  # Ensure damage_dealt is not negative
+                    round_data["actions"].append({
+                        "actor": "enemy",
+                        "type": "block",
+                        "message": f"The level {enemy.level} {enemy.type} blocked part of your attack, reducing damage from {user_dmg['damage']} to {damage_dealt}!"
+                    })
+                else:
+                    damage_dealt = user_dmg['damage']
+            else:
+                damage_dealt = 0
+
+            if damage_dealt > 0:
+                damage_result = enemy.take_damage(damage_dealt)
+                round_data["actions"].append({
+                    "actor": "player",
+                    "type": "attack",
+                    "damage": damage_dealt,
+                    "message": f"You {user_dmg['message']} the level {enemy.level} {enemy.type} for {damage_dealt} damage. {damage_result['message']}"
+                })
+            else:
+                round_data["actions"].append({
+                    "actor": "player",
+                    "type": "attack",
+                    "damage": 0,
+                    "message": f"Your attack did no damage to the level {enemy.level} {enemy.type}."
+                })
 
         if enemy.hp > 0:
             npc_dmg = enemy.roll_damage()
-            final_damage, absorbed_damage = apply_armor_protection(user_data, npc_dmg["damage"], round_data, round_number)
+            final_damage, absorbed_damage = apply_armor_protection(user_data, npc_dmg["damage"], round_data,
+                                                                   round_number)
             user_data["hp"] -= final_damage
             round_data["actions"].append({
                 "actor": "enemy",
@@ -123,11 +155,9 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
                     "player_hp": 1,
                     "enemy_hp": enemy.hp
                 })
-                update_user_data(user=user, updated_values={"action_points": user_data["action_points"] - 1, "hp": 1}, user_data_dict=usersdb)
+                update_user_data(user=user, updated_values={"action_points": user_data["action_points"] - 1, "hp": 1},
+                                 user_data_dict=usersdb)
             break
-
-    #battle_data["player"]["current_hp"] = user_data["hp"]
-    #battle_data["enemy"]["current_hp"] = enemy.hp
 
 def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> None:
     max_base_hp = 100

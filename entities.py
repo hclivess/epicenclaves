@@ -2,6 +2,10 @@ import random
 from typing import Dict, List, Any
 import inspect
 
+import random
+from typing import Dict, List, Any
+
+
 class Enemy:
     type = "enemy"
     base_hp = 100
@@ -20,6 +24,9 @@ class Enemy:
     min_level = 1
     max_level = 100
     experience_value = 10
+    evasion_chance = 0.0
+    block_chance = 0.0
+    block_reduction = 0.5
 
     def __init__(self, level: int):
         self.level = max(self.min_level, min(level, self.max_level))
@@ -29,6 +36,8 @@ class Enemy:
         self.armor = self.calculate_armor()
         self.alive = True
         self.experience = self.calculate_experience()
+        self.evasion = self.calculate_evasion()
+        self.block = self.calculate_block()
 
     def calculate_hp(self):
         return int(self.base_hp * (1 + 0.1 * (self.level - 1)))  # 10% increase per level
@@ -45,6 +54,12 @@ class Enemy:
     def calculate_experience(self):
         return int(self.experience_value * (1 + 0.1 * (self.level - 1)))  # 10% increase per level
 
+    def calculate_evasion(self):
+        return self.evasion_chance + (0.002 * (self.level - 1))  # 0.2% increase per level
+
+    def calculate_block(self):
+        return self.block_chance + (0.002 * (self.level - 1))  # 0.2% increase per level
+
     def roll_damage(self):
         damage = random.randint(self.min_damage, self.max_damage)
         message = "normal hit"
@@ -52,6 +67,33 @@ class Enemy:
             damage = int(damage * self.crit_damage)
             message = "critical hit"
         return {"damage": damage, "message": message}
+
+    def attempt_evasion(self):
+        return random.random() < self.evasion
+
+    def attempt_block(self):
+        return random.random() < self.block
+
+    def take_damage(self, damage: int) -> Dict[str, Any]:
+        self.hp -= damage
+        message = f"The {self.type} took {damage} damage."
+        special_effect = self.process_special_effects()
+        if special_effect:
+            message += f" {special_effect}"
+
+        return {
+            "damage_taken": damage,
+            "current_hp": self.hp,
+            "message": message,
+            "is_defeated": self.hp <= 0
+        }
+
+    def process_special_effects(self) -> str:
+        """
+        Process any special effects that occur when the enemy takes damage.
+        Override this method in subclasses to implement enemy-specific effects.
+        """
+        return ""
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [{"name": "fight", "action": f"/fight?target={self.type}"}]
@@ -61,6 +103,39 @@ class Enemy:
             "type": self.type,
             "level": self.level,
         }
+
+
+class Skeleton(Enemy):
+    type = "skeleton"
+    base_hp = 50
+    base_min_damage = 5
+    base_max_damage = 10
+    base_armor = 2
+    crit_chance = 0.2
+    crit_damage = 1.5
+    drop_chance = 0.5
+    regular_drop = {"bone": 2}
+    probability = 0.24
+    max_entities = 300
+    max_entities_total = 500
+    herd_probability = 0.4
+    min_level = 5
+    max_level = 30
+    experience_value = 20
+    reassemble_chance = 0.2
+    block_chance = 0.1
+    block_reduction = 0.3
+
+    def __init__(self, level: int):
+        super().__init__(level)
+        self.has_reassembled = False
+
+    def process_special_effects(self) -> str:
+        if self.hp <= 0 and not self.has_reassembled and random.random() < self.reassemble_chance:
+            self.hp = self.calculate_hp() // 2  # Reassemble with half HP
+            self.has_reassembled = True
+            return "The skeleton has reassembled itself!"
+        return ""
 
 class Boar(Enemy):
     type = "boar"
@@ -78,6 +153,8 @@ class Boar(Enemy):
     min_level = 3
     max_level = 18
     experience_value = 10
+    block_chance = 0.1
+    block_reduction = 0.3
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [{"name": "hunt", "action": f"/fight?target={self.type}"}]
@@ -98,6 +175,7 @@ class Wolf(Enemy):
     min_level = 8
     max_level = 25
     experience_value = 15
+    evasion_chance = 0.15
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [{"name": "hunt", "action": f"/fight?target={self.type}"}]
@@ -119,6 +197,9 @@ class Goblin(Enemy):
     min_level = 5
     max_level = 22
     experience_value = 12
+    evasion_chance = 0.1
+    block_chance = 0.05
+    block_reduction = 0.2
 
 class Specter(Enemy):
     type = "specter"
@@ -136,6 +217,7 @@ class Specter(Enemy):
     min_level = 20
     max_level = 50
     experience_value = 40
+    evasion_chance = 0.25
 
     def roll_damage(self):
         damage_info = super().roll_damage()
@@ -161,6 +243,8 @@ class Hatchling(Enemy):
     min_level = 30
     max_level = 70
     experience_value = 80
+    block_chance = 0.15
+    block_reduction = 0.4
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -195,6 +279,9 @@ class Bandit(Enemy):
     min_level = 10
     max_level = 35
     experience_value = 25
+    evasion_chance = 0.1
+    block_chance = 0.1
+    block_reduction = 0.3
 
     def roll_damage(self):
         damage_info = super().roll_damage()
@@ -220,6 +307,8 @@ class Troll(Enemy):
     max_level = 60
     experience_value = 70
     regeneration_rate = 5
+    block_chance = 0.2
+    block_reduction = 0.5
 
     def calculate_hp(self):
         hp = super().calculate_hp()
@@ -245,9 +334,11 @@ class Harpy(Enemy):
     evasion_chance = 0.2
 
     def roll_damage(self):
-        if random.random() < self.evasion_chance:
-            return {"damage": 0, "message": "evaded"}
-        return super().roll_damage()
+        damage_info = super().roll_damage()
+        if self.attempt_evasion():
+            damage_info["damage"] = 0
+            damage_info["message"] = "evaded your attack"
+        return damage_info
 
 class Orc(Enemy):
     type = "orc"
@@ -266,6 +357,8 @@ class Orc(Enemy):
     min_level = 20
     max_level = 50
     experience_value = 50
+    block_chance = 0.15
+    block_reduction = 0.35
 
 class Spider(Enemy):
     type = "spider"
@@ -287,6 +380,7 @@ class Spider(Enemy):
     poison_chance = 0.15
     poison_duration = 3
     poison_damage = 2
+    evasion_chance = 0.15
 
     def roll_damage(self):
         damage_info = super().roll_damage()
@@ -310,6 +404,7 @@ class Rat(Enemy):
     min_level = 1
     max_level = 10
     experience_value = 5
+    evasion_chance = 0.2  # Rats are small and quick, so they have a higher base evasion
 
 class Minotaur(Enemy):
     type = "minotaur"
@@ -328,6 +423,8 @@ class Minotaur(Enemy):
     min_level = 35
     max_level = 80
     experience_value = 100
+    block_chance = 0.25
+    block_reduction = 0.6
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -342,32 +439,6 @@ class Minotaur(Enemy):
             damage_info = super().roll_damage()
             self.charge_cooldown -= 1
             return damage_info
-
-class Skeleton(Enemy):
-    type = "skeleton"
-    base_hp = 50
-    base_min_damage = 5
-    base_max_damage = 10
-    base_armor = 2
-    crit_chance = 0.2
-    crit_damage = 1.5
-    drop_chance = 0.5
-    regular_drop = {"bone": 2}
-    probability = 0.24
-    max_entities = 300
-    max_entities_total = 500
-    herd_probability = 0.4
-    min_level = 5
-    max_level = 30
-    experience_value = 20
-    reassemble_chance = 0.2
-
-    def roll_damage(self):
-        damage_info = super().roll_damage()
-        if self.hp <= 0 and random.random() < self.reassemble_chance:
-            self.hp = self.calculate_hp() // 2  # Reassemble with half HP
-            damage_info["message"] += " (skeleton reassembled)"
-        return damage_info
 
 class Wraith(Enemy):
     type = "wraith"
@@ -386,6 +457,7 @@ class Wraith(Enemy):
     max_level = 70
     experience_value = 75
     phase_chance = 0.3
+    evasion_chance = 0.3
 
     def roll_damage(self):
         damage_info = super().roll_damage()
@@ -411,6 +483,8 @@ class Dragon(Enemy):
     min_level = 60
     max_level = 100
     experience_value = 500
+    block_chance = 0.3
+    block_reduction = 0.7
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -427,7 +501,6 @@ class Dragon(Enemy):
             damage_info = super().roll_damage()
             self.breath_attack_cooldown -= 1
             return damage_info
-
 
 class Lizarian(Enemy):
     type = "lizarian"
@@ -446,6 +519,9 @@ class Lizarian(Enemy):
     min_level = 55
     max_level = 90
     experience_value = 300
+    evasion_chance = 0.15
+    block_chance = 0.2
+    block_reduction = 0.5
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -464,7 +540,6 @@ class Lizarian(Enemy):
                 damage_info["message"] += " (regained spell charge)"
             return damage_info
 
-
 class Golem(Enemy):
     type = "golem"
     base_hp = 600
@@ -482,6 +557,8 @@ class Golem(Enemy):
     min_level = 65
     max_level = 95
     experience_value = 400
+    block_chance = 0.4
+    block_reduction = 0.8
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -512,7 +589,6 @@ class Golem(Enemy):
     def calculate_armor(self):
         return super().calculate_armor() + int(0.2 * self.level)  # Additional armor scaling
 
-
 class Zombie(Enemy):
     type = "zombie"
     base_hp = 450
@@ -530,6 +606,8 @@ class Zombie(Enemy):
     min_level = 50
     max_level = 85
     experience_value = 250
+    block_chance = 0.1
+    block_reduction = 0.3
 
     def __init__(self, level: int):
         super().__init__(level)
