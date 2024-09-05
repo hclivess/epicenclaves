@@ -218,12 +218,16 @@ def process_npc_defeat(enemy: Enemy, coords: str, user_data: Dict, user: str, us
         "exp_gained": experience_gained
     })
 
+    ingredients = user_data.get("ingredients", {})
+    for item, amount in enemy.regular_drop.items():
+        ingredients[item] = ingredients.get(item, 0) + amount
+
     updated_values = {
         "action_points": user_data["action_points"] - 1,
         "exp": user_data["exp"] + experience_gained,
         "hp": user_data["hp"],
         "unequipped": user_data["unequipped"],
-        **{key: user_data.get(key, 0) + value for key, value in enemy.regular_drop.items()}
+        "ingredients": ingredients
     }
 
     update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)

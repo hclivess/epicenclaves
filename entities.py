@@ -90,7 +90,7 @@ class Wolf(Enemy):
     crit_chance = 0.25
     crit_damage = 1.8
     drop_chance = 0.3
-    regular_drop = {"wolf_pelt": 1}
+    regular_drop = {"wolf pelt": 1}
     probability = 0.2
     max_entities = 500
     max_entities_total = 500
@@ -153,7 +153,7 @@ class Hatchling(Enemy):
     crit_chance = 0.2
     crit_damage = 1.8
     drop_chance = 0.8
-    regular_drop = {"dragon_scale": 1}
+    regular_drop = {"dragon scale": 1}
     probability = 0.24
     max_entities = 50
     max_entities_total = 500
@@ -211,7 +211,7 @@ class Troll(Enemy):
     crit_chance = 0.1
     crit_damage = 2.0
     drop_chance = 0.7
-    regular_drop = {"troll_hide": 1}
+    regular_drop = {"troll hide": 1}
     probability = 0.24
     max_entities = 100
     max_entities_total = 500
@@ -258,7 +258,7 @@ class Orc(Enemy):
     crit_chance = 0.12
     crit_damage = 1.8
     drop_chance = 0.6
-    regular_drop = {"orc_tusk": 1}
+    regular_drop = {"orc tusk": 1}
     probability = 0.24
     max_entities = 150
     max_entities_total = 500
@@ -276,7 +276,7 @@ class Spider(Enemy):
     crit_chance = 0.18
     crit_damage = 1.7
     drop_chance = 0.5
-    regular_drop = {"spider_silk": 1, "venom_sac": 1}
+    regular_drop = {"spider silk": 1, "venom sac": 1}
     probability = 0.24
     max_entities = 180
     max_entities_total = 500
@@ -302,7 +302,7 @@ class Rat(Enemy):
     crit_chance = 0.05
     crit_damage = 1.3
     drop_chance = 0.2
-    regular_drop = {"rat_tail": 1}
+    regular_drop = {"rat tail": 1}
     probability = 0.24
     max_entities = 1000
     max_entities_total = 1000
@@ -320,7 +320,7 @@ class Minotaur(Enemy):
     crit_chance = 0.15
     crit_damage = 2.2
     drop_chance = 0.8
-    regular_drop = {"minotaur_horn": 1}
+    regular_drop = {"minotaur horn": 1}
     probability = 0.24
     max_entities = 50
     max_entities_total = 500
@@ -377,7 +377,7 @@ class Wraith(Enemy):
     crit_chance = 0.25
     crit_damage = 1.9
     drop_chance = 0.7
-    regular_drop = {"soul_essence": 1}
+    regular_drop = {"soul essence": 1}
     probability = 0.24
     max_entities = 120
     max_entities_total = 500
@@ -403,7 +403,7 @@ class Dragon(Enemy):
     crit_chance = 0.2
     crit_damage = 2.5
     drop_chance = 1.0
-    regular_drop = {"dragon_scale": 3, "dragon_tooth": 1}
+    regular_drop = {"dragon scale": 3, "dragon tooth": 1}
     probability = 0.12
     max_entities = 50
     max_entities_total = 100
@@ -438,7 +438,7 @@ class Lizarian(Enemy):
     crit_chance = 0.2
     crit_damage = 2.2
     drop_chance = 0.9
-    regular_drop = {"lizard_scale": 2, "magic_essence": 1}
+    regular_drop = {"lizard scale": 2, "magic essence": 1}
     probability = 0.15
     max_entities = 75
     max_entities_total = 150
@@ -474,7 +474,7 @@ class Golem(Enemy):
     crit_chance = 0.1
     crit_damage = 2.0
     drop_chance = 0.95
-    regular_drop = {"golem_core": 1, "enchanted_stone": 3}
+    regular_drop = {"golem core": 1, "enchanted stone": 3}
     probability = 0.12
     max_entities = 60
     max_entities_total = 120
@@ -522,7 +522,7 @@ class Zombie(Enemy):
     crit_chance = 0.15
     crit_damage = 1.8
     drop_chance = 0.85
-    regular_drop = {"rotten_flesh": 2, "zombie_brain": 1}
+    regular_drop = {"rotten flesh": 2, "zombie brain": 1}
     probability = 0.18
     max_entities = 100
     max_entities_total = 200
