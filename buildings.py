@@ -9,8 +9,13 @@ class Building:
         self.role = "building"
 
     def format_cost(self, cost: Dict[str, int]) -> str:
-        emoji_map = {"wood": "🪵", "bismuth": "🪨", "gold": "💰", "food": "🍖"}
-        return " ".join(f"{emoji_map.get(resource, resource)}{amount}" for resource, amount in cost.items())
+        image_map = {
+            "wood": "img/assets/wood.png",
+            "bismuth": "img/assets/bismuth.png",
+            "gold": "img/assets/gold.png",
+            "food": "img/assets/food.png"
+        }
+        return " ".join(f"<img src='{image_map.get(resource, resource)}' width='32' height='32' alt='{resource}'>{amount}" for resource, amount in cost.items())
 
     def to_dict(self):
         return {
