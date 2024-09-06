@@ -40,8 +40,8 @@ from build import build
 from entity_generator import spawn
 from auth import (auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db)
 from sqlite import init_databases, load_users_to_memory, save_users_from_memory, save_map_from_memory, \
-    load_map_to_memory
-from player import create_user
+    load_map_to_memory, users_db
+from player import create_user, calculate_population_limit
 from wall_generator import generate_multiple_mazes
 from upgrade import upgrade
 from trash import trash_item, trash_armor, trash_all, trash_weapons
@@ -158,6 +158,7 @@ class BaseHandler(tornado.web.RequestHandler):
         current_total_hp = calculate_total_hp(current_hp, exp)
         max_total_hp = calculate_total_hp(100, exp)  # Assuming 100 is the base max HP
 
+        print("user_data", user_data)
         self.render(
             "templates/user_panel.html",
             user=user,
@@ -170,7 +171,8 @@ class BaseHandler(tornado.web.RequestHandler):
             inventory_descriptions=inventory_descriptions,
             league=league,
             current_total_hp=current_total_hp,
-            max_total_hp=max_total_hp
+            max_total_hp=max_total_hp,
+            pop_limit = calculate_population_limit(user_data)
         )
 
 

@@ -36,7 +36,6 @@ usersdb - data indexed by username:
                "role":"melee"
             }
          ],
-         "pop_lim":0,
          "alive":true,
          "online":true
       }

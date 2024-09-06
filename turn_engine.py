@@ -6,6 +6,7 @@ import time
 from sqlite import save_users_from_memory, save_map_from_memory
 from backend import update_user_data, hashify
 from entity_generator import spawn_all_entities
+from player import calculate_population_limit  # Import the function from player.py
 import string
 import importlib
 
@@ -17,10 +18,8 @@ if os.path.exists("test"):
 else:
     TEST = 0
 
-
 def fake_hash():
     return "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(36))
-
 
 def interruptible_sleep(seconds, interval=1, stop_condition=None):
     total_time_slept = 0
@@ -29,7 +28,6 @@ def interruptible_sleep(seconds, interval=1, stop_condition=None):
             break
         time.sleep(interval)
         total_time_slept += interval
-
 
 class TurnEngine(threading.Thread):
     def __init__(self, usersdb, mapdb):
@@ -80,8 +78,12 @@ class TurnEngine(threading.Thread):
         bis_increment = min(building_counts['mine'], building_counts['mountain'])
         updated_values["ingredients"]["bismuth"] = max(0, ingredients.get("bismuth", 0) + bis_increment)
 
+        # Calculate population limit using the imported function
+        population_limit = calculate_population_limit(user_data)
+        updated_values["pop_lim"] = population_limit
+
         current_population = user_data["peasants"] + user_data.get("army_free", 0) + user_data.get("army_deployed", 0)
-        available_pop_space = max(0, user_data["pop_lim"] - current_population)
+        available_pop_space = max(0, population_limit - current_population)
 
         # Calculate the potential new army
         potential_army_free = min(ingredients.get("food", 0) // 2, user_data["peasants"], building_counts['barracks'],
@@ -91,7 +93,7 @@ class TurnEngine(threading.Thread):
 
         # Update available population space after army calculations
         current_population = user_data["peasants"] + updated_values["army_free"] + user_data.get("army_deployed", 0)
-        available_pop_space = max(0, user_data["pop_lim"] - current_population)
+        available_pop_space = max(0, population_limit - current_population)
 
         potential_peasants_addition = min(building_counts['farm'], available_pop_space)
         updated_values["peasants"] = max(0, user_data["peasants"] + potential_peasants_addition)
@@ -127,9 +129,3 @@ class TurnEngine(threading.Thread):
 
     def stop(self):
         self.running = False
-
-
-if __name__ == "__main__":
-    turn_engine = TurnEngine({}, {})
-    turn_engine.start()
-    print("Turn engine started")

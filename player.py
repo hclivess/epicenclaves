@@ -29,7 +29,6 @@ class User:
         }
         self.equipped = []
         self.unequipped = []
-        self.pop_lim = 0
         self.alive = True
         self.online = True
         self.construction = {}
@@ -69,7 +68,6 @@ class User:
             "ingredients": self.ingredients,
             "equipped": self.equipped,
             "unequipped": self.unequipped,
-            "pop_lim": self.pop_lim,
             "alive": self.alive,
             "online": self.online,
             "construction": self.construction
@@ -146,3 +144,19 @@ def get_users_at_coords(x_pos: int, y_pos: int, user: str, users_dict: Dict[str,
 
 def calculate_total_hp(base_hp: int, exp: int) -> int:
     return base_hp + int(exp / User.HP_BONUS_PER_EXP)
+
+
+def calculate_population_limit(user_data):
+    population_limit = 0
+
+    if 'construction' in user_data:
+        for building in user_data['construction'].values():
+            if building.get('type') == 'house':
+                # Base population increase for a house
+                population_limit += 10
+
+                # Additional population for each level above 1
+                level = building.get('level', 1)
+                population_limit += 10 * (level - 1)
+
+    return population_limit

@@ -45,13 +45,9 @@ def upgrade(user: str, mapdb: Any, usersdb: Any) -> str:
         ingredients[resource] -= amount
     right_entity["level"] = next_level
 
-    if right_entity["type"].lower() == "house":
-        user_data["pop_lim"] = user_data.get("pop_lim", 0) + 10
-
     updated_values = {
         "action_points": user_data["action_points"] - 1,
         "ingredients": ingredients,
-        "pop_lim": user_data.get("pop_lim", 0),
     }
 
     print("updated_values", updated_values)

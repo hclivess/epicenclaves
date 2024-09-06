@@ -80,19 +80,6 @@ def adjust_population_limit(owner, new_owner, usersdb):
     owner_data = usersdb[owner]
     new_owner_data = usersdb[new_owner]
 
-    # Update population limit for both users
-    update_user_data(
-        user=owner,
-        updated_values={"pop_lim": owner_data["pop_lim"] - pop_delta},
-        user_data_dict=usersdb,
-    )
-    update_user_data(
-        user=new_owner,
-        updated_values={"pop_lim": new_owner_data["pop_lim"] + pop_delta},
-        user_data_dict=usersdb,
-    )
-
-
 def remove_entry_from_owner(owner, user_data, usersdb):
     coords = {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]}
     remove_from_user(owner, coords, usersdb)

@@ -39,15 +39,10 @@ def build(user, user_data, entity, name, mapdb, usersdb):
         if resource in ingredients:
             ingredients[resource] -= amount
 
-    # Special case for house
-    if entity == "house":
-        user_data["pop_lim"] = user_data.get("pop_lim", 0) + 10
-
     # Update user data
     updated_values = {
         "action_points": user_data["action_points"] - 1,
         "ingredients": ingredients,
-        "pop_lim": user_data.get("pop_lim"),
     }
     update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
 
