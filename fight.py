@@ -71,26 +71,41 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
             exp_bonus_value = exp_bonus(user_data["exp"])
             user_dmg = get_weapon_damage(user_data, exp_bonus_value)
 
-            if user_dmg['damage'] > 0:  # Only attempt evasion or blocking if there's actual damage
+            if user_dmg['damage'] > 0:
                 if enemy.attempt_evasion():
                     round_data["actions"].append({
                         "actor": "enemy",
                         "type": "evasion",
-                        "message": f"The level {enemy.level} {enemy.type} evaded your attack!"
+                        "message": f"The level {enemy.level} {enemy.type} evaded your attack."
                     })
                     damage_dealt = 0
                 elif enemy.attempt_block():
                     blocked_damage = int(user_dmg['damage'] * enemy.block_reduction)
-                    damage_dealt = max(0, user_dmg['damage'] - blocked_damage)  # Ensure damage_dealt is not negative
+                    damage_dealt = max(0, user_dmg['damage'] - blocked_damage)
                     round_data["actions"].append({
                         "actor": "enemy",
                         "type": "block",
-                        "message": f"The level {enemy.level} {enemy.type} blocked part of your attack, reducing damage from {user_dmg['damage']} to {damage_dealt}!"
+                        "message": f"The level {enemy.level} {enemy.type} blocked part of your attack. Damage reduced from {user_dmg['damage']} to {damage_dealt}."
                     })
                 else:
                     damage_dealt = user_dmg['damage']
             else:
                 damage_dealt = 0
+                weapon = next((item for item in user_data.get("equipped", []) if item.get("slot") == "right_hand"), None)
+                if weapon:
+                    round_data["actions"].append({
+                        "actor": "player",
+                        "type": "miss",
+                        "damage": 0,
+                        "message": f"Your attack with {weapon['type']} missed the {enemy.type}."
+                    })
+                else:
+                    round_data["actions"].append({
+                        "actor": "player",
+                        "type": "miss",
+                        "damage": 0,
+                        "message": f"Your unarmed attack missed the {enemy.type}."
+                    })
 
             if damage_dealt > 0:
                 damage_result = enemy.take_damage(damage_dealt)
@@ -99,13 +114,6 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
                     "type": "attack",
                     "damage": damage_dealt,
                     "message": f"You {user_dmg['message']} the level {enemy.level} {enemy.type} for {damage_dealt} damage. {damage_result['message']}"
-                })
-            else:
-                round_data["actions"].append({
-                    "actor": "player",
-                    "type": "attack",
-                    "damage": 0,
-                    "message": f"Your attack did no damage to the level {enemy.level} {enemy.type}."
                 })
 
         if enemy.hp > 0:
@@ -117,8 +125,7 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
                 "actor": "enemy",
                 "type": "attack",
                 "damage": final_damage,
-                "message": f"The level {enemy.level} {enemy.type} {npc_dmg['message']} you for {final_damage} damage. "
-                           f"You have {user_data['hp']} HP left"
+                "message": f"The level {enemy.level} {enemy.type} {npc_dmg['message']} you for {final_damage} damage. You have {user_data['hp']} HP left."
             })
 
         round_data["player_hp"] = user_data["hp"]
@@ -131,13 +138,13 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
             break
 
         if user_data["hp"] <= 0:
-            if death_roll(enemy.crit_chance):  # Using crit_chance as kill_chance
+            if death_roll(enemy.crit_chance):
                 battle_data["rounds"].append({
                     "round": round_number + 1,
                     "actions": [{
                         "actor": "system",
                         "type": "defeat",
-                        "message": "You died"
+                        "message": "You have been defeated and died."
                     }],
                     "player_hp": 0,
                     "enemy_hp": enemy.hp
@@ -150,7 +157,7 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
                     "actions": [{
                         "actor": "system",
                         "type": "escape",
-                        "message": "You are almost dead but managed to escape"
+                        "message": "You are critically wounded but managed to escape."
                     }],
                     "player_hp": 1,
                     "enemy_hp": enemy.hp
