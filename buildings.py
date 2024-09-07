@@ -86,7 +86,7 @@ class Farm(Building):
 
 class Barracks(Building):
     DISPLAY_NAME = "Barracks"
-    DESCRIPTION = "Turns peasants into army units. Costs 2 🍖 per turn. Provides additional housing."
+    DESCRIPTION = "Turns peasants into army units. Costs 2 <img src='img/assets/food.png' alt='Food' width='32' height='32'> per turn. Provides additional housing."
     COST = {"ingredients": {"wood": 150, "bismuth": 75}}
     IMAGE_SOURCE = "barracks.png"
     UPGRADE_COSTS = {
@@ -98,7 +98,7 @@ class Barracks(Building):
 
 class Sawmill(Building):
     DISPLAY_NAME = "Sawmill"
-    DESCRIPTION = "Produces 🪵1 per turn for each sawmill level and nearby forest."
+    DESCRIPTION = "Produces <img src='img/assets/wood.png' alt='Wood' width='32' height='32'>1 per turn for each sawmill level and nearby forest."
     COST = {"ingredients": {"wood": 100, "bismuth": 50}}
     IMAGE_SOURCE = "sawmill.png"
     UPGRADE_COSTS = {
@@ -110,7 +110,7 @@ class Sawmill(Building):
 
 class Mine(Building):
     DISPLAY_NAME = "Mine"
-    DESCRIPTION = "Produces 🪨1 per turn for each mine level and nearby mountain."
+    DESCRIPTION = "Produces <img src='img/assets/bismuth.png' alt='Bismuth' width='32' height='32'>1 per turn for each mine level and nearby mountain."
     COST = {"ingredients": {"wood": 100, "bismuth": 50}}
     IMAGE_SOURCE = "mine.png"
     UPGRADE_COSTS = {
