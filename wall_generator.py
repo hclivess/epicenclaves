@@ -12,13 +12,13 @@ def generate_maze(width, height, offset_x, offset_y):
 
             if neighbor_x and neighbor_y:
                 if random.choice([True, False]):
-                    maze[f'{x},{neighbor_y}'] = {'type': 'wall'}
+                    maze[f'{x},{neighbor_y}'] = {'type': 'rock'}
                 else:
-                    maze[f'{neighbor_x},{y}'] = {'type': 'wall'}
+                    maze[f'{neighbor_x},{y}'] = {'type': 'rock'}
             elif neighbor_y:
-                maze[f'{x},{neighbor_y}'] = {'type': 'wall'}
+                maze[f'{x},{neighbor_y}'] = {'type': 'rock'}
             elif neighbor_x:
-                maze[f'{neighbor_x},{y}'] = {'type': 'wall'}
+                maze[f'{neighbor_x},{y}'] = {'type': 'rock'}
     return maze
 
 def generate_multiple_mazes(mapdb, width, height, initial_offset_x, initial_offset_y, spawn_prob, total_max_mazes, map_size):
