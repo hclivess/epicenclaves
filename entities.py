@@ -672,7 +672,7 @@ class Mountain(Scenery):
         ]
 
 class Rock(Scenery):
-    type = "wall"
+    type = "rock"
 
 def get_all_subclasses(cls):
     return set(cls.__subclasses__()).union(

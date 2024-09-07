@@ -33,7 +33,7 @@ def move_to(user, target_x, target_y, axis_limit, user_data, users_dict, map_dic
                 y -= 1
 
             coord_key = f"{x},{y}"
-            if map_dict.get(coord_key, {}).get("type") == "wall":
+            if map_dict.get(coord_key, {}).get("type") == "rock":
                 return_message["message"] = f"Cannot move through a wall at {coord_key}"
                 break
         else:
@@ -85,8 +85,8 @@ def move(user, entry, axis_limit, user_data, users_dict, map_dict):
             return_message["message"] = "Out of action points"
         elif new_pos < 1 or new_pos > axis_limit:
             return_message["message"] = "Out of bounds"
-        elif map_dict.get(coord_key, {}).get("type") == "wall":
-            return_message["message"] = "Cannot move into a wall"
+        elif map_dict.get(coord_key, {}).get("type") == "rock":
+            return_message["message"] = "Cannot move into a rock"
         elif current_control and current_control != user and new_spot_control and new_spot_control != user:
             return_message["message"] = "Cannot move from one enemy tile to another"
         else:
