@@ -250,6 +250,13 @@ class ScoreboardHandler(BaseHandler):
                     user=user)
 
 
+class BestiaryHandler(BaseHandler):
+    def get(self):
+        enemy_classes = [cls for cls in entities.__dict__.values()
+                         if isinstance(cls, type) and issubclass(cls, entities.Enemy) and cls != entities.Enemy]
+        enemies = [cls(cls.min_level) for cls in enemy_classes]
+        self.render("templates/bestiary.html", enemies=enemies)
+
 class UserActionHandler(BaseHandler):
     def perform_action(self, user, action_func, league, *args, **kwargs):
         user_data = get_user_data(user, usersdb[league])
@@ -816,6 +823,7 @@ def make_app():
         (r"/trash_all", TrashAllHandler),
         (r"/repair", RepairHandler),
         (r"/deploy(.*)", DeployArmyHandler),
+        (r"/bestiary", BestiaryHandler),
         (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),
         (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),
         (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": "css"}),
