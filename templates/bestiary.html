@@ -149,8 +149,20 @@
                             <p><strong>Base HP:</strong> {{ enemy.base_hp }}</p>
                             <p><strong>Damage:</strong> {{ enemy.base_min_damage }} - {{ enemy.base_max_damage }}</p>
                             <p><strong>Armor:</strong> {{ enemy.base_armor }}</p>
-                            <p><strong>Exp Value:</strong> {{ enemy.experience_value }}</p>
+                            <p><strong>Crit Chance:</strong> {{ '{:.2f}'.format(enemy.crit_chance) }}</p>
+                            <p><strong>Crit Damage:</strong> {{ '{:.2f}'.format(enemy.crit_damage) }}</p>
+                            <p><strong>Drop Chance:</strong> {{ '{:.2f}'.format(enemy.drop_chance) }}</p>
+                            <p><strong>Regular Drop:</strong> {{ enemy.regular_drop }}</p>
+                            <p><strong>Probability:</strong> {{ enemy.probability }}</p>
+                            <p><strong>Map Size:</strong> {{ enemy.map_size }}</p>
+                            <p><strong>Max Entities:</strong> {{ enemy.max_entities if enemy.max_entities is not None else 'None' }}</p>
+                            <p><strong>Max Entities Total:</strong> {{ enemy.max_entities_total if enemy.max_entities_total is not None else 'None' }}</p>
+                            <p><strong>Herd Probability:</strong> {{ '{:.2f}'.format(enemy.herd_probability) }}</p>
                             <p><strong>Level Range:</strong> {{ enemy.min_level }} - {{ enemy.max_level }}</p>
+                            <p><strong>Experience Value:</strong> {{ enemy.experience_value }}</p>
+                            <p><strong>Evasion Chance:</strong> {{ '{:.2f}'.format(enemy.evasion_chance) }}</p>
+                            <p><strong>Block Chance:</strong> {{ '{:.2f}'.format(enemy.block_chance) }}</p>
+                            <p><strong>Block Reduction:</strong> {{ '{:.2f}'.format(enemy.block_reduction) }}</p>
                         </div>
                     </div>
                 {% end %}
