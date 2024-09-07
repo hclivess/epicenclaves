@@ -77,7 +77,7 @@ class TurnEngine(threading.Thread):
 
         updated_values["research"] = self.calculate_research(user_data, building_counts)
         updated_values["ingredients"] = self.calculate_resources(user_data, building_counts)
-        updated_values["pop_lim"] = self.calculate_population_limit(user_data, building_counts)
+        updated_values["pop_lim"] = calculate_population_limit(user_data)
 
         population_data = self.calculate_population(user_data, updated_values, building_counts)
         updated_values.update(population_data)
@@ -103,12 +103,6 @@ class TurnEngine(threading.Thread):
 
         return ingredients
 
-    def calculate_population_limit(self, user_data, building_counts):
-        base_limit = calculate_population_limit(user_data)
-        house_bonus = building_counts['house'] * 10
-        barracks_bonus = building_counts['barracks'] * 5  # Assuming barracks provide 5 housing per level
-        return base_limit + house_bonus + barracks_bonus
-
     def calculate_population(self, user_data, updated_values, building_counts):
         population_data = {}
 
@@ -116,17 +110,34 @@ class TurnEngine(threading.Thread):
                               user_data.get("army_free", 0) +
                               user_data.get("army_deployed", 0))
 
-        available_pop_space = max(0, updated_values["pop_lim"] - current_population)
+        pop_limit = updated_values["pop_lim"]
 
+        # Handle case where current population exceeds the limit
+        if current_population > pop_limit:
+            excess = current_population - pop_limit
+            peasant_reduction = min(excess, user_data["peasants"])
+            population_data["peasants"] = max(0, user_data["peasants"] - peasant_reduction)
+            population_data["army_free"] = user_data.get("army_free", 0)
+
+            # If we still have excess after reducing peasants, reduce army
+            if excess > peasant_reduction:
+                army_reduction = min(excess - peasant_reduction, population_data["army_free"])
+                population_data["army_free"] = max(0, population_data["army_free"] - army_reduction)
+
+            return population_data
+
+        # Calculate available space for new population
+        available_pop_space = max(0, pop_limit - current_population)
+
+        # Generate new peasants
         new_peasants = min(building_counts['farm'], available_pop_space)
         population_data["peasants"] = user_data["peasants"] + new_peasants
 
-        available_pop_space = max(0, updated_values["pop_lim"] -
-                                  (population_data["peasants"] +
-                                   user_data.get("army_free", 0) +
-                                   user_data.get("army_deployed", 0)))
+        # Recalculate available population space
+        current_population += new_peasants
+        available_pop_space = max(0, pop_limit - current_population)
 
-        # Barracks functionality
+        # Convert peasants to army units
         max_new_army = min(building_counts['barracks'], population_data["peasants"], available_pop_space)
         food_for_army = updated_values["ingredients"]["food"]
         new_army = min(max_new_army, food_for_army // 2)  # Each army unit costs 2 food

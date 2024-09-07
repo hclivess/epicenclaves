@@ -120,6 +120,7 @@ class Mine(Building):
         5: {"ingredients": {"wood": 506, "bismuth": 252}}
     }
 
+"""
 class ArcheryRange(Building):
     DISPLAY_NAME = "Archery Range"
     DESCRIPTION = "Allows training army units into archers."
@@ -139,7 +140,7 @@ class ArcheryRange(Building):
             {"name": "train 10 archers", "action": "/train?type=archer&amount=10"},
         ])
         return actions
-
+"""
 class Laboratory(Building):
     DISPLAY_NAME = "Laboratory"
     DESCRIPTION = "Turns peasants into researchers, generating research points."

@@ -147,16 +147,21 @@ def calculate_total_hp(base_hp: int, exp: int) -> int:
 
 
 def calculate_population_limit(user_data):
-    population_limit = 0
+    base_limit = 0
+    house_bonus = 0
+    barracks_bonus = 0
 
     if 'construction' in user_data:
         for building in user_data['construction'].values():
             if building.get('type') == 'house':
                 # Base population increase for a house
-                population_limit += 10
-
+                house_bonus += 10
                 # Additional population for each level above 1
                 level = building.get('level', 1)
-                population_limit += 10 * (level - 1)
+                house_bonus += 10 * (level - 1)
+            elif building.get('type') == 'barracks':
+                # Assuming barracks provide 5 housing per level
+                level = building.get('level', 1)
+                barracks_bonus += 5 * level
 
-    return population_limit
+    return base_limit + house_bonus + barracks_bonus
