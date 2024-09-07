@@ -5,7 +5,7 @@ def generate_maze(width, height, offset_x, offset_y):
     for y in range(offset_y, offset_y + height, 2):
         for x in range(offset_x, offset_x + width, 2):
             key = f'{x},{y}'
-            maze[key] = {'type': 'wall'}
+            maze[key] = {'type': 'rock'}
 
             neighbor_x = x + 1 if x < offset_x + width - 2 else None
             neighbor_y = y - 1 if y > offset_y + 1 else None

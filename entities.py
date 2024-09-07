@@ -671,7 +671,7 @@ class Mountain(Scenery):
             {"name": "conquer", "action": f"/conquer?target={self.type}"},
         ]
 
-class Wall(Scenery):
+class Rock(Scenery):
     type = "wall"
 
 def get_all_subclasses(cls):
