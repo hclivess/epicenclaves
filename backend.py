@@ -19,7 +19,7 @@ def hashify(data):
 
 def has_resources(user_data, cost):
     ingredients = user_data.get("ingredients", {})
-    for resource, amount in cost["ingredients"].items():
+    for resource, amount in cost.get("ingredients", {}).items():
         if ingredients.get(resource, 0) < amount:
             return False
     return True

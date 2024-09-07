@@ -14,8 +14,8 @@ def build(user, user_data, entity, name, mapdb, usersdb):
 
     on_tile = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
 
-    # Check if there's already a building or scenery on the tile
-    if any(entry.get(f"{user_data['x_pos']},{user_data['y_pos']}", {}).get("role") in ["building", "scenery"] for entry in on_tile):
+    tile_key = f"{user_data['x_pos']},{user_data['y_pos']}"
+    if any(entry.get(tile_key, {}).get("role") in ["building", "scenery"] for entry in on_tile):
         return "Cannot build here"
 
     if entity not in building_types:
@@ -30,7 +30,7 @@ def build(user, user_data, entity, name, mapdb, usersdb):
     if sum(1 for b in user_buildings.values() if b["type"] == entity) >= 10:
         return f"Cannot have more than 10 {building_data['display_name']} buildings"
 
-    if not has_resources(user_data, building_data["cost"]):
+    if not has_resources(user_data, {"ingredients": building_data["cost"]["ingredients"]}):
         return f"Not enough resources to build {building_data['display_name']}"
 
     # Deduct resources
@@ -38,13 +38,6 @@ def build(user, user_data, entity, name, mapdb, usersdb):
     for resource, amount in building_data["cost"]["ingredients"].items():
         if resource in ingredients:
             ingredients[resource] -= amount
-
-    # Update user data
-    updated_values = {
-        "action_points": user_data["action_points"] - 1,
-        "ingredients": ingredients,
-    }
-    update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
 
     # Prepare building data for insertion
     entity_data = {
@@ -57,15 +50,21 @@ def build(user, user_data, entity, name, mapdb, usersdb):
         "display_name": building_data["display_name"],
         "description": building_data["description"],
         "image_source": building_data["image_source"],
-        "upgrade_costs": building_data["upgrade_costs"],
     }
 
     # Update construction data
     construction_data = user_data.get("construction", {})
-    construction_data[f"{user_data['x_pos']},{user_data['y_pos']}"] = entity_data
-    update_user_data(user=user, updated_values={"construction": construction_data}, user_data_dict=usersdb)
+    construction_data[tile_key] = entity_data
+
+    # Update user data
+    updated_values = {
+        "action_points": user_data["action_points"] - 1,
+        "ingredients": ingredients,
+        "construction": construction_data
+    }
+    update_user_data(user=user, updated_values=updated_values, user_data_dict=usersdb)
 
     # Insert into map database
-    insert_map_data(mapdb, {f"{user_data['x_pos']},{user_data['y_pos']}": entity_data})
+    insert_map_data(mapdb, {tile_key: entity_data})
 
     return f"Successfully built {building_data['display_name']}"
