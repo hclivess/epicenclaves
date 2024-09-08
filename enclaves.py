@@ -222,6 +222,8 @@ class MapHandler(BaseHandler):
                 filtered_entity["control"] = entity["control"]
             if "army" in entity:
                 filtered_entity["army"] = entity["army"]
+            if "hp" in entity:
+                filtered_entity["hp"] = entity["hp"]
             visible_map_data[coord] = filtered_entity
 
         # Generate actions for each tile
@@ -379,8 +381,9 @@ class MoveToHandler(BaseHandler):
                 filtered_entity["army"] = entity["army"]
             if "hp" in entity:
                 filtered_entity["hp"] = entity["hp"]
-            visible_map_data[coord] = filtered_entity
+            filtered_map_data[coord] = filtered_entity
 
+        # Generate actions for each tile
         tile_actions = {}
         for coord, entity in visible_map_data.items():
             tile_actions[coord] = get_tile_actions(entity, user)
@@ -399,7 +402,6 @@ class MoveToHandler(BaseHandler):
 
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(map_data))
-
 
 class MoveHandler(UserActionHandler):
     def get(self, data):
@@ -432,6 +434,8 @@ class MoveHandler(UserActionHandler):
                     filtered_entity["control"] = entity["control"]
                 if "army" in entity:
                     filtered_entity["army"] = entity["army"]
+                if "hp" in entity:
+                    filtered_entity["hp"] = entity["hp"]
                 filtered_map_data[coord] = filtered_entity
 
             # Generate actions for each tile
