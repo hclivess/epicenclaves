@@ -125,7 +125,7 @@ class Palisade(Building):
     DESCRIPTION = "Serves as a protection against invaders."
     COST = {"ingredients": {"wood": 10, "bismuth": 10}}
     IMAGE_SOURCE = "palisade.png"
-    HP = 100
+    HP = 1000
     UPGRADE_COSTS = {}
 
 class Siege(Building):
@@ -133,6 +133,7 @@ class Siege(Building):
     DESCRIPTION = "Lay siege to a palisade in order to destroy it."
     COST = {"ingredients": {"wood": 100, "bismuth": 100}}
     IMAGE_SOURCE = "siege.png"
+    HP = 250
     UPGRADE_COSTS = {}
 
 """
