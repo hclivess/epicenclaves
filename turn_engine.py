@@ -172,13 +172,19 @@ class TurnEngine(threading.Thread):
                 for j in range(y - 2, y + 3):
                     adj_coord = f"{i},{j}"
                     adj_tile = get_map_at_coords(i, j, self.mapdb[league])
-                    if adj_tile and adj_tile[adj_coord].get("type") == "palisade" and adj_tile[adj_coord][
-                        "control"] != siege_owner:
-                        self.damage_palisade(league, adj_coord)
+                    if adj_tile:
+                        adj_tile = adj_tile[adj_coord]  # Unwrap the tile data
+                        if adj_tile.get("type") == "palisade" and adj_tile["control"] != siege_owner:
+                            self.damage_palisade(league, adj_coord)
 
     def damage_palisade(self, league, palisade_coord):
         palisade = self.mapdb[league][palisade_coord]
-        palisade["hp"] = palisade.get("hp", 100) - 1
+
+        # If HP is not set, initialize it to 100
+        if "hp" not in palisade:
+            palisade["hp"] = 100
+
+        palisade["hp"] -= 1
 
         if palisade["hp"] <= 0:
             del self.mapdb[league][palisade_coord]

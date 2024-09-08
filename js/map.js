@@ -1,4 +1,4 @@
- const gridSize = 80;
+const gridSize = 80;
 const verticalTiles = 20;
 
 let horizontalTiles;
@@ -33,6 +33,7 @@ function createMap(data) {
             text = `${entity.type}`;
             if (entity.level !== undefined) text += ` lvl ${entity.level}`;
             if (entity.control !== undefined) text += ` by ${entity.control}`;
+            if (entity.hp !== undefined) text += ` HP: ${entity.hp}`;
         }
         text += ` (${pos.x},${pos.y})`;
         label.textContent = text;
@@ -107,7 +108,6 @@ function updatePopupContent(x_pos, y_pos, tileType) {
     const currentTile = `${x_pos},${y_pos}`;
     let tileActions = jsonData.actions[currentTile] || [];
 
-    // Check for player actions
     Object.keys(jsonData.users).forEach(username => {
         const user = jsonData.users[username];
         if (user.x_pos === x_pos && user.y_pos === y_pos && username !== currentUser) {
@@ -127,7 +127,6 @@ function updatePopupContent(x_pos, y_pos, tileType) {
                 if (action.name === "challenge") {
                     popupContent += `<button onclick="performFightAction('${action.action}')">Challenge ${targetName}</button>`;
                 } else {
-                    // For other fight actions, use the original action name
                     popupContent += `<button onclick="performFightAction('${action.action}')">${action.name}</button>`;
                 }
             } else {
@@ -160,14 +159,14 @@ function checkPlayerPosition() {
         const exclamationMark = playerElement.querySelector('.exclamation-mark');
 
         if (entityOnTile || playersOnTile.length > 0) {
-    exclamationMark.style.display = "flex";
+            exclamationMark.style.display = "flex";
 
-    if (entityOnTile) {
-        updatePopupContent(x_pos, y_pos, entityOnTile.type);
-    } else if (playersOnTile.length > 0) {
-        const playerType = playersOnTile[0].type; // Assuming the first player's type is used
-        updatePopupContent(x_pos, y_pos, playerType);
-    }
+            if (entityOnTile) {
+                updatePopupContent(x_pos, y_pos, entityOnTile.type);
+            } else if (playersOnTile.length > 0) {
+                const playerType = playersOnTile[0].type;
+                updatePopupContent(x_pos, y_pos, playerType);
+            }
         } else {
             exclamationMark.style.display = "none";
             closePopup();
@@ -176,7 +175,6 @@ function checkPlayerPosition() {
 }
 
 function performFightAction(actionUrl) {
-    // Navigate to the fight page
     window.location.href = actionUrl;
 }
 
@@ -224,7 +222,6 @@ function performAction(actionUrl) {
             checkPlayerPosition();
 
             if (actionUrl.includes("rest")) {
-                // Delay the reload by 1 second
                 setTimeout(() => {
                     window.location.reload();
                 }, 1000);
@@ -244,13 +241,11 @@ function displayMessage(message) {
         messageDisplay.style.opacity = '1';
         messageDisplay.style.visibility = 'visible';
 
-        // Fade out the message after 5 seconds
         setTimeout(() => {
             messageDisplay.style.opacity = '0';
             messageDisplay.style.visibility = 'hidden';
         }, 5000);
 
-        // Clear the message after fade out
         setTimeout(() => {
             messageDisplay.textContent = '';
         }, 5300);

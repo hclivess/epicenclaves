@@ -49,9 +49,9 @@ def build(user, user_data, entity, name, mapdb, usersdb):
         "army": 0,
     }
 
-    # Add HP for palisades
-    if entity == "palisade":
-        entity_data["hp"] = 100
+    # Add HP for buildings that have it
+    if hasattr(building_instance, 'HP'):
+        entity_data["hp"] = building_instance.HP
 
     # Update construction data
     construction_data = user_data.get("construction", {})

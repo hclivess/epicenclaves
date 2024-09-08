@@ -377,7 +377,9 @@ class MoveToHandler(BaseHandler):
                 filtered_entity["control"] = entity["control"]
             if "army" in entity:
                 filtered_entity["army"] = entity["army"]
-            filtered_map_data[coord] = filtered_entity
+            if "hp" in entity:
+                filtered_entity["hp"] = entity["hp"]
+            visible_map_data[coord] = filtered_entity
 
         tile_actions = {}
         for coord, entity in visible_map_data.items():
