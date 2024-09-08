@@ -72,7 +72,7 @@ function createMap(data) {
         function createOutpostRange(x, y) {
             const range = document.createElement("div");
             range.className = "outpost-range";
-            const diameter = 61 * gridSize; // 30 tiles on each side, plus the center tile
+            const diameter = 21 * gridSize; // 10 tiles on each side, plus the center tile
             range.style.width = `${diameter}px`;
             range.style.height = `${diameter}px`;
             range.style.top = `${(y * gridSize) - (diameter / 2) + (gridSize / 2)}px`;

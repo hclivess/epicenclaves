@@ -19,9 +19,9 @@ def attack_enemy_siege(mapdb, usersdb, league, outpost_coord):
     outpost_owner = mapdb[league][outpost_coord]["control"]
 
     targetable_sieges = []
-    for i in range(x - 30, x + 31):
-        for j in range(y - 30, y + 31):
-            if math.sqrt((i - x)**2 + (j - y)**2) <= 30:
+    for i in range(x - 10, x + 11):
+        for j in range(y - 10, y + 11):
+            if math.sqrt((i - x)**2 + (j - y)**2) <= 10:
                 siege_coord = f"{i},{j}"
                 siege_tile = get_map_at_coords(i, j, mapdb[league])
                 if siege_tile:
