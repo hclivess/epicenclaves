@@ -1,7 +1,9 @@
+import random
 import threading
 import inspect
 
 from backend import get_user, map_lock
+from entity_generator import spawn_all_entities
 from player import get_users_at_coords
 
 from typing import List, Dict, Any, Optional
@@ -223,3 +225,71 @@ def strip_usersdb(usersdb: Dict[str, Any]) -> Dict[str, Any]:
     for username, user_data in usersdb.items():
         new_usersdb[username] = {k: v for k, v in user_data.items() if k in keys_to_keep}
     return new_usersdb
+
+
+def damage_palisade(mapdb, usersdb, league, palisade_coord):
+    if palisade_coord in mapdb[league]:  # Check if the palisade still exists
+        palisade = mapdb[league][palisade_coord]
+
+        # If HP is not set, initialize it to 100
+        if "hp" not in palisade:
+            palisade["hp"] = 100
+
+        palisade["hp"] -= 1
+
+        if palisade["hp"] <= 0:
+            del mapdb[league][palisade_coord]
+            owner = palisade["control"]
+            if owner in usersdb[league]:
+                user_data = usersdb[league][owner]
+                if "construction" in user_data and palisade_coord in user_data["construction"]:
+                    del user_data["construction"][palisade_coord]
+        else:
+            mapdb[league][palisade_coord] = palisade
+
+
+def check_surrounding_palisades(mapdb, usersdb, league, siege_coord):
+    x, y = map(int, siege_coord.split(','))
+    siege_owner = mapdb[league][siege_coord]["control"]
+
+    if is_surrounded_by(x, y, "palisade", mapdb[league], diameter=2):
+        targetable_palisades = []
+        for i in range(x - 2, x + 3):
+            for j in range(y - 2, y + 3):
+                adj_coord = f"{i},{j}"
+                adj_tile = get_map_at_coords(i, j, mapdb[league])
+                if adj_tile:
+                    adj_tile = adj_tile[adj_coord]  # Unwrap the tile data
+                    if adj_tile.get("type") == "palisade" and adj_tile["control"] != siege_owner:
+                        targetable_palisades.append(adj_coord)
+
+        if targetable_palisades:
+            target_coord = random.choice(targetable_palisades)
+            damage_palisade(mapdb, usersdb, league, target_coord)
+
+
+def process_siege_attacks(mapdb, usersdb, league):
+    # Create a list of coordinates to process
+    coords_to_process = list(mapdb[league].keys())
+
+    for coord in coords_to_process:
+        if coord in mapdb[league]:  # Check if the coord still exists
+            tile_data = mapdb[league][coord]
+            if tile_data.get("type") == "siege":
+                check_surrounding_palisades(mapdb, usersdb, league, coord)
+
+
+def spawn_entities(mapdb, league):
+    spawn_all_entities(mapdb[league])
+
+
+def count_buildings(user_data):
+    counts = {'sawmill': 0, 'forest': 0, 'barracks': 0, 'farm': 0, 'house': 0, 'mine': 0, 'mountain': 0,
+              'laboratory': 0}
+
+    for building_data in user_data.get("construction", {}).values():
+        building_type = building_data['type']
+        if building_type in counts:
+            counts[building_type] += building_data.get('level', 1)
+
+    return counts

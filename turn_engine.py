@@ -5,11 +5,10 @@ import threading
 import time
 from sqlite import save_users_from_memory, save_map_from_memory
 from backend import update_user_data, hashify
-from entity_generator import spawn_all_entities
 from player import calculate_population_limit
 import string
 import importlib
-from map import is_surrounded_by, get_map_at_coords
+from map import process_siege_attacks, spawn_entities, count_buildings
 
 # Import all entities dynamically
 entities = importlib.import_module('entities')
@@ -19,7 +18,6 @@ TEST = os.path.exists("test")
 
 def fake_hash():
     return "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(36))
-
 
 def interruptible_sleep(seconds, interval=1, stop_condition=None):
     total_time_slept = 0
@@ -57,8 +55,8 @@ class TurnEngine(threading.Thread):
             if self.compare_block != self.latest_block:
                 self.save_databases(league)
                 self.update_users_data(league)
-                self.spawn_entities(league)
-                self.process_siege_attacks(league)
+                spawn_entities(self.mapdb, league)
+                process_siege_attacks(self.mapdb, self.usersdb, league)
                 print(f"Current turn of {league}: {self.turn}")
 
     def save_databases(self, league):
@@ -74,7 +72,7 @@ class TurnEngine(threading.Thread):
             update_user_data(user=username, updated_values=updated_values, user_data_dict=self.usersdb[league])
 
     def calculate_updated_values(self, user_data):
-        building_counts = self.count_buildings(user_data)
+        building_counts = count_buildings(user_data)
         updated_values = {}
 
         updated_values["research"] = self.calculate_research(user_data, building_counts)
@@ -144,59 +142,3 @@ class TurnEngine(threading.Thread):
 
         return population_data
 
-    def count_buildings(self, user_data):
-        counts = {'sawmill': 0, 'forest': 0, 'barracks': 0, 'farm': 0, 'house': 0, 'mine': 0, 'mountain': 0,
-                  'laboratory': 0}
-
-        for building_data in user_data.get("construction", {}).values():
-            building_type = building_data['type']
-            if building_type in counts:
-                counts[building_type] += building_data.get('level', 1)
-
-        return counts
-
-    def spawn_entities(self, league):
-        spawn_all_entities(self.mapdb[league])
-
-    def process_siege_attacks(self, league):
-        for coord, tile_data in self.mapdb[league].items():
-            if tile_data.get("type") == "siege":
-                self.check_surrounding_palisades(league, coord)
-
-    def check_surrounding_palisades(self, league, siege_coord):
-        x, y = map(int, siege_coord.split(','))
-        siege_owner = self.mapdb[league][siege_coord]["control"]
-
-        if is_surrounded_by(x, y, "palisade", self.mapdb[league], diameter=2):
-            targetable_palisades = []
-            for i in range(x - 2, x + 3):
-                for j in range(y - 2, y + 3):
-                    adj_coord = f"{i},{j}"
-                    adj_tile = get_map_at_coords(i, j, self.mapdb[league])
-                    if adj_tile:
-                        adj_tile = adj_tile[adj_coord]  # Unwrap the tile data
-                        if adj_tile.get("type") == "palisade" and adj_tile["control"] != siege_owner:
-                            targetable_palisades.append(adj_coord)
-
-            if targetable_palisades:
-                target_coord = random.choice(targetable_palisades)
-                self.damage_palisade(league, target_coord)
-
-    def damage_palisade(self, league, palisade_coord):
-        palisade = self.mapdb[league][palisade_coord]
-
-        # If HP is not set, initialize it to 100
-        if "hp" not in palisade:
-            palisade["hp"] = 100
-
-        palisade["hp"] -= 1
-
-        if palisade["hp"] <= 0:
-            del self.mapdb[league][palisade_coord]
-            owner = palisade["control"]
-            if owner in self.usersdb[league]:
-                user_data = self.usersdb[league][owner]
-                if "construction" in user_data and palisade_coord in user_data["construction"]:
-                    del user_data["construction"][palisade_coord]
-        else:
-            self.mapdb[league][palisade_coord] = palisade
