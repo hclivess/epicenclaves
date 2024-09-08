@@ -96,6 +96,18 @@ class Barracks(Building):
         5: {"ingredients": {"wood": 759, "bismuth": 378}}
     }
 
+class Outpost(Building):
+    DISPLAY_NAME = "Outpost"
+    DESCRIPTION = "Destroys enemy siege deployments in a perimeter of 30 tiles."
+    COST = {"ingredients": {"wood": 150, "bismuth": 75}}
+    IMAGE_SOURCE = "outpost.png"
+    UPGRADE_COSTS = {
+        2: {"ingredients": {"wood": 225, "bismuth": 112}},
+        3: {"ingredients": {"wood": 337, "bismuth": 168}},
+        4: {"ingredients": {"wood": 506, "bismuth": 252}},
+        5: {"ingredients": {"wood": 759, "bismuth": 378}}
+    }
+
 class Sawmill(Building):
     DISPLAY_NAME = "Sawmill"
     DESCRIPTION = "Produces <img src='img/assets/wood.png' alt='Wood' width='32' height='32'>1 per turn for each sawmill level and nearby forest."

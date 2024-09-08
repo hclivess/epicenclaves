@@ -8,7 +8,9 @@ from backend import update_user_data, hashify
 from player import calculate_population_limit
 import string
 import importlib
-from map import process_siege_attacks, spawn_entities, count_buildings
+from map import spawn_entities, count_buildings
+from outpost import process_outpost_attacks
+from siege import process_siege_attacks
 
 # Import all entities dynamically
 entities = importlib.import_module('entities')
@@ -57,6 +59,7 @@ class TurnEngine(threading.Thread):
                 self.update_users_data(league)
                 spawn_entities(self.mapdb, league)
                 process_siege_attacks(self.mapdb, self.usersdb, league)
+                process_outpost_attacks(self.mapdb, self.usersdb, league)
                 print(f"Current turn of {league}: {self.turn}")
 
     def save_databases(self, league):

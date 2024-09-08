@@ -14,6 +14,7 @@
     .rock { background: url('../img/assets/rock.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .palisade { background: url('../img/assets/palisade.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .siege { background: url('../img/assets/siege.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .outpost { background: url('../img/assets/outpost.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .wolf { background: url('../img/assets/wolf.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .inn { background: url('../img/assets/inn.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .barracks { background: url('../img/assets/barracks.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
@@ -31,6 +32,18 @@
     .zombie { background: url('../img/assets/zombie.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .laboratory { background: url('../img/assets/laboratory.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .pond { background: url('../img/assets/pond.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+
+    .outpost-range {
+        position: absolute;
+        border: 2px solid rgba(255, 0, 0, 0.5);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 500;
+    }
+
+.outpost {
+    z-index: 501; /* Ensure outpost is above the range circle */
+}
 
 body, html {
     margin: 0;
