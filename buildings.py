@@ -120,6 +120,13 @@ class Mine(Building):
         5: {"ingredients": {"wood": 506, "bismuth": 252}}
     }
 
+class Palisade(Building):
+    DISPLAY_NAME = "Palisade"
+    DESCRIPTION = "Serves as a protection against invaders."
+    COST = {"ingredients": {"wood": 10, "bismuth": 10}}
+    IMAGE_SOURCE = "palisade.png"
+    UPGRADE_COSTS = {}
+
 """
 class ArcheryRange(Building):
     DISPLAY_NAME = "Archery Range"

@@ -2,7 +2,7 @@ import random
 import math
 from typing import List, Dict, Any, Optional, Tuple
 from map import get_coords, remove_from_map
-from player import calculate_total_hp
+from player import calculate_total_hp, has_item_equipped, drop_random_item
 from backend import update_user_data
 from item_generator import generate_weapon, generate_armor
 from entities import entity_types, Enemy
@@ -420,10 +420,6 @@ def get_weapon_damage(attacker: Dict, exp_bonus_value: int) -> Dict:
     return {"damage": final_damage, "base_damage": damage, "exp_bonus": exp_bonus_value, "message": message}
 
 
-def has_item_equipped(player: Dict, item_type: str) -> bool:
-    return any(item.get("type") == item_type for item in player.get("equipped", []))
-
-
 def get_fight_preconditions(user_data: Dict) -> Optional[str]:
     if user_data["action_points"] < 1:
         return "Not enough action points to fight"
@@ -473,18 +469,3 @@ def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, vict
             update_user_data(defeated_name, new_data, usersdb)
 
 
-def drop_random_item(player: Dict) -> Tuple[Optional[Dict], Optional[str]]:
-    inventory = player.get("unequipped", [])
-    equipped_items = [item for item in player.get("equipped", []) if item["type"] != "empty"]
-
-    all_items = inventory + equipped_items
-    if not all_items:
-        return None, None
-
-    dropped_item = random.choice(all_items)
-    if dropped_item in inventory:
-        player["unequipped"].remove(dropped_item)
-        return dropped_item, "unequipped"
-    else:
-        player["equipped"] = [item for item in player["equipped"] if item != dropped_item]
-        return dropped_item, dropped_item["slot"]

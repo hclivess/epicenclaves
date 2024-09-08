@@ -1,5 +1,5 @@
 import random
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple, Optional
 from item_generator import generate_armor, generate_weapon, generate_tool
 import threading
 
@@ -165,3 +165,24 @@ def calculate_population_limit(user_data):
                 barracks_bonus += 5 * level
 
     return base_limit + house_bonus + barracks_bonus
+
+
+def has_item_equipped(player: Dict, item_type: str) -> bool:
+    return any(item.get("type") == item_type for item in player.get("equipped", []))
+
+
+def drop_random_item(player: Dict) -> Tuple[Optional[Dict], Optional[str]]:
+    inventory = player.get("unequipped", [])
+    equipped_items = [item for item in player.get("equipped", []) if item["type"] != "empty"]
+
+    all_items = inventory + equipped_items
+    if not all_items:
+        return None, None
+
+    dropped_item = random.choice(all_items)
+    if dropped_item in inventory:
+        player["unequipped"].remove(dropped_item)
+        return dropped_item, "unequipped"
+    else:
+        player["equipped"] = [item for item in player["equipped"] if item != dropped_item]
+        return dropped_item, dropped_item["slot"]
