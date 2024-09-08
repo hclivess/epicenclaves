@@ -31,14 +31,16 @@ def move_to(user, target_x, target_y, axis_limit, user_data, users_dict, map_dic
                 y -= 1
 
             coord_key = f"{x},{y}"
-            tile_type = map_dict.get(coord_key, {}).get("type")
+            tile_data = map_dict.get(coord_key, {})
+            tile_type = tile_data.get("type")
+            tile_control = tile_data.get("control")
+
             if tile_type == "rock":
                 return_message["message"] = f"Cannot move through a wall at {coord_key}"
                 break
-            elif tile_type == "palisade":
-                palisade_owner = map_dict[coord_key].get("owner")
-                if palisade_owner != user:
-                    return_message["message"] = f"Cannot move through an enemy palisade at {coord_key}"
+            elif tile_type == "palisade" or tile_control:
+                if tile_control != user:
+                    return_message["message"] = f"Cannot move through an enemy controlled tile at {coord_key}"
                     break
         else:
             # Check current position and target position

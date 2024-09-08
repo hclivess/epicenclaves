@@ -168,6 +168,7 @@ class TurnEngine(threading.Thread):
         siege_owner = self.mapdb[league][siege_coord]["control"]
 
         if is_surrounded_by(x, y, "palisade", self.mapdb[league], diameter=2):
+            targetable_palisades = []
             for i in range(x - 2, x + 3):
                 for j in range(y - 2, y + 3):
                     adj_coord = f"{i},{j}"
@@ -175,7 +176,11 @@ class TurnEngine(threading.Thread):
                     if adj_tile:
                         adj_tile = adj_tile[adj_coord]  # Unwrap the tile data
                         if adj_tile.get("type") == "palisade" and adj_tile["control"] != siege_owner:
-                            self.damage_palisade(league, adj_coord)
+                            targetable_palisades.append(adj_coord)
+
+            if targetable_palisades:
+                target_coord = random.choice(targetable_palisades)
+                self.damage_palisade(league, target_coord)
 
     def damage_palisade(self, league, palisade_coord):
         palisade = self.mapdb[league][palisade_coord]
