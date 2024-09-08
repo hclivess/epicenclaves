@@ -31,7 +31,8 @@ function createMap(data) {
             text = `${playerName} Exp:${entity.exp} HP:${entity.hp}`;
         } else {
             text = `${entity.type}`;
-            if (entity.level !== undefined) text += ` Lvl${entity.level}`;
+            if (entity.level !== undefined) text += ` lvl ${entity.level}`;
+            if (entity.control !== undefined) text += ` by ${entity.control}`;
         }
         text += ` (${pos.x},${pos.y})`;
         label.textContent = text;
