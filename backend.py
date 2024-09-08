@@ -124,7 +124,7 @@ def calculate_level(min_level, max_level, bias=3):
 
     # Calculate the logarithmic distribution with the biased random value
     # Use max() to prevent log(1) which would result in 0
-    log_ratio = math.log(max(max_level / min_level, 1.00001))
+    log_ratio = math.log(max_level / max(min_level, 1))
     result = int(min_level * math.exp(biased_random_value * log_ratio))
 
     # Ensure the result is within the allowed range

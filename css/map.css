@@ -13,6 +13,7 @@
     .wall { background: url('../img/assets/wall.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .rock { background: url('../img/assets/rock.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .palisade { background: url('../img/assets/palisade.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .siege { background: url('../img/assets/siege.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .wolf { background: url('../img/assets/wolf.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .inn { background: url('../img/assets/inn.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .barracks { background: url('../img/assets/barracks.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }

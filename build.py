@@ -47,10 +47,11 @@ def build(user, user_data, entity, name, mapdb, usersdb):
         "control": user,
         "role": "building",
         "army": 0,
-        "display_name": building_data["display_name"],
-        "description": building_data["description"],
-        "image_source": building_data["image_source"],
     }
+
+    # Add HP for palisades
+    if entity == "palisade":
+        entity_data["hp"] = 100
 
     # Update construction data
     construction_data = user_data.get("construction", {})

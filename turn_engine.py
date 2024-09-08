@@ -9,6 +9,7 @@ from entity_generator import spawn_all_entities
 from player import calculate_population_limit
 import string
 import importlib
+from map import is_surrounded_by, get_map_at_coords
 
 # Import all entities dynamically
 entities = importlib.import_module('entities')
@@ -57,6 +58,7 @@ class TurnEngine(threading.Thread):
                 self.save_databases(league)
                 self.update_users_data(league)
                 self.spawn_entities(league)
+                self.process_siege_attacks(league)
                 print(f"Current turn of {league}: {self.turn}")
 
     def save_databases(self, league):
@@ -112,32 +114,26 @@ class TurnEngine(threading.Thread):
 
         pop_limit = updated_values["pop_lim"]
 
-        # Handle case where current population exceeds the limit
         if current_population > pop_limit:
             excess = current_population - pop_limit
             peasant_reduction = min(excess, user_data["peasants"])
             population_data["peasants"] = max(0, user_data["peasants"] - peasant_reduction)
             population_data["army_free"] = user_data.get("army_free", 0)
 
-            # If we still have excess after reducing peasants, reduce army
             if excess > peasant_reduction:
                 army_reduction = min(excess - peasant_reduction, population_data["army_free"])
                 population_data["army_free"] = max(0, population_data["army_free"] - army_reduction)
 
             return population_data
 
-        # Calculate available space for new population
         available_pop_space = max(0, pop_limit - current_population)
 
-        # Generate new peasants
         new_peasants = min(building_counts['farm'], available_pop_space)
         population_data["peasants"] = user_data["peasants"] + new_peasants
 
-        # Recalculate available population space
         current_population += new_peasants
         available_pop_space = max(0, pop_limit - current_population)
 
-        # Convert peasants to army units
         max_new_army = min(building_counts['barracks'], population_data["peasants"], available_pop_space)
         food_for_army = updated_values["ingredients"]["food"]
         new_army = min(max_new_army, food_for_army // 2)  # Each army unit costs 2 food
@@ -161,3 +157,35 @@ class TurnEngine(threading.Thread):
 
     def spawn_entities(self, league):
         spawn_all_entities(self.mapdb[league])
+
+    def process_siege_attacks(self, league):
+        for coord, tile_data in self.mapdb[league].items():
+            if tile_data.get("type") == "siege":
+                self.check_surrounding_palisades(league, coord)
+
+    def check_surrounding_palisades(self, league, siege_coord):
+        x, y = map(int, siege_coord.split(','))
+        siege_owner = self.mapdb[league][siege_coord]["control"]
+
+        if is_surrounded_by(x, y, "palisade", self.mapdb[league], diameter=2):
+            for i in range(x - 2, x + 3):
+                for j in range(y - 2, y + 3):
+                    adj_coord = f"{i},{j}"
+                    adj_tile = get_map_at_coords(i, j, self.mapdb[league])
+                    if adj_tile and adj_tile[adj_coord].get("type") == "palisade" and adj_tile[adj_coord][
+                        "control"] != siege_owner:
+                        self.damage_palisade(league, adj_coord)
+
+    def damage_palisade(self, league, palisade_coord):
+        palisade = self.mapdb[league][palisade_coord]
+        palisade["hp"] = palisade.get("hp", 100) - 1
+
+        if palisade["hp"] <= 0:
+            del self.mapdb[league][palisade_coord]
+            owner = palisade["control"]
+            if owner in self.usersdb[league]:
+                user_data = self.usersdb[league][owner]
+                if "construction" in user_data and palisade_coord in user_data["construction"]:
+                    del user_data["construction"][palisade_coord]
+        else:
+            self.mapdb[league][palisade_coord] = palisade
