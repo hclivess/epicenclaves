@@ -38,9 +38,9 @@ def move_to(user, target_x, target_y, axis_limit, user_data, users_dict, map_dic
             if tile_type == "rock":
                 return_message["message"] = f"Cannot move through a wall at {coord_key}"
                 break
-            elif tile_type == "palisade" or tile_control:
+            elif tile_type == "palisade":
                 if tile_control != user:
-                    return_message["message"] = f"Cannot move through an enemy controlled tile at {coord_key}"
+                    return_message["message"] = f"Cannot move through an enemy controlled palisade at {coord_key}"
                     break
         else:
             # Check current position and target position
