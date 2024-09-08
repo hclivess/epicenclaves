@@ -1,7 +1,5 @@
 from backend import update_user_data
 
-from backend import update_user_data
-
 def move_to(user, target_x, target_y, axis_limit, user_data, users_dict, map_dict):
     return_message = {"success": False, "message": None}
 
@@ -33,9 +31,15 @@ def move_to(user, target_x, target_y, axis_limit, user_data, users_dict, map_dic
                 y -= 1
 
             coord_key = f"{x},{y}"
-            if map_dict.get(coord_key, {}).get("type") == "rock":
+            tile_type = map_dict.get(coord_key, {}).get("type")
+            if tile_type == "rock":
                 return_message["message"] = f"Cannot move through a wall at {coord_key}"
                 break
+            elif tile_type == "palisade":
+                palisade_owner = map_dict[coord_key].get("owner")
+                if palisade_owner != user:
+                    return_message["message"] = f"Cannot move through an enemy palisade at {coord_key}"
+                    break
         else:
             # Check current position and target position
             current_coord_key = f"{current_x},{current_y}"
@@ -78,6 +82,7 @@ def move(user, entry, axis_limit, user_data, users_dict, map_dict):
 
         current_control = map_dict.get(current_coord_key, {}).get("control")
         new_spot_control = map_dict.get(coord_key, {}).get("control")
+        new_spot_type = map_dict.get(coord_key, {}).get("type")
 
         if not user_data.get("alive"):
             return_message["message"] = "Cannot move while dead"
@@ -85,8 +90,10 @@ def move(user, entry, axis_limit, user_data, users_dict, map_dict):
             return_message["message"] = "Out of action points"
         elif new_pos < 1 or new_pos > axis_limit:
             return_message["message"] = "Out of bounds"
-        elif map_dict.get(coord_key, {}).get("type") == "rock":
+        elif new_spot_type == "rock":
             return_message["message"] = "Cannot move into a rock"
+        elif new_spot_type == "palisade" and map_dict[coord_key].get("control") != user:
+            return_message["message"] = "Cannot move through an enemy palisade"
         elif current_control and current_control != user and new_spot_control and new_spot_control != user:
             return_message["message"] = "Cannot move from one enemy tile to another"
         else:
