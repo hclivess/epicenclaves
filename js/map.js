@@ -137,6 +137,17 @@ function updatePopupContent(x_pos, y_pos, tileType) {
     const currentTile = `${x_pos},${y_pos}`;
     let tileActions = jsonData.actions[currentTile] || [];
 
+    // Check for player actions
+    const playersOnTile = Object.values(jsonData.users).filter(user =>
+        user.x_pos === x_pos && user.y_pos === y_pos && user !== jsonData.users[currentUser]
+    );
+
+    if (playersOnTile.length > 0) {
+        playersOnTile.forEach(player => {
+            tileActions = tileActions.concat(jsonData.actions[player.name] || []);
+        });
+    }
+
     let popupContent = `
         <h3>Tile Information</h3>
         <p>You arrived at ${tileType} (${x_pos}, ${y_pos})</p>
@@ -144,12 +155,14 @@ function updatePopupContent(x_pos, y_pos, tileType) {
 
     if (tileActions.length > 0) {
         tileActions.forEach(action => {
-            if (action.name === "challenge") {
+            if (action.action.startsWith('/fight')) {
                 const targetName = action.action.split('name=')[1];
-                popupContent += `<button onclick="performFightAction('${action.action}')">Challenge ${targetName}</button>`;
-            } else if (action.name === "drag") {
-                const targetName = action.action.split('target=')[1];
-                popupContent += `<button onclick="showDragDirections('${targetName}')">Drag ${targetName}</button>`;
+                if (action.name === "challenge") {
+                    popupContent += `<button onclick="performFightAction('${action.action}')">Challenge ${targetName}</button>`;
+                } else {
+                    // For other fight actions, use the original action name
+                    popupContent += `<button onclick="performFightAction('${action.action}')">${action.name}</button>`;
+                }
             } else {
                 const actionUrl = new URL(action.action, window.location.origin);
                 actionUrl.searchParams.append('return_to_map', 'true');
