@@ -40,45 +40,45 @@ function createMap(data) {
         return label;
     }
 
-       function createEntity(className, x, y, entity, isPlayer = false, playerName = '') {
-            const element = document.createElement("div");
-            element.className = `entity ${className} ${isPlayer ? 'player' : 'npc'}`;
-            element.style.top = y * gridSize + "px";
-            element.style.left = x * gridSize + "px";
+    function createEntity(className, x, y, entity, isPlayer = false, playerName = '') {
+        const element = document.createElement("div");
+        element.className = `entity ${className} ${isPlayer ? 'player' : 'npc'}`;
+        element.style.top = y * gridSize + "px";
+        element.style.left = x * gridSize + "px";
 
-            if (entity.img) {
-                element.style.backgroundImage = `url('${entity.img}')`;
-            }
-
-            const label = createEntityLabel(entity, {x: x+1, y: y+1}, isPlayer, playerName);
-            element.appendChild(label);
-
-            if (isPlayer) {
-                const exclamationMark = document.createElement("div");
-                exclamationMark.className = "exclamation-mark";
-                exclamationMark.textContent = "!";
-                exclamationMark.style.display = "none";
-                element.appendChild(exclamationMark);
-            }
-
-            if (className === 'outpost') {
-                createOutpostRange(x, y);
-            }
-
-            fragment.appendChild(element);
-            return element;
+        if (entity.img) {
+            element.style.backgroundImage = `url('${entity.img}')`;
         }
 
-        function createOutpostRange(x, y) {
-            const range = document.createElement("div");
-            range.className = "outpost-range";
-            const diameter = 21 * gridSize; // 10 tiles on each side, plus the center tile
-            range.style.width = `${diameter}px`;
-            range.style.height = `${diameter}px`;
-            range.style.top = `${(y * gridSize) - (diameter / 2) + (gridSize / 2)}px`;
-            range.style.left = `${(x * gridSize) - (diameter / 2) + (gridSize / 2)}px`;
-            fragment.appendChild(range);
+        const label = createEntityLabel(entity, {x: x+1, y: y+1}, isPlayer, playerName);
+        element.appendChild(label);
+
+        if (isPlayer) {
+            const exclamationMark = document.createElement("div");
+            exclamationMark.className = "exclamation-mark";
+            exclamationMark.textContent = "!";
+            exclamationMark.style.display = "none";
+            element.appendChild(exclamationMark);
         }
+
+        if (className === 'outpost') {
+            createOutpostRange(x, y);
+        }
+
+        fragment.appendChild(element);
+        return element;
+    }
+
+    function createOutpostRange(x, y) {
+        const range = document.createElement("div");
+        range.className = "outpost-range";
+        const diameter = 21 * gridSize; // 10 tiles on each side, plus the center tile
+        range.style.width = `${diameter}px`;
+        range.style.height = `${diameter}px`;
+        range.style.top = `${(y * gridSize) - (diameter / 2) + (gridSize / 2)}px`;
+        range.style.left = `${(x * gridSize) - (diameter / 2) + (gridSize / 2)}px`;
+        fragment.appendChild(range);
+    }
 
     function createVisibleTiles() {
         const currentUserData = data.users[currentUser];
@@ -123,13 +123,6 @@ function updatePopupContent(x_pos, y_pos, tileType) {
     const currentTile = `${x_pos},${y_pos}`;
     let tileActions = jsonData.actions[currentTile] || [];
 
-    Object.keys(jsonData.users).forEach(username => {
-        const user = jsonData.users[username];
-        if (user.x_pos === x_pos && user.y_pos === y_pos && username !== currentUser) {
-            tileActions = tileActions.concat(jsonData.actions[username] || []);
-        }
-    });
-
     let popupContent = `
         <h3>Tile Information</h3>
         <p>You arrived at ${tileType} (${x_pos}, ${y_pos})</p>
@@ -137,13 +130,12 @@ function updatePopupContent(x_pos, y_pos, tileType) {
 
     if (tileActions.length > 0) {
         tileActions.forEach(action => {
-            if (action.action.startsWith('/fight')) {
+            if (action.name === "challenge") {
                 const targetName = action.action.split('name=')[1];
-                if (action.name === "challenge") {
-                    popupContent += `<button onclick="performFightAction('${action.action}')">Challenge ${targetName}</button>`;
-                } else {
-                    popupContent += `<button onclick="performFightAction('${action.action}')">${action.name}</button>`;
-                }
+                popupContent += `<button onclick="performFightAction('${action.action}')">Challenge ${targetName}</button>`;
+            } else if (action.name === "drag") {
+                const targetName = action.action.split('target=')[1];
+                popupContent += `<button onclick="performDragAction('${targetName}')">Drag ${targetName}</button>`;
             } else {
                 const actionUrl = new URL(action.action, window.location.origin);
                 actionUrl.searchParams.append('return_to_map', 'true');
@@ -195,6 +187,42 @@ function checkPlayerPosition() {
 
 function performFightAction(actionUrl) {
     window.location.href = actionUrl;
+}
+
+function performDragAction(targetName) {
+    const directions = ['up', 'down', 'left', 'right'];
+    const directionButtons = directions.map(dir =>
+        `<button onclick="dragPlayer('${targetName}', '${dir}')">${dir}</button>`
+    ).join('');
+
+    const popup = document.getElementById('popup');
+    popup.innerHTML = `
+        <h3>Drag ${targetName}</h3>
+        <p>Choose a direction to drag the player:</p>
+        ${directionButtons}
+        <div class="popup-close" onclick="closePopup()">X</div>
+    `;
+}
+
+function dragPlayer(targetName, direction) {
+    fetch(`/drag?target=${targetName}&direction=${direction}&return_to_map=true`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            displayMessage(data.message);
+        }
+        updateMap(data);
+        closePopup();
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        displayMessage('An error occurred while dragging the player.');
+    });
 }
 
 function closePopup() {
