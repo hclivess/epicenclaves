@@ -544,7 +544,7 @@ class DragHandler(BaseHandler):
         return f"Dragged player {target} {direction}."
 
 class MoveHandler(BaseHandler):
-    def get(self):
+    def get(self, direction):
         target = self.get_argument("target", default="home")
         entry = self.get_argument("direction")
         user = tornado.escape.xhtml_escape(self.current_user)
