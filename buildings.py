@@ -98,7 +98,7 @@ class Barracks(Building):
 
 class Outpost(Building):
     DISPLAY_NAME = "Outpost"
-    DESCRIPTION = "Destroys enemy siege deployments in a perimeter of 30 tiles."
+    DESCRIPTION = "Destroys enemy siege deployments in a perimeter of 10 tiles."
     COST = {"ingredients": {"wood": 150, "bismuth": 75}}
     IMAGE_SOURCE = "outpost.png"
     UPGRADE_COSTS = {
