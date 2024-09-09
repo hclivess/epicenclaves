@@ -40,45 +40,45 @@ function createMap(data) {
         return label;
     }
 
-    function createEntity(className, x, y, entity, isPlayer = false, playerName = '') {
-        const element = document.createElement("div");
-        element.className = `entity ${className} ${isPlayer ? 'player' : 'npc'}`;
-        element.style.top = y * gridSize + "px";
-        element.style.left = x * gridSize + "px";
+       function createEntity(className, x, y, entity, isPlayer = false, playerName = '') {
+            const element = document.createElement("div");
+            element.className = `entity ${className} ${isPlayer ? 'player' : 'npc'}`;
+            element.style.top = y * gridSize + "px";
+            element.style.left = x * gridSize + "px";
 
-        if (entity.img) {
-            element.style.backgroundImage = `url('${entity.img}')`;
+            if (entity.img) {
+                element.style.backgroundImage = `url('${entity.img}')`;
+            }
+
+            const label = createEntityLabel(entity, {x: x+1, y: y+1}, isPlayer, playerName);
+            element.appendChild(label);
+
+            if (isPlayer) {
+                const exclamationMark = document.createElement("div");
+                exclamationMark.className = "exclamation-mark";
+                exclamationMark.textContent = "!";
+                exclamationMark.style.display = "none";
+                element.appendChild(exclamationMark);
+            }
+
+            if (className === 'outpost') {
+                createOutpostRange(x, y);
+            }
+
+            fragment.appendChild(element);
+            return element;
         }
 
-        const label = createEntityLabel(entity, {x: x+1, y: y+1}, isPlayer, playerName);
-        element.appendChild(label);
-
-        if (isPlayer && playerName === currentUser) {
-            const exclamationMark = document.createElement("div");
-            exclamationMark.className = "exclamation-mark";
-            exclamationMark.textContent = "!";
-            exclamationMark.style.display = "none";
-            element.appendChild(exclamationMark);
+        function createOutpostRange(x, y) {
+            const range = document.createElement("div");
+            range.className = "outpost-range";
+            const diameter = 21 * gridSize; // 10 tiles on each side, plus the center tile
+            range.style.width = `${diameter}px`;
+            range.style.height = `${diameter}px`;
+            range.style.top = `${(y * gridSize) - (diameter / 2) + (gridSize / 2)}px`;
+            range.style.left = `${(x * gridSize) - (diameter / 2) + (gridSize / 2)}px`;
+            fragment.appendChild(range);
         }
-
-        if (className === 'outpost') {
-            createOutpostRange(x, y);
-        }
-
-        fragment.appendChild(element);
-        return element;
-    }
-
-    function createOutpostRange(x, y) {
-        const range = document.createElement("div");
-        range.className = "outpost-range";
-        const diameter = 21 * gridSize; // 10 tiles on each side, plus the center tile
-        range.style.width = `${diameter}px`;
-        range.style.height = `${diameter}px`;
-        range.style.top = `${(y * gridSize) - (diameter / 2) + (gridSize / 2)}px`;
-        range.style.left = `${(x * gridSize) - (diameter / 2) + (gridSize / 2)}px`;
-        fragment.appendChild(range);
-    }
 
     function createVisibleTiles() {
         const currentUserData = data.users[currentUser];
@@ -166,27 +166,28 @@ function checkPlayerPosition() {
         const { x_pos, y_pos } = currentUserData;
         const key = `${x_pos},${y_pos}`;
         const entityOnTile = jsonData.construction[key];
-        const playersOnTile = Object.values(jsonData.users).filter(user =>
-            user.x_pos === x_pos && user.y_pos === y_pos && user !== currentUserData
+        const playersOnTile = Object.entries(jsonData.users).filter(([username, user]) =>
+            user.x_pos === x_pos && user.y_pos === y_pos && username !== currentUser
         );
 
-        const playerElement = document.querySelector(`.entity.player[style*="top: ${(y_pos-1)*gridSize}px"][style*="left: ${(x_pos-1)*gridSize}px"]`);
+        const playerElement = document.querySelector(`.entity.player[style*="left: ${(x_pos - 1) * gridSize}px"][style*="top: ${(y_pos - 1) * gridSize}px"]`);
         if (playerElement) {
             const exclamationMark = playerElement.querySelector('.exclamation-mark');
-            if (exclamationMark) {
-                if (entityOnTile || playersOnTile.length > 0) {
-                    exclamationMark.style.display = "flex";
 
-                    if (entityOnTile) {
-                        updatePopupContent(x_pos, y_pos, entityOnTile.type);
-                    } else if (playersOnTile.length > 0) {
-                        const playerType = playersOnTile[0].type;
-                        updatePopupContent(x_pos, y_pos, playerType);
-                    }
-                } else {
-                    exclamationMark.style.display = "none";
-                    closePopup();
+            if (entityOnTile || playersOnTile.length > 0 || jsonData.actions[key]) {
+                exclamationMark.style.display = "flex";
+
+                if (entityOnTile) {
+                    updatePopupContent(x_pos, y_pos, entityOnTile.type);
+                } else if (playersOnTile.length > 0) {
+                    const [playerUsername, playerData] = playersOnTile[0];
+                    updatePopupContent(x_pos, y_pos, playerData.type);
+                } else if (jsonData.actions[key]) {
+                    updatePopupContent(x_pos, y_pos, 'action');
                 }
+            } else {
+                exclamationMark.style.display = "none";
+                closePopup();
             }
         }
     }
