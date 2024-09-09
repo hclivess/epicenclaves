@@ -482,7 +482,7 @@ class Dragon(Enemy):
     max_entities_total = 250
     herd_probability = 0
     min_level = 60
-    max_level = 100
+    max_level = 1000
     experience_value = 500
     block_chance = 0.3
     block_reduction = 0.7
