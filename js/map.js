@@ -158,11 +158,14 @@ function updatePopupContent(x_pos, y_pos, tileType) {
             if (action.action.startsWith('/fight')) {
                 const targetName = action.action.split('name=')[1];
                 if (action.name === "challenge") {
-                    popupContent += `<button onclick="performFightAction('${action.action}')">Challenge ${targetName}</button>`;
+                    popupContent += `<button onclick="performFightAction('${action.action}&return_to_map=false')">Challenge ${targetName}</button>`;
                 } else {
                     // For other fight actions, use the original action name
-                    popupContent += `<button onclick="performFightAction('${action.action}')">${action.name}</button>`;
+                    popupContent += `<button onclick="performFightAction('${action.action}&return_to_map=false')">${action.name}</button>`;
                 }
+            } else if (action.name === "drag") {
+                const targetName = action.action.split('target=')[1];
+                popupContent += `<button onclick="showDragDirections('${targetName}')">Drag ${targetName}</button>`;
             } else {
                 const actionUrl = new URL(action.action, window.location.origin);
                 actionUrl.searchParams.append('return_to_map', 'true');
