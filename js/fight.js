@@ -64,37 +64,14 @@ function animateProfilePicture(pictureElement, isDamageTaken) {
 function addLogMessage(message, className) {
     const li = document.createElement('li');
     li.textContent = message;
-    li.classList.add('battle-message');
+    li.classList.add('battle-message', className);
 
-    switch(className) {
-        case 'defeat':
-            li.classList.add('defeat-message');
-            break;
-        case 'escape':
-            li.classList.add('escape-message');
-            break;
-        case 'loot':
-            li.classList.add('loot-message');
-            break;
-        case 'no_loot':
-            li.classList.add('no-loot-message');
-            break;
-        case 'exp_gain':
-            li.classList.add('exp-gain-message');
-            break;
-        case 'armor':
-        case 'armor_break':
-        case 'armor_miss':
-        case 'no_armor':
-            li.classList.add('armor-message');
-            break;
-        case 'attack':
-            if (message.toLowerCase().startsWith('you')) {
-                li.classList.add('player-attack');
-            } else {
-                li.classList.add('enemy-attack');
-            }
-            break;
+    if (className === 'attack') {
+        if (message.toLowerCase().startsWith('you')) {
+            li.classList.add('player-attack');
+        } else {
+            li.classList.add('enemy-attack');
+        }
     }
 
     battleLog.insertBefore(li, battleLog.firstChild);
