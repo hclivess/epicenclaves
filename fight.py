@@ -48,6 +48,8 @@ def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users:
 
 def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_data: Dict, user: str, usersdb: Dict,
               mapdb: Dict) -> None:
+    damage_dealt = 0
+
     enemy_class = entity_types.get(npc_data['type'].lower())
     if enemy_class is None:
         battle_data["rounds"].append({"round": 0, "message": f"Unknown enemy type: {npc_data['type']}"})
