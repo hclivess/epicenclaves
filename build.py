@@ -27,7 +27,7 @@ def build(user, user_data, entity, name, mapdb, usersdb):
 
     # Check building limit
     user_buildings = user_data.get("construction", {})
-    if sum(1 for b in user_buildings.values() if b["type"] == entity) >= 10:
+    if sum(1 for b in user_buildings.values() if b["type"] == entity and not b["type"] == "palisade") >= 10:
         return f"Cannot have more than 10 {building_data['display_name']} buildings"
 
     if not has_resources(user_data, {"ingredients": building_data["cost"]["ingredients"]}):
