@@ -179,6 +179,12 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
     user_max_total_hp = calculate_total_hp(max_base_hp, user_data["exp"])
     target_max_total_hp = calculate_total_hp(max_base_hp, target_data["exp"])
 
+    battle_data["player"].update({
+        "name": user,
+        "max_hp": user_max_total_hp,
+        "current_hp": user_data["hp"]
+    })
+
     battle_data["enemy"].update({
         "name": target_name,
         "max_hp": target_max_total_hp,
