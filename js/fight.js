@@ -114,13 +114,13 @@ async function processAction(action) {
 
     if (action.type === 'attack') {
         if (action.actor === 'player') {
-            currentEnemyHp -= action.damage;
+            currentEnemyHp = Math.max(0, currentEnemyHp - action.damage);
             showDamagePopUp(action.damage, false);
             if (!isAnimationSkipped) await animateAttack(playerPicture, enemyPicture);
             await animateProfilePicture(enemyPicture, true);
             updateHealth(currentEnemyHp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
         } else {
-            currentPlayerHp -= action.damage;
+            currentPlayerHp = Math.max(0, currentPlayerHp - action.damage);
             showDamagePopUp(action.damage, true);
             if (!isAnimationSkipped) await animateAttack(enemyPicture, playerPicture);
             await animateProfilePicture(playerPicture, true);
@@ -136,9 +136,15 @@ async function processAction(action) {
 }
 
 async function processRound(roundData) {
-    for (const action of roundData.actions) {
+    addLogMessage(roundData.message, 'round-message');
+    for (const action of roundData.actions || []) {
         await processAction(action);
     }
+    // Update health after each round
+    currentPlayerHp = roundData.player_hp;
+    currentEnemyHp = roundData.enemy_hp;
+    updateHealth(currentPlayerHp, battleData.player.max_hp, playerHealth, playerHpDisplay);
+    updateHealth(currentEnemyHp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
 }
 
 async function startBattle() {
