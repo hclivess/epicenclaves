@@ -62,6 +62,10 @@ function animateProfilePicture(pictureElement, isDamageTaken) {
 }
 
 function addLogMessage(message, className) {
+    if (!message || message.trim() === '') {
+        return;
+    }
+
     const li = document.createElement('li');
     li.textContent = message;
     li.classList.add('battle-message');

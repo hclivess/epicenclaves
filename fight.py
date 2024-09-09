@@ -93,7 +93,6 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
                 else:
                     damage_dealt = user_dmg['damage']
             else:
-                damage_dealt = 0
                 weapon = next((item for item in user_data.get("equipped", []) if item.get("slot") == "right_hand"), None)
                 if weapon:
                     round_data["actions"].append({
@@ -244,7 +243,11 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
 
         round_data["player_hp"] = user_data["hp"]
         round_data["enemy_hp"] = target_data["hp"]
-        round_data["message"] = f"Round {round_number} complete. Your HP: {user_data['hp']}/{user_max_total_hp}, {target_name}'s HP: {target_data['hp']}/{target_max_total_hp}"
+        round_data["actions"].append({
+            "actor": "system",
+            "type": "round_end",
+            "message": f"Round {round_number} complete. Your HP: {user_data['hp']}/{user_max_total_hp}, {target_name}'s HP: {target_data['hp']}/{target_max_total_hp}"
+        })
         battle_data["rounds"].append(round_data)
 
         if 0 < target_data["hp"] < 10:
@@ -353,7 +356,12 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, rounds: Li
                    f"(Base: {damage_dict['base_damage']}, Exp bonus: {damage_dict['exp_bonus']}). "
                    f"Your HP: {defender['hp']}/{defender_max_hp}, {attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}")
 
-    round_data["message"] = message
+    round_data["actions"].append({
+        "actor": "player" if attacker_name == "You" else "enemy",
+        "type": "attack",
+        "damage": final_damage,
+        "message": message
+    })
     rounds.append(round_data)
 
 def exp_bonus(value: int, base: int = 10) -> int:
@@ -493,7 +501,11 @@ def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, vict
         "round": round_number,
         "player_hp": defeated["hp"],
         "enemy_hp": defeated["hp"],
-        "message": message
+        "actions": [{
+            "actor": "system",
+            "type": "defeat",
+            "message": message
+        }]
     })
 
     # Add item drop mechanic
@@ -513,11 +525,13 @@ def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, vict
                     "round": round_number,
                     "player_hp": defeated["hp"],
                     "enemy_hp": defeated["hp"],
-                    "message": f"{victor_name} looted a {dropped_item['type']} from {defeated_name}'s mutilated body!"
+                    "actions": [{
+                        "actor": "system",
+                        "type": "loot",
+                        "message": f"{victor_name} looted a {dropped_item['type']} from {defeated_name}'s mutilated body!"
+                    }]
                 })
                 update_user_data(victor_name, {"unequipped": victor["unequipped"], "equipped": victor["equipped"]},
                                  usersdb)
 
             update_user_data(defeated_name, new_data, usersdb)
-
-
