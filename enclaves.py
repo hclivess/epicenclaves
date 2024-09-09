@@ -430,6 +430,8 @@ class DragHandler(BaseHandler):
             message = f"User {user} not found."
         else:
             message = self._drag_player(user, user_data, target, direction)
+            # Refresh user data after dragging
+            user_data = get_user_data(user, usersdb[league])
 
         if return_to_map:
             # Prepare map data for JSON response
@@ -488,7 +490,11 @@ class DragHandler(BaseHandler):
             self.set_header("Content-Type", "application/json")
             self.write(json.dumps(map_data))
         else:
-            self.render_user_panel(user, user_data, message=message, league=league)
+            # Refresh on_tile_map and on_tile_users
+            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
+            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[league])
+            self.render_user_panel(user, user_data, message=message, on_tile_map=on_tile_map, on_tile_users=on_tile_users, league=league)
+
 
     def _drag_player(self, user, user_data, target, direction):
         league = self.get_current_league()
