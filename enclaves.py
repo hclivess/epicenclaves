@@ -404,6 +404,50 @@ class MoveToHandler(BaseHandler):
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(map_data))
 
+class DragHandler(UserActionHandler):
+    def get(self):
+        target = self.get_argument("target")
+        direction = self.get_argument("direction")
+        user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
+        self.perform_action(user, self._drag_player, league, target, direction)
+
+    def _drag_player(self, user, user_data, target, direction):
+        league = self.get_current_league()
+        target_data = usersdb[league].get(target)
+        if not target_data:
+            return f"Player {target} not found."
+
+        if target_data.get("alive", True):
+            return f"Player {target} is not dead and cannot be dragged."
+
+        dx, dy = 0, 0
+        if direction == "up":
+            dy = -1
+        elif direction == "down":
+            dy = 1
+        elif direction == "left":
+            dx = -1
+        elif direction == "right":
+            dx = 1
+        else:
+            return f"Invalid direction: {direction}"
+
+        target_x, target_y = target_data["x_pos"], target_data["y_pos"]
+        new_x, new_y = target_x + dx, target_y + dy
+
+        # Check if the new position is within the map boundaries
+        if not (0 <= new_x < max_size and 0 <= new_y < max_size):
+            return "Cannot drag the player outside the map boundaries."
+
+        # Update the dragged player's position
+        update_user_data(target, {"x_pos": new_x, "y_pos": new_y}, usersdb[league])
+
+        # Move the dragging player to the new position
+        move_to(user, new_x, new_y, max_size, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
+
+        return f"Dragged player {target} {direction}."
+
 class MoveHandler(UserActionHandler):
     def get(self, data):
         target = self.get_argument("target", default="home")
@@ -825,6 +869,7 @@ def make_app():
         (r"/revive", ReviveHandler),
         (r"/equip", EquipHandler),
         (r"/unequip", UnequipHandler),
+        (r"/drag", DragHandler),
         (r"/trash", TrashHandler),
         (r"/demolish", DemolishHandler),
         (r"/trash_weapons", TrashWeaponsHandler),

@@ -44,7 +44,15 @@ class User:
 
     def get_actions(self, current_user: str) -> List[Dict[str, str]]:
         if self.username != current_user:
-            return [{"name": "challenge", "action": f"/fight?target=player&name={self.username}"}]
+            if not self.alive:
+                return [
+                    {"name": "drag up", "action": f"/drag?target={self.username}&direction=up"},
+                    {"name": "drag down", "action": f"/drag?target={self.username}&direction=down"},
+                    {"name": "drag left", "action": f"/drag?target={self.username}&direction=left"},
+                    {"name": "drag right", "action": f"/drag?target={self.username}&direction=right"}
+                ]
+            else:
+                return [{"name": "challenge", "action": f"/fight?target=player&name={self.username}"}]
         return []
 
     def to_dict(self) -> Dict[str, Any]:
