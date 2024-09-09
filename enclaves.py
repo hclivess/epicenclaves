@@ -397,13 +397,24 @@ class MoveToHandler(BaseHandler):
                 filtered_entity["hp"] = entity["hp"]
             filtered_map_data[coord] = filtered_entity
 
-        # Generate actions for each tile
+        # Generate actions for each tile and player
         tile_actions = {}
-        for coord, entity in visible_map_data.items():
+        for coord, entity in filtered_map_data.items():
             tile_actions[coord] = get_tile_actions(entity, user)
-        for coord, user_info in visible_users_data.items():
-            user_obj = User(coord, **user_info)
-            tile_actions[coord] = user_obj.get_actions(user)
+
+        for username, user_info in filtered_users_data.items():
+            if username != user:
+                coord = f"{user_info['x_pos']},{user_info['y_pos']}"
+                if user_info.get('hp', 0) > 0:  # Alive users have HP > 0
+                    tile_actions[coord] = [{
+                        "name": "challenge",
+                        "action": f"/fight?target=player&name={username}"
+                    }]
+                else:  # Dead users have HP <= 0
+                    tile_actions[coord] = [{
+                        "name": "drag",
+                        "action": f"/drag?target={username}"
+                    }]
 
         map_data = {
             "users": filtered_users_data,
@@ -532,8 +543,8 @@ class DragHandler(BaseHandler):
 
         return f"Dragged player {target} {direction}."
 
-class MoveHandler(UserActionHandler):
-    def get(self, data):
+class MoveHandler(BaseHandler):
+    def get(self):
         target = self.get_argument("target", default="home")
         entry = self.get_argument("direction")
         user = tornado.escape.xhtml_escape(self.current_user)
@@ -567,13 +578,24 @@ class MoveHandler(UserActionHandler):
                     filtered_entity["hp"] = entity["hp"]
                 filtered_map_data[coord] = filtered_entity
 
-            # Generate actions for each tile
+            # Generate actions for each tile and player
             tile_actions = {}
-            for coord, entity in visible_map_data.items():
+            for coord, entity in filtered_map_data.items():
                 tile_actions[coord] = get_tile_actions(entity, user)
-            for coord, user_info in visible_users_data.items():
-                user_obj = User(coord, **user_info)
-                tile_actions[coord] = user_obj.get_actions(user)
+
+            for username, user_info in filtered_users_data.items():
+                if username != user:
+                    coord = f"{user_info['x_pos']},{user_info['y_pos']}"
+                    if user_info.get('hp', 0) > 0:  # Alive users have HP > 0
+                        tile_actions[coord] = [{
+                            "name": "challenge",
+                            "action": f"/fight?target=player&name={username}"
+                        }]
+                    else:  # Dead users have HP <= 0
+                        tile_actions[coord] = [{
+                            "name": "drag",
+                            "action": f"/drag?target={username}"
+                        }]
 
             map_data = {
                 "users": filtered_users_data,
@@ -587,7 +609,9 @@ class MoveHandler(UserActionHandler):
             self.set_header("Content-Type", "application/json")
             self.write(json.dumps(map_data))
         else:
-            self.render_user_panel(user, user_data, message=moved["message"], league=self.get_current_league())
+            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
+            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[league])
+            self.render_user_panel(user, user_data, message=moved["message"], on_tile_map=on_tile_map, on_tile_users=on_tile_users, league=league)
 
 
 class ReviveHandler(UserActionHandler):
