@@ -149,7 +149,7 @@ class Boar(Enemy):
     regular_drop = {"food": 1}
     probability = 0.1
     max_entities = 500
-    max_entities_total = 1000
+    max_entities_total = 1500
     herd_probability = 0.7
     min_level = 3
     max_level = 18
@@ -171,7 +171,7 @@ class Wolf(Enemy):
     regular_drop = {"wolf pelt": 1}
     probability = 0.2
     max_entities = 500
-    max_entities_total = 500
+    max_entities_total = 1000
     herd_probability = 0.8
     min_level = 8
     max_level = 25
@@ -193,7 +193,7 @@ class Goblin(Enemy):
     regular_drop = {"gold": 5}
     probability = 0.24
     max_entities = 200
-    max_entities_total = 500
+    max_entities_total = 1000
     herd_probability = 0.5
     min_level = 5
     max_level = 22
@@ -213,7 +213,7 @@ class Specter(Enemy):
     regular_drop = {"ectoplasm": 1}
     probability = 0.24
     max_entities = 100
-    max_entities_total = 500
+    max_entities_total = 1000
     herd_probability = 0.3
     min_level = 20
     max_level = 50
@@ -239,7 +239,7 @@ class Hatchling(Enemy):
     regular_drop = {"dragon scale": 1}
     probability = 0.24
     max_entities = 50
-    max_entities_total = 500
+    max_entities_total = 1000
     herd_probability = 0.2
     min_level = 30
     max_level = 70
@@ -275,7 +275,7 @@ class Bandit(Enemy):
     regular_drop = {"gold": 10}
     probability = 0.24
     max_entities = 250
-    max_entities_total = 500
+    max_entities_total = 1000
     herd_probability = 0.4
     min_level = 10
     max_level = 35
@@ -302,7 +302,7 @@ class Troll(Enemy):
     regular_drop = {"troll hide": 1}
     probability = 0.24
     max_entities = 100
-    max_entities_total = 500
+    max_entities_total = 1000
     herd_probability = 0.2
     min_level = 25
     max_level = 60
@@ -327,7 +327,7 @@ class Harpy(Enemy):
     regular_drop = {"feather": 3}
     probability = 0.24
     max_entities = 150
-    max_entities_total = 500
+    max_entities_total = 1000
     herd_probability = 0.5
     min_level = 15
     max_level = 45
@@ -353,7 +353,7 @@ class Orc(Enemy):
     regular_drop = {"orc tusk": 1}
     probability = 0.24
     max_entities = 150
-    max_entities_total = 500
+    max_entities_total = 1000
     herd_probability = 0.4
     min_level = 20
     max_level = 50
@@ -373,7 +373,7 @@ class Spider(Enemy):
     regular_drop = {"spider silk": 1, "venom sac": 1}
     probability = 0.24
     max_entities = 180
-    max_entities_total = 500
+    max_entities_total = 1000
     herd_probability = 0.6
     min_level = 12
     max_level = 40
@@ -419,7 +419,7 @@ class Minotaur(Enemy):
     regular_drop = {"minotaur horn": 1}
     probability = 0.24
     max_entities = 50
-    max_entities_total = 500
+    max_entities_total = 1000
     herd_probability = 0.1
     min_level = 35
     max_level = 80
@@ -452,7 +452,7 @@ class Wraith(Enemy):
     regular_drop = {"soul essence": 1}
     probability = 0.24
     max_entities = 120
-    max_entities_total = 500
+    max_entities_total = 1000
     herd_probability = 0.3
     min_level = 30
     max_level = 70
@@ -479,7 +479,7 @@ class Dragon(Enemy):
     regular_drop = {"dragon scale": 3, "dragon tooth": 1}
     probability = 0.12
     max_entities = 50
-    max_entities_total = 100
+    max_entities_total = 250
     herd_probability = 0
     min_level = 60
     max_level = 100
@@ -515,7 +515,7 @@ class Lizarian(Enemy):
     regular_drop = {"lizard scale": 2, "magic essence": 1}
     probability = 0.15
     max_entities = 75
-    max_entities_total = 150
+    max_entities_total = 300
     herd_probability = 0.1
     min_level = 55
     max_level = 90
@@ -553,7 +553,7 @@ class Golem(Enemy):
     regular_drop = {"golem core": 1, "enchanted stone": 3}
     probability = 0.12
     max_entities = 60
-    max_entities_total = 120
+    max_entities_total = 250
     herd_probability = 0.05
     min_level = 65
     max_level = 95
@@ -602,7 +602,7 @@ class Zombie(Enemy):
     regular_drop = {"rotten flesh": 2, "zombie brain": 1}
     probability = 0.18
     max_entities = 100
-    max_entities_total = 200
+    max_entities_total = 400
     herd_probability = 0.4
     min_level = 50
     max_level = 85
