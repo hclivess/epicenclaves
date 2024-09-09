@@ -493,7 +493,7 @@ def get_fight_preconditions(user_data: Dict) -> Optional[str]:
 def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, victor_name: str, death_chance: float,
                           usersdb: Dict, rounds: List[Dict], round_number: int, defeated_max_hp: int) -> None:
     if random.random() < death_chance:
-        message = f"{defeated_name} is defeated. {defeated_name}'s HP: 0/{defeated_max_hp}"
+        message = f"{defeated_name} was killed in battle. {defeated_name}'s HP: 0/{defeated_max_hp}"
         new_data = {"alive": False, "hp": 0, "action_points": 0}
     else:
         message = f"{defeated_name} barely managed to escape. {defeated_name}'s HP: 1/{defeated_max_hp}"
@@ -536,4 +536,4 @@ def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, vict
                 update_user_data(victor_name, {"unequipped": victor["unequipped"], "equipped": victor["equipped"]},
                                  usersdb)
 
-            update_user_data(defeated_name, new_data, usersdb)
+    update_user_data(defeated_name, new_data, usersdb)
