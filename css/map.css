@@ -220,13 +220,15 @@ body, html {
     .popup-close:active {
         transform: scale(0.95);
     }
-    .navigation-submenu {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        background-color: #333;
-        padding: 10px;
-    }
+.navigation-submenu {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    background-color: #333;
+    padding: 10px;
+}
+
     .btn {
         display: inline-block;
         padding: 6px 12px;
