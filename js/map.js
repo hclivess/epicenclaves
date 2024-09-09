@@ -118,6 +118,20 @@ function updateMap(data) {
     checkPlayerPosition();
 }
 
+function showDragDirections(targetName) {
+    const popup = document.getElementById('popup');
+    const directions = ['up', 'down', 'left', 'right'];
+    let popupContent = `
+        <h3>Drag ${targetName}</h3>
+        <p>Choose a direction to drag the player:</p>
+    `;
+    directions.forEach(direction => {
+        popupContent += `<button onclick="performDragAction('${targetName}', '${direction}')">${direction}</button>`;
+    });
+    popupContent += `<div class="popup-close" onclick="closePopup()">X</div>`;
+    popup.innerHTML = popupContent;
+}
+
 function updatePopupContent(x_pos, y_pos, tileType) {
     const popup = document.getElementById('popup');
     const currentTile = `${x_pos},${y_pos}`;
@@ -135,7 +149,7 @@ function updatePopupContent(x_pos, y_pos, tileType) {
                 popupContent += `<button onclick="performFightAction('${action.action}')">Challenge ${targetName}</button>`;
             } else if (action.name === "drag") {
                 const targetName = action.action.split('target=')[1];
-                popupContent += `<button onclick="performDragAction('${targetName}')">Drag ${targetName}</button>`;
+                popupContent += `<button onclick="showDragDirections('${targetName}')">Drag ${targetName}</button>`;
             } else {
                 const actionUrl = new URL(action.action, window.location.origin);
                 actionUrl.searchParams.append('return_to_map', 'true');
@@ -189,19 +203,26 @@ function performFightAction(actionUrl) {
     window.location.href = actionUrl;
 }
 
-function performDragAction(targetName) {
-    const directions = ['up', 'down', 'left', 'right'];
-    const directionButtons = directions.map(dir =>
-        `<button onclick="dragPlayer('${targetName}', '${dir}')">${dir}</button>`
-    ).join('');
-
-    const popup = document.getElementById('popup');
-    popup.innerHTML = `
-        <h3>Drag ${targetName}</h3>
-        <p>Choose a direction to drag the player:</p>
-        ${directionButtons}
-        <div class="popup-close" onclick="closePopup()">X</div>
-    `;
+function performDragAction(targetName, direction) {
+    fetch(`/drag?target=${targetName}&direction=${direction}&return_to_map=true`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            displayMessage(data.message);
+        }
+        Object.assign(jsonData, data);
+        updateMap(jsonData);
+        closePopup();
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        displayMessage('An error occurred while dragging the player.');
+    });
 }
 
 function dragPlayer(targetName, direction) {
