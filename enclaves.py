@@ -10,6 +10,7 @@ import inspect
 import tornado.ioloop
 import tornado.web
 import tornado.escape
+import time
 
 from buildings import Building
 import buildings
@@ -535,11 +536,13 @@ class FightHandler(BaseHandler):
                 else:
                     target_picture = f"img/assets/{target}.png"
 
+
                 self.render("templates/fight.html",
                             battle_data=json.dumps(fight_result["battle_data"]),
                             profile_picture=user_data["img"],
                             target_picture=target_picture,
-                            target=target)
+                            target=target,
+                            timestamp=int(time.time()))  # Add this line
 
     def _perform_fight(self, user, user_data, target, target_name, league):
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
