@@ -196,7 +196,7 @@ class Goblin(Enemy):
     max_entities_total = 1000
     herd_probability = 0.5
     min_level = 5
-    max_level = 22
+    max_level = 45
     experience_value = 12
     evasion_chance = 0.1
     block_chance = 0.05
@@ -518,7 +518,7 @@ class Lizarian(Enemy):
     max_entities_total = 300
     herd_probability = 0.1
     min_level = 55
-    max_level = 90
+    max_level = 750
     experience_value = 300
     evasion_chance = 0.15
     block_chance = 0.2
@@ -556,7 +556,7 @@ class Golem(Enemy):
     max_entities_total = 250
     herd_probability = 0.05
     min_level = 65
-    max_level = 95
+    max_level = 400
     experience_value = 400
     block_chance = 0.4
     block_reduction = 0.8
@@ -605,7 +605,7 @@ class Zombie(Enemy):
     max_entities_total = 400
     herd_probability = 0.4
     min_level = 50
-    max_level = 85
+    max_level = 120
     experience_value = 250
     block_chance = 0.1
     block_reduction = 0.3
