@@ -239,34 +239,6 @@
             </div>
         </div>
 
-        <div class="row mt-4">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0">Acquired Tiles</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="item-grid">
-                            {% for coord, building in file["construction"].items() %}
-                                {% if building.get('type') != 'palisade' %}
-
-                                <div class="item-card">
-                                    <img src="/img/assets/{{building.get('type')}}.png" alt="Building Icon" class="menu-icon">
-                                    <div class="item-details">
-                                        <p><strong>Type:</strong> {{ building.get("type") }}</p>
-                                        <p><strong>Position:</strong> ({{ coord }})</p>
-                                        <p><strong>Army:</strong> {{ building.get("army") }}</p>
-                                        <p><strong>Level:</strong> {{ building.get("level") }}</p>
-                                    </div>
-                                </div>
-                                {% end %}
-                            {% end %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
 <div class="row mt-4">
     <div class="col-md-12">
         <div class="card">
@@ -290,6 +262,35 @@
             </div>
         </div>
     </div>
+</div>
+
+
+<div class="row mt-4">
+    <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Acquired Tiles</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="item-grid">
+                            {% for coord, building in file["construction"].items() %}
+                                {% if building.get('type') != 'palisade' %}
+
+                                <div class="item-card">
+                                    <img src="/img/assets/{{building.get('type')}}.png" alt="Building Icon" class="menu-icon">
+                                    <div class="item-details">
+                                        <p><strong>Type:</strong> {{ building.get("type") }}</p>
+                                        <p><strong>Position:</strong> ({{ coord }})</p>
+                                        <p><strong>Army:</strong> {{ building.get("army") }}</p>
+                                        <p><strong>Level:</strong> {{ building.get("level") }}</p>
+                                    </div>
+                                 </div>
+                            {% end %}
+                        {% end %}
+                    </div>
+                </div>
+        </div>
+     </div>
 </div>
 
     </div>
