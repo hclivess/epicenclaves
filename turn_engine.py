@@ -87,6 +87,7 @@ class TurnEngine(threading.Thread):
 
         updated_values["action_points"] = user_data.get("action_points", 0) + 10
         updated_values["age"] = user_data.get("age", 0) + 1
+        updated_values["score"] = int(user_data.get("exp", 0) / max(1, user_data.get("age", 0)))
 
         return updated_values
 

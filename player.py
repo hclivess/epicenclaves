@@ -14,6 +14,7 @@ class User:
         self.age = 0
         self.img = profile_pic
         self.exp = 0
+        self.score = 0
         self.units = []
         self.research = 0
         self.base_hp = 100  # Base HP value
@@ -64,6 +65,7 @@ class User:
             "age": self.age,
             "img": self.img,
             "exp": self.exp,
+            "score": self.score,
             "units": self.units,
             "research": self.research,
             "hp": self.get_total_hp(),
