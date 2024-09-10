@@ -120,12 +120,16 @@ def calculate_level(min_level, max_level, bias=0):
     random_value = random.random()
 
     # Adjust the random value with a bias factor to skew the distribution
-    biased_random_value = random_value ** (1 / bias)
+    if bias != 0:
+        biased_random_value = random_value ** (1 / bias)
+    else:
+        biased_random_value = random_value
 
-    # Calculate the logarithmic distribution with the biased random value
-    # Use max() to prevent log(1) which would result in 0
-    log_ratio = math.log(max_level / max(min_level, 1))
-    result = int(min_level * math.exp(biased_random_value * log_ratio))
+    # Calculate the logarithmic distribution
+    log_min = math.log(max(min_level, 1))
+    log_max = math.log(max_level)
+    log_result = log_min + biased_random_value * (log_max - log_min)
+    result = int(round(math.exp(log_result)))
 
     # Ensure the result is within the allowed range
     result = max(min_level, min(result, max_level))
