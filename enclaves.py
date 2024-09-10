@@ -126,6 +126,12 @@ def get_tile_actions(tile: Any, user: str) -> List[Dict[str, str]]:
 
 
 class BaseHandler(tornado.web.RequestHandler):
+    def prepare(self):
+        allowed_paths = ["/", "/login"]  # Add any other public paths here
+        if not self.current_user and self.request.path not in allowed_paths:
+            self.redirect("/")
+            return
+
     def get_current_user(self):
         return self.get_secure_cookie("user")
 
