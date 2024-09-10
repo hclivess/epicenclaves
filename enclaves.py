@@ -1,3 +1,4 @@
+import tornado.websocket
 import asyncio
 import json
 import os.path
@@ -956,6 +957,53 @@ class LoginHandler(BaseHandler):
         else:
             self.render("templates/denied.html", message=message)
 
+class ChatHandler(BaseHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
+        if not user:
+            self.redirect("/")
+            return
+        chat_history = self.get_chat_history(league)
+        self.render("templates/chat.html", user=user, league=league, chat_history=chat_history)
+
+    def get_chat_history(self, league):
+        chat_history_file = f"chat_history_{league}.json"
+        if os.path.exists(chat_history_file):
+            with open(chat_history_file, "r") as file:
+                chat_history = json.load(file)
+        else:
+            chat_history = []
+        return chat_history
+
+class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
+    connections = set()
+
+    def open(self):
+        ChatWebSocketHandler.connections.add(self)
+
+    def on_message(self, message):
+        user = tornado.escape.xhtml_escape(self.get_secure_cookie("user").decode())
+        league = self.get_secure_cookie("league").decode()
+        message_data = json.loads(message)  # Parse the received message as JSON
+        message_data["user"] = user  # Add the user to the message data
+        self.store_chat_message(league, message_data)
+        for connection in ChatWebSocketHandler.connections:
+            connection.write_message(json.dumps(message_data))
+
+    def on_close(self):
+        ChatWebSocketHandler.connections.remove(self)
+
+    def store_chat_message(self, league, message_data):
+        chat_history_file = f"chat_history_{league}.json"
+        if os.path.exists(chat_history_file):
+            with open(chat_history_file, "r") as file:
+                chat_history = json.load(file)
+        else:
+            chat_history = []
+        chat_history.append(message_data)
+        with open(chat_history_file, "w") as file:
+            json.dump(chat_history, file)
 
 def make_app():
     return tornado.web.Application([
@@ -986,6 +1034,8 @@ def make_app():
         (r"/repair", RepairHandler),
         (r"/deploy(.*)", DeployArmyHandler),
         (r"/bestiary", BestiaryHandler),
+        (r"/chat", ChatHandler),
+        (r"/ws/chat", ChatWebSocketHandler),
         (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),
         (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),
         (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": "css"}),

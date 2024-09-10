@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+    <link rel="stylesheet" href="/css/chat.css">
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/chat.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="navigation-submenu">
+            <a href="/" class="btn btn-secondary">Back</a>
+        </div>
+        <h1>Chat</h1>
+        <div id="messages">
+            {% for message in chat_history %}
+                <p><strong>{{ message['user'] }}:</strong> {{ message['text'] }}</p>
+            {% end %}
+        </div>
+        <input type="text" id="message-input" placeholder="Type your message...">
+        <button id="send-button">Send</button>
+    </div>
+</body>
+</html>

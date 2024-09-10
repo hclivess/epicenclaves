@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
+
+body {
+    font-family: 'Merriweather', serif;
+    background-color: #0a0a0a;
+    background-image: url('../img/assets/background.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 20px;
+}
+
+.chat-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: rgba(20, 20, 20, 0.8);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-family: 'Cinzel', serif;
+    color: #ffd700;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#messages {
+    height: 400px;
+    overflow-y: scroll;
+    padding: 10px;
+    background-color: rgba(40, 40, 40, 0.9);
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+#messages p {
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+#messages p strong {
+    color: #ffd700;
+}
+
+.input-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+#message-input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: rgba(60, 60, 60, 0.7);
+    color: #e0e0e0;
+    margin-right: 10px;
+}
+
+#send-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #ffd700;
+    color: #0a0a0a;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#send-button:hover {
+    background-color: #ffdf4d;
+}
+
+.navigation-submenu {
+    background-color: rgba(40, 40, 40, 0.9);
+    padding: 10px 0;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-right: 10px;
+    font-family: 'Merriweather', serif;
+    font-size: 16px;
+    font-weight: 400;
+    text-align: center;
+    text-decoration: none;
+    background-color: #4a4a4a;
+    color: #ffd700;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #5a5a5a;
+    transform: translateY(-2px);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: rgba(60, 60, 60, 0.7);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #ffd700;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #ffdf4d;
+}
