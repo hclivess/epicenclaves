@@ -282,7 +282,7 @@ def process_npc_defeat(enemy: Enemy, coords: str, user_data: Dict, user: str, us
     }
 
     if random.random() < enemy.drop_chance:
-        min_item_level = max(1, enemy.level / 2)
+        min_item_level = max(1, int(enemy.level / 2))
         max_item_level = enemy.level
         new_item = generate_weapon(min_level=min_item_level,
                                    max_level=max_item_level) if random.random() < 0.5 else generate_armor(
