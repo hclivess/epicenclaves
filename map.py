@@ -135,21 +135,32 @@ def insert_map_data(existing_data: Dict[str, Any], new_data: Dict[str, Any]) -> 
 def is_visible(x1: int, y1: int, x2: int, y2: int, distance: int) -> bool:
     return (x1 - x2) ** 2 + (y1 - y2) ** 2 <= distance ** 2
 
+
 def get_map_data_limit(x_pos: int, y_pos: int, map_data_dict: Dict[str, Any], distance: int = 5) -> Dict[str, Any]:
     filtered_data = {}
+    distance_squared = distance ** 2
+    x_min, x_max = x_pos - distance, x_pos + distance
+    y_min, y_max = y_pos - distance, y_pos + distance
+
     for coords, data in map_data_dict.items():
         x_map, y_map = map(int, coords.split(","))
-        if is_visible(x_pos, y_pos, x_map, y_map, distance):
-            filtered_data[coords] = data
+        if x_min <= x_map <= x_max and y_min <= y_map <= y_max:
+            if (x_map - x_pos) ** 2 + (y_map - y_pos) ** 2 <= distance_squared:
+                filtered_data[coords] = data
     return filtered_data
+
 
 def get_users_data_limit(x_pos: int, y_pos: int, usersdb: Dict[str, Any], distance: int = 5) -> Dict[str, Any]:
     filtered_data = {}
+    distance_squared = distance ** 2
+    x_min, x_max = x_pos - distance, x_pos + distance
+    y_min, y_max = y_pos - distance, y_pos + distance
+
     for username, data in usersdb.items():
-        x_map = data['x_pos']
-        y_map = data['y_pos']
-        if is_visible(x_pos, y_pos, x_map, y_map, distance):
-            filtered_data[username] = data
+        x_map, y_map = data['x_pos'], data['y_pos']
+        if x_min <= x_map <= x_max and y_min <= y_map <= y_max:
+            if (x_map - x_pos) ** 2 + (y_map - y_pos) ** 2 <= distance_squared:
+                filtered_data[username] = data
     return filtered_data
 
 def get_buildings(user_data: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -173,25 +184,17 @@ def is_surrounded_by(x: int, y: int, entity_type: str, mapdb: Dict[str, Any], di
     return False
 
 def get_surrounding_map_and_user_data(user: str, user_data_dict: Dict[str, Any], map_data_dict: Dict[str, Any], distance: int) -> Dict[str, Any]:
-    if user not in user_data_dict:
+    user_data = user_data_dict.get(user)
+    if not user_data:
         return {"error": "User not found."}
 
-    user_x_pos = user_data_dict[user]["x_pos"]
-    user_y_pos = user_data_dict[user]["y_pos"]
+    user_x_pos = user_data["x_pos"]
+    user_y_pos = user_data["y_pos"]
 
-    user_map_data_dict = get_map_data_limit(
-        user_x_pos,
-        user_y_pos,
-        map_data_dict=map_data_dict,
-        distance=distance
-    )
-
-    result = {
+    return {
         "users": get_users_data_limit(user_x_pos, user_y_pos, user_data_dict, distance=distance),
-        "construction": user_map_data_dict,
+        "construction": get_map_data_limit(user_x_pos, user_y_pos, map_data_dict=map_data_dict, distance=distance),
     }
-
-    return result
 
 def get_coords(entry: Dict[str, Any]) -> str:
     return list(entry.keys())[0]

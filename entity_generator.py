@@ -73,7 +73,7 @@ def spawn_herd(mapdb, entity_class, biome_x, biome_y, herd_size, map_size, min_l
             return
 
         angle = random.uniform(0, 2 * math.pi)
-        distance = random.uniform(1, 10)
+        distance = random.uniform(1, 5)
         new_x = int(biome_x + distance * math.cos(angle))
         new_y = int(biome_y + distance * math.sin(angle))
 
