@@ -1,7 +1,6 @@
 import random
 from typing import List, Dict, Any, Tuple, Optional
 from item_generator import generate_armor, generate_weapon, generate_tool
-import threading
 
 class User:
     HP_BONUS_PER_EXP = 500

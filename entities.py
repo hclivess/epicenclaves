@@ -318,7 +318,7 @@ class Troll(Enemy):
     regeneration_rate = 5
     block_chance = 0.2
     block_reduction = 0.5
-    biome = "cavern"
+    biome = "mountain"
 
     def calculate_hp(self):
         hp = super().calculate_hp()
