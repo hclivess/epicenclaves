@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="icon" type="image/x-icon" href="/img/favicon.ico">
-
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico">
     <title>Epic Enclaves - Scoreboard</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
@@ -58,6 +57,13 @@
             font-family: 'Cinzel', serif;
             color: #bb86fc;
         }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        .search-container input {
+            padding: 5px 10px;
+            width: 200px;
+        }
     </style>
 </head>
 <body>
@@ -70,12 +76,15 @@
 
         <div class="section">
             <h2>Players</h2>
-            <div class="card-grid">
+            <div class="search-container">
+                <input type="text" id="playerSearch" placeholder="Search players...">
+            </div>
+            <div class="card-grid" id="playerGrid">
                 {% for user_id, user_info in usersdb.items() %}
                 <div class="card">
                     <img src="{{ user_info['img'] }}" alt="Player {{ user_id }}">
                     <p><strong>ID:</strong> {{ user_id }} <strong>Type:</strong> {{ user_info['type'] }}</p>
-                    <p><strong>Pos:</strong> ({{ user_info['x_pos'] }}, {{ user_info['y_pos'] }}) <strong>Age:</strong> {{ user_info['age'] }} <strong>Exp:</strong> {{ user_info['exp'] }}<strong> Score:</strong> {{ user_info['score'] }}</p>
+                    <p><strong>Pos:</strong> ({{ user_info['x_pos'] }}, {{ user_info['y_pos'] }}) <strong>Age:</strong> {{ user_info['age'] }} <strong>Exp:</strong> {{ user_info['exp'] }} <strong>Score:</strong> {{ user_info['score'] }}</p>
                 </div>
                 {% end %}
             </div>
@@ -83,7 +92,10 @@
 
         <div class="section">
             <h2>Map</h2>
-            <div class="card-grid">
+            <div class="search-container">
+                <input type="text" id="mapSearch" placeholder="Search map items...">
+            </div>
+            <div class="card-grid" id="mapGrid">
                 {% for position, item in mapdb.items() %}
                 <div class="card">
                     <p><strong>Pos:</strong> {{ position }} <strong>Type:</strong> {{ item.get('type') }} <strong>Role:</strong> {{ item.get('role') }}</p>
@@ -106,6 +118,42 @@
 
         window.addEventListener('load', adjustGrid);
         window.addEventListener('resize', adjustGrid);
+
+        // Search functionality for players
+        const playerSearch = document.getElementById('playerSearch');
+        const playerGrid = document.getElementById('playerGrid');
+
+        playerSearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const players = playerGrid.getElementsByClassName('card');
+
+            Array.from(players).forEach(function(player) {
+                const playerInfo = player.textContent.toLowerCase();
+                if (playerInfo.includes(searchTerm)) {
+                    player.style.display = 'block';
+                } else {
+                    player.style.display = 'none';
+                }
+            });
+        });
+
+        // Search functionality for map items
+        const mapSearch = document.getElementById('mapSearch');
+        const mapGrid = document.getElementById('mapGrid');
+
+        mapSearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const mapItems = mapGrid.getElementsByClassName('card');
+
+            Array.from(mapItems).forEach(function(item) {
+                const itemInfo = item.textContent.toLowerCase();
+                if (itemInfo.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
     </script>
 </body>
 </html>
