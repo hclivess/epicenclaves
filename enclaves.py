@@ -1112,6 +1112,8 @@ if __name__ == "__main__":
                   herd_probability=0, is_biome_generation=True)
             spawn(mapdb=mapdb[league], entity_class=entities.Graveyard, probability=1, map_size=1000, max_entities=200,
                   herd_probability=0, is_biome_generation=True)
+            spawn(mapdb=mapdb[league], entity_class=entities.Desert, probability=1, map_size=1000, max_entities=200,
+                  herd_probability=0, is_biome_generation=True)
 
             spawn(mapdb=mapdb[league], entity_class=entities.Rat, probability=1, map_size=1000, max_entities=200,
                   herd_probability=1)

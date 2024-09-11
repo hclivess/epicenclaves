@@ -539,7 +539,7 @@ class Lizarian(Enemy):
     evasion_chance = 0.15
     block_chance = 0.2
     block_reduction = 0.5
-    biome = "pond"
+    biome = "desert"
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -650,6 +650,145 @@ class Zombie(Enemy):
     def calculate_hp(self):
         return super().calculate_hp() + int(2 * self.level)
 
+
+class Basilisk(Enemy):
+    type = "basilisk"
+    base_hp = 180
+    base_min_damage = 20
+    base_max_damage = 35
+    base_armor = 12
+    crit_chance = 0.15
+    crit_damage = 2.0
+    drop_chance = 0.7
+    regular_drop = {"basilisk scale": 2, "petrified venom": 1}
+    probability = 0.2
+    max_entities = 80
+    max_entities_total = 300
+    herd_probability = 0.1
+    min_level = 40
+    max_level = 90
+    experience_value = 150
+    petrify_chance = 0.2
+    block_chance = 0.2
+    block_reduction = 0.5
+    biome = "desert"
+
+    def roll_damage(self):
+        damage_info = super().roll_damage()
+        if random.random() < self.petrify_chance:
+            damage_info["damage"] *= 2  # Double damage on petrify
+            damage_info["message"] += " (petrifying gaze)"
+        return damage_info
+
+class Djinn(Enemy):
+    type = "djinn"
+    base_hp = 250
+    base_min_damage = 30
+    base_max_damage = 45
+    base_armor = 8
+    crit_chance = 0.2
+    crit_damage = 2.2
+    drop_chance = 0.8
+    regular_drop = {"magical essence": 3, "djinn's lamp": 1}
+    probability = 0.15
+    max_entities = 60
+    max_entities_total = 200
+    herd_probability = 0.05
+    min_level = 50
+    max_level = 100
+    experience_value = 200
+    wish_chance = 0.25
+    evasion_chance = 0.3
+    biome = "desert"
+
+    def roll_damage(self):
+        if random.random() < self.wish_chance:
+            effect = random.choice(["heal", "power", "defense"])
+            if effect == "heal":
+                self.hp = min(self.hp + self.max_hp // 4, self.max_hp)
+                return {"damage": 0, "message": "granted a wish of healing"}
+            elif effect == "power":
+                damage = random.randint(self.max_damage, self.max_damage * 2)
+                return {"damage": damage, "message": "granted a wish of power"}
+            else:  # defense
+                self.armor *= 2  # Temporary armor boost
+                return {"damage": 0, "message": "granted a wish of protection"}
+        return super().roll_damage()
+
+class Manticore(Enemy):
+    type = "manticore"
+    base_hp = 300
+    base_min_damage = 35
+    base_max_damage = 50
+    base_armor = 15
+    crit_chance = 0.18
+    crit_damage = 2.1
+    drop_chance = 0.75
+    regular_drop = {"manticore spike": 3, "lion's mane": 1}
+    probability = 0.18
+    max_entities = 70
+    max_entities_total = 250
+    herd_probability = 0.15
+    min_level = 55
+    max_level = 110
+    experience_value = 250
+    spike_volley_chance = 0.3
+    block_chance = 0.15
+    block_reduction = 0.4
+    biome = "desert"
+
+    def roll_damage(self):
+        if random.random() < self.spike_volley_chance:
+            num_spikes = random.randint(3, 6)
+            total_damage = sum(random.randint(self.base_min_damage, self.base_max_damage) for _ in range(num_spikes))
+            return {"damage": total_damage, "message": f"launched a volley of {num_spikes} spikes"}
+        return super().roll_damage()
+
+class Sandworm(Enemy):
+    type = "sandworm"
+    base_hp = 400
+    base_min_damage = 40
+    base_max_damage = 60
+    base_armor = 20
+    crit_chance = 0.1
+    crit_damage = 2.5
+    drop_chance = 0.9
+    regular_drop = {"sandworm segment": 5, "desert spice": 2}
+    probability = 0.12
+    max_entities = 50
+    max_entities_total = 150
+    herd_probability = 0
+    min_level = 70
+    max_level = 150
+    experience_value = 350
+    burrow_chance = 0.4
+    swallow_chance = 0.15
+    block_chance = 0.25
+    block_reduction = 0.6
+    biome = "desert"
+
+    def __init__(self, level: int):
+        super().__init__(level)
+        self.is_burrowed = False
+
+    def roll_damage(self):
+        if self.is_burrowed:
+            self.is_burrowed = False
+            damage = random.randint(int(self.max_damage * 1.5), int(self.max_damage * 2.5))
+            return {"damage": damage, "message": "erupted from the sand with a devastating attack"}
+        elif random.random() < self.burrow_chance:
+            self.is_burrowed = True
+            return {"damage": 0, "message": "burrowed into the sand"}
+        elif random.random() < self.swallow_chance:
+            damage = self.max_damage * 2
+            return {"damage": damage, "message": "attempted to swallow you whole"}
+        return super().roll_damage()
+
+    def take_damage(self, damage: int) -> Dict[str, Any]:
+        if self.is_burrowed:
+            damage = damage // 2  # Half damage while burrowed
+        return super().take_damage(damage)
+
 class Scenery:
     probability = 0
     biome = "any"
@@ -700,6 +839,12 @@ class Graveyard(Scenery):
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return []
 
+class Desert(Scenery):
+    type = "desert"
+    biome = "desert"
+
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        return []
 
 class Mountain(Scenery):
     type = "mountain"
