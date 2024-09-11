@@ -64,6 +64,15 @@
             padding: 5px 10px;
             width: 200px;
         }
+        .winner-card {
+            background-image: url('/img/assets/winner.png');
+            background-size: cover;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        .winner-card p {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -79,9 +88,17 @@
             <div class="search-container">
                 <input type="text" id="playerSearch" placeholder="Search players...">
             </div>
+
+            {% set max_score = 0 %}
+            {% for user_id, user_info in usersdb.items() %}
+                {% if user_info['score'] > max_score %}
+                    {% set max_score = user_info['score'] %}
+                {% end %}
+            {% end %}
+
             <div class="card-grid" id="playerGrid">
                 {% for user_id, user_info in usersdb.items() %}
-                <div class="card">
+                <div class="card{% if user_info['score'] == max_score %} winner-card{% end %}">
                     <img src="{{ user_info['img'] }}" alt="Player {{ user_id }}">
                     <p><strong>ID:</strong> {{ user_id }} <strong>Type:</strong> {{ user_info['type'] }}</p>
                     <p><strong>Pos:</strong> ({{ user_info['x_pos'] }}, {{ user_info['y_pos'] }}) <strong>Age:</strong> {{ user_info['age'] }} <strong>Exp:</strong> {{ user_info['exp'] }} <strong>Score:</strong> {{ user_info['score'] }}</p>
