@@ -120,13 +120,14 @@ def create_user(user_data_dict: Dict[str, Dict[str, Any]], user: str, mapdb: Dic
 
     # Generate a hatchet as the starting weapon
     starting_hatchet = generate_tool(max_level=1, tool_type="hatchet")
+    starting_pickaxe = generate_tool(max_level=1, tool_type="pickaxe")
 
     # Create a new User instance
     new_user = User(user, x_pos, y_pos, profile_pic)
 
     # Set initial equipment
     new_user.equipped = [starting_hatchet] + initial_armor
-    new_user.unequipped = [generate_weapon(max_level=1)]
+    new_user.unequipped = [starting_pickaxe, generate_weapon(max_level=1)]
 
     # Calculate total initial armor value
     new_user.armor = sum(armor["protection"] for armor in initial_armor)
