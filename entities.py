@@ -27,6 +27,7 @@ class Enemy:
     evasion_chance = 0.0
     block_chance = 0.0
     block_reduction = 0.5
+    biome = "any"
 
     def __init__(self, level: int):
         self.level = max(self.min_level, min(level, self.max_level))
@@ -126,6 +127,7 @@ class Skeleton(Enemy):
     reassemble_chance = 0.2
     block_chance = 0.1
     block_reduction = 0.3
+    biome = "graveyard"
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -156,6 +158,7 @@ class Boar(Enemy):
     experience_value = 10
     block_chance = 0.1
     block_reduction = 0.3
+    biome="forest"
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [{"name": "hunt", "action": f"/fight?target={self.type}"}]
@@ -177,6 +180,7 @@ class Wolf(Enemy):
     max_level = 25
     experience_value = 15
     evasion_chance = 0.15
+    biome="forest"
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [{"name": "hunt", "action": f"/fight?target={self.type}"}]
@@ -201,6 +205,7 @@ class Goblin(Enemy):
     evasion_chance = 0.1
     block_chance = 0.05
     block_reduction = 0.2
+    biome="pond"
 
 class Specter(Enemy):
     type = "specter"
@@ -219,6 +224,7 @@ class Specter(Enemy):
     max_level = 50
     experience_value = 40
     evasion_chance = 0.25
+    biome="cavern"
 
     def roll_damage(self):
         damage_info = super().roll_damage()
@@ -246,6 +252,7 @@ class Hatchling(Enemy):
     experience_value = 80
     block_chance = 0.15
     block_reduction = 0.4
+    biome="cavern"
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -283,6 +290,7 @@ class Bandit(Enemy):
     evasion_chance = 0.1
     block_chance = 0.1
     block_reduction = 0.3
+    biome = "cavern"
 
     def roll_damage(self):
         damage_info = super().roll_damage()
@@ -310,6 +318,7 @@ class Troll(Enemy):
     regeneration_rate = 5
     block_chance = 0.2
     block_reduction = 0.5
+    biome = "cavern"
 
     def calculate_hp(self):
         hp = super().calculate_hp()
@@ -333,6 +342,7 @@ class Harpy(Enemy):
     max_level = 45
     experience_value = 35
     evasion_chance = 0.2
+    biome = "cavern"
 
     def roll_damage(self):
         damage_info = super().roll_damage()
@@ -360,6 +370,7 @@ class Orc(Enemy):
     experience_value = 50
     block_chance = 0.15
     block_reduction = 0.35
+    biome = "cavern"
 
 class Spider(Enemy):
     type = "spider"
@@ -382,6 +393,7 @@ class Spider(Enemy):
     poison_duration = 3
     poison_damage = 2
     evasion_chance = 0.15
+    biome = "cavern"
 
     def roll_damage(self):
         damage_info = super().roll_damage()
@@ -406,6 +418,7 @@ class Rat(Enemy):
     max_level = 10
     experience_value = 5
     evasion_chance = 0.2  # Rats are small and quick, so they have a higher base evasion
+    biome = "cavern"
 
 class Minotaur(Enemy):
     type = "minotaur"
@@ -426,6 +439,7 @@ class Minotaur(Enemy):
     experience_value = 100
     block_chance = 0.25
     block_reduction = 0.6
+    biome = "cavern"
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -459,6 +473,7 @@ class Wraith(Enemy):
     experience_value = 75
     phase_chance = 0.3
     evasion_chance = 0.3
+    biome = "pond"
 
     def roll_damage(self):
         damage_info = super().roll_damage()
@@ -486,6 +501,7 @@ class Dragon(Enemy):
     experience_value = 500
     block_chance = 0.3
     block_reduction = 0.7
+    biome = "cavern"
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -523,6 +539,7 @@ class Lizarian(Enemy):
     evasion_chance = 0.15
     block_chance = 0.2
     block_reduction = 0.5
+    biome = "pond"
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -560,6 +577,7 @@ class Golem(Enemy):
     experience_value = 400
     block_chance = 0.4
     block_reduction = 0.8
+    biome = "rock"
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -609,6 +627,7 @@ class Zombie(Enemy):
     experience_value = 250
     block_chance = 0.1
     block_reduction = 0.3
+    biome = "graveyard"
 
     def __init__(self, level: int):
         super().__init__(level)
@@ -633,17 +652,21 @@ class Zombie(Enemy):
 
 class Scenery:
     probability = 0
+    biome = "any"
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return []
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            "type": self.type
+            "type": self.type,
+            "biome": self.biome
         }
 
 class Forest(Scenery):
     type = "forest"
+    biome = "forest"
+
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [
@@ -654,6 +677,8 @@ class Forest(Scenery):
 
 class Pond(Scenery):
     type = "pond"
+    biome = "pond"
+
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [
@@ -661,8 +686,24 @@ class Pond(Scenery):
             {"name": "conquer", "action": f"/conquer?target={self.type}"},
         ]
 
+class Cavern(Scenery):
+    type = "cavern"
+    biome = "cavern"
+
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        return []
+
+class Graveyard(Scenery):
+    type = "graveyard"
+    biome = "graveyard"
+
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        return []
+
+
 class Mountain(Scenery):
     type = "mountain"
+    biome = "mountain"
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [
@@ -673,6 +714,7 @@ class Mountain(Scenery):
 
 class Rock(Scenery):
     type = "rock"
+    biome = "rock"
 
 def get_all_subclasses(cls):
     return set(cls.__subclasses__()).union(

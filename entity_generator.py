@@ -1,132 +1,118 @@
 import random
+from typing import Dict, Any, List, Tuple
 import importlib
-from backend import calculate_level
+import math
+from collections import defaultdict
 
-# Import all entities from a separate module
+# Import entities module
 entities = importlib.import_module('entities')
 
-def spawn_all_entities(mapdb):
-    entity_classes = [cls for name, cls in entities.__dict__.items() if isinstance(cls, type) and hasattr(cls, 'type')]
-    for entity_class in entity_classes:
-        spawn(entity_class, mapdb)
+# Import specific classes from entities
+from entities import Enemy, Scenery, entity_types
 
-def spawn(entity_class, mapdb, probability=None, min_level=None, max_level=None, map_size=None, max_entities=None,
-          max_entities_total=None, herd_size=None, herd_radius=None, herd_probability=None):
-    probability = probability if probability is not None else getattr(entity_class, 'probability', 1)
+def find_nearby_biomes(mapdb: Dict[str, Any], x: int, y: int, radius: int, target_biome: str) -> List[Tuple[int, int]]:
+    return [(nx, ny) for dx in range(-radius, radius + 1)
+            for dy in range(-radius, radius + 1)
+            if f"{(nx := x + dx)},{(ny := y + dy)}" in mapdb
+            and mapdb[f"{nx},{ny}"].get('biome') == target_biome]
+
+def spawn(mapdb: Dict[str, Any], entity_class, **kwargs):
+    probability = kwargs.get('probability', getattr(entity_class, 'probability', 1))
     if probability <= 0:
-        print(f"Skipping spawn for {entity_class.type} due to zero or negative probability")
         return
 
-    min_level = min_level if min_level is not None else getattr(entity_class, 'min_level', 1)
-    max_level = max_level if max_level is not None else getattr(entity_class, 'max_level', 2)
-    map_size = map_size if map_size is not None else getattr(entity_class, 'map_size', 1000)
-    max_entities = max_entities if max_entities is not None else getattr(entity_class, 'max_entities', None)
-    max_entities_total = max_entities_total if max_entities_total is not None else getattr(entity_class, 'max_entities_total', None)
-    herd_size = herd_size if herd_size is not None else getattr(entity_class, 'herd_size', 15)
-    herd_radius = herd_radius if herd_radius is not None else getattr(entity_class, 'herd_radius', 5)
-    herd_probability = herd_probability if herd_probability is not None else getattr(entity_class, 'herd_probability', 0.5)
+    min_level = kwargs.get('min_level', getattr(entity_class, 'min_level', 1))
+    max_level = kwargs.get('max_level', getattr(entity_class, 'max_level', 2))
+    map_size = kwargs.get('map_size', getattr(entity_class, 'map_size', 1000))
+    max_entities = kwargs.get('max_entities', getattr(entity_class, 'max_entities', None))
+    max_entities_total = kwargs.get('max_entities_total', getattr(entity_class, 'max_entities_total', None))
+    herd_size = kwargs.get('herd_size', getattr(entity_class, 'herd_size', 15))
+    herd_radius = kwargs.get('herd_radius', getattr(entity_class, 'herd_radius', 5))
+    herd_probability = kwargs.get('herd_probability', getattr(entity_class, 'herd_probability', 0.5))
+    is_biome_generation = kwargs.get('is_biome_generation', False)
 
     total_entities = 0
     total_tiles = map_size * map_size
     existing_entities = sum(1 for value in mapdb.values() if value.get('type') == entity_class.type)
 
-    print(f"Attempting to spawn {entity_class.type} entities:")
-    #print(f"  - Probability: {probability}")
-    #print(f"  - Min level: {min_level}")
-    #print(f"  - Max level: {max_level}")
-    #print(f"  - Max entities per spawn: {max_entities if max_entities is not None else 'Unlimited'}")
-    #print(f"  - Max total entities: {max_entities_total if max_entities_total is not None else 'Unlimited'}")
-    print(f"  - Current entities on map: {existing_entities}")
-    #print(f"  - Map size: {map_size}x{map_size}")
+    biome = getattr(entity_class, 'biome', 'any')
 
-    while True:
-        if random.random() > probability:
-            print(f"Spawn attempt for {entity_class.type} skipped due to probability check")
+    if is_biome_generation:
+        biome_locations = set((x, y) for x in range(1, map_size + 1) for y in range(1, map_size + 1)
+                              if f"{x},{y}" not in mapdb)
+    else:
+        biome_locations = set((x, y) for x in range(1, map_size + 1) for y in range(1, map_size + 1)
+                              if f"{x},{y}" in mapdb and mapdb[f"{x},{y}"].get('biome') == biome)
+
+    if not biome_locations and not is_biome_generation:
+        return
+
+    while biome_locations:
+        if random.random() > probability or \
+           (max_entities is not None and total_entities >= max_entities) or \
+           (max_entities_total is not None and existing_entities + total_entities >= max_entities_total) or \
+           len(mapdb) >= total_tiles:
             break
 
-        if max_entities is not None and total_entities >= max_entities:
-            print(f"Reached maximum entities per spawn ({max_entities}) for {entity_class.type}")
-            return
+        biome_x, biome_y = biome_locations.pop()
 
-        if max_entities_total is not None and existing_entities + total_entities >= max_entities_total:
-            print(f"Reached maximum total entities ({max_entities_total}) for {entity_class.type}")
-            return
-
-        if len(mapdb) >= total_tiles:
-            print(f"No more empty tiles available ({len(mapdb)}/{total_tiles}) for {entity_class.type}")
-            return
-
-        x_pos = random.randint(1, map_size)
-        y_pos = random.randint(1, map_size)
-        coord_key = f"{x_pos},{y_pos}"
-
-        if coord_key in mapdb:
-            print(f"Tile {coord_key} is occupied, trying another location for {entity_class.type}")
-            continue
-
-        if random.random() <= herd_probability:
-            print(f"Attempting to spawn a herd of {entity_class.type}")
-            herd_spawned = 0
-            for _ in range(herd_size):
-                if max_entities is not None and total_entities >= max_entities:
-                    print(f"Reached maximum entities per spawn ({max_entities}) during herd spawn for {entity_class.type}")
-                    return
-                if max_entities_total is not None and existing_entities + total_entities >= max_entities_total:
-                    print(f"Reached maximum total entities ({max_entities_total}) during herd spawn for {entity_class.type}")
-                    return
-                entity_level = calculate_level(min_level, max_level)
-                x_offset = random.randint(-herd_radius, herd_radius)
-                y_offset = random.randint(-herd_radius, herd_radius)
-                new_x = x_pos + x_offset
-                new_y = y_pos + y_offset
-                new_coord_key = f"{new_x},{new_y}"
-
-                if 1 <= new_x <= map_size and 1 <= new_y <= map_size and new_coord_key not in mapdb:
-                    entity_data = create_entity_data(entity_class, entity_level)
-                    print(f"Generating {entity_class.type} (Level {entity_level}) at {new_x}, {new_y}")
-                    save_map_data(x_pos=new_x, y_pos=new_y, data=entity_data, map_data_dict=mapdb)
-                    total_entities += 1
-                    herd_spawned += 1
-                else:
-                    print(f"Failed to spawn herd member at {new_x}, {new_y} for {entity_class.type}")
-            print(f"Herd spawn complete: {herd_spawned}/{herd_size} {entity_class.type} entities spawned")
+        if random.random() <= herd_probability and not is_biome_generation:
+            spawn_herd(mapdb, entity_class, biome_x, biome_y, herd_size, map_size, min_level, max_level,
+                       max_entities, max_entities_total, existing_entities, total_entities)
         else:
-            entity_level = calculate_level(min_level, max_level)
-            entity_data = create_entity_data(entity_class, entity_level)
-            print(f"Generating single {entity_class.type} (Level {entity_level}) at {x_pos}, {y_pos}")
-            save_map_data(x_pos=x_pos, y_pos=y_pos, data=entity_data, map_data_dict=mapdb)
+            spawn_single(mapdb, entity_class, biome_x, biome_y, map_size, min_level, max_level, is_biome_generation)
             total_entities += 1
 
-    print(f"Spawn attempt for {entity_class.type} complete. Total new entities: {total_entities}")
+    return total_entities
+
+def spawn_herd(mapdb, entity_class, biome_x, biome_y, herd_size, map_size, min_level, max_level,
+               max_entities, max_entities_total, existing_entities, total_entities):
+    for _ in range(herd_size):
+        if (max_entities is not None and total_entities >= max_entities) or \
+           (max_entities_total is not None and existing_entities + total_entities >= max_entities_total):
+            return
+
+        angle = random.uniform(0, 2 * math.pi)
+        distance = random.uniform(1, 10)
+        new_x = int(biome_x + distance * math.cos(angle))
+        new_y = int(biome_y + distance * math.sin(angle))
+
+        if spawn_single(mapdb, entity_class, new_x, new_y, map_size, min_level, max_level):
+            total_entities += 1
+
+def spawn_single(mapdb, entity_class, x, y, map_size, min_level, max_level, is_biome_generation=False):
+    new_coord_key = f"{x},{y}"
+    if 1 <= x <= map_size and 1 <= y <= map_size and new_coord_key not in mapdb:
+        entity_level = 1 if is_biome_generation else random.randint(min_level, max_level)
+        entity_data = create_entity_data(entity_class, entity_level)
+        mapdb[new_coord_key] = entity_data
+        return True
+    return False
+
+def spawn_all_entities(mapdb):
+    for entity_class in entity_types.values():
+        if issubclass(entity_class, Scenery) and entity_class != Scenery:
+            spawn(mapdb, entity_class, is_biome_generation=True)
+
+    for entity_class in entity_types.values():
+        if issubclass(entity_class, Enemy):
+            spawn(mapdb, entity_class)
 
 def create_entity_data(entity_class, level):
-    if issubclass(entity_class, entities.Enemy):
-        entity_instance = entity_class(level)
-    else:
-        entity_instance = entity_class()
-    return entity_instance.to_dict()
+    return (entity_class(level) if issubclass(entity_class, entities.Enemy) else entity_class()).to_dict()
 
-def save_map_data(map_data_dict, x_pos, y_pos, data):
-    # Use a string coordinate key like 'x,y'
-    coord_key = f"{x_pos},{y_pos}"
-    map_data_dict[coord_key] = data
-
-def count_entities_of_type(mapdb, entity_type):
-    return sum(1 for data in mapdb.values() if "type" in data and data["type"] == entity_type)
+def count_entities_of_type(mapdb):
+    counts = defaultdict(int)
+    for data in mapdb.values():
+        if "type" in data:
+            counts[data["type"]] += 1
+    return counts
 
 if __name__ == "__main__":
-    # Test the entity generation
     test_mapdb = {}
     spawn_all_entities(test_mapdb)
-    print("Entity generation test complete.")
     print(f"Total entities generated: {len(test_mapdb)}")
-    entity_counts = {}
-    for entity in test_mapdb.values():
-        entity_type = entity['type']
-        if entity_type not in entity_counts:
-            entity_counts[entity_type] = 0
-        entity_counts[entity_type] += 1
-
+    entity_counts = count_entities_of_type(test_mapdb)
     print("Entity type counts:")
     for entity_type, count in entity_counts.items():
         print(f"  {entity_type}: {count}")

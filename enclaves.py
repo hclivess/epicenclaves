@@ -1101,12 +1101,26 @@ if __name__ == "__main__":
 
         print(db_status)
         if not db_status["map_exists"]:
-            spawn(mapdb=mapdb[league], entity_class=entities.Rat, probability=1, map_size=1000, max_entities=2500, herd_probability=1)
-            spawn(mapdb=mapdb[league], entity_class=entities.Boar, probability=1, map_size=1000, max_entities=2500, herd_probability=1)
-            spawn(mapdb=mapdb[league], entity_class=entities.Wolf, probability=1, map_size=1000, max_entities=2500, herd_probability=1)
-            spawn(mapdb=mapdb[league], entity_class=entities.Forest, probability=1, map_size=1000, max_entities=2500, herd_probability=0)
-            spawn(mapdb=mapdb[league], entity_class=entities.Pond, probability=1, map_size=1000, max_entities=2500, herd_probability=0)
-            spawn(mapdb=mapdb[league], entity_class=entities.Mountain, probability=1, map_size=1000, max_entities=2500, herd_probability=0)
+            # First, spawn the biomes
+            spawn(mapdb=mapdb[league], entity_class=entities.Cavern, probability=1, map_size=1000, max_entities=250,
+                  herd_probability=0, is_biome_generation=True)
+            spawn(mapdb=mapdb[league], entity_class=entities.Forest, probability=1, map_size=1000, max_entities=250,
+                  herd_probability=0, is_biome_generation=True)
+            spawn(mapdb=mapdb[league], entity_class=entities.Pond, probability=1, map_size=1000, max_entities=100,
+                  herd_probability=0, is_biome_generation=True)
+            spawn(mapdb=mapdb[league], entity_class=entities.Mountain, probability=1, map_size=1000, max_entities=200,
+                  herd_probability=0, is_biome_generation=True)
+            spawn(mapdb=mapdb[league], entity_class=entities.Graveyard, probability=1, map_size=1000, max_entities=200,
+                  herd_probability=0, is_biome_generation=True)
+
+            spawn(mapdb=mapdb[league], entity_class=entities.Rat, probability=1, map_size=1000, max_entities=200,
+                  herd_probability=1)
+            spawn(mapdb=mapdb[league], entity_class=entities.Boar, probability=1, map_size=1000, max_entities=200,
+                  herd_probability=1)
+            spawn(mapdb=mapdb[league], entity_class=entities.Wolf, probability=1, map_size=1000, max_entities=200,
+                  herd_probability=1)
+
+            # Generate mazes (if you still want to include them)
             generate_multiple_mazes(mapdb[league], 20, 20, 10, 10, 0.1, 500, 1000)
 
     turn_engine = TurnEngine(usersdb, mapdb)
