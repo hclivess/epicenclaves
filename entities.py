@@ -342,7 +342,7 @@ class Harpy(Enemy):
     max_level = 45
     experience_value = 35
     evasion_chance = 0.2
-    biome = "cavern"
+    biome = "mountain"
 
     def roll_damage(self):
         damage_info = super().roll_damage()
