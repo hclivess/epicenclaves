@@ -1123,7 +1123,7 @@ if __name__ == "__main__":
                   herd_probability=1)
 
             # Generate mazes (if you still want to include them)
-            generate_multiple_mazes(mapdb[league], 20, 20, 10, 10, 0.1, 500, 1000)
+            generate_multiple_mazes(mapdb[league], 51, 51, 10, 10, 0.1, 500, 1000)
 
     turn_engine = TurnEngine(usersdb, mapdb)
     turn_engine.start()
