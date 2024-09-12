@@ -49,7 +49,8 @@ from upgrade import upgrade
 from trash import trash_item, trash_armor, trash_all, trash_weapons
 from repair import repair_all_items
 
-max_size = 1000000
+MAX_SIZE = 1000000
+DISTANCE = 15
 
 # Get all weapon classes dynamically
 weapon_classes = {name.lower(): cls for name, cls in inspect.getmembers(inspect.getmodule(Weapon), inspect.isclass)
@@ -380,15 +381,15 @@ class MoveToHandler(BaseHandler):
 
         # Proximity check
         current_x, current_y = user_data["x_pos"], user_data["y_pos"]
-        max_move_distance = 10  # Define the maximum allowed move distance
+        max_move_distance = DISTANCE  # Define the maximum allowed move distance
         if abs(x - current_x) > max_move_distance or abs(y - current_y) > max_move_distance:
             self.write(json.dumps({"error": "Invalid move. Target location is too far."}))
             return
 
-        moved = move_to(user, x, y, max_size, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
+        moved = move_to(user, x, y, MAX_SIZE, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
         user_data = get_user_data(user, usersdb=usersdb[league])  # Refresh user data
 
-        visible_distance = 10
+        visible_distance = DISTANCE
         x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
         visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb[league], visible_distance)
         visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb[league]), visible_distance)
@@ -547,14 +548,14 @@ class DragHandler(BaseHandler):
         new_x, new_y = target_x + dx, target_y + dy
 
         # Check if the new position is within the map boundaries
-        if not (0 <= new_x < max_size and 0 <= new_y < max_size):
+        if not (0 <= new_x < MAX_SIZE and 0 <= new_y < MAX_SIZE):
             return "Cannot drag the player outside the map boundaries."
 
         # Update the dragged player's position
         update_user_data(target, {"x_pos": new_x, "y_pos": new_y}, usersdb[league])
 
         # Move the dragging player to the new position
-        move_to(user, new_x, new_y, max_size, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
+        move_to(user, new_x, new_y, MAX_SIZE, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
 
         return f"Dragged player {target} {direction}."
 
@@ -565,11 +566,11 @@ class MoveHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         user_data = get_user_data(user, usersdb=usersdb[league])
-        moved = move(user, entry, max_size, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
+        moved = move(user, entry, MAX_SIZE, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
         user_data = get_user_data(user, usersdb=usersdb[league])  # Refresh user data
 
         if target == "map":
-            visible_distance = 10
+            visible_distance = DISTANCE
             x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
             visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb[league], visible_distance)
             visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb[league]), visible_distance)
