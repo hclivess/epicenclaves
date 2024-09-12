@@ -31,7 +31,7 @@ class Enemy:
 
     def __init__(self, level: int):
         self.level = max(self.min_level, min(level, self.max_level))
-        self.max_hp = self.calculate_hp()
+        self.max_hp = self.calculate_npc_hp()
         self.hp = self.max_hp
         self.min_damage, self.max_damage = self.calculate_damage()
         self.armor = self.calculate_armor()
@@ -40,7 +40,7 @@ class Enemy:
         self.evasion = self.calculate_evasion()
         self.block = self.calculate_block()
 
-    def calculate_hp(self):
+    def calculate_npc_hp(self):
         return int(self.base_hp * (1 + 0.20 * (self.level - 1)))  # 20% increase per level
 
     def calculate_damage(self):
@@ -135,7 +135,7 @@ class Skeleton(Enemy):
 
     def process_special_effects(self) -> str:
         if self.hp <= 0 and not self.has_reassembled and random.random() < self.reassemble_chance:
-            self.hp = self.calculate_hp() // 2  # Reassemble with half HP
+            self.hp = self.calculate_npc_hp() // 2  # Reassemble with half HP
             self.has_reassembled = True
             return "The skeleton has reassembled itself!"
         return ""
@@ -320,8 +320,8 @@ class Troll(Enemy):
     block_reduction = 0.5
     biome = "mountain"
 
-    def calculate_hp(self):
-        hp = super().calculate_hp()
+    def calculate_npc_hp(self):
+        hp = super().calculate_npc_hp()
         return hp + self.regeneration_rate * (self.level - 1)  # Additional HP from regeneration
 
 class Harpy(Enemy):
@@ -647,8 +647,8 @@ class Zombie(Enemy):
 
         return damage_info
 
-    def calculate_hp(self):
-        return super().calculate_hp() + int(2 * self.level)
+    def calculate_npc_hp(self):
+        return super().calculate_npc_hp() + int(2 * self.level)
 
 
 class Basilisk(Enemy):

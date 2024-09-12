@@ -422,3 +422,27 @@ document.addEventListener('keydown', function(event) {
             displayMessage('An error occurred while moving.');
         });
 });
+
+
+function buildPalisade() {
+    fetch('/build?entity=palisade&name=town1&return_to_map=true', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            displayMessage(data.message);
+        }
+        // Assuming jsonData is a global variable holding the map data
+        Object.assign(jsonData, data);
+        updateMap(jsonData);
+        checkPlayerPosition();
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        displayMessage('An error occurred while building the palisade.');
+    });
+}
