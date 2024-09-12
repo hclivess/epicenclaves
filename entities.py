@@ -41,7 +41,7 @@ class Enemy:
         self.block = self.calculate_block()
 
     def calculate_hp(self):
-        return int(self.base_hp * (1 + 0.15 * (self.level - 1)))  # 15% increase per level
+        return int(self.base_hp * (1 + 0.20 * (self.level - 1)))  # 20% increase per level
 
     def calculate_damage(self):
         scaling_factor = 1 + 0.1 * (self.level - 1)  # 10% increase per level
