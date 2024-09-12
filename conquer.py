@@ -6,10 +6,10 @@ from backend import (
 from map import update_map_data, get_coords
 import random
 
-
-# Calculate attack success based on attacker and defender strengths.
-def attack_success(attacker, defender):
-    total = attacker + defender
+def attack_success(attacker, defender, building_level=0):
+    # Increase defender's strength by 100% for each building level
+    defender_strength = defender * (2 ** building_level)
+    total = attacker + defender_strength
     if total == 0:
         return {"success": True, "chance": 100}
     chance = (attacker / total) * 100
@@ -17,23 +17,15 @@ def attack_success(attacker, defender):
     success = roll <= chance
     return {"success": success, "chance": chance}
 
-
-# Check if the tile belongs to the user.
 def is_user_tile_owner(entry, user):
     return get_values(entry).get("control") == user
 
-
-# Check if tile can be acquired by the user.
 def can_acquire_tile(entry, target):
     return get_values(entry).get("type") == target
 
-
-# Check if the user has enough action points.
 def has_sufficient_action_points(user_data):
     return user_data["action_points"] >= 10
 
-
-# Handle the case when attack fails.
 def process_attack_failure(user, user_data, usersdb, chance):
     update_user_data(
         user=user,
@@ -46,8 +38,6 @@ def process_attack_failure(user, user_data, usersdb, chance):
     )
     return f"Your army was crushed in battle, the chance of success was {chance}! You were seriously hurt."
 
-
-# Handle the case when attack is successful.
 def process_attack_success(
         entry, user, usersdb, mapdb, user_data, enemy_army, your_army, chance
 ):
@@ -72,7 +62,6 @@ def process_attack_success(
 
     return f"Takeover successful. The chance was {chance}%."
 
-
 def adjust_population_limit(owner, new_owner, usersdb):
     pop_delta = 10
 
@@ -83,7 +72,6 @@ def adjust_population_limit(owner, new_owner, usersdb):
 def remove_entry_from_owner(owner, user_data, usersdb):
     coords = {"x_pos": user_data["x_pos"], "y_pos": user_data["y_pos"]}
     remove_from_user(owner, coords, usersdb)
-
 
 def assign_entry_to_user(entry, user, user_data, mapdb, usersdb, remaining_army):
     key = get_coords(entry)
@@ -102,10 +90,6 @@ def assign_entry_to_user(entry, user, user_data, mapdb, usersdb, remaining_army)
         user_data_dict=usersdb,
     )
 
-
-
-
-# Main function to handle tile conquest.
 def attempt_conquer(user, target, on_tile_map, usersdb, mapdb, user_data):
     if not on_tile_map:
         return "Looks like an empty tile"
@@ -120,8 +104,9 @@ def attempt_conquer(user, target, on_tile_map, usersdb, mapdb, user_data):
 
         your_army = user_data.get("army_free", 0)
         enemy_army = get_values(entry).get("army", 0)
+        building_level = get_values(entry).get("level", 0)  # Get the building level, default to 0 if not present
 
-        conquered = attack_success(attacker=your_army, defender=enemy_army)
+        conquered = attack_success(attacker=your_army, defender=enemy_army, building_level=building_level)
 
         if not conquered["success"]:
             return process_attack_failure(user, user_data, usersdb, conquered["chance"])
