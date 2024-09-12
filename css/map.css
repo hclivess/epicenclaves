@@ -1,44 +1,44 @@
-    .dragon { background: url('../img/assets/dragon.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
-    .goblin { background: url('../img/assets/goblin.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
-    .specter { background: url('../img/assets/specter.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
-    .hatchling { background: url('../img/assets/hatchling.png') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
-    .bandit { background: url('../img/assets/bandit.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .troll { background: url('../img/assets/troll.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .harpy { background: url('../img/assets/harpy.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .minotaur { background: url('../img/assets/minotaur.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .wraith { background: url('../img/assets/wraith.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .boar { background: url('../img/assets/boar.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .forest { background: url('../img/assets/forest.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .mountain { background: url('../img/assets/mountain.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .wall { background: url('../img/assets/wall.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .rock { background: url('../img/assets/rock.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .palisade { background: url('../img/assets/palisade.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .siege { background: url('../img/assets/siege.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .outpost { background: url('../img/assets/outpost.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .wolf { background: url('../img/assets/wolf.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .inn { background: url('../img/assets/inn.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .barracks { background: url('../img/assets/barracks.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .sawmill { background: url('../img/assets/sawmill.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .house { background: url('../img/assets/house.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .farm { background: url('../img/assets/farm.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .mine { background: url('../img/assets/mine.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .blacksmith { background: url('../img/assets/blacksmith.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .skeleton { background: url('../img/assets/skeleton.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .orc { background: url('../img/assets/orc.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .rat { background: url('../img/assets/rat.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .spider { background: url('../img/assets/spider.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .lizarian { background: url('../img/assets/lizarian.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .golem { background: url('../img/assets/golem.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .zombie { background: url('../img/assets/zombie.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .laboratory { background: url('../img/assets/laboratory.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .pond { background: url('../img/assets/pond.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .cavern { background: url('../img/assets/cavern.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .graveyard { background: url('../img/assets/graveyard.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .basilisk { background: url('../img/assets/basilisk.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .sandworm { background: url('../img/assets/sandworm.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .manticore { background: url('../img/assets/manticore.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .djinn { background: url('../img/assets/djinn.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
-    .desert { background: url('../img/assets/desert.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .dragon { background: url('../img/assets/thumbs/dragon.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
+    .goblin { background: url('../img/assets/thumbs/goblin.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
+    .specter { background: url('../img/assets/thumbs/specter.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
+    .hatchling { background: url('../img/assets/thumbs/hatchling.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(255, 215, 0, 0.5), rgba(0, 0, 0, 0.5)); }
+    .bandit { background: url('../img/assets/thumbs/bandit.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .troll { background: url('../img/assets/thumbs/troll.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .harpy { background: url('../img/assets/thumbs/harpy.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .minotaur { background: url('../img/assets/thumbs/minotaur.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .wraith { background: url('../img/assets/thumbs/wraith.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .boar { background: url('../img/assets/thumbs/boar.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .forest { background: url('../img/assets/thumbs/forest.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .mountain { background: url('../img/assets/thumbs/mountain.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .wall { background: url('../img/assets/thumbs/wall.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .rock { background: url('../img/assets/thumbs/rock.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .palisade { background: url('../img/assets/thumbs/palisade.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .siege { background: url('../img/assets/thumbs/siege.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .outpost { background: url('../img/assets/thumbs/outpost.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .wolf { background: url('../img/assets/thumbs/wolf.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .inn { background: url('../img/assets/thumbs/inn.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .barracks { background: url('../img/assets/thumbs/barracks.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .sawmill { background: url('../img/assets/thumbs/sawmill.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .house { background: url('../img/assets/thumbs/house.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .farm { background: url('../img/assets/thumbs/farm.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .mine { background: url('../img/assets/thumbs/mine.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .blacksmith { background: url('../img/assets/thumbs/blacksmith.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .skeleton { background: url('../img/assets/thumbs/skeleton.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .orc { background: url('../img/assets/thumbs/orc.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .rat { background: url('../img/assets/thumbs/rat.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .spider { background: url('../img/assets/thumbs/spider.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .lizarian { background: url('../img/assets/thumbs/lizarian.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .golem { background: url('../img/assets/thumbs/golem.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .zombie { background: url('../img/assets/thumbs/zombie.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .laboratory { background: url('../img/assets/thumbs/laboratory.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .pond { background: url('../img/assets/thumbs/pond.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .cavern { background: url('../img/assets/thumbs/cavern.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .graveyard { background: url('../img/assets/thumbs/graveyard.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .basilisk { background: url('../img/assets/thumbs/basilisk.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .sandworm { background: url('../img/assets/thumbs/sandworm.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .manticore { background: url('../img/assets/thumbs/manticore.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .djinn { background: url('../img/assets/thumbs/djinn.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .desert { background: url('../img/assets/thumbs/desert.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
 
     .outpost-range {
         position: absolute;
@@ -308,7 +308,7 @@ body, html {
 
 
 .btn-palisade {
-    background-image: url('/img/assets/palisade.png');
+    background-image: url('/img/assets/thumbs/palisade.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

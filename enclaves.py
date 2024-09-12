@@ -48,6 +48,7 @@ from maze_generator import generate_multiple_mazes
 from upgrade import upgrade
 from trash import trash_item, trash_armor, trash_all, trash_weapons
 from repair import repair_all_items
+from drag import drag_player
 
 MAX_SIZE = 1000000
 DISTANCE = 15
@@ -527,7 +528,10 @@ class DragHandler(BaseHandler):
         if user_data is None:
             message = f"User {user} not found."
         else:
-            message = self._drag_player(user, user_data, target, direction)
+            message, new_x, new_y = drag_player(target, direction, league, usersdb, mapdb, MAX_SIZE)
+            if new_x is not None and new_y is not None:
+                # Move the dragging player to the new position
+                move_to(user, new_x, new_y, MAX_SIZE, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
             # Refresh user data after dragging
             user_data = get_user_data(user, usersdb[league])
 
@@ -592,43 +596,6 @@ class DragHandler(BaseHandler):
             on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
             on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[league])
             self.render_user_panel(user, user_data, message=message, on_tile_map=on_tile_map, on_tile_users=on_tile_users, league=league)
-
-
-    def _drag_player(self, user, user_data, target, direction):
-        league = self.get_current_league()
-        target_data = usersdb[league].get(target)
-        if not target_data:
-            return f"Player {target} not found."
-
-        if target_data.get("hp", 0) > 0:
-            return f"Player {target} is not dead and cannot be dragged."
-
-        dx, dy = 0, 0
-        if direction == "up":
-            dy = -1
-        elif direction == "down":
-            dy = 1
-        elif direction == "left":
-            dx = -1
-        elif direction == "right":
-            dx = 1
-        else:
-            return f"Invalid direction: {direction}"
-
-        target_x, target_y = target_data["x_pos"], target_data["y_pos"]
-        new_x, new_y = target_x + dx, target_y + dy
-
-        # Check if the new position is within the map boundaries
-        if not (0 <= new_x < MAX_SIZE and 0 <= new_y < MAX_SIZE):
-            return "Cannot drag the player outside the map boundaries."
-
-        # Update the dragged player's position
-        update_user_data(target, {"x_pos": new_x, "y_pos": new_y}, usersdb[league])
-
-        # Move the dragging player to the new position
-        move_to(user, new_x, new_y, MAX_SIZE, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
-
-        return f"Dragged player {target} {direction}."
 
 
 
