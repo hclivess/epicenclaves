@@ -387,6 +387,8 @@ addClickListenerToMap();
 document.addEventListener('keydown', function(event) {
     const key = event.key;
     let direction;
+    let steps = 1;  // Default to 1 step
+
     switch (key) {
         case 'ArrowUp':
             direction = 'up';
@@ -406,21 +408,41 @@ document.addEventListener('keydown', function(event) {
         default:
             return;
     }
+
     event.preventDefault();
-    fetch(`/move?direction=${direction}&target=map`)
-        .then(response => response.json())
-        .then(data => {
-            Object.assign(jsonData, data);
-            updateMap(jsonData);
-            if (data.message) {
-                displayMessage(data.message);
-            }
-            checkPlayerPosition();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            displayMessage('An error occurred while moving.');
-        });
+
+    // Check if Shift key is pressed
+    if (event.shiftKey) {
+        steps = 10;  // Move 10 tiles when Shift is pressed
+    }
+
+    // Function to move multiple steps
+    function moveMultipleSteps(stepsRemaining) {
+        if (stepsRemaining > 0) {
+            fetch(`/move?direction=${direction}&target=map`)
+                .then(response => response.json())
+                .then(data => {
+                    Object.assign(jsonData, data);
+                    updateMap(jsonData);
+                    if (data.message) {
+                        displayMessage(data.message);
+                    }
+                    checkPlayerPosition();
+
+                    // Continue moving if there are steps remaining and the move was successful
+                    if (stepsRemaining > 1 && !data.message.includes("failed")) {
+                        moveMultipleSteps(stepsRemaining - 1);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    displayMessage('An error occurred while moving.');
+                });
+        }
+    }
+
+    // Start the multi-step movement
+    moveMultipleSteps(steps);
 });
 
 
