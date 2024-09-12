@@ -44,7 +44,7 @@ from auth import (auth_cookie_get, auth_login_validate, auth_add_user, auth_exis
 from sqlite import init_databases, load_users_to_memory, save_users_from_memory, save_map_from_memory, \
     load_map_to_memory, users_db
 from player import create_user, calculate_population_limit
-from wall_generator import generate_multiple_mazes
+from maze_generator import generate_multiple_mazes
 from upgrade import upgrade
 from trash import trash_item, trash_armor, trash_all, trash_weapons
 from repair import repair_all_items
