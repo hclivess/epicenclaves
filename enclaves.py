@@ -377,6 +377,14 @@ class MoveToHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         user_data = get_user_data(user, usersdb=usersdb[league])
+
+        # Proximity check
+        current_x, current_y = user_data["x_pos"], user_data["y_pos"]
+        max_move_distance = 10  # Define the maximum allowed move distance
+        if abs(x - current_x) > max_move_distance or abs(y - current_y) > max_move_distance:
+            self.write(json.dumps({"error": "Invalid move. Target location is too far."}))
+            return
+
         moved = move_to(user, x, y, max_size, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
         user_data = get_user_data(user, usersdb=usersdb[league])  # Refresh user data
 
