@@ -269,7 +269,7 @@ class ScoreboardHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
-        self.render("templates/scoreboard.html", mapdb=mapdb[league], usersdb=usersdb[league], ensure_ascii=False,
+        self.render("templates/scoreboard.html", mapdb=mapdb[league].copy(), usersdb=usersdb[league].copy(), ensure_ascii=False,
                     user=user)
 
 
