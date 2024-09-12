@@ -41,10 +41,10 @@ class Enemy:
         self.block = self.calculate_block()
 
     def calculate_hp(self):
-        return int(self.base_hp * (1 + 0.1 * (self.level - 1)))  # 10% increase per level
+        return int(self.base_hp * (1 + 0.15 * (self.level - 1)))  # 15% increase per level
 
     def calculate_damage(self):
-        scaling_factor = 1 + 0.05 * (self.level - 1)  # 5% increase per level
+        scaling_factor = 1 + 0.1 * (self.level - 1)  # 10% increase per level
         min_damage = int(self.base_min_damage * scaling_factor)
         max_damage = int(self.base_max_damage * scaling_factor)
         return min_damage, max_damage
@@ -53,7 +53,7 @@ class Enemy:
         return self.base_armor + int(0.5 * (self.level - 1))  # 0.5 armor increase per level
 
     def calculate_experience(self):
-        return int(self.experience_value * (1 + 0.1 * (self.level - 1)))  # 10% increase per level
+        return int(self.experience_value * (1 + 0.05 * (self.level - 1)))  # 5% increase per level
 
     def calculate_evasion(self):
         return self.evasion_chance + (0.002 * (self.level - 1))  # 0.2% increase per level
