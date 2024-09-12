@@ -492,6 +492,9 @@ def get_fight_preconditions(user_data: Dict) -> Optional[str]:
 
 def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, victor_name: str, death_chance: float,
                           usersdb: Dict, rounds: List[Dict], round_number: int, defeated_max_hp: int) -> None:
+
+    print("victor", victor)
+    print("defeated", defeated)
     if random.random() < death_chance:
         message = f"{defeated_name} was killed in battle. {defeated_name}'s HP: 0/{defeated_max_hp}"
         new_data = {"alive": False, "hp": 0, "action_points": 0}
@@ -501,8 +504,8 @@ def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, vict
 
     rounds.append({
         "round": round_number,
-        "player_hp": defeated["hp"],
-        "enemy_hp": defeated["hp"],
+        "player_hp": victor["hp"] if victor_name == "You" else defeated["hp"],
+        "enemy_hp": defeated["hp"] if victor_name == "You" else victor["hp"],
         "actions": [{
             "actor": "system",
             "type": "defeat",
