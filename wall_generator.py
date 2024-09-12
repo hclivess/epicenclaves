@@ -81,8 +81,8 @@ def create_svg(mapdb, map_size, cell_size=5):
 if __name__ == "__main__":
     mapdb = {}
     map_size = 1000
-    maze_width = 31  # Odd number to ensure walls on all sides
-    maze_height = 31  # Odd number to ensure walls on all sides
+    maze_width = 51 # Odd number to ensure walls on all sides
+    maze_height = 51  # Odd number to ensure walls on all sides
     initial_offset = 5
     spawn_probability = 0.5
     max_mazes = 20

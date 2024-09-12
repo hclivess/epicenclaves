@@ -1,5 +1,5 @@
 from backend import has_resources, update_user_data
-from map import get_tile_map, insert_map_data
+from map import get_tile_map, insert_map_data, is_surrounded_by
 from buildings import building_types
 
 def build(user, user_data, entity, name, mapdb, usersdb):
@@ -12,9 +12,10 @@ def build(user, user_data, entity, name, mapdb, usersdb):
     if user_data["action_points"] < 1:
         return "Not enough action points to build"
 
-    on_tile = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb)
+    x, y = user_data["x_pos"], user_data["y_pos"]
+    on_tile = get_tile_map(x, y, mapdb)
 
-    tile_key = f"{user_data['x_pos']},{user_data['y_pos']}"
+    tile_key = f"{x},{y}"
     if any(entry.get(tile_key, {}).get("role") in ["building", "scenery"] for entry in on_tile):
         return "Cannot build here"
 
@@ -24,6 +25,14 @@ def build(user, user_data, entity, name, mapdb, usersdb):
     building_class = building_types[entity]
     building_instance = building_class(1)  # Create an instance with ID 1 (you might want to generate a unique ID)
     building_data = building_instance.to_dict()
+
+    # Check building restrictions
+    if entity == "sawmill":
+        if not is_surrounded_by(x, y, "forest", mapdb, diameter=1):
+            return "Sawmills can only be built on tiles surrounding forests"
+    elif entity == "mine":
+        if not is_surrounded_by(x, y, "mountain", mapdb, diameter=1):
+            return "Mines can only be built on tiles adjacent to mountains"
 
     # Check building limit
     user_buildings = user_data.get("construction", {})

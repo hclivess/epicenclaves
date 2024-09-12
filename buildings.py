@@ -110,7 +110,7 @@ class Outpost(Building):
 
 class Sawmill(Building):
     DISPLAY_NAME = "Sawmill"
-    DESCRIPTION = "Produces <img src='img/assets/wood.png' alt='Wood' width='32' height='32'>1 per turn for each sawmill level and nearby forest."
+    DESCRIPTION = "Produces <img src='img/assets/wood.png' alt='Wood' width='32' height='32'>1 per turn for each sawmill level and adjacent forest."
     COST = {"ingredients": {"wood": 100, "bismuth": 50}}
     IMAGE_SOURCE = "sawmill.png"
     UPGRADE_COSTS = {
@@ -122,7 +122,7 @@ class Sawmill(Building):
 
 class Mine(Building):
     DISPLAY_NAME = "Mine"
-    DESCRIPTION = "Produces <img src='img/assets/bismuth.png' alt='Bismuth' width='32' height='32'>1 per turn for each mine level and nearby mountain."
+    DESCRIPTION = "Produces <img src='img/assets/bismuth.png' alt='Bismuth' width='32' height='32'>1 per turn for each mine level and adjacent mountain."
     COST = {"ingredients": {"wood": 100, "bismuth": 50}}
     IMAGE_SOURCE = "mine.png"
     UPGRADE_COSTS = {
