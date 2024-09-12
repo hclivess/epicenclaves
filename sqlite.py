@@ -4,8 +4,6 @@ import sqlite3
 from hashlib import blake2b
 from typing import Dict, Any
 
-from map import sql_lock
-
 if not os.path.exists("db"):
     os.mkdir("db")
 users_db = sqlite3.connect("db/auth.db")
@@ -159,25 +157,24 @@ def create_map_database(league="game") -> None:
 
 
 def save_map_from_memory(map_data_dict: Dict[str, Any], league="game") -> None:
-    with sql_lock:
-        print(f"saving map to drive for league {league}")
-        conn_map = sqlite3.connect("db/map_data.db")
-        cursor_map = conn_map.cursor()
+    print(f"saving map to drive for league {league}")
+    conn_map = sqlite3.connect("db/map_data.db")
+    cursor_map = conn_map.cursor()
 
-        for key, data in map_data_dict[league].copy().items():
-            x_map, y_map = map(int, key.split(','))
-            data_str = json.dumps(data)
+    for key, data in map_data_dict[league].copy().items():
+        x_map, y_map = map(int, key.split(','))
+        data_str = json.dumps(data)
 
-            cursor_map.execute(f"SELECT 1 FROM {league} WHERE x_pos = ? AND y_pos = ?", (x_map, y_map))
-            exists = cursor_map.fetchone()
+        cursor_map.execute(f"SELECT 1 FROM {league} WHERE x_pos = ? AND y_pos = ?", (x_map, y_map))
+        exists = cursor_map.fetchone()
 
-            if exists:
-                cursor_map.execute(f"UPDATE {league} SET data = ? WHERE x_pos = ? AND y_pos = ?", (data_str, x_map, y_map))
-            else:
-                cursor_map.execute(f"INSERT INTO {league} (x_pos, y_pos, data) VALUES (?, ?, ?)", (x_map, y_map, data_str))
+        if exists:
+            cursor_map.execute(f"UPDATE {league} SET data = ? WHERE x_pos = ? AND y_pos = ?", (data_str, x_map, y_map))
+        else:
+            cursor_map.execute(f"INSERT INTO {league} (x_pos, y_pos, data) VALUES (?, ?, ?)", (x_map, y_map, data_str))
 
-        conn_map.commit()
-        conn_map.close()
+    conn_map.commit()
+    conn_map.close()
 
 
 def load_map_to_memory(league="game") -> Dict[str, Any]:

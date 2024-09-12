@@ -1,9 +1,8 @@
-import threading
 import inspect
 from typing import List, Dict, Any, Optional, Tuple
 from math import floor
 
-from backend import get_user, map_lock
+from backend import get_user
 from entity_generator import spawn_all_entities
 from player import get_users_at_coords, User
 from entities import Enemy, Scenery
@@ -21,7 +20,6 @@ building_types = {cls.__name__.lower(): cls for cls in Building.__subclasses__()
 
 # Global cache for chunks
 chunks_cache = {}
-chunks_cache_lock = threading.Lock()
 
 
 def get_chunk_key(x: int, y: int) -> Tuple[int, int]:
@@ -29,26 +27,25 @@ def get_chunk_key(x: int, y: int) -> Tuple[int, int]:
 
 
 def get_or_create_chunk(chunk_key: Tuple[int, int], map_data_dict: Dict[str, Any]) -> Dict[str, Any]:
-    with chunks_cache_lock:
-        if chunk_key in chunks_cache:
-            return chunks_cache[chunk_key]
+    if chunk_key in chunks_cache:
+        return chunks_cache[chunk_key]
 
-        chunk = {}
-        chunk_x, chunk_y = chunk_key
-        for x in range(chunk_x * CHUNK_SIZE, (chunk_x + 1) * CHUNK_SIZE):
-            for y in range(chunk_y * CHUNK_SIZE, (chunk_y + 1) * CHUNK_SIZE):
-                key = f"{x},{y}"
-                if key in map_data_dict:
-                    chunk[key] = map_data_dict[key]
+    chunk = {}
+    chunk_x, chunk_y = chunk_key
+    for x in range(chunk_x * CHUNK_SIZE, (chunk_x + 1) * CHUNK_SIZE):
+        for y in range(chunk_y * CHUNK_SIZE, (chunk_y + 1) * CHUNK_SIZE):
+            key = f"{x},{y}"
+            if key in map_data_dict:
+                chunk[key] = map_data_dict[key]
 
-        chunks_cache[chunk_key] = chunk
+    chunks_cache[chunk_key] = chunk
 
-        if len(chunks_cache) > CHUNKS_CACHE_SIZE:
-            # Remove the oldest chunk (first item in the dictionary)
-            oldest_key = next(iter(chunks_cache))
-            del chunks_cache[oldest_key]
+    if len(chunks_cache) > CHUNKS_CACHE_SIZE:
+        # Remove the oldest chunk (first item in the dictionary)
+        oldest_key = next(iter(chunks_cache))
+        del chunks_cache[oldest_key]
 
-        return chunk
+    return chunk
 
 
 def get_tile_map(x: int, y: int, mapdb: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -137,58 +134,55 @@ def owned_by(x: int, y: int, control: str, mapdb: Dict[str, Any]) -> bool:
 
 
 def update_map_data(update_data: Dict[str, Any], map_data_dict: Dict[str, Any]) -> None:
-    with map_lock:
-        coords = list(update_data.keys())[0]
-        tile_data = update_data[coords]
-        x, y = map(int, coords.split(','))
-        chunk_key = get_chunk_key(x, y)
+    coords = list(update_data.keys())[0]
+    tile_data = update_data[coords]
+    x, y = map(int, coords.split(','))
+    chunk_key = get_chunk_key(x, y)
 
-        if coords in map_data_dict:
-            map_data_dict[coords].update(tile_data)
+    if coords in map_data_dict:
+        map_data_dict[coords].update(tile_data)
 
-            # Update the chunk in the cache
-            if chunk_key in chunks_cache:
-                chunks_cache[chunk_key][coords] = map_data_dict[coords]
-        else:
-            raise KeyError(f"No data found at the given coordinates {coords}.")
+        # Update the chunk in the cache
+        if chunk_key in chunks_cache:
+            chunks_cache[chunk_key][coords] = map_data_dict[coords]
+    else:
+        raise KeyError(f"No data found at the given coordinates {coords}.")
 
 
 def remove_from_map(coords: str, entity_type: str, map_data_dict: Dict[str, Any]) -> None:
-    with map_lock:
-        print("remove_from_map", coords, entity_type)
+    print("remove_from_map", coords, entity_type)
 
-        if coords in map_data_dict:
-            if map_data_dict[coords].get("type") == entity_type:
-                del map_data_dict[coords]
+    if coords in map_data_dict:
+        if map_data_dict[coords].get("type") == entity_type:
+            del map_data_dict[coords]
 
-                # Remove from the chunk cache
-                x, y = map(int, coords.split(','))
-                chunk_key = get_chunk_key(x, y)
-                if chunk_key in chunks_cache and coords in chunks_cache[chunk_key]:
-                    del chunks_cache[chunk_key][coords]
+            # Remove from the chunk cache
+            x, y = map(int, coords.split(','))
+            chunk_key = get_chunk_key(x, y)
+            if chunk_key in chunks_cache and coords in chunks_cache[chunk_key]:
+                del chunks_cache[chunk_key][coords]
 
-                print(f"Entity of type {entity_type} at coordinates {coords} has been removed.")
-            else:
-                print(f"Entity of type {entity_type} not found at the given coordinates {coords}.")
+            print(f"Entity of type {entity_type} at coordinates {coords} has been removed.")
         else:
-            print(f"No data found at the given coordinates {coords}.")
+            print(f"Entity of type {entity_type} not found at the given coordinates {coords}.")
+    else:
+        print(f"No data found at the given coordinates {coords}.")
 
 
 def insert_map_data(existing_data: Dict[str, Any], new_data: Dict[str, Any]) -> None:
-    with map_lock:
-        print("insert_map_data", new_data)
+    print("insert_map_data", new_data)
 
-        for coord, construction_info in new_data.items():
-            if coord in existing_data:
-                existing_data[coord].update(construction_info)
-            else:
-                existing_data[coord] = construction_info
+    for coord, construction_info in new_data.items():
+        if coord in existing_data:
+            existing_data[coord].update(construction_info)
+        else:
+            existing_data[coord] = construction_info
 
-            # Update the chunk cache
-            x, y = map(int, coord.split(','))
-            chunk_key = get_chunk_key(x, y)
-            if chunk_key in chunks_cache:
-                chunks_cache[chunk_key][coord] = existing_data[coord]
+        # Update the chunk cache
+        x, y = map(int, coord.split(','))
+        chunk_key = get_chunk_key(x, y)
+        if chunk_key in chunks_cache:
+            chunks_cache[chunk_key][coord] = existing_data[coord]
 
 
 def is_visible(x1: int, y1: int, x2: int, y2: int, distance: int) -> bool:
@@ -290,9 +284,6 @@ def get_map_at_coords(x_pos: int, y_pos: int, map_data_dict: Dict[str, Any]) -> 
         return {key: chunk[key]}
 
     return None
-
-
-sql_lock = threading.Lock()
 
 
 def strip_usersdb(usersdb: Dict[str, Any]) -> Dict[str, Any]:
