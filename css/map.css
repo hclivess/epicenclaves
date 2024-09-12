@@ -37,6 +37,7 @@
     .basilisk { background: url('../img/assets/basilisk.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .sandworm { background: url('../img/assets/sandworm.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .manticore { background: url('../img/assets/manticore.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .djinn { background: url('../img/assets/djinn.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .desert { background: url('../img/assets/desert.png') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
 
     .outpost-range {
