@@ -791,6 +791,8 @@ class Sandworm(Enemy):
 
 class Scenery:
     probability = 0
+    role = "scenery"
+    type = "scenery"
     biome = "any"
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
@@ -798,13 +800,14 @@ class Scenery:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
+            "role": self.role,
             "type": self.type,
             "biome": self.biome
         }
 
 class Forest(Scenery):
-    type = "forest"
     biome = "forest"
+    type = "forest"
 
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
@@ -815,8 +818,8 @@ class Forest(Scenery):
         ]
 
 class Pond(Scenery):
-    type = "pond"
     biome = "pond"
+    type = "pond"
 
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
@@ -826,36 +829,36 @@ class Pond(Scenery):
         ]
 
 class Cavern(Scenery):
-    type = "cavern"
     biome = "cavern"
+    type = "cavern"
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return []
 
 class Graveyard(Scenery):
-    type = "graveyard"
     biome = "graveyard"
+    type = "graveyard"
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return []
 
 class Desert(Scenery):
-    type = "desert"
     biome = "desert"
+    type = "desert"
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return []
 
 class Gnomes(Scenery):
-    type = "gnomes"
     biome = "gnomes"
+    type = "gnomes"
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return []
 
 class Mountain(Scenery):
-    type = "mountain"
     biome = "mountain"
+    type = "mountain"
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return [
@@ -865,8 +868,8 @@ class Mountain(Scenery):
         ]
 
 class Rock(Scenery):
-    type = "rock"
     biome = "rock"
+    type = "rock"
 
 def get_all_subclasses(cls):
     return set(cls.__subclasses__()).union(
