@@ -267,6 +267,41 @@ function closePopup() {
     popup.style.display = "none";
 }
 
+function movePlayer(direction, steps) {
+    isMoving = true;
+
+    function moveStep(remainingSteps) {
+        if (remainingSteps > 0) {
+            fetch(`/move?direction=${direction}&target=map`)
+                .then(response => response.json())
+                .then(data => {
+                    Object.assign(jsonData, data);
+                    updateMap(jsonData);
+                    if (data.message) {
+                        displayMessage(data.message);
+                    }
+                    checkPlayerPosition();
+
+                    // Continue moving if there are steps remaining and the move was successful
+                    if (remainingSteps > 1 && !data.message.includes("failed")) {
+                        moveStep(remainingSteps - 1);
+                    } else {
+                        isMoving = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    displayMessage('An error occurred while moving.');
+                    isMoving = false;
+                });
+        } else {
+            isMoving = false;
+        }
+    }
+
+    moveStep(steps);
+}
+
 function moveToPosition(x, y, callback) {
     fetch(`/move_to?x=${x}&y=${y}&target=map`, {
         method: 'GET',
@@ -393,6 +428,8 @@ calculateHorizontalTiles();
 createMap(jsonData);
 addClickListenerToMap();
 
+let isMoving = false;
+
 document.addEventListener('keydown', function(event) {
     const key = event.key;
     let direction;
@@ -425,33 +462,10 @@ document.addEventListener('keydown', function(event) {
         steps = 10;  // Move 10 tiles when Shift is pressed
     }
 
-    // Function to move multiple steps
-    function moveMultipleSteps(stepsRemaining) {
-        if (stepsRemaining > 0) {
-            fetch(`/move?direction=${direction}&target=map`)
-                .then(response => response.json())
-                .then(data => {
-                    Object.assign(jsonData, data);
-                    updateMap(jsonData);
-                    if (data.message) {
-                        displayMessage(data.message);
-                    }
-                    checkPlayerPosition();
-
-                    // Continue moving if there are steps remaining and the move was successful
-                    if (stepsRemaining > 1 && !data.message.includes("failed")) {
-                        moveMultipleSteps(stepsRemaining - 1);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    displayMessage('An error occurred while moving.');
-                });
-        }
+    // Only process movement if not already moving
+    if (!isMoving) {
+        movePlayer(direction, steps);
     }
-
-    // Start the multi-step movement
-    moveMultipleSteps(steps);
 });
 
 
