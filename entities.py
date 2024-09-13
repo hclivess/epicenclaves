@@ -439,7 +439,7 @@ class Minotaur(Enemy):
     experience_value = 100
     block_chance = 0.25
     block_reduction = 0.6
-    biome = "cavern"
+    biome = "rock"
 
     def __init__(self, level: int):
         super().__init__(level)
