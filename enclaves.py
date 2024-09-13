@@ -216,7 +216,7 @@ class MapHandler(BaseHandler):
             self.redirect("/")
             return
 
-        visible_distance = 10
+        visible_distance = DISTANCE
         user_data = get_user_data(user, usersdb[league])
         x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
         visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb[league], visible_distance)
