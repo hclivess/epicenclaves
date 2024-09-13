@@ -49,6 +49,7 @@ from upgrade import upgrade
 from trash import trash_item, trash_armor, trash_all, trash_weapons
 from repair import repair_all_items
 from drag import drag_player
+from revive import revive
 
 MAX_SIZE = 1000000
 DISTANCE = 15
@@ -601,23 +602,24 @@ class DragHandler(BaseHandler):
             self.render_user_panel(user, user_data, message=message, on_tile_map=on_tile_map, on_tile_users=on_tile_users, league=league)
 
 
-
 class ReviveHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
-        self.perform_action(user, self._revive, league)
+        user_data = get_user_data(user, usersdb[league])
 
-    def _revive(self, user, user_data):
-        league = self.get_current_league()
-        if user_data.get("action_points") > 250:
-            new_ap = user_data["action_points"] - 250
-            update_user_data(user=user, updated_values={"alive": True, "hp": 100, "action_points": new_ap},
-                             user_data_dict=usersdb[league])
-            message = "You awaken from the dead"
-        else:
-            message = "You do not have enough action points to revive"
-        return message
+        message = revive(user, user_data, league, usersdb)
+
+        # Re-fetch user data as it may have changed after revive
+        updated_user_data = get_user_data(user, usersdb[league])
+
+        # Render the user panel
+        self.render_user_panel(
+            user,
+            updated_user_data,
+            message=message,
+            league=league
+        )
 
 
 class RestHandler(UserActionHandler):
