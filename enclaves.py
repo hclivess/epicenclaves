@@ -39,7 +39,7 @@ from map import (get_tile_map, get_tile_users, get_user_data, strip_usersdb,
 from rest import attempt_rest
 from move import move, move_to
 from build import build
-from entity_generator import spawn
+from spawner import spawn
 from auth import (auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db)
 from sqlite import init_databases, load_users_to_memory, save_users_from_memory, save_map_from_memory, \
     load_map_to_memory, users_db

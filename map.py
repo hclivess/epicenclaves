@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional, Tuple
 from math import floor
 
 from backend import get_user
-from entity_generator import spawn_all_entities
+from spawner import spawn_all_entities
 from player import get_users_at_coords, User
 from entities import Enemy, Scenery
 from buildings import Building
