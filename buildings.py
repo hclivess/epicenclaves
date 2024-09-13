@@ -68,7 +68,7 @@ class Inn(Building):
         actions = super().get_actions(user)
         actions.extend([
             {"name": "sleep 10 hours", "action": "/rest?hours=10"},
-            {"name": "sleep 20 hours", "action": "/rest?hours=20"},
+            {"name": "sleep until rested", "action": "/rest?hours=all"},
         ])
         return actions
 

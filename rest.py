@@ -3,8 +3,20 @@ from map import occupied_by, owned_by
 from player import calculate_total_hp
 
 
+from typing import List, Dict
+from backend import update_user_data
+from map import occupied_by, owned_by
+from player import calculate_total_hp
+
+def get_actions(self, user: str) -> List[Dict[str, str]]:
+    actions = super().get_actions(user)
+    actions.extend([
+        {"name": "sleep 10 hours", "action": "/rest?hours=10"},
+        {"name": "sleep until rested", "action": "/rest?hours=all"},
+    ])
+    return actions
+
 def attempt_rest(user, user_data, hours_arg, usersdb, mapdb):
-    hours = int(hours_arg)
     x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
 
     proper_tile = occupied_by(x_pos, y_pos, what="inn", mapdb=mapdb)
@@ -20,10 +32,15 @@ def attempt_rest(user, user_data, hours_arg, usersdb, mapdb):
         return "You cannot rest here, inn required"
     elif not under_control:
         return "This location is not under your control"
-    elif user_data["action_points"] < hours:
-        return "Out of action points to rest"
 
-    # If the control checks pass and the user is able to rest
+    if hours_arg == "all":
+        hours_needed = max_total_hp - current_hp
+        hours = min(hours_needed, user_data["action_points"])
+    else:
+        hours = int(hours_arg)
+        if user_data["action_points"] < hours:
+            return "Out of action points to rest"
+
     hp_recovered = hours  # Assuming 1 HP recovered per hour
     new_hp = min(current_hp + hp_recovered, max_total_hp)
     new_ap = user_data["action_points"] - hours
