@@ -6,12 +6,6 @@ from hashlib import blake2b
 if not os.path.exists("db"):
     os.mkdir("db")
 
-from threading import Lock
-
-# Initialize locks
-map_lock = Lock()
-
-
 def hashify(data):
     hashified = blake2b(data.encode(), digest_size=15).hexdigest()
     return hashified
