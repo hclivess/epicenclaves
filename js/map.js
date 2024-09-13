@@ -512,7 +512,7 @@ function refreshMapData() {
 
 
 // Set up periodic refresh
-const refreshInterval = 1000; // 1 second
+const refreshInterval = 5000; // 5 second
 setInterval(refreshMapData, refreshInterval);
 
 refreshMapData(); // Initial refresh when the page loads
