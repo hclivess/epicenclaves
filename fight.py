@@ -220,7 +220,11 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
         })
 
         if target_data["hp"] <= 0:
-            battle_data["rounds"].append(round_data)  # Append the round data before processing defeat
+            # Update round data with final HP values
+            round_data["player_hp"] = user_data["hp"]
+            round_data["enemy_hp"] = target_data["hp"]
+            battle_data["rounds"].append(round_data)
+
             experience = user_data["exp"] + 10 + target_data["exp"] // 10
             update_user_data(user, {"exp": experience}, usersdb)
             process_player_defeat(target_data, target_name, user_data, user, 0.5, usersdb, battle_data["rounds"],
@@ -242,7 +246,11 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
         })
 
         if user_data["hp"] <= 0:
-            battle_data["rounds"].append(round_data)  # Append the round data before processing defeat
+            # Update round data with final HP values
+            round_data["player_hp"] = user_data["hp"]
+            round_data["enemy_hp"] = target_data["hp"]
+            battle_data["rounds"].append(round_data)
+
             experience = target_data["exp"] + 10 + user_data["exp"] // 10
             update_user_data(target_name, {"exp": experience}, usersdb)
             process_player_defeat(user_data, user, target_data, target_name, 0.5, usersdb, battle_data["rounds"],
