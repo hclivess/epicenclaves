@@ -846,6 +846,13 @@ class Desert(Scenery):
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         return []
 
+class Gnomes(Scenery):
+    type = "gnomes"
+    biome = "gnomes"
+
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        return []
+
 class Mountain(Scenery):
     type = "mountain"
     biome = "mountain"

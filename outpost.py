@@ -3,7 +3,6 @@ import random
 
 from map import get_map_at_coords
 
-
 def process_outpost_attacks(mapdb, usersdb, league):
     coords_to_process = list(mapdb[league].keys())
 

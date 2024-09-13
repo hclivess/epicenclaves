@@ -168,7 +168,10 @@ class BaseHandler(tornado.web.RequestHandler):
         current_total_hp = calculate_total_hp(current_hp, exp)
         max_total_hp = calculate_total_hp(100, exp)  # Assuming 100 is the base max HP
 
-        print("user_data", user_data)
+        #print("user_data", user_data)
+        #print("mapdb", mapdb)
+
+
         self.render(
             "templates/user_panel.html",
             user=user,
@@ -1097,6 +1100,8 @@ if __name__ == "__main__":
             spawn(mapdb=mapdb[league], entity_class=entities.Graveyard, probability=1, map_size=1000, max_entities=200,
                   herd_probability=0, is_biome_generation=True)
             spawn(mapdb=mapdb[league], entity_class=entities.Desert, probability=1, map_size=1000, max_entities=200,
+                  herd_probability=0, is_biome_generation=True)
+            spawn(mapdb=mapdb[league], entity_class=entities.Gnomes, probability=1, map_size=1000, max_entities=200,
                   herd_probability=0, is_biome_generation=True)
 
             spawn(mapdb=mapdb[league], entity_class=entities.Rat, probability=1, map_size=1000, max_entities=200,

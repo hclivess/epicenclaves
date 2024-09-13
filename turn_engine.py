@@ -11,6 +11,7 @@ import importlib
 from map import spawn_entities, count_buildings
 from outpost import process_outpost_attacks
 from siege import process_siege_attacks
+from gnomes import move_gnomes
 
 # Import all entities dynamically
 entities = importlib.import_module('entities')
@@ -58,8 +59,12 @@ class TurnEngine(threading.Thread):
                 self.save_databases(league)
                 self.update_users_data(league)
                 spawn_entities(self.mapdb, league)
+                print("Processing sieges")
                 process_siege_attacks(self.mapdb, self.usersdb, league)
+                print("Processing outposts")
                 process_outpost_attacks(self.mapdb, self.usersdb, league)
+                print("Moving gnomes")
+                move_gnomes(self.mapdb, league)
                 print(f"Current turn of {league}: {self.turn}")
 
     def save_databases(self, league):

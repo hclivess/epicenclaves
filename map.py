@@ -10,7 +10,7 @@ from buildings import Building
 
 # Constants for chunking
 CHUNK_SIZE = 16
-CHUNKS_CACHE_SIZE = 100
+CHUNKS_CACHE_SIZE = 0
 
 # Get all subclasses of Enemy and Scenery
 entity_types = {cls.__name__.lower(): cls for cls in Enemy.__subclasses__() + Scenery.__subclasses__()}
