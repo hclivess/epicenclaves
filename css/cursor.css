@@ -1,25 +1,85 @@
-body, html {
+/* Base cursor for all elements */
+body, html, * {
     cursor: url('../img/assets/custom_cursor_pointer.png'), auto;
-
-/* Apply the custom cursor to all elements */
-* {
-    cursor: inherit;
 }
 
-/* Override cursor for interactive elements */
-a, button, input[type="submit"], input[type="button"], select {
+/* Interactive elements */
+a, button, input[type="submit"], input[type="button"], input[type="text"], input[type="password"],
+select, textarea, .btn, .btn-primary, .btn-secondary, .btn-danger, .btn-palisade, .btn-up,
+.btn-lg, .active, .popup-close, [role="button"], .card, .enemy-card, .fighter, .health-bar,
+#messages, .chat-container, .bestiary-grid, .navigation-submenu, .battle-arena, .form-group,
+.login-panel, .description-panel, .map-container, #map, #popup, .search-container,
+.card-grid, .system-message, .navigation-submenu, .profile-pic, .user-stats, .revive-btn,
+.ingredient-icon, .item-card, .item-details, .tile-actions, .item-grid {
     cursor: url('../img/assets/custom_cursor_pointer.png'), pointer !important;
 }
 
 /* Ensure buttons don't use the default hand cursor */
-button {
-    cursor: url('../img/assets/custom_cursor_pointer.png'), pointer !important;
+button, .btn, .btn-primary, .btn-secondary, .btn-danger, .btn-palisade, .btn-up, .btn-lg, .active {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
 }
 
-/* Target specific button classes if needed */
-.btn, .btn-primary, .btn-secondary, .btn-danger, .btn-palisade, .popup-close, .league-select, .form-group {
+/* Specific elements from your HTML */
+.fixed-menu, .btn-group, .card-body, .battle-log-container, .pop-up-container,
+.player-pop-up, .enemy-pop-up, #playerHpDisplay, #enemyHpDisplay, #playerHealth, #enemyHealth,
+.login-panel, .description-panel, .welcome-image, .league-select, #league-description,
+#goto-form, #message-display, .navigation-container, .section, #playerGrid, #mapGrid,
+.winner-card, .system-message, .user-stats, .revive-btn, .available-resources, .current-tile,
+.other-users-here, .equipped-items, .inventory, .construction-menu, .acquired-tiles {
+    cursor: inherit;
+}
+
+/* Form elements */
+input[type="checkbox"], input[type="radio"], input[type="file"] {
     cursor: url('../img/assets/custom_cursor_pointer.png'), pointer !important;
+}
+
+/* Custom elements and classes */
+.fighter, .health-bar, .hp-display, .pop-up-container, .battle-arena, .enemy-card, .bestiary-grid,
+.login-panel, .description-panel, .map-container, .card-grid, .item-card, .item-grid {
+    cursor: url('../img/assets/custom_cursor_pointer.png'), auto;
+}
+
+/* Ensure text selection still shows the text cursor */
+::selection {
+    cursor: text;
+}
+
+/* For any drag interactions, if applicable */
+[draggable="true"] {
+    cursor: move;
+    cursor: -webkit-grab;
+    cursor: grab;
+}
+
+[draggable="true"]:active {
+    cursor: -webkit-grabbing;
+    cursor: grabbing;
+}
+
+/* Specific cursor for input fields */
+input[type="text"], input[type="password"], textarea {
+    cursor: url('../img/assets/custom_cursor_pointer.png'), text !important;
+}
+
+/* Specific cursor for select dropdowns */
+select {
+    cursor: url('../img/assets/custom_cursor_pointer.png'), default !important;
+}
+
+/* Specific cursor for links */
+a:hover {
+    cursor: url('../img/assets/custom_cursor_pointer.png'), pointer !important;
+}
+
+/* Specific cursor for disabled elements */
+button:disabled, input:disabled, select:disabled, a.disabled {
+    cursor: url('../img/assets/custom_cursor_pointer.png'), not-allowed !important;
+}
+
+/* Specific cursor for resizable elements, if any */
+.resizable {
+    cursor: url('../img/assets/custom_cursor_pointer.png'), se-resize !important;
 }
