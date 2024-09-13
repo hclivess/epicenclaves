@@ -329,6 +329,20 @@ function moveToPosition(x, y, callback) {
     });
 }
 
+function handleGoTo() {
+    const x = parseInt(document.getElementById('goto-x').value);
+    const y = parseInt(document.getElementById('goto-y').value);
+    if (!isNaN(x) && !isNaN(y)) {
+        moveToPosition(x, y, (success) => {
+            if (success) {
+                updateMap(jsonData);
+            }
+        });
+    } else {
+        displayMessage('Please enter valid x and y coordinates.');
+    }
+}
+
 function performAction(actionUrl) {
     fetch(actionUrl)
         .then(response => response.json())

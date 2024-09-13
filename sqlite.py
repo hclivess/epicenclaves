@@ -170,7 +170,7 @@ def save_map_from_memory(map_data_dict: Dict[str, Any], league="game") -> None:
         cursor_map.execute(f"DELETE FROM {league}")
 
         # Insert all current data
-        for key, data in map_data_dict[league].items():
+        for key, data in map_data_dict[league].copy().items():
             x_map, y_map = map(int, key.split(','))
             data_str = json.dumps(data)
             cursor_map.execute(f"INSERT INTO {league} (x_pos, y_pos, data) VALUES (?, ?, ?)", (x_map, y_map, data_str))
