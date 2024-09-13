@@ -1088,6 +1088,7 @@ if __name__ == "__main__":
 
         print(db_status)
         if not db_status["map_exists"]:
+            print("Fresh start")
             # First, spawn the biomes
             spawn(mapdb=mapdb[league], entity_class=entities.Cavern, probability=1, map_size=1000, max_entities=250,
                   herd_probability=0, is_biome_generation=True)
