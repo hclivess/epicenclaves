@@ -303,6 +303,7 @@ function movePlayer(direction, steps) {
 }
 
 function moveToPosition(x, y, callback) {
+    console.log(`Sending request to move to (${x}, ${y})`);
     fetch(`/move_to?x=${x}&y=${y}&target=map`, {
         method: 'GET',
         headers: {
@@ -311,6 +312,7 @@ function moveToPosition(x, y, callback) {
     })
     .then(response => response.json())
     .then(data => {
+        console.log('Received response:', data);
         Object.assign(jsonData, data);
         updateMap(jsonData);
 
@@ -318,7 +320,7 @@ function moveToPosition(x, y, callback) {
             displayMessage(data.message);
         }
 
-        const success = data.message && !data.message.includes("failed");
+        const success = data.x_pos === x && data.y_pos === y;
         callback(success);
         checkPlayerPosition();
     })

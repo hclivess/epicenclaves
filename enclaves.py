@@ -460,13 +460,6 @@ class MoveToHandler(BaseHandler):
         league = self.get_current_league()
         user_data = get_user_data(user, usersdb=usersdb[league])
 
-        # Proximity check
-        current_x, current_y = user_data["x_pos"], user_data["y_pos"]
-        max_move_distance = DISTANCE  # Define the maximum allowed move distance
-        if abs(x - current_x) > max_move_distance or abs(y - current_y) > max_move_distance:
-            self.write(json.dumps({"error": "Invalid move. Target location is too far."}))
-            return
-
         moved = move_to(user, x, y, MAX_SIZE, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
         user_data = get_user_data(user, usersdb=usersdb[league])  # Refresh user data
 
@@ -519,7 +512,8 @@ class MoveToHandler(BaseHandler):
             "actions": tile_actions,
             "x_pos": x_pos,
             "y_pos": y_pos,
-            "message": moved.get("message", "")  # Include the message from the move_to function
+            "message": moved["message"],
+            "steps_taken": moved["steps_taken"]
         }
 
         self.set_header("Content-Type", "application/json")
