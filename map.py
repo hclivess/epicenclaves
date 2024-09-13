@@ -135,7 +135,7 @@ def get_map_data_limit(x_pos: int, y_pos: int, map_data_dict: Dict[str, Any], di
     x_min, x_max = x_pos - distance, x_pos + distance
     y_min, y_max = y_pos - distance, y_pos + distance
 
-    for coords, data in map_data_dict.items():
+    for coords, data in map_data_dict.copy().items():
         x_map, y_map = map(int, coords.split(","))
         if x_min <= x_map <= x_max and y_min <= y_map <= y_max:
             if (x_map - x_pos) ** 2 + (y_map - y_pos) ** 2 <= distance_squared:
