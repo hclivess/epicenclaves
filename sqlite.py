@@ -3,7 +3,7 @@ import os
 import sqlite3
 from hashlib import blake2b
 from typing import Dict, Any
-from map import chunks_cache, get_chunk_key
+from map import get_chunk_key
 
 if not os.path.exists("db"):
     os.mkdir("db")
@@ -162,10 +162,6 @@ def save_map_from_memory(map_data_dict: Dict[str, Any], league="game") -> None:
     conn_map = sqlite3.connect("db/map_data.db")
     cursor_map = conn_map.cursor()
 
-    # Clear the chunks cache before saving
-    global chunks_cache
-    chunks_cache.clear()
-
     # First, remove all existing gnomes from the database
     cursor_map.execute(f"DELETE FROM {league} WHERE json_extract(data, '$.type') = 'gnomes'")
 
@@ -177,14 +173,6 @@ def save_map_from_memory(map_data_dict: Dict[str, Any], league="game") -> None:
 
     conn_map.commit()
     conn_map.close()
-
-    # Rebuild the chunks cache after saving
-    for key, data in map_data_dict[league].items():
-        x, y = map(int, key.split(','))
-        chunk_key = get_chunk_key(x, y)
-        if chunk_key not in chunks_cache:
-            chunks_cache[chunk_key] = {}
-        chunks_cache[chunk_key][key] = data
 
     print(f"Map saved for league {league}. Total entities: {len(map_data_dict[league])}")
     print(f"Gnome count after save: {sum(1 for tile in map_data_dict[league].values() if tile['type'] == 'gnomes')}")
