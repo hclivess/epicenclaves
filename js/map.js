@@ -468,3 +468,22 @@ function buildPalisade() {
         displayMessage('An error occurred while building the palisade.');
     });
 }
+
+function refreshMapData() {
+    fetch('/map?format=json')
+        .then(response => response.json())
+        .then(data => {
+            Object.assign(jsonData, data);
+            updateMap(jsonData);
+            checkPlayerPosition();
+        })
+        .catch(error => {
+            console.error('Error refreshing map data:', error);
+        });
+}
+
+// Set up periodic refresh
+const refreshInterval = 5000; // 5 seconds
+setInterval(refreshMapData, refreshInterval);
+
+refreshMapData(); // Initial refresh when the page loads

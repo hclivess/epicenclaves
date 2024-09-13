@@ -264,7 +264,13 @@ class MapHandler(BaseHandler):
             "x_pos": x_pos,
             "y_pos": y_pos
         }
-        self.render("templates/map.html", user=user, data=json.dumps(map_data), timestamp=time.time())
+
+        # Check if the request wants JSON
+        if self.get_argument("format", None) == "json":
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(map_data))
+        else:
+            self.render("templates/map.html", user=user, data=json.dumps(map_data), timestamp=time.time())
 
 
 class ScoreboardHandler(BaseHandler):
