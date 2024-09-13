@@ -547,7 +547,7 @@ class Lizarian(Enemy):
 
     def roll_damage(self):
         if self.spell_charges > 0:
-            spell_type = random.choice(["fireball", "ice_shard", "lightning_bolt"])
+            spell_type = random.choice(["fireball", "ice shard", "lightning bolt", "personal data theft"])
             damage = random.randint(int(self.max_damage * 1.5), int(self.max_damage * 2.5))
             self.spell_charges -= 1
             return {"damage": damage, "message": f"cast {spell_type}"}
