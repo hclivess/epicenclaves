@@ -500,19 +500,57 @@ def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, vict
                           usersdb: Dict, rounds: List[Dict], round_number: int, defeated_max_hp: int) -> None:
     print("victor", victor)
     print("defeated", defeated)
-    is_player_defeated = defeated_name == victor["username"]
+    is_player_defeated = defeated_name == victor.get("username")
 
     if random.random() < death_chance:
         message = f"{'You were' if is_player_defeated else defeated_name + ' was'} killed in battle. {'Your' if is_player_defeated else defeated_name + 's'} HP: 0/{defeated_max_hp}"
         new_data = {"alive": False, "hp": 0, "action_points": 0}
+
+        # Item drop mechanic - only happens when player dies
+        if random.random() < 0.3:  # 30% chance to drop an item
+            dropped_item, slot = drop_random_item(defeated)
+            if dropped_item:
+                # Remove the item from the defeated player's inventory
+                if slot == "unequipped":
+                    defeated["unequipped"] = [item for item in defeated["unequipped"] if item["id"] != dropped_item["id"]]
+                else:
+                    defeated["equipped"] = [item for item in defeated["equipped"] if item["id"] != dropped_item["id"]]
+
+                # Add the item to the victor's inventory
+                if slot == "unequipped" or has_item_equipped(victor, dropped_item["type"]):
+                    victor["unequipped"].append(dropped_item)
+                else:
+                    victor["equipped"].append(dropped_item)
+
+                loot_message = f"{'You looted' if victor_name == victor.get('username') else victor_name + ' looted'} a {dropped_item['type']} from {'your' if is_player_defeated else defeated_name + 's'} mutilated body!"
+                rounds.append({
+                    "round": round_number,
+                    "player_hp": victor["hp"] if victor_name == victor.get("username") else defeated["hp"],
+                    "enemy_hp": defeated["hp"] if victor_name == victor.get("username") else victor["hp"],
+                    "actions": [{
+                        "actor": "system",
+                        "type": "loot",
+                        "message": loot_message
+                    }]
+                })
+
+                # Update victor's data in the database
+                update_user_data(victor_name, {
+                    "unequipped": victor["unequipped"],
+                    "equipped": victor["equipped"]
+                }, usersdb)
+
+                # Update the new_data dictionary for the defeated player
+                new_data["unequipped"] = defeated["unequipped"]
+                new_data["equipped"] = defeated["equipped"]
     else:
         message = f"{'You' if is_player_defeated else defeated_name} barely managed to escape. {'Your' if is_player_defeated else defeated_name + 's'} HP: 1/{defeated_max_hp}"
         new_data = {"action_points": defeated["action_points"] - 1, "hp": 1}
 
     rounds.append({
         "round": round_number,
-        "player_hp": victor["hp"] if victor_name == victor["username"] else defeated["hp"],
-        "enemy_hp": defeated["hp"] if victor_name == victor["username"] else victor["hp"],
+        "player_hp": victor["hp"] if victor_name == victor.get("username") else defeated["hp"],
+        "enemy_hp": defeated["hp"] if victor_name == victor.get("username") else victor["hp"],
         "actions": [{
             "actor": "system",
             "type": "defeat",
@@ -520,31 +558,5 @@ def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, vict
         }]
     })
 
-    # Add item drop mechanic
-    if random.random() < 0.3:  # 30% chance to drop an item
-        dropped_item, slot = drop_random_item(defeated)
-        if dropped_item:
-            if slot == "unequipped":
-                victor["unequipped"].append(dropped_item)
-            else:
-                # If it's an equipped item, we need to handle it differently
-                if not has_item_equipped(victor, dropped_item["type"]):
-                    victor["equipped"].append(dropped_item)
-                else:
-                    victor["unequipped"].append(dropped_item)
-
-            loot_message = f"{'You looted' if victor_name == victor['username'] else victor_name + ' looted'} a {dropped_item['type']} from {'your' if is_player_defeated else defeated_name + 's'} mutilated body!"
-            rounds.append({
-                "round": round_number,
-                "player_hp": victor["hp"] if victor_name == victor["username"] else defeated["hp"],
-                "enemy_hp": defeated["hp"] if victor_name == victor["username"] else victor["hp"],
-                "actions": [{
-                    "actor": "system",
-                    "type": "loot",
-                    "message": loot_message
-                }]
-            })
-            update_user_data(victor_name, {"unequipped": victor["unequipped"], "equipped": victor["equipped"]},
-                             usersdb)
-
+    # Update defeated player's data
     update_user_data(defeated_name, new_data, usersdb)
