@@ -1,19 +1,22 @@
 from backend import update_user_data
 
-
 def repair_all_items(user, usersdb):
     user_data = usersdb[user]
 
     items_to_repair = []
+    total_missing_durability = 0
 
-    # Count items that need repair
+    # Count items that need repair and calculate total missing durability
     for item in user_data['equipped'] + user_data['unequipped']:
         if 'durability' in item and 'max_durability' in item:
-            if item['durability'] < item['max_durability']:
+            missing_durability = item['max_durability'] - item['durability']
+            if missing_durability > 0:
                 items_to_repair.append(item)
+                total_missing_durability += missing_durability
 
-    total_wood_cost = len(items_to_repair) * 100
-    total_bismuth_cost = len(items_to_repair) * 50
+    # Calculate costs based on missing durability
+    total_wood_cost = total_missing_durability * 10  # 10 wood per missing durability point
+    total_bismuth_cost = total_missing_durability * 5  # 5 bismuth per missing durability point
 
     if user_data['wood'] < total_wood_cost:
         return f"Not enough wood. You need {total_wood_cost} wood to repair all items."
