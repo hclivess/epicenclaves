@@ -1,6 +1,5 @@
-from map import occupied_by, owned_by
+from map import occupied_by, owned_by, remove_from_map
 from backend import update_user_data
-
 
 def demolish(user, user_data, usersdb, mapdb):
     # Check if the user owns the building on the current tile
@@ -27,8 +26,8 @@ def demolish(user, user_data, usersdb, mapdb):
     # Get the building type for confirmation
     building_type = tile_data["type"]
 
-    # Remove the building data from the map and user data
-    del mapdb[coord]  # Remove the building from the map database
+    # Remove the building data from the map using remove_from_map function
+    remove_from_map(coord, building_type, mapdb)
 
     # Update the user's construction data
     user_construction = user_data.get("construction", {})

@@ -158,25 +158,35 @@ def create_map_database(league="game") -> None:
 
 
 def save_map_from_memory(map_data_dict: Dict[str, Any], league="game") -> None:
-    print(f"saving map to drive for league {league}")
+    print(f"Saving map to drive for league {league}")
     conn_map = sqlite3.connect("db/map_data.db")
     cursor_map = conn_map.cursor()
 
-    # First, remove all existing gnomes from the database
-    cursor_map.execute(f"DELETE FROM {league} WHERE json_extract(data, '$.type') = 'gnomes'")
+    try:
+        # Start a transaction
+        conn_map.execute("BEGIN TRANSACTION")
 
-    for key, data in map_data_dict[league].copy().items():
-        x_map, y_map = map(int, key.split(','))
-        data_str = json.dumps(data)
+        # Drop all existing data for the league
+        cursor_map.execute(f"DELETE FROM {league}")
 
-        cursor_map.execute(f"INSERT OR REPLACE INTO {league} (x_pos, y_pos, data) VALUES (?, ?, ?)", (x_map, y_map, data_str))
+        # Insert all current data
+        for key, data in map_data_dict[league].items():
+            x_map, y_map = map(int, key.split(','))
+            data_str = json.dumps(data)
+            cursor_map.execute(f"INSERT INTO {league} (x_pos, y_pos, data) VALUES (?, ?, ?)", (x_map, y_map, data_str))
 
-    conn_map.commit()
-    conn_map.close()
+        # Commit the transaction
+        conn_map.commit()
+        print(f"Map saved for league {league}. Total entities: {len(map_data_dict[league])}")
 
-    print(f"Map saved for league {league}. Total entities: {len(map_data_dict[league])}")
-    print(f"Gnome count after save: {sum(1 for tile in map_data_dict[league].values() if tile['type'] == 'gnomes')}")
+    except sqlite3.Error as e:
+        # If there's an error, roll back the changes
+        conn_map.rollback()
+        print(f"An error occurred: {e}")
 
+    finally:
+        # Close the connection
+        conn_map.close()
 
 def load_map_to_memory(league="game") -> Dict[str, Any]:
     # Connect to the database and get a cursor
