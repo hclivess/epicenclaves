@@ -208,7 +208,8 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
         # Player attacks target
         exp_bonus_value = exp_bonus(user_data["exp"])
         user_dmg = get_weapon_damage(user_data, exp_bonus_value)
-        final_damage, absorbed_damage = apply_armor_protection(target_data, user_dmg['damage'], round_data, round_number)
+        final_damage, absorbed_damage = apply_armor_protection(target_data, user_dmg['damage'], round_data,
+                                                               round_number)
         target_data["hp"] = max(0, target_data["hp"] - final_damage)
 
         round_data["actions"].append({
@@ -219,15 +220,18 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
         })
 
         if target_data["hp"] <= 0:
+            battle_data["rounds"].append(round_data)  # Append the round data before processing defeat
             experience = user_data["exp"] + 10 + target_data["exp"] // 10
             update_user_data(user, {"exp": experience}, usersdb)
-            process_player_defeat(target_data, target_name, user_data, user, 0.5, usersdb, battle_data["rounds"], round_number, target_max_total_hp)
+            process_player_defeat(target_data, target_name, user_data, user, 0.5, usersdb, battle_data["rounds"],
+                                  round_number, target_max_total_hp)
             break
 
         # Target attacks player
         exp_bonus_value = exp_bonus(target_data["exp"])
         target_dmg = get_weapon_damage(target_data, exp_bonus_value)
-        final_damage, absorbed_damage = apply_armor_protection(user_data, target_dmg['damage'], round_data, round_number)
+        final_damage, absorbed_damage = apply_armor_protection(user_data, target_dmg['damage'], round_data,
+                                                               round_number)
         user_data["hp"] = max(0, user_data["hp"] - final_damage)
 
         round_data["actions"].append({
@@ -238,9 +242,11 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
         })
 
         if user_data["hp"] <= 0:
+            battle_data["rounds"].append(round_data)  # Append the round data before processing defeat
             experience = target_data["exp"] + 10 + user_data["exp"] // 10
             update_user_data(target_name, {"exp": experience}, usersdb)
-            process_player_defeat(user_data, user, target_data, target_name, 0.5, usersdb, battle_data["rounds"], round_number, user_max_total_hp)
+            process_player_defeat(user_data, user, target_data, target_name, 0.5, usersdb, battle_data["rounds"],
+                                  round_number, user_max_total_hp)
             break
 
         round_data["player_hp"] = user_data["hp"]
@@ -492,20 +498,21 @@ def get_fight_preconditions(user_data: Dict) -> Optional[str]:
 
 def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, victor_name: str, death_chance: float,
                           usersdb: Dict, rounds: List[Dict], round_number: int, defeated_max_hp: int) -> None:
-
     print("victor", victor)
     print("defeated", defeated)
+    is_player_defeated = defeated_name == victor["username"]
+
     if random.random() < death_chance:
-        message = f"{defeated_name} was killed in battle. {defeated_name}'s HP: 0/{defeated_max_hp}"
+        message = f"{'You were' if is_player_defeated else defeated_name + ' was'} killed in battle. {'Your' if is_player_defeated else defeated_name + 's'} HP: 0/{defeated_max_hp}"
         new_data = {"alive": False, "hp": 0, "action_points": 0}
     else:
-        message = f"{defeated_name} barely managed to escape. {defeated_name}'s HP: 1/{defeated_max_hp}"
+        message = f"{'You' if is_player_defeated else defeated_name} barely managed to escape. {'Your' if is_player_defeated else defeated_name + 's'} HP: 1/{defeated_max_hp}"
         new_data = {"action_points": defeated["action_points"] - 1, "hp": 1}
 
     rounds.append({
         "round": round_number,
-        "player_hp": victor["hp"] if victor_name == "You" else defeated["hp"],
-        "enemy_hp": defeated["hp"] if victor_name == "You" else victor["hp"],
+        "player_hp": victor["hp"] if victor_name == victor["username"] else defeated["hp"],
+        "enemy_hp": defeated["hp"] if victor_name == victor["username"] else victor["hp"],
         "actions": [{
             "actor": "system",
             "type": "defeat",
@@ -526,17 +533,18 @@ def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, vict
                 else:
                     victor["unequipped"].append(dropped_item)
 
-                rounds.append({
-                    "round": round_number,
-                    "player_hp": defeated["hp"],
-                    "enemy_hp": defeated["hp"],
-                    "actions": [{
-                        "actor": "system",
-                        "type": "loot",
-                        "message": f"{victor_name} looted a {dropped_item['type']} from {defeated_name}'s mutilated body!"
-                    }]
-                })
-                update_user_data(victor_name, {"unequipped": victor["unequipped"], "equipped": victor["equipped"]},
-                                 usersdb)
+            loot_message = f"{'You looted' if victor_name == victor['username'] else victor_name + ' looted'} a {dropped_item['type']} from {'your' if is_player_defeated else defeated_name + 's'} mutilated body!"
+            rounds.append({
+                "round": round_number,
+                "player_hp": victor["hp"] if victor_name == victor["username"] else defeated["hp"],
+                "enemy_hp": defeated["hp"] if victor_name == victor["username"] else victor["hp"],
+                "actions": [{
+                    "actor": "system",
+                    "type": "loot",
+                    "message": loot_message
+                }]
+            })
+            update_user_data(victor_name, {"unequipped": victor["unequipped"], "equipped": victor["equipped"]},
+                             usersdb)
 
     update_user_data(defeated_name, new_data, usersdb)
