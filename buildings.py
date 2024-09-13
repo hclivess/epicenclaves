@@ -142,7 +142,7 @@ class Palisade(Building):
 
 class Siege(Building):
     DISPLAY_NAME = "Siege"
-    DESCRIPTION = "Lay siege to a palisade in order to destroy it."
+    DESCRIPTION = "Lay siege to a palisade in order to destroy it. Perimeter of 1."
     COST = {"ingredients": {"wood": 100, "bismuth": 100}}
     IMAGE_SOURCE = "siege.png"
     HP = 250
