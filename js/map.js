@@ -32,7 +32,7 @@ function createMap(data) {
         } else {
             text = `${entity.type}`;
             if (entity.level !== undefined) text += ` lvl ${entity.level}`;
-            if (entity.control !== undefined) text += ` by ${entity.control}`;
+            if (entity.control !== undefined) text += ` of ${entity.control}`;
             if (entity.hp !== undefined) text += ` HP: ${entity.hp}`;
         }
         text += ` (${pos.x},${pos.y})`;
