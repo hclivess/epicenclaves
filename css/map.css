@@ -128,30 +128,7 @@ body, html {
     background-repeat: repeat;
     background-size: contain;
     background-position: top left;
-    cursor: url('../img/assets/custom_cursor_pointer.png'), auto;
 
-/* Apply the custom cursor to all elements */
-* {
-    cursor: inherit;
-}
-
-/* Override cursor for interactive elements */
-a, button, input[type="submit"], input[type="button"], select {
-    cursor: url('../img/assets/custom_cursor_pointer.png'), pointer !important;
-}
-
-/* Ensure buttons don't use the default hand cursor */
-button {
-    cursor: url('../img/assets/custom_cursor_pointer.png'), pointer !important;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-}
-
-/* Target specific button classes if needed */
-.btn, .btn-primary, .btn-secondary, .btn-danger, .btn-palisade, .popup-close {
-    cursor: url('../img/assets/custom_cursor_pointer.png'), pointer !important;
-}
 
     .map-container {
         width: 100%;
