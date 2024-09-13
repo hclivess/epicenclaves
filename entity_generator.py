@@ -44,27 +44,33 @@ def spawn(mapdb: Dict[str, Any], entity_class, **kwargs):
         'is_biome_generation': kwargs.get('is_biome_generation', False)
     }
 
-    total_entities = 0
     existing_entities = sum(1 for value in mapdb.values() if value.get('type') == entity_class.type)
+    if existing_entities >= params['max_entities_total']:
+        return 0
+
+    dynamic_probability = calculate_dynamic_probability(base_probability, existing_entities,
+                                                        params['max_entities_total'])
+
+    # Perform probability check first
+    if random.random() > dynamic_probability:
+        return 0  # Skip if probability check fails
+
     biome = getattr(entity_class, 'biome', 'any')
+    biome_locations = list(get_biome_locations(mapdb, params['map_size'], biome, params['is_biome_generation']))
 
-    biome_locations = get_biome_locations(mapdb, params['map_size'], biome, params['is_biome_generation'])
+    if not biome_locations:
+        return 0
 
+    total_entities = 0
     while biome_locations and total_entities < params['max_entities'] and existing_entities + total_entities < params[
         'max_entities_total']:
-        dynamic_probability = calculate_dynamic_probability(base_probability, existing_entities + total_entities,
-                                                            params['max_entities_total'])
+        biome_x, biome_y = random.choice(biome_locations)
+        biome_locations.remove((biome_x, biome_y))
 
-        if random.random() > dynamic_probability:
-            break
-
-        biome_x, biome_y = biome_locations.pop()
-
-        if random.random() <= params['herd_probability'] and not params['is_biome_generation']:
+        if not params['is_biome_generation'] and random.random() <= params['herd_probability']:
             total_entities += spawn_herd(mapdb, entity_class, biome_x, biome_y, params)
-        else:
-            if spawn_single(mapdb, entity_class, biome_x, biome_y, params):
-                total_entities += 1
+        elif spawn_single(mapdb, entity_class, biome_x, biome_y, params):
+            total_entities += 1
 
     return total_entities
 
