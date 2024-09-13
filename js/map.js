@@ -317,26 +317,35 @@ function performAction(actionUrl) {
         });
 }
 
-function displayMessage(message) {
-    const messageDisplay = document.getElementById('message-display');
+let currentMessage = '';
+let messageTimeout = null;
+const MESSAGE_DISPLAY_TIME = 5000; // 5 seconds
 
+function displayMessage(message) {
     if (message && message.trim() !== '') {
+        currentMessage = message;
+        const messageDisplay = document.getElementById('message-display');
+
         messageDisplay.textContent = message;
         messageDisplay.style.opacity = '1';
         messageDisplay.style.visibility = 'visible';
 
-        setTimeout(() => {
+        // Clear any existing timeout
+        if (messageTimeout) {
+            clearTimeout(messageTimeout);
+        }
+
+        // Set a new timeout
+        messageTimeout = setTimeout(() => {
             messageDisplay.style.opacity = '0';
             messageDisplay.style.visibility = 'hidden';
-        }, 5000);
-
-        setTimeout(() => {
-            messageDisplay.textContent = '';
-        }, 5300);
-    } else {
-        messageDisplay.textContent = '';
-        messageDisplay.style.opacity = '0';
-        messageDisplay.style.visibility = 'hidden';
+            setTimeout(() => {
+                if (messageDisplay.textContent === currentMessage) {
+                    messageDisplay.textContent = '';
+                    currentMessage = '';
+                }
+            }, 300); // Short delay for fade-out transition
+        }, MESSAGE_DISPLAY_TIME);
     }
 }
 
@@ -476,11 +485,17 @@ function refreshMapData() {
             Object.assign(jsonData, data);
             updateMap(jsonData);
             checkPlayerPosition();
+
+            // Only display a new message if there isn't already one being shown
+            if (data.message && data.message !== currentMessage) {
+                displayMessage(data.message);
+            }
         })
         .catch(error => {
             console.error('Error refreshing map data:', error);
         });
 }
+
 
 // Set up periodic refresh
 const refreshInterval = 1000; // 1 second
