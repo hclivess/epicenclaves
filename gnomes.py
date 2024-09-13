@@ -20,7 +20,7 @@ def move_gnomes(mapdb, league):
     # Then, move gnomes to their new positions
     for old_coord, new_coord in gnomes_to_move.items():
         if new_coord not in mapdb[league] and new_coord not in new_positions:
-            new_positions[new_coord] = {'type': 'gnomes', 'biome': 'gnomes'}
+            new_positions[new_coord] = {"role": "scenery", "type": "gnomes", "biome": "gnomes"}
         else:
             # If the new position is occupied or another gnome is moving there,
             # keep the gnome in its original position
