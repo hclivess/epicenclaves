@@ -20,6 +20,6 @@ button {
 }
 
 /* Target specific button classes if needed */
-.btn, .btn-primary, .btn-secondary, .btn-danger, .btn-palisade, .popup-close {
+.btn, .btn-primary, .btn-secondary, .btn-danger, .btn-palisade, .popup-close, .league-select, .form-group {
     cursor: url('../img/assets/custom_cursor_pointer.png'), pointer !important;
 }
