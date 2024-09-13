@@ -56,7 +56,7 @@ def move_to(user, target_x, target_y, axis_limit, user_data, users_dict, map_dic
             tile_control = tile_data.get("control")
 
             if tile_type == "rock":
-                return_message["message"] = f"Stopped at {x},{y}. Cannot move through a wall at {coord_key}"
+                return_message["message"] = f"Stopped at {x},{y}. Cannot move through a rock at {coord_key}"
                 break
             elif tile_type == "palisade":
                 if tile_control != user:
