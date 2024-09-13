@@ -52,6 +52,8 @@ class TurnEngine(threading.Thread):
         self.running = False
 
     def process_turn(self):
+        start_time = time.time()  # Start the timer
+
         self.update_latest_block()
         self.turn += 1
         for league in self.mapdb:
@@ -66,6 +68,10 @@ class TurnEngine(threading.Thread):
                 print("Moving gnomes")
                 move_gnomes(self.mapdb, league)
                 print(f"Current turn of {league}: {self.turn}")
+
+        end_time = time.time()  # End the timer
+        execution_time = end_time - start_time  # Calculate the execution time
+        print(f"Turn {self.turn} execution time: {execution_time:.2f} seconds")
 
     def save_databases(self, league):
         save_map_from_memory(self.mapdb, league=league)
