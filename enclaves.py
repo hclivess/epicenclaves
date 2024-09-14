@@ -47,7 +47,7 @@ from player import create_user, calculate_population_limit
 from maze_generator import generate_multiple_mazes
 from upgrade import upgrade
 from trash import trash_item, trash_armor, trash_all, trash_weapons
-from repair import repair_all_items
+from repair import repair_all_items, repair_item
 from drag import drag_player
 from revive import revive
 
@@ -331,9 +331,18 @@ class RepairHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
-        self.perform_action(user, self._repair_items, league)
+        item_id = self.get_argument("id", None)
 
-    def _repair_items(self, user, user_data):
+        if item_id:
+            self.perform_action(user, self._repair_item, league, item_id)
+        else:
+            self.perform_action(user, self._repair_all_items, league)
+
+    def _repair_item(self, user, user_data, item_id):
+        league = self.get_current_league()
+        return repair_item(user, usersdb[league], item_id)
+
+    def _repair_all_items(self, user, user_data):
         league = self.get_current_league()
         return repair_all_items(user, usersdb[league])
 

@@ -181,6 +181,9 @@
                         {% end %}
                         {% if item.get('id') %}
                             <a href="/unequip?id={{item['id']}}" class="btn btn-warning btn-sm">Stash</a>
+                            {% if item.get('role') == "armor" %}
+                                <a href="/repair?id={{item['id']}}" class="btn btn-primary btn-sm">Repair</a>
+                            {% end %}
                         {% end %}
                     </div>
                 </div>
@@ -230,6 +233,9 @@
                         {% if item.get('id') %}
                             <a href="/equip?id={{item['id']}}" class="btn btn-primary btn-sm">Equip</a>
                             <a href="/trash?id={{item['id']}}" class="btn btn-danger btn-sm">Trash</a>
+                            {% if item.get('role') == "armor" %}
+                                <a href="/repair?id={{item['id']}}" class="btn btn-primary btn-sm">Repair</a>
+                            {% end %}
                         {% end %}
                     </div>
                 </div>
