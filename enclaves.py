@@ -29,7 +29,7 @@ from mine import mine_mountain
 from conquer import attempt_conquer
 from deploy_army import deploy_army, remove_army
 from equip import equip_item, unequip_item
-from fight import fight, get_fight_preconditions
+from combat import fight, get_fight_preconditions
 from login import login, get_leagues
 from typing import List, Dict, Any
 from turn_engine import TurnEngine
