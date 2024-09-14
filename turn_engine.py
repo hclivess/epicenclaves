@@ -34,9 +34,8 @@ def interruptible_sleep(seconds, interval=1, stop_condition=None):
 class TurnEngine(threading.Thread):
     def __init__(self, usersdb, mapdb):
         super().__init__()
-        self.latest_block = None
-        self.compare_block = None
         self.turn = 0
+        self.round_time = 0
         self.running = True
         self.usersdb = usersdb
         self.mapdb = mapdb
@@ -54,31 +53,30 @@ class TurnEngine(threading.Thread):
     def process_turn(self):
         start_time = time.time()  # Start the timer
 
-        self.update_latest_block()
-        self.turn += 1
-        for league in self.mapdb:
-            if self.compare_block != self.latest_block:
-                self.save_databases(league)
-                self.update_users_data(league)
-                spawn_entities(self.mapdb, league)
-                print("Processing sieges")
-                process_siege_attacks(self.mapdb, self.usersdb, league)
-                print("Processing outposts")
-                process_outpost_attacks(self.mapdb, self.usersdb, league)
-                print("Moving gnomes")
-                move_gnomes(self.mapdb, league)
-                print(f"Current turn of {league}: {self.turn}")
+        if time.time() - self.round_time > 60:
+            self.round_time = time.time()
+            self.turn += 1
+
+            for league in self.mapdb:
+                    self.save_databases(league)
+                    self.update_users_data(league)
+                    spawn_entities(self.mapdb, league)
+                    print("Processing sieges")
+                    process_siege_attacks(self.mapdb, self.usersdb, league)
+                    print("Processing outposts")
+                    process_outpost_attacks(self.mapdb, self.usersdb, league)
+                    print("Moving gnomes")
+                    move_gnomes(self.mapdb, league)
+                    print(f"Current turn of {league}: {self.turn}")
 
         end_time = time.time()  # End the timer
         execution_time = end_time - start_time  # Calculate the execution time
         print(f"Turn {self.turn} execution time: {execution_time:.2f} seconds")
 
+
     def save_databases(self, league):
         save_map_from_memory(self.mapdb, league=league)
         save_users_from_memory(self.usersdb, league=league)
-
-    def update_latest_block(self):
-        self.latest_block = hashify(fake_hash()) if TEST else blockchain.last_bis_hash()
 
     def update_users_data(self, league):
         league_users = self.usersdb[league]
