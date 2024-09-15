@@ -1,3 +1,4 @@
+import math
 import tornado.websocket
 import asyncio
 import json
@@ -464,8 +465,8 @@ class MoveHandler(BaseHandler):
 
 class MoveToHandler(BaseHandler):
     def get(self):
-        x = int(self.get_argument("x"))
-        y = int(self.get_argument("y"))
+        x = math.floor(float(self.get_argument("x")))
+        y = math.floor(float(self.get_argument("y")))
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         user_data = get_user_data(user, usersdb=usersdb[league])
@@ -479,6 +480,7 @@ class MoveToHandler(BaseHandler):
             x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
             visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb[league], visible_distance)
             visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb[league]), visible_distance)
+
 
             # Filter the data to include only essential information
             filtered_users_data = {}

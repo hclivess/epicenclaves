@@ -402,18 +402,19 @@ function displayMessage(message) {
 
 function addClickListenerToMap() {
     const mapContainer = document.getElementById("map");
-    mapContainer.addEventListener("click", (event) => {
-        if (event.target.classList.contains("tile") || event.target.closest(".entity")) {
-            const clickedElement = event.target.classList.contains("tile") ? event.target : event.target.closest(".entity");
-            const clickX = parseInt(clickedElement.style.left) / gridSize + 1;
-            const clickY = parseInt(clickedElement.style.top) / gridSize + 1;
+    const containerRect = mapContainer.getBoundingClientRect();
 
-            moveToPosition(clickX, clickY, (success) => {
-                if (success) {
-                    updateMap(jsonData);
-                }
-            });
-        }
+    mapContainer.addEventListener("click", (event) => {
+        const clickX = Math.floor((event.clientX - containerRect.left + mapContainer.scrollLeft) / gridSize) + 1;
+        const clickY = Math.floor((event.clientY - containerRect.top + mapContainer.scrollTop) / gridSize) + 1;
+
+        console.log(`Clicked on map at (${clickX}, ${clickY})`);
+
+        moveToPosition(clickX, clickY, (success) => {
+            if (success) {
+                updateMap(jsonData);
+            }
+        });
     });
 }
 
