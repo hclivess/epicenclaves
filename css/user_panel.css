@@ -54,6 +54,12 @@ body {
     background-color: #2a2a2a;
 }
 
+.construction-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
 .resource-icon {
     width: 32px;
     height: 32px;

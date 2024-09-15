@@ -10,7 +10,8 @@ def exp_bonus(value: int, base: int = 10) -> int:
 def death_roll(hit_chance: float) -> bool:
     return random.random() < hit_chance
 
-def apply_armor_protection(defender: Dict, initial_damage: int, round_data: Dict) -> Tuple[int, int]:
+def apply_armor_protection(defender: Dict, initial_damage: int, round_data: Dict, round_number: int) -> Tuple[int, int]:
+    armor_protection = 0
     is_player = defender.get('name', 'You') == 'You'
 
     all_armor_slots = [armor for armor in defender.get("equipped", []) if armor.get("role") == "armor"]

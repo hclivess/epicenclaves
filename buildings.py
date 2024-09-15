@@ -15,7 +15,7 @@ class Building:
             "gold": "img/assets/gold.png",
             "food": "img/assets/food.png"
         }
-        return " ".join(f"<img src='{image_map.get(resource, resource)}' width='32' height='32' alt='{resource}'>{amount}" for resource, amount in cost.items())
+        return " ".join(f"<img class='resource-icon' src='{image_map.get(resource, resource)}' width='32' height='32' alt='{resource}'>{amount}" for resource, amount in cost.items())
 
     def to_dict(self):
         return {
@@ -86,7 +86,7 @@ class Farm(Building):
 
 class Barracks(Building):
     DISPLAY_NAME = "Barracks"
-    DESCRIPTION = "Turns peasants into army units. Costs 2 <img src='img/assets/food.png' alt='Food' width='32' height='32'> per turn. Provides additional housing."
+    DESCRIPTION = "Turns peasants into army units. Costs 2 <img class='resource-icon' src='img/assets/food.png' alt='Food' width='32' height='32'> per turn. Provides additional housing."
     COST = {"ingredients": {"wood": 150, "bismuth": 75}}
     IMAGE_SOURCE = "barracks.png"
     UPGRADE_COSTS = {
@@ -110,7 +110,7 @@ class Outpost(Building):
 
 class Sawmill(Building):
     DISPLAY_NAME = "Sawmill"
-    DESCRIPTION = "Produces <img src='img/assets/wood.png' alt='Wood' width='32' height='32'>1 per turn for each sawmill level and adjacent forest."
+    DESCRIPTION = "Produces <img class='resource-icon' src='img/assets/wood.png' alt='Wood' width='32' height='32'>1 per turn for each sawmill level and adjacent forest."
     COST = {"ingredients": {"wood": 100, "bismuth": 50}}
     IMAGE_SOURCE = "sawmill.png"
     UPGRADE_COSTS = {
@@ -122,7 +122,7 @@ class Sawmill(Building):
 
 class Mine(Building):
     DISPLAY_NAME = "Mine"
-    DESCRIPTION = "Produces <img src='img/assets/bismuth.png' alt='Bismuth' width='32' height='32'>1 per turn for each mine level and adjacent mountain."
+    DESCRIPTION = "Produces <img class='resource-icon' src='img/assets/bismuth.png' alt='Bismuth' width='32' height='32'>1 per turn for each mine level and adjacent mountain."
     COST = {"ingredients": {"wood": 100, "bismuth": 50}}
     IMAGE_SOURCE = "mine.png"
     UPGRADE_COSTS = {
