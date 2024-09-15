@@ -304,7 +304,7 @@ function movePlayer(direction, steps) {
 
 function moveToPosition(x, y, callback) {
     console.log(`Sending request to move to (${x}, ${y})`);
-    fetch(`/move_to?x=${x}&y=${y}&target=map`, {
+    fetch(`/move_to?x=${x}&y=${y}&target=map&return_to_map=true`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

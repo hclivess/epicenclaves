@@ -469,65 +469,71 @@ class MoveToHandler(BaseHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         user_data = get_user_data(user, usersdb=usersdb[league])
+        return_to_map = self.get_argument("return_to_map", default="false") == "true"
 
         moved = move_to(user, x, y, MAX_SIZE, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
         user_data = get_user_data(user, usersdb=usersdb[league])  # Refresh user data
 
-        visible_distance = DISTANCE
-        x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
-        visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb[league], visible_distance)
-        visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb[league]), visible_distance)
+        if return_to_map:
+            visible_distance = DISTANCE
+            x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
+            visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb[league], visible_distance)
+            visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb[league]), visible_distance)
 
-        # Filter the data to include only essential information
-        filtered_users_data = {}
-        for username, user_info in visible_users_data.items():
-            essential_keys = ["x_pos", "y_pos", "type", "img", "exp", "hp", "armor"]
-            filtered_users_data[username] = {key: user_info[key] for key in essential_keys if key in user_info}
+            # Filter the data to include only essential information
+            filtered_users_data = {}
+            for username, user_info in visible_users_data.items():
+                essential_keys = ["x_pos", "y_pos", "type", "img", "exp", "hp", "armor"]
+                filtered_users_data[username] = {key: user_info[key] for key in essential_keys if key in user_info}
 
-        filtered_map_data = {}
-        for coord, entity in visible_map_data.items():
-            filtered_entity = {"type": entity["type"]}
-            if "level" in entity:
-                filtered_entity["level"] = entity["level"]
-            if "control" in entity:
-                filtered_entity["control"] = entity["control"]
-            if "army" in entity:
-                filtered_entity["army"] = entity["army"]
-            if "hp" in entity:
-                filtered_entity["hp"] = entity["hp"]
-            filtered_map_data[coord] = filtered_entity
+            filtered_map_data = {}
+            for coord, entity in visible_map_data.items():
+                filtered_entity = {"type": entity["type"]}
+                if "level" in entity:
+                    filtered_entity["level"] = entity["level"]
+                if "control" in entity:
+                    filtered_entity["control"] = entity["control"]
+                if "army" in entity:
+                    filtered_entity["army"] = entity["army"]
+                if "hp" in entity:
+                    filtered_entity["hp"] = entity["hp"]
+                filtered_map_data[coord] = filtered_entity
 
-        # Generate actions for each tile and player
-        tile_actions = {}
-        for coord, entity in filtered_map_data.items():
-            tile_actions[coord] = get_tile_actions(entity, user)
+            # Generate actions for each tile and player
+            tile_actions = {}
+            for coord, entity in filtered_map_data.items():
+                tile_actions[coord] = get_tile_actions(entity, user)
 
-        for username, user_info in filtered_users_data.items():
-            if username != user:
-                coord = f"{user_info['x_pos']},{user_info['y_pos']}"
-                if user_info.get('hp', 0) > 0:  # Alive users have HP > 0
-                    tile_actions[coord] = [{
-                        "name": "challenge",
-                        "action": f"/fight?target=player&name={username}"
-                    }]
-                else:  # Dead users have HP <= 0
-                    tile_actions[coord] = [{
-                        "name": "drag",
-                        "action": f"/drag?target={username}"
-                    }]
+            for username, user_info in filtered_users_data.items():
+                if username != user:
+                    coord = f"{user_info['x_pos']},{user_info['y_pos']}"
+                    if user_info.get('hp', 0) > 0:  # Alive users have HP > 0
+                        tile_actions[coord] = [{
+                            "name": "challenge",
+                            "action": f"/fight?target=player&name={username}"
+                        }]
+                    else:  # Dead users have HP <= 0
+                        tile_actions[coord] = [{
+                            "name": "drag",
+                            "action": f"/drag?target={username}"
+                        }]
 
-        map_data = {
-            "users": filtered_users_data,
-            "construction": filtered_map_data,
-            "actions": tile_actions,
-            "x_pos": x_pos,
-            "y_pos": y_pos,
-            "message": moved["message"],
-            "steps_taken": moved["steps_taken"]
-        }
+            map_data = {
+                "users": filtered_users_data,
+                "construction": filtered_map_data,
+                "actions": tile_actions,
+                "x_pos": x_pos,
+                "y_pos": y_pos,
+                "message": moved["message"],
+                "steps_taken": moved["steps_taken"]
+            }
 
-        self.set_header("Content-Type", "application/json")
-        self.write(json.dumps(map_data))
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(map_data))
+        else:
+            on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
+            on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[league])
+            self.render_user_panel(user, user_data, message=moved["message"], on_tile_map=on_tile_map, on_tile_users=on_tile_users, league=league)
 
 class DragHandler(BaseHandler):
     def get(self):
