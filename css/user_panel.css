@@ -112,21 +112,6 @@ body {
     border-radius: 10px;
 }
 
-.navigation-submenu .btn {
-    margin-right: 10px;
-    margin-bottom: 10px;
-    background-color: #4a4a4a;
-    border: none;
-    color: #ffd700;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-    font-size: 0.85rem;
-}
-
-.navigation-submenu .btn:hover {
-    background-color: #5a5a5a;
-    transform: translateY(-2px);
-}
-
 .tile-actions {
     display: flex;
     flex-wrap: wrap;

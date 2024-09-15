@@ -33,22 +33,21 @@
 </head>
 
 <body class="bg-light">
-
-    <div class="fixed-menu d-flex justify-content-center">
-        <div class="btn-group">
-            <a class="btn btn-lg active btn-up" href="/map" role="button">Map 🗺️</a>
-            <a class="btn btn-lg active btn-up" href="/" role="button">👤 User Panel</a>
-            <a class="btn btn-lg active btn-up" href="/logout" role="button">Logout 🌙</a>
+        <div class="container mt-4">
+        <div class="navigation-submenu text-center mb-3">
+            <a href="/" class="btn btn-secondary">👤 User Panel</a>
+            <a href="/map" class="btn btn-secondary">🗺️ Map</a>
+            <a href="/bestiary" class="btn btn-secondary">📚 Bestiary</a>
+            <a href="/chat" class="btn btn-secondary">💬 Chat</a>
+            <a href="/logout" class="btn btn-danger">🌙 Logout</a>
         </div>
-    </div>
+        </div>
 
-    <div class="container mt-5 pt-5">
+    <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <div class="card border-0 shadow-lg">
                     <div class="card-body">
-                        <h1 class="card-title text-center">Battle in Progress</h1>
-                        <hr>
                         <div class="battle-arena">
                             <div class="fighter player">
                                 <div class="hp-display" id="playerHpDisplay"></div>
