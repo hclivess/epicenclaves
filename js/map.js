@@ -401,23 +401,28 @@ function displayMessage(message) {
 }
 
 function addClickListenerToMap() {
-    const mapContainer = document.getElementById("map");
-    const containerRect = mapContainer.getBoundingClientRect();
+    const mapContainer = document.querySelector('.map-container');
+    const map = document.getElementById('map');
 
     mapContainer.addEventListener("click", (event) => {
-        const clickX = Math.floor((event.clientX - containerRect.left + mapContainer.scrollLeft) / gridSize) + 1;
-        const clickY = Math.floor((event.clientY - containerRect.top + mapContainer.scrollTop) / gridSize) + 1;
+        const rect = mapContainer.getBoundingClientRect();
+        const mapRect = map.getBoundingClientRect();
+        const clickX = Math.floor((event.clientX - mapRect.left) / gridSize) + 1;
+        const clickY = Math.floor((event.clientY - mapRect.top) / gridSize) + 1;
 
         console.log(`Clicked on map at (${clickX}, ${clickY})`);
+        console.log(`Map container position: left=${rect.left}, top=${rect.top}`);
+        console.log(`Map position: left=${mapRect.left}, top=${mapRect.top}`);
+        console.log(`Grid size: ${gridSize}`);
 
         moveToPosition(clickX, clickY, (success) => {
+            console.log(`Move to (${clickX}, ${clickY}) ${success ? 'successful' : 'failed'}`);
             if (success) {
                 updateMap(jsonData);
             }
         });
     });
 }
-
 function centerMapOnPlayer() {
     const currentUserData = jsonData.users[currentUser];
     if (currentUserData) {
