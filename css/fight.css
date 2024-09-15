@@ -172,11 +172,12 @@ body {
 
 .pop-up {
     position: absolute;
-    font-size: 20px;
+    font-size: 32px;
     font-weight: bold;
     white-space: nowrap;
     pointer-events: none;
     transform: translateX(-50%);
+    color: white;
 }
 
 .pop-up.player-pop-up {
