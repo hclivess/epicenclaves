@@ -320,6 +320,8 @@
                                                 <p class="card-text"><strong>Position:</strong> ({{ coord }})</p>
                                                 <p class="card-text"><strong>Army:</strong> {{ building.get("army") }}</p>
                                                 <p class="card-text"><strong>Level:</strong> {{ building.get("level") }}</p>
+                                                <a href="/move_to?x={{ coord.split(',')[0] }}&y={{ coord.split(',')[1] }}" class="btn btn-primary btn-sm">Travel</a>
+
                                             </div>
                                         </div>
                                     </div>
