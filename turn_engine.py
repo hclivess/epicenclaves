@@ -51,9 +51,9 @@ class TurnEngine(threading.Thread):
         self.running = False
 
     def process_turn(self):
-        start_time = time.time()  # Start the timer
-
         if time.time() - self.round_time > 60:
+            start_time = time.time()  # Start the timer
+
             self.round_time = time.time()
             self.turn += 1
 
@@ -69,9 +69,9 @@ class TurnEngine(threading.Thread):
                     move_gnomes(self.mapdb, league)
                     print(f"Current turn of {league}: {self.turn}")
 
-        end_time = time.time()  # End the timer
-        execution_time = end_time - start_time  # Calculate the execution time
-        print(f"Turn {self.turn} execution time: {execution_time:.2f} seconds")
+            end_time = time.time()  # End the timer
+            execution_time = end_time - start_time  # Calculate the execution time
+            print(f"Turn {self.turn} execution time: {execution_time:.2f} seconds")
 
 
     def save_databases(self, league):
