@@ -214,12 +214,12 @@ body {
 }
 
 .navigation-submenu {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-end;
-    background-color: #333;
+    background-color: rgba(40, 40, 40, 0.9);
     padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    font-family: 'Merriweather', serif;
+    display: inline-block;
 }
 
 #battleLog .battle-message:last-child {

@@ -148,7 +148,6 @@ body {
     border: none;
     color: #ffd700;
     transition: background-color 0.3s ease, transform 0.3s ease;
-    font-size: 0.85rem;
 }
 
 .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover, .btn-warning:hover, .btn-success:hover {
