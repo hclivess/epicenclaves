@@ -120,10 +120,9 @@ def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, vict
                           usersdb: Dict, rounds: List[Dict], round_number: int, defeated_max_hp: int) -> None:
     print("victor", victor)
     print("defeated", defeated)
-    is_player_defeated = defeated_name == defeated.get("username")
 
     if random.random() < death_chance:
-        message = f"{'You were' if is_player_defeated else defeated_name + ' was'} killed in battle. {'Your' if is_player_defeated else defeated_name + 's'} HP: 0/{defeated_max_hp}"
+        message = f"{defeated_name} was killed in battle. {defeated_name}'s HP: 0/{defeated_max_hp}"
         new_data = {"alive": False, "hp": 0, "action_points": 0}
 
         # Item drop mechanic - only happens when player dies
@@ -142,7 +141,7 @@ def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, vict
                 else:
                     victor["equipped"].append(dropped_item)
 
-                loot_message = f"{'You looted' if victor_name == victor.get('username') else victor_name + ' looted'} a {dropped_item['type']} from {'your' if is_player_defeated else defeated_name + 's'} mutilated body!"
+                loot_message = f"{victor_name} looted a {dropped_item['type']} from {defeated_name}'s mutilated body!"
                 rounds.append({
                     "round": round_number,
                     "player_hp": victor["hp"] if victor_name == victor.get("username") else defeated["hp"],
@@ -164,7 +163,7 @@ def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, vict
                 new_data["unequipped"] = defeated["unequipped"]
                 new_data["equipped"] = defeated["equipped"]
     else:
-        message = f"{'You' if is_player_defeated else defeated_name} barely managed to escape. {'Your' if is_player_defeated else defeated_name + 's'} HP: 1/{defeated_max_hp}"
+        message = f"{defeated_name} barely managed to escape. {defeated_name}'s HP: 1/{defeated_max_hp}"
         new_data = {"action_points": defeated["action_points"] - 1, "hp": 1}
 
     rounds.append({
