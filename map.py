@@ -1,10 +1,11 @@
 import inspect
+import random
 from typing import List, Dict, Any, Optional, Tuple
 from math import floor
 
 from backend import get_user
 from spawner import spawn_all_entities
-from player import get_users_at_coords, User
+from player import User
 from buildings import Building
 from scenery import scenery_types
 from enemies import enemy_types
@@ -229,3 +230,51 @@ def count_buildings(user_data):
             counts[building_type] += building_data.get('level', 1)
 
     return counts
+
+
+def find_open_space(mapdb: Dict[str, Any]) -> tuple:
+    x = random.randint(0, 100)
+    y = random.randint(0, 100)
+
+    while True:
+        open_space = True
+
+        for dx in range(-1, 2):  # Check within a 3x3 square
+            for dy in range(-1, 2):
+                check_x, check_y = x + dx, y + dy
+                if f"{check_x},{check_y}" in mapdb:
+                    open_space = False
+                    break
+            if not open_space:
+                break
+
+        if open_space:
+            return x, y
+
+        # Increment coordinates
+        y += 1
+        if y > 2 ** 31:
+            x += 1
+            y = 1
+            if x > 2 ** 31:
+                raise Exception("No open space found within available range.")
+
+
+def get_users_at_coords(x_pos: int, y_pos: int, user: str, users_dict: Dict[str, Any], include_construction: bool = True, include_self: bool = True) -> List[Dict[str, Any]]:
+    """Returns a list of user data at a specific coordinate"""
+
+    users_at_coords = []
+
+    for username, user_data in users_dict.items():
+        # Skip this user if it's the same as the specified user and include_self is False
+        if username == user and not include_self:
+            continue
+
+        if user_data["x_pos"] == x_pos and user_data["y_pos"] == y_pos:
+            if not include_construction:
+                user_data = user_data.copy()  # So we don't modify the original data
+                user_data.pop('construction', None)  # Remove the construction data if present
+            users_at_coords.append({username: user_data})
+
+    # Return the list of users at the given coordinates (may be empty if no users found)
+    return users_at_coords
