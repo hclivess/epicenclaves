@@ -259,42 +259,42 @@ h5 {
   transition: width 0.5s ease-in-out;
 }
 
-/* New styles for current tile and other users */
-.current-tile-card, .other-user-card {
+/* Styles for Current Tile and Acquired Tiles */
+.current-tile-card, .acquired-tile-card {
     display: flex;
     flex-direction: column;
 }
 
-.current-tile-card .card-body, .other-user-card .card-body {
+.current-tile-card .card-body, .acquired-tile-card .card-body {
     display: flex;
     flex-direction: column;
 }
 
-.current-tile-info, .other-user-info {
+.current-tile-info, .acquired-tile-info {
     display: flex;
     align-items: flex-start;
     margin-bottom: 10px;
 }
 
-.current-tile-info img, .other-user-info img {
+.current-tile-info img, .acquired-tile-info img {
     width: 80px;
     height: 80px;
     object-fit: contain;
     margin-right: 10px;
 }
 
-.current-tile-details, .other-user-details {
+.current-tile-details, .acquired-tile-details {
     flex-grow: 1;
 }
 
-.current-tile-actions, .other-user-actions {
+.current-tile-actions, .acquired-tile-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
     margin-top: auto;
 }
 
-.current-tile-actions .btn, .other-user-actions .btn {
+.current-tile-actions .btn, .acquired-tile-actions .btn {
     font-size: 0.8rem;
     padding: 0.2rem 0.5rem;
     background-color: #4a4a4a;
@@ -303,7 +303,17 @@ h5 {
     transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-.current-tile-actions .btn:hover, .other-user-actions .btn:hover {
+.current-tile-actions .btn:hover, .acquired-tile-actions .btn:hover {
     background-color: #5a5a5a;
     transform: translateY(-2px);
+}
+
+.acquired-tile-details p {
+    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+}
+
+.acquired-tile-details .card-title {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
 }
