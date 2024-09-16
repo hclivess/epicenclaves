@@ -374,6 +374,13 @@ function handleGoTo() {
 
 function performAction(actionUrl) {
     setUserInteracting(true);
+
+    // Check if the action is a /temple redirect
+    if (actionUrl.includes('/temple')) {
+        window.location.href = actionUrl;
+        return;
+    }
+
     fetch(actionUrl)
         .then(response => response.json())
         .then(data => {
