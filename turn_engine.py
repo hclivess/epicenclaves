@@ -12,6 +12,7 @@ from map import spawn_entities, count_buildings
 from outpost import process_outpost_attacks
 from siege import process_siege_attacks
 from gnomes import move_gnomes
+from player import calculate_total_mana, calculate_total_hp
 
 from scenery import scenery_types
 from enemies import enemy_types
@@ -98,8 +99,17 @@ class TurnEngine(threading.Thread):
         }
 
         current_mana = user_data.get("mana", 0)
-        if current_mana < 100:
-            updated_values["mana"] = min(100, current_mana + 1)
+        current_hp = user_data.get("hp", 0)
+        current_exp = user_data.get("exp", 0)
+
+        max_total_mana = calculate_total_mana(100, current_exp)
+        max_total_hp = calculate_total_hp(100, current_exp)
+
+        if current_mana < max_total_mana:
+            updated_values["mana"] = min(current_mana + 1, max_total_mana)
+
+        if current_hp < max_total_hp:
+            updated_values["hp"] = min(current_hp + 1, max_total_hp)
 
         updated_values.update(self.calculate_population(user_data, updated_values, building_counts))
 
