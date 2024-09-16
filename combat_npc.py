@@ -40,8 +40,8 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
             spell_cast = attempt_spell_cast(user_data, spell_types)
             if spell_cast:
                 damage_dealt = spell_cast['damage']
-                user_data['mana'] -= spell_cast['mana_cost']  # Deduct mana cost
-                update_user_data(user=user, updated_values={"mana": user_data["mana"]}, user_data_dict=usersdb)  # Update mana in database
+                user_data['mana'] = max(0, user_data['mana'] - spell_cast['mana_cost'])  # Ensure mana doesn't go below 0
+                update_user_data(user=user, updated_values={"mana": user_data["mana"]}, user_data_dict=usersdb)
                 enemy.hp = max(0, enemy.hp - damage_dealt)
                 round_data["actions"].append({
                     "actor": "player",

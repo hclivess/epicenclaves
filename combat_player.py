@@ -104,9 +104,10 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
     if spell_cast:
         final_damage = spell_cast['damage']
         mana_spent = spell_cast['mana_cost']
+        attacker['mana'] = max(0, attacker['mana'] - mana_spent)  # Ensure mana doesn't go below 0
         defender["hp"] = max(0, defender["hp"] - final_damage)
         message = f"{attacker_name} cast {spell_cast['name']} on {defender_name} for {final_damage} damage. " \
-                  f"{attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}, Mana: {attacker['mana'] - mana_spent}. " \
+                  f"{attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}, Mana: {attacker['mana']}. " \
                   f"{defender_name}'s HP: {defender['hp']}/{defender_max_hp}"
         round_data["actions"].append({
             "actor": "player" if attacker_name == attacker.get('username') else "enemy",

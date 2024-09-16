@@ -7,18 +7,15 @@ def attempt_spell_cast(caster: Dict, spell_types: Dict) -> Optional[Dict]:
     if random.random() > 0.1 or not caster.get('spells'):  # 10% chance to cast a spell
         return None
 
-    spell_name = random.choice(caster['spells'])
-    spell_class = spell_types.get(spell_name)
+    available_spells = [spell for spell in caster['spells'] if
+                        spell_types.get(spell) and spell_types[spell](0).MANA_COST <= caster.get('mana', 0)]
 
-    if not spell_class:
+    if not available_spells:
         return None
 
+    spell_name = random.choice(available_spells)
+    spell_class = spell_types[spell_name]
     spell = spell_class(0)  # The ID doesn't matter here
-
-    if caster.get('mana', 0) < spell.MANA_COST:
-        return None
-
-    caster['mana'] -= spell.MANA_COST
 
     return {
         'name': spell.DISPLAY_NAME,
