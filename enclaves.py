@@ -1039,14 +1039,39 @@ class TempleHandler(BaseHandler):
         available_spells = [spell_class(spell_id=i) for i, spell_class in enumerate(spell_types.values())]
 
         self.render(
-            "templates/learn.html",
+            "templates/temple.html",
             user=user,
             league=league,
             user_data=user_data,
             available_spells=available_spells
         )
 
+class LearnHandler(BaseHandler):
+    def post(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
+        spell_type = self.get_argument("spell")
 
+        user_data = get_user_data(user, usersdb[league])
+        if user_data is None:
+            self.write(json.dumps({"success": False, "message": "User not found"}))
+            return
+
+        spell_class = spell_types.get(spell_type.lower())
+        if spell_class is None:
+            self.write(json.dumps({"success": False, "message": "Spell not found"}))
+            return
+
+        spell = spell_class(spell_id=len(user_data['spells']))
+        cost = spell.COST.get('research', 0)
+
+        if user_data['research'] >= cost:
+            user_data['research'] -= cost
+            user_data['spells'].append(spell.to_dict())
+            update_user_data(user, user_data, usersdb[league])
+            self.write(json.dumps({"success": True, "message": f"Learned {spell.DISPLAY_NAME}"}))
+        else:
+            self.write(json.dumps({"success": False, "message": "Not enough research points"}))
 
 def make_app():
     return tornado.web.Application([
@@ -1078,6 +1103,7 @@ def make_app():
         (r"/deploy(.*)", DeployArmyHandler),
         (r"/bestiary", BestiaryHandler),
         (r"/temple", TempleHandler),
+        (r"/learn", LearnHandler),
         (r"/chat", ChatHandler),
         (r"/ws/chat", ChatWebSocketHandler),
         (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),
