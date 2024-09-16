@@ -56,6 +56,7 @@ from trash import trash_item, trash_armor, trash_all, trash_weapons
 from repair import repair_all_items, repair_item
 from drag import drag_player
 from revive import revive
+from learn import learn_spell
 
 MAX_SIZE = 1000000
 DISTANCE = 15
@@ -1052,31 +1053,8 @@ class LearnHandler(BaseHandler):
         league = self.get_current_league()
         spell_type = self.get_argument("spell")
 
-        user_data = get_user_data(user, usersdb[league])
-        if user_data is None:
-            self.write(json.dumps({"success": False, "message": "User not found"}))
-            return
-
-        if spell_type in user_data.get('spells', []):
-            self.write(json.dumps({"success": False, "message": "You have already learned this spell"}))
-            return
-
-        spell_class = spell_types.get(spell_type.lower())
-        if spell_class is None:
-            self.write(json.dumps({"success": False, "message": "Spell not found"}))
-            return
-
-        spell = spell_class(spell_id=len(user_data['spells']))
-        cost = spell.COST.get('research', 0)
-
-        if user_data['research'] >= cost:
-            user_data['research'] -= cost
-            user_data['spells'].append(spell_type)  # Only store the spell type
-            update_user_data(user, user_data, usersdb[league])
-            self.write(json.dumps({"success": True, "message": f"Learned {spell.DISPLAY_NAME}"}))
-        else:
-            self.write(json.dumps({"success": False, "message": "Not enough research points"}))
-
+        success, message = learn_spell(user, usersdb[league], mapdb[league], spell_type, spell_types)
+        self.write(json.dumps({"success": success, "message": message}))
 
 def make_app():
     return tornado.web.Application([
