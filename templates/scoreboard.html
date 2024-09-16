@@ -5,76 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="/img/favicon.ico">
     <link href="css/cursor.css" rel="stylesheet">
+    <link href="css/scoreboard.css" rel="stylesheet">
     <title>Epic Enclaves - Scoreboard</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
-
-        body {
-            font-family: 'Merriweather', serif;
-            margin: 0;
-            padding: 0;
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-        }
-        .container { padding: 20px; }
-        .navigation-container { background-color: #2a2a2a; padding: 10px; text-align: center; margin-bottom: 20px; }
-        .btn {
-            display: inline-block;
-            padding: 8px 15px;
-            margin: 0 5px;
-            text-decoration: none;
-            color: #ffc107;
-            background-color: #3a3a3a;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-            font-weight: bold;
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            background-color: #4a4a4a;
-        }
-        .btn-danger {
-            background-color: #dc3545;
-        }
-        .btn-danger:hover {
-            background-color: #c82333;
-        }
-        .section { margin-bottom: 20px; }
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
-        .card {
-            border: 1px solid #444;
-            padding: 10px;
-            border-radius: 5px;
-            background-color: #2a2a2a;
-            transition: all 0.3s ease;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        .card img { max-width: 100%; height: auto; }
-        h2 {
-            font-family: 'Cinzel', serif;
-            color: #bb86fc;
-        }
-        .search-container {
-            margin-bottom: 20px;
-        }
-        .search-container input {
-            padding: 5px 10px;
-            width: 200px;
-        }
-        .winner-card {
-            background-image: url('/img/assets/winner.png');
-            background-size: cover;
-            color: #fff;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-        }
-        .winner-card p {
-            font-weight: bold;
-        }
-    </style>
+    <script type="text/javascript" src="js/scoreboard.js"></script>
 </head>
 <body>
     <div class="container">
@@ -103,6 +36,7 @@
                     <img src="{{ user_info['img'] }}" alt="Player {{ user_id }}">
                     <p><strong>ID:</strong> {{ user_id }} <strong>Type:</strong> {{ user_info['type'] }}</p>
                     <p><strong>Pos:</strong> ({{ user_info['x_pos'] }}, {{ user_info['y_pos'] }}) <strong>Age:</strong> {{ user_info['age'] }} <strong>Exp:</strong> {{ user_info['exp'] }} <strong>Score:</strong> {{ user_info['score'] }}</p>
+                    <a href="/move_to?x={{ user_info['x_pos'] }}&y={{ user_info['y_pos'] }}" class="btn btn-primary btn-sm">Travel</a>
                 </div>
                 {% end %}
             </div>
@@ -117,61 +51,11 @@
                 {% for position, item in mapdb.items() %}
                 <div class="card">
                     <p><strong>Pos:</strong> {{ position }} <strong>Type:</strong> {{ item.get('type') }} <strong>Role:</strong> {{ item.get('role') }}</p>
+                    <a href="/move_to?x={{ position.split(',')[0] }}&y={{ position.split(',')[1] }}" class="btn btn-primary btn-sm">Travel</a>
                 </div>
                 {% end %}
             </div>
         </div>
     </div>
-
-    <script>
-        function adjustGrid() {
-            const grids = document.querySelectorAll('.card-grid');
-            grids.forEach(grid => {
-                const containerWidth = grid.offsetWidth;
-                const cardWidth = 200; // Minimum card width
-                const columns = Math.floor(containerWidth / cardWidth);
-                grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-            });
-        }
-
-        window.addEventListener('load', adjustGrid);
-        window.addEventListener('resize', adjustGrid);
-
-        // Search functionality for players
-        const playerSearch = document.getElementById('playerSearch');
-        const playerGrid = document.getElementById('playerGrid');
-
-        playerSearch.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const players = playerGrid.getElementsByClassName('card');
-
-            Array.from(players).forEach(function(player) {
-                const playerInfo = player.textContent.toLowerCase();
-                if (playerInfo.includes(searchTerm)) {
-                    player.style.display = 'block';
-                } else {
-                    player.style.display = 'none';
-                }
-            });
-        });
-
-        // Search functionality for map items
-        const mapSearch = document.getElementById('mapSearch');
-        const mapGrid = document.getElementById('mapGrid');
-
-        mapSearch.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const mapItems = mapGrid.getElementsByClassName('card');
-
-            Array.from(mapItems).forEach(function(item) {
-                const itemInfo = item.textContent.toLowerCase();
-                if (itemInfo.includes(searchTerm)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        });
-    </script>
 </body>
 </html>

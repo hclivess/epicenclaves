@@ -1,7 +1,20 @@
 from backend import update_user_data
+from map import occupied_by, owned_by
+from typing import List, Dict
 
-def repair_all_items(user, usersdb, wood_cost=10, bismuth_cost=5):
+
+def repair_all_items(user, usersdb, mapdb, wood_cost=10, bismuth_cost=5):
     user_data = usersdb[user]
+    x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
+
+    # Check if the user is on a blacksmith tile and controls it
+    proper_tile = occupied_by(x_pos, y_pos, what="blacksmith", mapdb=mapdb)
+    under_control = owned_by(x_pos, y_pos, control=user, mapdb=mapdb)
+
+    if not proper_tile:
+        return "You cannot repair items here, a blacksmith is required"
+    elif not under_control:
+        return "This blacksmith is not under your control"
 
     items_to_repair = []
     total_missing_durability = 0
@@ -45,8 +58,18 @@ def repair_all_items(user, usersdb, wood_cost=10, bismuth_cost=5):
         return "No items needed repair. No resources were deducted."
 
 
-def repair_item(user, usersdb, item_id, wood_cost=10, bismuth_cost=5):
+def repair_item(user, usersdb, mapdb, item_id, wood_cost=10, bismuth_cost=5):
     user_data = usersdb[user]
+    x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
+
+    # Check if the user is on a blacksmith tile and controls it
+    proper_tile = occupied_by(x_pos, y_pos, what="blacksmith", mapdb=mapdb)
+    under_control = owned_by(x_pos, y_pos, control=user, mapdb=mapdb)
+
+    if not proper_tile:
+        return "You cannot repair items here, a blacksmith is required"
+    elif not under_control:
+        return "This blacksmith is not under your control"
 
     # Find the item in equipped or unequipped items
     item_to_repair = None

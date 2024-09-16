@@ -2,20 +2,6 @@ from backend import update_user_data
 from map import occupied_by, owned_by
 from player import calculate_total_hp
 
-
-from typing import List, Dict
-from backend import update_user_data
-from map import occupied_by, owned_by
-from player import calculate_total_hp
-
-def get_actions(self, user: str) -> List[Dict[str, str]]:
-    actions = super().get_actions(user)
-    actions.extend([
-        {"name": "sleep 10 hours", "action": "/rest?hours=10"},
-        {"name": "sleep until rested", "action": "/rest?hours=all"},
-    ])
-    return actions
-
 def attempt_rest(user, user_data, hours_arg, usersdb, mapdb):
     x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
 
