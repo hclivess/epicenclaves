@@ -2,7 +2,8 @@ import random
 from typing import Dict, List
 from backend import update_user_data
 from player import calculate_total_hp, has_item_equipped, drop_random_item
-from combat_utils import exp_bonus, get_weapon_damage, apply_armor_protection
+from combat_utils import exp_bonus, get_weapon_damage, apply_armor_protection, attempt_spell_cast
+from spells import spell_types
 
 def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> None:
     print(f"Starting fight_player. Target: {target_name}, User: {user}")
@@ -94,17 +95,18 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
     print(f"Fight ended. Rounds: {len(battle_data['rounds'])}, Player HP: {user_data['hp']}, Enemy HP: {target_data['hp']}")
 
 def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_name: str, round_data: Dict,
-                  round_number: int, attacker_max_hp: int, defender_max_hp: int) -> None:
+                  round_number: int, attacker_max_hp: int, defender_max_hp: int) -> Dict:
     if attacker["hp"] <= 0:
-        return
+        return {}
 
     # Attempt spell cast
     spell_cast = attempt_spell_cast(attacker, spell_types)
     if spell_cast:
         final_damage = spell_cast['damage']
+        mana_spent = spell_cast['mana_cost']
         defender["hp"] = max(0, defender["hp"] - final_damage)
         message = f"{attacker_name} cast {spell_cast['name']} on {defender_name} for {final_damage} damage. " \
-                  f"{attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}, Mana: {attacker['mana']}. " \
+                  f"{attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}, Mana: {attacker['mana'] - mana_spent}. " \
                   f"{defender_name}'s HP: {defender['hp']}/{defender_max_hp}"
         round_data["actions"].append({
             "actor": "player" if attacker_name == attacker.get('username') else "enemy",
@@ -112,6 +114,7 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
             "damage": final_damage,
             "message": message
         })
+        return {'mana_spent': mana_spent}
     else:
         exp_bonus_value = exp_bonus(attacker["exp"])
         damage_dict = get_weapon_damage(attacker, exp_bonus_value)
@@ -130,6 +133,8 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
             "damage": final_damage,
             "message": message
         })
+
+    return {}
 
 def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, victor_name: str, death_chance: float,
                           usersdb: Dict, rounds: List[Dict], round_number: int, defeated_max_hp: int) -> None:

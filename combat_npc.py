@@ -40,6 +40,8 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
             spell_cast = attempt_spell_cast(user_data, spell_types)
             if spell_cast:
                 damage_dealt = spell_cast['damage']
+                user_data['mana'] -= spell_cast['mana_cost']  # Deduct mana cost
+                update_user_data(user=user, updated_values={"mana": user_data["mana"]}, user_data_dict=usersdb)  # Update mana in database
                 enemy.hp = max(0, enemy.hp - damage_dealt)
                 round_data["actions"].append({
                     "actor": "player",
@@ -129,7 +131,7 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
                     "enemy_hp": enemy.hp
                 })
                 user_data["alive"] = False
-                update_user_data(user=user, updated_values={"alive": False, "hp": 0}, user_data_dict=usersdb)
+                update_user_data(user=user, updated_values={"alive": False, "hp": 0, "mana": user_data["mana"]}, user_data_dict=usersdb)
             else:
                 battle_data["rounds"].append({
                     "round": round_number + 1,
@@ -141,7 +143,7 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
                     "player_hp": 1,
                     "enemy_hp": enemy.hp
                 })
-                update_user_data(user=user, updated_values={"action_points": user_data["action_points"] - 1, "hp": 1},
+                update_user_data(user=user, updated_values={"action_points": user_data["action_points"] - 1, "hp": 1, "mana": user_data["mana"]},
                                  user_data_dict=usersdb)
             break
 
