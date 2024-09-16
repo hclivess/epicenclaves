@@ -40,6 +40,8 @@
     .djinn { background: url('../img/assets/thumbs/djinn.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .desert { background: url('../img/assets/thumbs/desert.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
     .gnomes { background: url('../img/assets/thumbs/gnomes.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .temple { background: url('../img/assets/thumbs/temple.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
+    .vampire { background: url('../img/assets/thumbs/vampire.jpg') center/cover no-repeat, linear-gradient(to bottom, rgba(128, 128, 128, 0.5), rgba(0, 0, 0, 0.5)); }
 
 .goto-form {
     display: inline-flex;

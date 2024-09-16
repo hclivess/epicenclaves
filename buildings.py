@@ -198,7 +198,25 @@ class Blacksmith(Building):
         actions.append({"name": "repair all gear", "action": "/repair?type=all"})
         return actions
 
+class Temple(Building):
+    DISPLAY_NAME = "Temple"
+    DESCRIPTION = "Allows you to study various types of magic."
+    COST = {"ingredients": {"wood": 150, "bismuth": 75}}
+    IMAGE_SOURCE = "temple.png"
+    UPGRADE_COSTS = {
+        2: {"ingredients": {"wood": 225, "bismuth": 112}},
+        3: {"ingredients": {"wood": 337, "bismuth": 168}},
+        4: {"ingredients": {"wood": 506, "bismuth": 252}},
+        5: {"ingredients": {"wood": 759, "bismuth": 378}}
+    }
+
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        actions = super().get_actions(user)
+        actions.append({"name": "learn healing", "action": "/learn?type=healing"})
+        return actions
+
 building_types = {
     cls.__name__.lower(): cls for name, cls in globals().items()
     if isinstance(cls, type) and issubclass(cls, Building) and cls != Building
 }
+

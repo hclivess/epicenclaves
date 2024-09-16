@@ -4,6 +4,7 @@ from item_generator import generate_armor, generate_weapon, generate_tool
 
 class User:
     HP_BONUS_PER_EXP = 500
+    MANA_BONUS_PER_EXP = 500
 
     def __init__(self, username: str, x_pos: int, y_pos: int, profile_pic: str = "", **kwargs):
         self.username = username
@@ -17,6 +18,7 @@ class User:
         self.units = []
         self.research = 0
         self.base_hp = 100  # Base HP value
+        self.base_mana = 100  # Base mana value
         self.armor = 0
         self.action_points = 500
         self.army_deployed = 0
@@ -39,8 +41,14 @@ class User:
     def get_hp_bonus(self):
         return int(self.exp / self.HP_BONUS_PER_EXP)
 
+    def get_mana_bonus(self):
+        return int(self.exp / self.MANA_BONUS_PER_EXP)
+
     def get_total_hp(self):
         return self.base_hp + self.get_hp_bonus()
+
+    def get_total_mana(self):
+        return self.base_mana + self.get_mana_bonus()
 
     def get_actions(self, current_user: str) -> List[Dict[str, str]]:
         if self.username != current_user:
@@ -68,6 +76,7 @@ class User:
             "units": self.units,
             "research": self.research,
             "hp": self.get_total_hp(),
+            "mana": self.get_total_mana(),
             "base_hp": self.base_hp,
             "armor": self.armor,
             "action_points": self.action_points,
