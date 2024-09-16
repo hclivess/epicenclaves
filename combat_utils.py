@@ -12,7 +12,7 @@ def death_roll(hit_chance: float) -> bool:
 
 def apply_armor_protection(defender: Dict, initial_damage: int, round_data: Dict, round_number: int) -> Tuple[int, int]:
     armor_protection = 0
-    is_player = defender.get('name', 'You') == 'You'
+    defender_name = defender.get('username', 'Unknown')
 
     all_armor_slots = [armor for armor in defender.get("equipped", []) if armor.get("role") == "armor"]
 
@@ -25,7 +25,7 @@ def apply_armor_protection(defender: Dict, initial_damage: int, round_data: Dict
 
             damage_reduction_percentage = (armor_protection / initial_damage) * 100 if initial_damage > 0 else 0
 
-            armor_info = f"Your {selected_armor['type']}" if is_player else f"{defender['name']}'s {selected_armor['type']}"
+            armor_info = f"{defender_name}'s {selected_armor['type']}"
             final_damage = max(0, initial_damage - armor_protection)
 
             round_data["actions"].append({
@@ -43,28 +43,25 @@ def apply_armor_protection(defender: Dict, initial_damage: int, round_data: Dict
             selected_armor["durability"] = max(0, selected_armor["durability"] - durability_loss)
 
             if selected_armor["durability"] <= 0:
-                message = f"Your {selected_armor['type']} has broken and is no longer usable!" if is_player else f"{defender['name']}'s {selected_armor['type']} has broken and is no longer usable!"
                 round_data["actions"].append({
                     "actor": "system",
                     "type": "armor_break",
-                    "message": message
+                    "message": f"{defender_name}'s {selected_armor['type']} has broken and is no longer usable!"
                 })
                 defender["equipped"] = [item for item in defender["equipped"] if item != selected_armor]
         else:
-            message = "The attack hit an unprotected area!" if is_player else f"The attack hit an unprotected area on {defender['name']}!"
             round_data["actions"].append({
                 "actor": "system",
                 "type": "armor_miss",
-                "message": message
+                "message": f"The attack hit an unprotected area on {defender_name}!"
             })
             final_damage = initial_damage
     else:
         final_damage = initial_damage
-        message = "You have no armor equipped!" if is_player else f"{defender['name']} has no armor equipped!"
         round_data["actions"].append({
             "actor": "system",
             "type": "no_armor",
-            "message": message
+            "message": f"{defender_name} has no armor equipped!"
         })
 
     absorbed_damage = initial_damage - final_damage

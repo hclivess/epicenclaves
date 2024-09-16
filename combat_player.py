@@ -39,18 +39,7 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
         round_data = {"round": round_number, "actions": []}
 
         # Player attacks target
-        exp_bonus_value = exp_bonus(user_data["exp"])
-        user_dmg = get_weapon_damage(user_data, exp_bonus_value)
-        final_damage, absorbed_damage = apply_armor_protection(target_data, user_dmg['damage'], round_data,
-                                                               round_number)
-        target_data["hp"] = max(0, target_data["hp"] - final_damage)
-
-        round_data["actions"].append({
-            "actor": "player",
-            "type": "attack",
-            "damage": final_damage,
-            "message": f"You {user_dmg['message']} {target_name} for {final_damage} damage. {target_name}'s HP: {target_data['hp']}/{target_max_total_hp}"
-        })
+        player_attack(user_data, target_data, user, target_name, round_data, round_number, user_max_total_hp, target_max_total_hp)
 
         if target_data["hp"] <= 0:
             # Update round data with final HP values
@@ -65,18 +54,7 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
             break
 
         # Target attacks player
-        exp_bonus_value = exp_bonus(target_data["exp"])
-        target_dmg = get_weapon_damage(target_data, exp_bonus_value)
-        final_damage, absorbed_damage = apply_armor_protection(user_data, target_dmg['damage'], round_data,
-                                                               round_number)
-        user_data["hp"] = max(0, user_data["hp"] - final_damage)
-
-        round_data["actions"].append({
-            "actor": "enemy",
-            "type": "attack",
-            "damage": final_damage,
-            "message": f"{target_name} {target_dmg['message']} you for {final_damage} damage. Your HP: {user_data['hp']}/{user_max_total_hp}"
-        })
+        player_attack(target_data, user_data, target_name, user, round_data, round_number, target_max_total_hp, user_max_total_hp)
 
         if user_data["hp"] <= 0:
             # Update round data with final HP values
@@ -115,7 +93,7 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
 
     print(f"Fight ended. Rounds: {len(battle_data['rounds'])}, Player HP: {user_data['hp']}, Enemy HP: {target_data['hp']}")
 
-def player_attack(attacker: Dict, defender: Dict, attacker_name: str, rounds: List[Dict],
+def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_name: str, round_data: Dict,
                   round_number: int, attacker_max_hp: int, defender_max_hp: int) -> None:
     if attacker["hp"] <= 0:
         return
@@ -123,40 +101,26 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, rounds: Li
     exp_bonus_value = exp_bonus(attacker["exp"])
     damage_dict = get_weapon_damage(attacker, exp_bonus_value)
 
-    # Create a new round data dictionary
-    round_data = {
-        "round": round_number,
-        "player_hp": attacker["hp"] if attacker_name == "You" else defender["hp"],
-        "enemy_hp": defender["hp"] if attacker_name == "You" else attacker["hp"],
-        "actions": []
-    }
-
     final_damage, absorbed_damage = apply_armor_protection(defender, damage_dict['damage'], round_data, round_number)
 
     defender["hp"] = max(0, defender["hp"] - final_damage)  # Ensure HP doesn't go below 0
 
-    if attacker_name == "You":
-        message = (f"You {damage_dict['message']} for {final_damage} damage "
-                   f"(Base: {damage_dict['base_damage']}, Exp bonus: {damage_dict['exp_bonus']}). "
-                   f"Your HP: {attacker['hp']}/{attacker_max_hp}, Enemy HP: {defender['hp']}/{defender_max_hp}")
-    else:
-        message = (f"{attacker_name} hits you for {final_damage} {damage_dict['message']} damage "
-                   f"(Base: {damage_dict['base_damage']}, Exp bonus: {damage_dict['exp_bonus']}). "
-                   f"Your HP: {defender['hp']}/{defender_max_hp}, {attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}")
+    message = (f"{attacker_name} {damage_dict['message']} {defender_name} for {final_damage} damage "
+               f"(Base: {damage_dict['base_damage']}, Exp bonus: {damage_dict['exp_bonus']}). "
+               f"{attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}, {defender_name}'s HP: {defender['hp']}/{defender_max_hp}")
 
     round_data["actions"].append({
-        "actor": "player" if attacker_name == "You" else "enemy",
+        "actor": "player" if attacker_name == attacker.get('username') else "enemy",
         "type": "attack",
         "damage": final_damage,
         "message": message
     })
-    rounds.append(round_data)
 
 def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, victor_name: str, death_chance: float,
                           usersdb: Dict, rounds: List[Dict], round_number: int, defeated_max_hp: int) -> None:
     print("victor", victor)
     print("defeated", defeated)
-    is_player_defeated = defeated_name == victor.get("username")
+    is_player_defeated = defeated_name == defeated.get("username")
 
     if random.random() < death_chance:
         message = f"{'You were' if is_player_defeated else defeated_name + ' was'} killed in battle. {'Your' if is_player_defeated else defeated_name + 's'} HP: 0/{defeated_max_hp}"
