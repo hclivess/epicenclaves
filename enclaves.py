@@ -654,8 +654,7 @@ class RestHandler(UserActionHandler):
         message = self.perform_rest_action(user, self._rest, league, hours)
 
         if return_to_map:
-            self.set_header("Content-Type", "application/json")
-            self.write(json.dumps({"message": message}))
+            self.return_json_response(message)
         else:
             user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message, league=league)
@@ -670,6 +669,13 @@ class RestHandler(UserActionHandler):
         league = self.get_current_league()
         result = attempt_rest(user, user_data, hours, usersdb[league], mapdb[league])
         return result if isinstance(result, str) else result.get("message", "Rest action completed")
+
+    def return_json_response(self, message):
+        response_data = {
+            "message": message
+        }
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps(response_data))
 
 class FightHandler(BaseHandler):
     def get(self):
