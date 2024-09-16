@@ -97,6 +97,10 @@ class TurnEngine(threading.Thread):
             "age": user_data.get("age", 0) + 1
         }
 
+        current_mana = user_data.get("mana", 0)
+        if current_mana < 100:
+            updated_values["mana"] = min(100, current_mana + 1)
+
         updated_values.update(self.calculate_population(user_data, updated_values, building_counts))
 
         updated_values["score"] = int(user_data.get("exp", 0) * 10000 / max(1, updated_values["age"]))
