@@ -4,11 +4,12 @@ import importlib
 import math
 from collections import defaultdict
 
-# Import entities module
-entities = importlib.import_module('entities')
 
-# Import specific classes from entities
-from entities import Enemy, Scenery, entity_types
+scenery = importlib.import_module('scenery')
+enemies = importlib.import_module('enemies')
+
+from scenery import Scenery, scenery_types
+from enemies import Enemy, enemy_types
 
 
 def find_nearby_biomes(mapdb: Dict[str, Any], x: int, y: int, radius: int, target_biome: str) -> List[Tuple[int, int]]:
@@ -108,17 +109,17 @@ def spawn_single(mapdb, entity_class, x, y, params):
 
 
 def spawn_all_entities(mapdb):
-    for entity_class in entity_types.values():
+    for entity_class in scenery_types.values():
         if issubclass(entity_class, Scenery) and entity_class != Scenery:
             spawn(mapdb, entity_class, is_biome_generation=True)
 
-    for entity_class in entity_types.values():
+    for entity_class in enemy_types.values():
         if issubclass(entity_class, Enemy):
             spawn(mapdb, entity_class)
 
 
 def create_entity_data(entity_class, level):
-    return (entity_class(level) if issubclass(entity_class, entities.Enemy) else entity_class()).to_dict()
+    return (entity_class(level) if issubclass(entity_class, Enemy) else entity_class()).to_dict()
 
 
 def count_entities_of_type(mapdb):

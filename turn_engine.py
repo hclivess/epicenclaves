@@ -13,8 +13,10 @@ from outpost import process_outpost_attacks
 from siege import process_siege_attacks
 from gnomes import move_gnomes
 
-# Import all entities dynamically
-entities = importlib.import_module('entities')
+from scenery import scenery_types
+from enemies import enemy_types
+
+entity_types = {**scenery_types, **enemy_types}
 
 TEST = os.path.exists("test")
 

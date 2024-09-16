@@ -18,7 +18,12 @@ from buildings import Building
 import buildings
 from player import User, calculate_total_hp
 
-import entities
+import scenery
+import enemies
+from scenery import Scenery, scenery_types
+from enemies import Enemy, enemy_types
+
+
 from fish import fish_pond
 from demolish import demolish
 from leagues import load_leagues
@@ -55,6 +60,8 @@ from revive import revive
 MAX_SIZE = 1000000
 DISTANCE = 15
 
+entity_types = {**scenery_types, **enemy_types}
+
 # Get all weapon classes dynamically
 weapon_classes = {name.lower(): cls for name, cls in inspect.getmembers(inspect.getmodule(Weapon), inspect.isclass)
                   if issubclass(cls, Weapon) and cls != Weapon}
@@ -76,9 +83,7 @@ def get_all_subclasses(cls):
         [s for c in cls.__subclasses__() for s in get_all_subclasses(c)])
 
 
-# Dynamically gather all entity and building types
-entity_types = {cls.__name__.lower(): cls for cls in
-                get_all_subclasses(entities.Enemy) | get_all_subclasses(entities.Scenery)}
+
 building_types = {cls.__name__.lower(): cls for cls in get_all_subclasses(buildings.Building)}
 
 
@@ -288,10 +293,10 @@ class ScoreboardHandler(BaseHandler):
 
 class BestiaryHandler(BaseHandler):
     def get(self):
-        enemy_classes = [cls for cls in entities.__dict__.values()
-                         if isinstance(cls, type) and issubclass(cls, entities.Enemy) and cls != entities.Enemy]
-        enemies = [cls(cls.min_level) for cls in enemy_classes]
-        self.render("templates/bestiary.html", enemies=enemies)
+        enemy_classes = [cls for cls in enemies.__dict__.values()
+                         if isinstance(cls, type) and issubclass(cls, enemies.Enemy) and cls != enemies.Enemy]
+        enemies_list = [cls(cls.min_level) for cls in enemy_classes]
+        self.render("templates/bestiary.html", enemies=enemies_list)
 
 class UserActionHandler(BaseHandler):
     def perform_action(self, user, action_func, league, *args, **kwargs):
@@ -1102,26 +1107,26 @@ if __name__ == "__main__":
         if not db_status["map_exists"]:
             print("Fresh start")
             # First, spawn the biomes
-            spawn(mapdb=mapdb[league], entity_class=entities.Cavern, probability=1, map_size=1000, max_entities=250,
+            spawn(mapdb=mapdb[league], entity_class=scenery.Cavern, probability=1, map_size=1000, max_entities=250,
                   herd_probability=0, is_biome_generation=True)
-            spawn(mapdb=mapdb[league], entity_class=entities.Forest, probability=1, map_size=1000, max_entities=250,
+            spawn(mapdb=mapdb[league], entity_class=scenery.Forest, probability=1, map_size=1000, max_entities=250,
                   herd_probability=0, is_biome_generation=True)
-            spawn(mapdb=mapdb[league], entity_class=entities.Pond, probability=1, map_size=1000, max_entities=100,
+            spawn(mapdb=mapdb[league], entity_class=scenery.Pond, probability=1, map_size=1000, max_entities=100,
                   herd_probability=0, is_biome_generation=True)
-            spawn(mapdb=mapdb[league], entity_class=entities.Mountain, probability=1, map_size=1000, max_entities=200,
+            spawn(mapdb=mapdb[league], entity_class=scenery.Mountain, probability=1, map_size=1000, max_entities=200,
                   herd_probability=0, is_biome_generation=True)
-            spawn(mapdb=mapdb[league], entity_class=entities.Graveyard, probability=1, map_size=1000, max_entities=200,
+            spawn(mapdb=mapdb[league], entity_class=scenery.Graveyard, probability=1, map_size=1000, max_entities=200,
                   herd_probability=0, is_biome_generation=True)
-            spawn(mapdb=mapdb[league], entity_class=entities.Desert, probability=1, map_size=1000, max_entities=200,
+            spawn(mapdb=mapdb[league], entity_class=scenery.Desert, probability=1, map_size=1000, max_entities=200,
                   herd_probability=0, is_biome_generation=True)
-            spawn(mapdb=mapdb[league], entity_class=entities.Gnomes, probability=1, map_size=1000, max_entities=200,
+            spawn(mapdb=mapdb[league], entity_class=scenery.Gnomes, probability=1, map_size=1000, max_entities=200,
                   herd_probability=0, is_biome_generation=True)
 
-            spawn(mapdb=mapdb[league], entity_class=entities.Rat, probability=1, map_size=1000, max_entities=200,
+            spawn(mapdb=mapdb[league], entity_class=enemies.Rat, probability=1, map_size=1000, max_entities=200,
                   herd_probability=1)
-            spawn(mapdb=mapdb[league], entity_class=entities.Boar, probability=1, map_size=1000, max_entities=200,
+            spawn(mapdb=mapdb[league], entity_class=enemies.Boar, probability=1, map_size=1000, max_entities=200,
                   herd_probability=1)
-            spawn(mapdb=mapdb[league], entity_class=entities.Wolf, probability=1, map_size=1000, max_entities=200,
+            spawn(mapdb=mapdb[league], entity_class=enemies.Wolf, probability=1, map_size=1000, max_entities=200,
                   herd_probability=1)
 
             # Generate mazes (if you still want to include them)

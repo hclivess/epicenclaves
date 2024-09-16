@@ -5,14 +5,19 @@ from math import floor
 from backend import get_user
 from spawner import spawn_all_entities
 from player import get_users_at_coords, User
-from entities import Enemy, Scenery
 from buildings import Building
+from scenery import scenery_types
+from enemies import enemy_types
 
 # Constants for chunking
 CHUNK_SIZE = 16
 
 # Get all subclasses of Enemy and Scenery
-entity_types = {cls.__name__.lower(): cls for cls in Enemy.__subclasses__() + Scenery.__subclasses__()}
+# Combine scenery_types and enemy_types
+entity_types = {**scenery_types, **enemy_types}
+
+# If you need the types in lowercase, you can create a new dictionary:
+entity_types_lower = {k.lower(): v for k, v in entity_types.items()}
 
 # Get all subclasses of Building
 building_types = {cls.__name__.lower(): cls for cls in Building.__subclasses__()}

@@ -1,10 +1,5 @@
 import random
 from typing import Dict, List, Any
-import inspect
-
-import random
-from typing import Dict, List, Any
-
 
 class Enemy:
     type = "enemy"
@@ -105,7 +100,6 @@ class Enemy:
             "type": self.type,
             "level": self.level,
         }
-
 
 class Skeleton(Enemy):
     type = "skeleton"
@@ -650,7 +644,6 @@ class Zombie(Enemy):
     def calculate_npc_hp(self):
         return super().calculate_npc_hp() + int(2 * self.level)
 
-
 class Basilisk(Enemy):
     type = "basilisk"
     base_hp = 180
@@ -715,6 +708,7 @@ class Djinn(Enemy):
                 return {"damage": 0, "message": "granted a wish of protection"}
         return super().roll_damage()
 
+
 class Manticore(Enemy):
     type = "manticore"
     base_hp = 300
@@ -743,6 +737,7 @@ class Manticore(Enemy):
             total_damage = sum(random.randint(self.base_min_damage, self.base_max_damage) for _ in range(num_spikes))
             return {"damage": total_damage, "message": f"launched a volley of {num_spikes} spikes"}
         return super().roll_damage()
+
 
 class Sandworm(Enemy):
     type = "sandworm"
@@ -789,104 +784,29 @@ class Sandworm(Enemy):
             damage = damage // 2  # Half damage while burrowed
         return super().take_damage(damage)
 
-class Scenery:
-    probability = 0
-    role = "scenery"
-    type = "scenery"
-    biome = "any"
 
-    def get_actions(self, user: str) -> List[Dict[str, str]]:
-        return []
+def get_all_enemy_subclasses():
+    all_subclasses = set()
+    classes_to_check = list(Enemy.__subclasses__())
 
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "role": self.role,
-            "type": self.type,
-            "biome": self.biome
-        }
+    while classes_to_check:
+        subclass = classes_to_check.pop()
+        if subclass not in all_subclasses:
+            all_subclasses.add(subclass)
+            classes_to_check.extend(subclass.__subclasses__())
 
-class Forest(Scenery):
-    biome = "forest"
-    type = "forest"
+    return all_subclasses
 
 
-    def get_actions(self, user: str) -> List[Dict[str, str]]:
-        return [
-            {"name": "chop", "action": "/chop?amount=1"},
-            {"name": "chop 10", "action": "/chop?amount=10"},
-            {"name": "conquer", "action": f"/conquer?target={self.type}"},
-        ]
-
-class Pond(Scenery):
-    biome = "pond"
-    type = "pond"
-
-
-    def get_actions(self, user: str) -> List[Dict[str, str]]:
-        return [
-            {"name": "fish", "action": "/fish"},
-            {"name": "conquer", "action": f"/conquer?target={self.type}"},
-        ]
-
-class Cavern(Scenery):
-    biome = "cavern"
-    type = "cavern"
-
-    def get_actions(self, user: str) -> List[Dict[str, str]]:
-        return []
-
-class Graveyard(Scenery):
-    biome = "graveyard"
-    type = "graveyard"
-
-    def get_actions(self, user: str) -> List[Dict[str, str]]:
-        return []
-
-class Desert(Scenery):
-    biome = "desert"
-    type = "desert"
-
-    def get_actions(self, user: str) -> List[Dict[str, str]]:
-        return []
-
-class Gnomes(Scenery):
-    biome = "gnomes"
-    type = "gnomes"
-
-    def get_actions(self, user: str) -> List[Dict[str, str]]:
-        return []
-
-class Mountain(Scenery):
-    biome = "mountain"
-    type = "mountain"
-
-    def get_actions(self, user: str) -> List[Dict[str, str]]:
-        return [
-            {"name": "mine", "action": "/mine?amount=1"},
-            {"name": "mine 10", "action": "/mine?amount=10"},
-            {"name": "conquer", "action": f"/conquer?target={self.type}"},
-        ]
-
-class Rock(Scenery):
-    biome = "rock"
-    type = "rock"
-
-def get_all_subclasses(cls):
-    return set(cls.__subclasses__()).union(
-        [s for c in cls.__subclasses__() for s in get_all_subclasses(c)])
-
-# Automatically collect all entity classes
-entity_classes = get_all_subclasses(Enemy) | get_all_subclasses(Scenery)
-
-# Create the entity_types dictionary
-entity_types = {}
-for cls in entity_classes:
+# The rest of the code remains the same
+enemy_types = {}
+for cls in get_all_enemy_subclasses():
     if hasattr(cls, 'type'):
-        entity_types[cls.type] = cls
+        enemy_types[cls.type] = cls
     else:
         print(f"Warning: {cls.__name__} does not have a 'type' attribute.")
 
-# Optionally, you can print out the collected entity types for verification
-print("Collected entity types:")
-for entity_type, entity_class in entity_types.items():
-    print(f"{entity_type}: {entity_class.__name__}")
+# Optionally, you can print out the collected enemy types for verification
+print("Collected enemy types:")
+for enemy_type, enemy_class in enemy_types.items():
+    print(f"{enemy_type}: {enemy_class.__name__}")

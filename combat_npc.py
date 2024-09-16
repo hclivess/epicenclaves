@@ -3,16 +3,15 @@ from typing import Dict, Any
 from map import remove_from_map
 from backend import update_user_data
 from item_generator import generate_weapon, generate_armor
-from entities import Enemy, entity_types
+from enemies import Enemy, enemy_types
 from combat_utils import exp_bonus, get_weapon_damage, apply_armor_protection, death_roll
 from player import calculate_total_hp
-
 
 def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_data: Dict, user: str, usersdb: Dict,
               mapdb: Dict) -> None:
     damage_dealt = 0
 
-    enemy_class = entity_types.get(npc_data['type'].lower())
+    enemy_class = enemy_types.get(npc_data['type'].lower())
     if enemy_class is None:
         battle_data["rounds"].append({"round": 0, "message": f"Unknown enemy type: {npc_data['type']}"})
         return

@@ -5,7 +5,7 @@ from map import get_coords, remove_from_map
 from player import calculate_total_hp, has_item_equipped, drop_random_item
 from backend import update_user_data
 from item_generator import generate_weapon, generate_armor
-from entities import entity_types, Enemy
+from enemies import Enemy, enemy_types
 from combat_utils import exp_bonus, death_roll, apply_armor_protection, calculate_armor_effectiveness, get_weapon_damage
 from combat_npc import fight_npc, process_npc_defeat
 from combat_player import fight_player, player_attack, process_player_defeat
