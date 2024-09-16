@@ -1067,7 +1067,7 @@ class LearnHandler(BaseHandler):
 
         if user_data['research'] >= cost:
             user_data['research'] -= cost
-            user_data['spells'].append(spell.to_dict())
+            user_data['spells'].append(spell_type)  # Only store the spell type
             update_user_data(user, user_data, usersdb[league])
             self.write(json.dumps({"success": True, "message": f"Learned {spell.DISPLAY_NAME}"}))
         else:

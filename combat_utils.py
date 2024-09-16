@@ -1,6 +1,30 @@
 import random
 import math
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
+
+
+def attempt_spell_cast(caster: Dict, spell_types: Dict) -> Optional[Dict]:
+    if random.random() > 0.1 or not caster.get('spells'):  # 10% chance to cast a spell
+        return None
+
+    spell_name = random.choice(caster['spells'])
+    spell_class = spell_types.get(spell_name)
+
+    if not spell_class:
+        return None
+
+    spell = spell_class(0)  # The ID doesn't matter here
+
+    if caster.get('mana', 0) < spell.MANA_COST:
+        return None
+
+    caster['mana'] -= spell.MANA_COST
+
+    return {
+        'name': spell.DISPLAY_NAME,
+        'damage': spell.DAMAGE,
+        'mana_cost': spell.MANA_COST
+    }
 
 def exp_bonus(value: int, base: int = 10) -> int:
     if value <= 0:
