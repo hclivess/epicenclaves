@@ -236,16 +236,19 @@ h5 {
     padding-left: 10px;
 }
 
-.health-bar-container {
+.health-bar-container,
+.mana-bar-container {
   margin-bottom: 10px;
 }
 
-.health-bar-label {
+.health-bar-label,
+.mana-bar-label {
   font-size: 0.9rem;
   margin-bottom: 5px;
 }
 
-.health-bar {
+.health-bar,
+.mana-bar {
   width: 100%;
   height: 20px;
   background-color: #444;
@@ -256,6 +259,12 @@ h5 {
 .health-bar-fill {
   height: 100%;
   background-color: #4CAF50;
+  transition: width 0.5s ease-in-out;
+}
+
+.mana-bar-fill {
+  height: 100%;
+  background-color: #3498db;
   transition: width 0.5s ease-in-out;
 }
 

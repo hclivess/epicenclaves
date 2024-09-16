@@ -16,7 +16,7 @@ import time
 
 from buildings import Building
 import buildings
-from player import User, calculate_total_hp
+from player import User, calculate_total_hp, calculate_total_mana
 
 import scenery
 import enemies
@@ -171,9 +171,12 @@ class BaseHandler(tornado.web.RequestHandler):
 
         # Calculate current and max total HP
         current_hp = user_data.get("hp", 0)
+        current_mana = user_data.get("mana", 0)
         exp = user_data.get("exp", 0)
         current_total_hp = calculate_total_hp(current_hp, exp)
         max_total_hp = calculate_total_hp(100, exp)  # Assuming 100 is the base max HP
+        current_total_mana = calculate_total_mana(current_mana, exp)
+        max_total_mana = calculate_total_mana(100, exp)  # Assuming 100 is the base max HP
 
         #print("user_data", user_data)
         #print("mapdb", mapdb)
@@ -192,6 +195,8 @@ class BaseHandler(tornado.web.RequestHandler):
             league=league,
             current_total_hp=current_total_hp,
             max_total_hp=max_total_hp,
+            current_total_mana=current_total_mana,
+            max_total_mana=max_total_mana,
             pop_limit = calculate_population_limit(user_data)
         )
 

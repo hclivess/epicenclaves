@@ -45,6 +45,7 @@
                     {% end %}
                 </div>
             </div>
+
             <div class="user-stats">
               <div class="health-bar-container">
                 <div class="health-bar-label">Health Points: {{ file.get("hp", "N/A") }} / {{ max_total_hp }}</div>
@@ -52,6 +53,15 @@
                   <div class="health-bar-fill" style="width: {{ (file.get('hp', 0) / max_total_hp) * 100 }}%"></div>
                 </div>
               </div>
+
+            <div class="mana-bar-container">
+                <div class="mana-bar-label">
+                    Mana Points: {{ file.get("mana", "N/A") }} / {{ max_total_mana }}
+                </div>
+                <div class="mana-bar">
+                    <div class="mana-bar-fill" style="width: {{ (file.get('mana', 0) / max_total_mana) * 100 }}%"></div>
+                </div>
+            </div>
 
                 <p class="mb-1">Age: {{ file.get("age", "N/A") }}</p>
                 <p class="mb-1">Alive: {{ file.get("alive", "N/A") }}</p>

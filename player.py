@@ -1,7 +1,6 @@
 import random
 from typing import List, Dict, Any, Tuple, Optional
 from item_generator import generate_armor, generate_weapon, generate_tool
-from map import find_open_space
 
 
 class User:
@@ -127,6 +126,8 @@ def create_user(user_data_dict: Dict[str, Dict[str, Any]], user: str, mapdb: Dic
 def calculate_total_hp(base_hp: int, exp: int) -> int:
     return base_hp + int(exp / User.HP_BONUS_PER_EXP)
 
+def calculate_total_mana(base_mana: int, exp: int) -> int:
+    return base_mana + int(exp / User.MANA_BONUS_PER_EXP)
 
 def calculate_population_limit(user_data):
     base_limit = 0
@@ -168,3 +169,31 @@ def drop_random_item(player: Dict) -> Tuple[Optional[Dict], Optional[str]]:
     else:
         player["equipped"] = [item for item in player["equipped"] if item != dropped_item]
         return dropped_item, dropped_item["slot"]
+
+
+def find_open_space(mapdb: Dict[str, Any]) -> tuple:
+    x = random.randint(0, 100)
+    y = random.randint(0, 100)
+
+    while True:
+        open_space = True
+
+        for dx in range(-1, 2):  # Check within a 3x3 square
+            for dy in range(-1, 2):
+                check_x, check_y = x + dx, y + dy
+                if f"{check_x},{check_y}" in mapdb:
+                    open_space = False
+                    break
+            if not open_space:
+                break
+
+        if open_space:
+            return x, y
+
+        # Increment coordinates
+        y += 1
+        if y > 2 ** 31:
+            x += 1
+            y = 1
+            if x > 2 ** 31:
+                raise Exception("No open space found within available range.")
