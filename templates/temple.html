@@ -55,42 +55,42 @@
   </div>
 </div>
 
-    <div class="container my-4">
-        <div id="infopanel" class="alert alert-info mb-4">
-            Learn new spells to enhance your magical abilities!
-        </div>
+<div class="container my-4">
+    <div id="infopanel" class="alert alert-info mb-4">
+        Learn new spells to enhance your magical abilities!
+    </div>
 
-        <div class="card">
-            <div class="card-header bg-dark text-warning">
-                <h4 class="mb-0">Available Spells</h4>
-            </div>
-            <div class="card-body">
-                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                    {% for spell in available_spells %}
-                    <div class="col">
-                        <div class="card h-100 bg-dark text-light">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start">
-                                    <img src="/img/assets/{{ spell.IMAGE_SOURCE }}" alt="{{ spell.DISPLAY_NAME }}" class="spell-icon me-3">
-                                    <div>
-                                        <h5 class="spell-name">{{ spell.DISPLAY_NAME }}</h5>
-                                        <p class="small mb-2">{{ spell.DESCRIPTION }}</p>
-                                        <p class="small mb-1">Damage: {{ spell.DAMAGE }}</p>
-                                        <p class="small mb-1">Mana Cost: {{ spell.MANA_COST }}</p>
-                                        <p class="small mb-2">Research Cost: {% raw spell.format_cost(spell.COST) %}</p>
-                                        <button class="btn btn-sm learn-button" onclick="learnSpell('{{ spell.type }}')" {% if spell.type in user_data['spells'] %}disabled{% end %}>
-                                            {% if spell.type in user_data['spells'] %}Learned{% else %}Learn Spell{% end %}
-                                        </button>
-                                    </div>
+    <div class="card">
+        <div class="card-header bg-dark text-warning">
+            <h4 class="mb-0">Available Spells</h4>
+        </div>
+        <div class="card-body">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for spell in available_spells %}
+                <div class="col">
+                    <div class="card h-100 bg-dark text-light">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start">
+                                <img src="/img/assets/{{ spell.IMAGE_SOURCE }}" alt="{{ spell.DISPLAY_NAME }}" class="spell-icon me-3" />
+                                <div>
+                                    <h5 class="spell-name">{{ spell.DISPLAY_NAME }}</h5>
+                                    <p class="small mb-2">{{ spell.DESCRIPTION }}</p>
+                                    <p class="small mb-1">Damage: {{ spell.DAMAGE }}</p>
+                                    <p class="small mb-1">Mana Cost: {{ spell.MANA_COST }}</p>
+                                    <p class="small mb-2">Research Cost: {% raw spell.format_cost(spell.COST) %}</p>
+                                    <button class="btn btn-sm learn-button" onclick="learnSpell('{{ spell.type }}')" {% if spell.type in user_data['spells'] %}disabled{% end %}>
+                                        {% if spell.type in user_data['spells'] %}Learned{% else %}Learn Spell{% end %}
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {% end %}
                 </div>
+                {% end %}
             </div>
         </div>
     </div>
+</div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
