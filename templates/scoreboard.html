@@ -4,19 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="/img/favicon.ico">
-    <link href="css/cursor.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/scoreboard.css" rel="stylesheet">
     <title>Epic Enclaves - Scoreboard</title>
     <script type="text/javascript" src="js/scoreboard.js"></script>
 </head>
 <body>
-    <div class="container">
-        <nav class="navigation-container">
-            <a href="/" class="btn">👤 User Panel</a>
-            <a href="/map" class="btn">🗺️ Map</a>
-            <a href="/logout" class="btn">🌙 Logout</a>
-        </nav>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-auto">
+                <div class="navigation-submenu text-center">
+                    <a href="/" class="btn btn-secondary">👤 User Panel</a>
+                    <a href="/map" class="btn btn-secondary">🗺️ Map</a>
+                    <a href="/bestiary" class="btn btn-secondary">📚 Bestiary</a>
+                    <a href="/chat" class="btn btn-secondary">💬 Chat</a>
+                    <a href="/logout" class="btn btn-danger">🌙 Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="container">
         <section class="section">
             <h2>Players</h2>
             <div class="filter-container">

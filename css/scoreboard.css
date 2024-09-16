@@ -2,14 +2,45 @@
 
 body {
     font-family: 'Merriweather', serif;
-    margin: 0;
-    padding: 0;
-    background-color: #1a1a1a;
-    color: #e0e0e0;
+    background-color: #0a0a0a;
+    background-image: url('../img/assets/background.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: #ffffff;
 }
 
-/* ... (keep existing styles) ... */
+.container {
+    background-color: rgba(20, 20, 20, 0.8);
+    border-radius: 15px;
+    padding: 5px;
+    margin-top: 10px; /* Reduced from 20px */
+    margin-bottom: 10px; /* Reduced from 20px */
+}
 
+/* Navigation menu styles */
+.navigation-submenu {
+    background-color: rgba(40, 40, 40, 0.9);
+    padding: 5px; /* Reduced from 10px */
+    margin: 10px; /* Reduced from 20px */
+}
+
+
+.btn-secondary, .btn-danger, .btn-primary {
+    background-color: #4a4a4a;
+    border: none;
+    color: #ffd700;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    padding: 0.2rem 0.5rem;
+}
+
+.btn-secondary:hover, .btn-danger:hover, .btn-primary:hover {
+    background-color: #5a5a5a;
+    transform: translateY(-2px);
+    color: #ffd700;
+}
+
+/* Rest of the CSS remains the same */
 .filter-container {
     display: flex;
     gap: 10px;
@@ -17,85 +48,111 @@ body {
     align-items: center;
 }
 
-.search-input, .filter-select {
+.search-input {
     padding: 8px 12px;
     border-radius: 5px;
-    border: 1px solid #444;
+    border: 1px solid #ffd700;
     background-color: #2a2a2a;
-    color: #e0e0e0;
+    color: #ffffff;
     font-family: 'Merriweather', serif;
-}
-
-.search-input {
     flex-grow: 1;
     min-width: 200px;
 }
 
-.filter-select {
-    min-width: 120px;
-}
-
-.search-input:focus, .filter-select:focus {
+.search-input:focus {
     outline: none;
-    border-color: #bb86fc;
-    box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.3);
+    border-color: #ffd700;
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.3);
 }
 
-        .container { padding: 20px; }
-        .navigation-container { background-color: #2a2a2a; padding: 10px; text-align: center; margin-bottom: 20px; }
-        .btn {
-            display: inline-block;
-            padding: 8px 15px;
-            margin: 0 5px;
-            text-decoration: none;
-            color: #ffc107;
-            background-color: #3a3a3a;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-            font-weight: bold;
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            background-color: #4a4a4a;
-        }
-        .btn-danger {
-            background-color: #dc3545;
-        }
-        .btn-danger:hover {
-            background-color: #c82333;
-        }
-        .section { margin-bottom: 20px; }
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
-        .card {
-            border: 1px solid #444;
-            padding: 10px;
-            border-radius: 5px;
-            background-color: #2a2a2a;
-            transition: all 0.3s ease;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        .card img { max-width: 100%; height: auto; }
-        h2 {
-            font-family: 'Cinzel', serif;
-            color: #bb86fc;
-        }
-        .search-container {
-            margin-bottom: 20px;
-        }
-        .search-container input {
-            padding: 5px 10px;
-            width: 200px;
-        }
-        .winner-card {
-            background-image: url('/img/assets/winner.png');
-            background-size: cover;
-            color: #fff;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-        }
-        .winner-card p {
-            font-weight: bold;
-        }
+.section {
+    margin-bottom: 40px;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    border: 1px solid #4a4a4a;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: rgba(42, 42, 42, 0.8);
+    transition: all 0.3s ease;
+    color: #ffffff;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+}
+
+.card img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-family: 'Cinzel', serif;
+    color: #ffd700;
+    margin-bottom: 20px;
+}
+
+.winner-card {
+    background-image: linear-gradient(rgba(42, 42, 42, 0.8), rgba(42, 42, 42, 0.8)), url('/img/assets/winner.png');
+    background-size: cover;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    border: 2px solid #ffd700;
+}
+
+.winner-card p {
+    font-weight: bold;
+}
+
+/* Styling for travel buttons to match user panel */
+.btn-primary.btn-sm {
+    background-color: #4a4a4a;
+    border: none;
+    color: #ffd700;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    padding: 0.2rem 0.5rem;
+}
+
+.btn-primary.btn-sm:hover {
+    background-color: #5a5a5a;
+    transform: translateY(-2px);
+    color: #ffd700;
+}
+
+@media (max-width: 768px) {
+    .card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .navigation-submenu {
+        flex-wrap: wrap;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #2a2a2a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4a4a4a;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #5a5a5a;
+}
