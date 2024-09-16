@@ -577,7 +577,7 @@ document.addEventListener('keydown', function(event) {
 });
 
 // Set up periodic refresh
-const refreshInterval = 5000; // 5 seconds
+const refreshInterval = 60000; // 60 seconds
 setInterval(refreshMapData, refreshInterval);
 
 // Initial refresh when the page loads
