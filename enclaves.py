@@ -341,11 +341,11 @@ class RepairHandler(UserActionHandler):
 
     def _repair_item(self, user, user_data, item_id):
         league = self.get_current_league()
-        return repair_item(user, usersdb[league], mapdb, item_id)
+        return repair_item(user, usersdb[league], mapdb[league], item_id)
 
     def _repair_all_items(self, user, user_data):
         league = self.get_current_league()
-        return repair_all_items(user, usersdb[league], mapdb)
+        return repair_all_items(user, usersdb[league], mapdb[league])
 
 
 class TrashHandler(UserActionHandler):
