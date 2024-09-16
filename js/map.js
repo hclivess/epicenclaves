@@ -2,10 +2,24 @@ const gridSize = 80;
 const verticalTiles = 20;
 
 let horizontalTiles;
+let isUserInteracting = false;
+let lastInteractionTime = Date.now();
+const INTERACTION_COOLDOWN = 2000; // 2 seconds
 
 function calculateHorizontalTiles() {
     const mapContainer = document.querySelector('.map-container');
     horizontalTiles = Math.ceil(mapContainer.offsetWidth / gridSize) + 4;
+}
+
+function setUserInteracting(interacting) {
+    isUserInteracting = interacting;
+    if (interacting) {
+        lastInteractionTime = Date.now();
+    }
+}
+
+function canRefresh() {
+    return !isUserInteracting && (Date.now() - lastInteractionTime > INTERACTION_COOLDOWN);
 }
 
 function createMap(data) {
@@ -216,10 +230,12 @@ function checkPlayerPosition() {
 }
 
 function performFightAction(actionUrl) {
+    setUserInteracting(true);
     window.location.href = actionUrl;
 }
 
 function performDragAction(targetName, direction) {
+    setUserInteracting(true);
     fetch(`/drag?target=${targetName}&direction=${direction}&return_to_map=true`, {
         method: 'GET',
         headers: {
@@ -234,14 +250,17 @@ function performDragAction(targetName, direction) {
         Object.assign(jsonData, data);
         updateMap(jsonData);
         closePopup();
+        setUserInteracting(false);
     })
     .catch((error) => {
         console.error('Error:', error);
         displayMessage('An error occurred while dragging the player.');
+        setUserInteracting(false);
     });
 }
 
 function dragPlayer(targetName, direction) {
+    setUserInteracting(true);
     fetch(`/drag?target=${targetName}&direction=${direction}&return_to_map=true`, {
         method: 'GET',
         headers: {
@@ -255,10 +274,12 @@ function dragPlayer(targetName, direction) {
         }
         updateMap(data);
         closePopup();
+        setUserInteracting(false);
     })
     .catch((error) => {
         console.error('Error:', error);
         displayMessage('An error occurred while dragging the player.');
+        setUserInteracting(false);
     });
 }
 
@@ -268,6 +289,7 @@ function closePopup() {
 }
 
 function movePlayer(direction, steps) {
+    setUserInteracting(true);
     isMoving = true;
 
     function moveStep(remainingSteps) {
@@ -282,20 +304,22 @@ function movePlayer(direction, steps) {
                     }
                     checkPlayerPosition();
 
-                    // Continue moving if there are steps remaining and the move was successful
                     if (remainingSteps > 1 && !data.message.includes("failed")) {
                         moveStep(remainingSteps - 1);
                     } else {
                         isMoving = false;
+                        setUserInteracting(false);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     displayMessage('An error occurred while moving.');
                     isMoving = false;
+                    setUserInteracting(false);
                 });
         } else {
             isMoving = false;
+            setUserInteracting(false);
         }
     }
 
@@ -303,6 +327,7 @@ function movePlayer(direction, steps) {
 }
 
 function moveToPosition(x, y, callback) {
+    setUserInteracting(true);
     console.log(`Sending request to move to (${x}, ${y})`);
     fetch(`/move_to?x=${x}&y=${y}&target=map&return_to_map=true`, {
         method: 'GET',
@@ -323,11 +348,13 @@ function moveToPosition(x, y, callback) {
         const success = data.x_pos === x && data.y_pos === y;
         callback(success);
         checkPlayerPosition();
+        setUserInteracting(false);
     })
     .catch((error) => {
         console.error('Error:', error);
         displayMessage('An error occurred while moving.');
         callback(false);
+        setUserInteracting(false);
     });
 }
 
@@ -346,6 +373,7 @@ function handleGoTo() {
 }
 
 function performAction(actionUrl) {
+    setUserInteracting(true);
     fetch(actionUrl)
         .then(response => response.json())
         .then(data => {
@@ -361,10 +389,12 @@ function performAction(actionUrl) {
                     window.location.reload();
                 }, 1000);
             }
+            setUserInteracting(false);
         })
         .catch(error => {
             console.error('Error:', error);
             displayMessage('An error occurred while performing the action.');
+            setUserInteracting(false);
         });
 }
 
@@ -423,6 +453,7 @@ function addClickListenerToMap() {
         });
     });
 }
+
 function centerMapOnPlayer() {
     const currentUserData = jsonData.users[currentUser];
     if (currentUserData) {
@@ -439,6 +470,61 @@ function centerMapOnPlayer() {
         map.style.left = `${-leftOffset}px`;
         map.style.top = `${-topOffset}px`;
     }
+}
+
+function buildPalisade() {
+    setUserInteracting(true);
+    fetch('/build?entity=palisade&name=town1&return_to_map=true', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            displayMessage(data.message);
+        }
+        Object.assign(jsonData, data);
+        updateMap(jsonData);
+        checkPlayerPosition();
+        setUserInteracting(false);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        displayMessage('An error occurred while building the palisade.');
+        setUserInteracting(false);
+    });
+}
+
+function refreshMapData() {
+    if (!canRefresh()) {
+        return;
+    }
+
+    fetch('/map?format=json')
+        .then(response => response.json())
+        .then(data => {
+            const oldPosition = jsonData.users[currentUser];
+            Object.assign(jsonData, data);
+            updateMap(jsonData);
+
+            // Only check player position and show popup if the player hasn't moved
+            const newPosition = jsonData.users[currentUser];
+            if (oldPosition.x_pos === newPosition.x_pos && oldPosition.y_pos === newPosition.y_pos) {
+                checkPlayerPosition();
+            } else {
+                closePopup(); // Close popup if player has moved
+            }
+
+            // Only display a new message if there isn't already one being shown
+            if (data.message && data.message !== currentMessage) {
+                displayMessage(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error refreshing map data:', error);
+        });
 }
 
 window.addEventListener('resize', () => {
@@ -490,51 +576,9 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-
-function buildPalisade() {
-    fetch('/build?entity=palisade&name=town1&return_to_map=true', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            displayMessage(data.message);
-        }
-        // Assuming jsonData is a global variable holding the map data
-        Object.assign(jsonData, data);
-        updateMap(jsonData);
-        checkPlayerPosition();
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        displayMessage('An error occurred while building the palisade.');
-    });
-}
-
-function refreshMapData() {
-    fetch('/map?format=json')
-        .then(response => response.json())
-        .then(data => {
-            Object.assign(jsonData, data);
-            updateMap(jsonData);
-            checkPlayerPosition();
-
-            // Only display a new message if there isn't already one being shown
-            if (data.message && data.message !== currentMessage) {
-                displayMessage(data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error refreshing map data:', error);
-        });
-}
-
-
 // Set up periodic refresh
-const refreshInterval = 5000; // 5 second
+const refreshInterval = 5000; // 5 seconds
 setInterval(refreshMapData, refreshInterval);
 
-refreshMapData(); // Initial refresh when the page loads
+// Initial refresh when the page loads
+refreshMapData();
