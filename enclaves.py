@@ -1057,6 +1057,10 @@ class LearnHandler(BaseHandler):
             self.write(json.dumps({"success": False, "message": "User not found"}))
             return
 
+        if spell_type in user_data.get('spells', []):
+            self.write(json.dumps({"success": False, "message": "You have already learned this spell"}))
+            return
+
         spell_class = spell_types.get(spell_type.lower())
         if spell_class is None:
             self.write(json.dumps({"success": False, "message": "Spell not found"}))
@@ -1072,6 +1076,7 @@ class LearnHandler(BaseHandler):
             self.write(json.dumps({"success": True, "message": f"Learned {spell.DISPLAY_NAME}"}))
         else:
             self.write(json.dumps({"success": False, "message": "Not enough research points"}))
+
 
 def make_app():
     return tornado.web.Application([
