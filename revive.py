@@ -1,15 +1,10 @@
 import math
 from backend import update_user_data
 
-def calculate_revive_cost(exp):
-    base_cost = 500
-    exp_cost = math.ceil(exp * 0.1)
-    return base_cost + exp_cost
-
 def revive(user, user_data, league, usersdb):
     exp = user_data.get("exp", 0)
-    revive_cost = calculate_revive_cost(exp)
-    exp_deduction = math.ceil(exp * 0.1)
+    revive_cost = 1000  # Static cost of 1000 action points
+    exp_deduction = math.ceil(exp * 0.1)  # 10% of current experience
 
     if user_data.get("action_points", 0) >= revive_cost:
         new_ap = user_data["action_points"] - revive_cost
