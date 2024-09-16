@@ -383,12 +383,6 @@ function performAction(actionUrl) {
                 displayMessage(data.message);
             }
             checkPlayerPosition();
-
-            if (actionUrl.includes("rest")) {
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            }
             setUserInteracting(false);
         })
         .catch(error => {
