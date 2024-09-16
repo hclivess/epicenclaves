@@ -58,7 +58,7 @@ def repair_all_items(user, usersdb, mapdb, wood_cost=10, bismuth_cost=5):
         return "No items needed repair. No resources were deducted."
 
 
-def repair_item(user, usersdb, mapdb, item_id, wood_cost=10, bismuth_cost=5):
+def repair_item(user, usersdb, mapdb, item_id, wood_cost=2, bismuth_cost=2):
     user_data = usersdb[user]
     x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
 
