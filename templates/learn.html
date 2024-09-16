@@ -2,9 +2,115 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Spells</title>
+    <link rel="stylesheet" href="/css/user_panel.css">
+    <style>
+        .spell-card {
+            background-color: rgba(40, 40, 40, 0.9);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+        .spell-card:hover {
+            transform: translateY(-5px);
+        }
+        .spell-info {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+        }
+        .spell-icon {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-right: 15px;
+        }
+        .spell-details {
+            flex-grow: 1;
+        }
+        .spell-name {
+            color: #ffd700;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        .spell-description {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        .spell-stats {
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+        .learn-button {
+            background-color: #4a4a4a;
+            border: none;
+            color: #ffd700;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .learn-button:hover {
+            background-color: #5a5a5a;
+        }
+    </style>
 </head>
 <body>
+    <div class="container mt-4">
+        <div class="alert alert-info">
+            Learn new spells to enhance your magical abilities!
+        </div>
 
+        <div class="card mb-3">
+            <div class="card-header">
+                <h4 class="mb-0">Available Spells</h4>
+            </div>
+            <div class="card-body">
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% for spell in available_spells %}
+                    <div class="col">
+                        <div class="spell-card">
+                            <div class="spell-info">
+                                <img src="/img/assets/{{ spell.IMAGE_SOURCE }}" alt="{{ spell.DISPLAY_NAME }}" class="spell-icon">
+                                <div class="spell-details">
+                                    <h5 class="spell-name">{{ spell.DISPLAY_NAME }}</h5>
+                                    <p class="spell-description">{{ spell.DESCRIPTION }}</p>
+                                    <p class="spell-stats">Damage: {{ spell.DAMAGE }}</p>
+                                    <p class="spell-stats">Mana Cost: {{ spell.MANA_COST }}</p>
+                                    <p class="spell-stats">Research Cost: {% raw spell.format_cost(spell.COST) %}</p>
+                                    <button class="learn-button" onclick="learnSpell('{{ spell.type }}')">Learn Spell</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% end %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function learnSpell(spellType) {
+            fetch(`/learn?spell=${spellType}`, {
+                method: 'POST',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`You have learned the ${spellType} spell!`);
+                    // Optionally, update the UI to reflect the learned spell
+                } else {
+                    alert(`Failed to learn the spell: ${data.message}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while learning the spell.');
+            });
+        }
+    </script>
 </body>
 </html>

@@ -23,7 +23,7 @@ import enemies
 from scenery import Scenery, scenery_types
 from enemies import Enemy, enemy_types
 
-
+from spells import spell_types
 from fish import fish_pond
 from demolish import demolish
 from leagues import load_leagues
@@ -132,7 +132,6 @@ def get_tile_actions(tile: Any, user: str) -> List[Dict[str, str]]:
     if hasattr(tile, 'get_actions'):
         return tile.get_actions(user)
     return []
-
 
 class BaseHandler(tornado.web.RequestHandler):
     def prepare(self):
@@ -1026,6 +1025,29 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
         with open(chat_history_file, "w") as file:
             json.dump(chat_history, file)
 
+class TempleHandler(BaseHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
+        if not user:
+            self.redirect("/")
+            return
+
+        user_data = get_user_data(user, usersdb[league])
+
+        # Create spell instances without converting to dictionaries
+        available_spells = [spell_class(spell_id=i) for i, spell_class in enumerate(spell_types.values())]
+
+        self.render(
+            "templates/learn.html",
+            user=user,
+            league=league,
+            user_data=user_data,
+            available_spells=available_spells
+        )
+
+
+
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
@@ -1055,6 +1077,7 @@ def make_app():
         (r"/repair", RepairHandler),
         (r"/deploy(.*)", DeployArmyHandler),
         (r"/bestiary", BestiaryHandler),
+        (r"/temple", TempleHandler),
         (r"/chat", ChatHandler),
         (r"/ws/chat", ChatWebSocketHandler),
         (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),

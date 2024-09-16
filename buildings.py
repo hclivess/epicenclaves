@@ -212,7 +212,7 @@ class Temple(Building):
 
     def get_actions(self, user: str) -> List[Dict[str, str]]:
         actions = super().get_actions(user)
-        actions.append({"name": "learn healing", "action": "/learn?type=healing"})
+        actions.append({"name": "enter", "action": "/temple"})
         return actions
 
 building_types = {
