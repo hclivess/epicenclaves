@@ -12,7 +12,8 @@ class Spell:
             "bismuth": "img/assets/bismuth.png",
             "gold": "img/assets/gold.png",
             "food": "img/assets/food.png",
-            "mana": "img/assets/mana.png"
+            "mana": "img/assets/mana.png",
+            "research": "img/assets/research.png"
         }
         return " ".join(f"<img class='resource-icon' src='{image_map.get(resource, resource)}' width='32' height='32' alt='{resource}'>{amount}" for resource, amount in cost.items())
 
