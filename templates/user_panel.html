@@ -336,9 +336,9 @@
                     <div class="acquired-tile-info">
                       <img src="/img/assets/{{building.get('type')}}.png" class="menu-icon" width="80" height="80" alt="{{ building.get('type') }} Icon">
                       <div class="acquired-tile-details">
-                          <p class="mb-1"><strong>Type:</strong> {{ list(entry.values())[0].get("type") }}</p>
+                          <p class="mb-1"><strong>Type:</strong> {{ building.get("type") }}</p>
                         <p class="mb-1"><strong>Position:</strong> ({{ coord }})</p>
-                        <p class="mb-1"><strong>Distance:</strong> {{ distance }}</p>
+                        <span class="distance-indicator" style="--distance: {{ min(distance, 1000) / 1000 }};">Distance: {{ distance }}</span>
                         <p class="mb-1"><strong>Army:</strong> {{ building.get("army") }}</p>
                         <p class="mb-1"><strong>Level:</strong> {{ building.get("level") }}</p>
                       </div>
