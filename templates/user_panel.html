@@ -101,63 +101,64 @@
 </div>
 
             <div class="col-md-8">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h4 class="mb-0">Current Tile</h4>
-                            </div>
-                            <div class="card-body">
-                                {% for entry in on_tile_map %}
-                                    <div class="card mb-3">
-                                        <div class="card-body">
-                                            <img src="/img/assets/{{ list(entry.values())[0].get('type') }}.png" class="menu-icon float-start me-3" alt="Icon" width="120" height="120">
-                                            <div>
-                                                <p><strong>Type:</strong> {{ list(entry.values())[0].get("type") }}</p>
-                                                <p><strong>Control:</strong> {{ list(entry.values())[0].get("control") }}</p>
-                                                <p><strong>Army:</strong> {{ list(entry.values())[0].get("army") }}</p>
-                                                <p><strong>Level:</strong> {{ list(entry.values())[0].get("level") }}</p>
-                                                <div class="mt-2">
-                                                    {% set coord = list(entry.keys())[0] %}
-                                                    {% for action in actions.get(coord, []) %}
-                                                        <a href="{{ action['action'] }}" class="btn btn-secondary btn-sm me-1">{{ action['name'] }}</a>
-                                                    {% end %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% end %}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h4 class="mb-0">Other Users Here</h4>
-                            </div>
-                            <div class="card-body">
-                                {% for entry in on_tile_users %}
-                                    <div class="card mb-3">
-                                        <div class="card-body">
-                                            <img src="{{ list(entry.values())[0].get('img') }}" alt="Profile Picture" class="menu-icon float-start me-3" width="120" height="120">
-                                            <div>
-                                                <p><strong>Name:</strong> {{ list(entry.keys())[0] }}</p>
-                                                <p><strong>Type:</strong> {{ list(entry.values())[0].get('type') }}</p>
-                                                <p><strong>HP:</strong> {{ list(entry.values())[0].get('hp') }}</p>
-                                                <div class="mt-2">
-                                                    {% set coord = list(entry.keys())[0] %}
-                                                    {% for action in actions.get(coord, []) %}
-                                                        <a href="{{ action['action'] }}" class="btn btn-secondary btn-sm me-1">{{ action['name'] }}</a>
-                                                    {% end %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% end %}
-                            </div>
-                        </div>
-                    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h4 class="mb-0">Current Tile</h4>
                 </div>
+                <div class="card-body">
+                    {% for entry in on_tile_map %}
+                    <div class="current-tile-card mb-3">
+                        <div class="current-tile-info">
+                            <img src="/img/assets/{{ list(entry.values())[0].get('type') }}.png" alt="{{ list(entry.values())[0].get('type') }} Icon" class="menu-icon">
+                            <div class="current-tile-details">
+                                <p><strong>Type:</strong> {{ list(entry.values())[0].get("type") }}</p>
+                                <p><strong>Control:</strong> {{ list(entry.values())[0].get("control") }}</p>
+                                <p><strong>Army:</strong> {{ list(entry.values())[0].get("army") }}</p>
+                                <p><strong>Level:</strong> {{ list(entry.values())[0].get("level") }}</p>
+                            </div>
+                        </div>
+                        <div class="current-tile-actions">
+                            {% set coord = list(entry.keys())[0] %}
+                            {% for action in actions.get(coord, []) %}
+                                <a href="{{ action['action'] }}" class="btn btn-secondary btn-sm">{{ action['name'] }}</a>
+                            {% end %}
+                        </div>
+                    </div>
+                    {% end %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h4 class="mb-0">Other Users Here</h4>
+                </div>
+                <div class="card-body">
+                    {% for entry in on_tile_users %}
+                    <div class="other-user-card mb-3">
+                        <div class="other-user-info">
+                            <img src="{{ list(entry.values())[0].get('img') }}" alt="Profile Picture" class="menu-icon">
+                            <div class="other-user-details">
+                                <p><strong>Name:</strong> {{ list(entry.keys())[0] }}</p>
+                                <p><strong>Type:</strong> {{ list(entry.values())[0].get('type') }}</p>
+                                <p><strong>HP:</strong> {{ list(entry.values())[0].get('hp') }}</p>
+                            </div>
+                        </div>
+                        <div class="other-user-actions">
+                            {% set coord = list(entry.keys())[0] %}
+                            {% for action in actions.get(coord, []) %}
+                                <a href="{{ action['action'] }}" class="btn btn-secondary btn-sm">{{ action['name'] }}</a>
+                            {% end %}
+                        </div>
+                    </div>
+                    {% end %}
+                </div>
+            </div>
+        </div>
+    </div>
 
                 <!-- Equipped Items Section -->
 <div class="card mb-3">

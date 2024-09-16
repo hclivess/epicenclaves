@@ -112,22 +112,25 @@ body {
     border-radius: 10px;
 }
 
-.tile-actions {
+.tile-actions, .user-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
+    margin-top: 10px;
 }
 
-.tile-actions .btn {
+.tile-actions .btn, .user-actions .btn {
     font-size: 0.8rem;
     padding: 0.2rem 0.5rem;
     background-color: #4a4a4a;
     border: none;
     color: #ffd700;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-.tile-actions .btn:hover {
+.tile-actions .btn:hover, .user-actions .btn:hover {
     background-color: #5a5a5a;
+    transform: translateY(-2px);
 }
 
 .system-message {
@@ -254,4 +257,53 @@ h5 {
   height: 100%;
   background-color: #4CAF50;
   transition: width 0.5s ease-in-out;
+}
+
+/* New styles for current tile and other users */
+.current-tile-card, .other-user-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.current-tile-card .card-body, .other-user-card .card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.current-tile-info, .other-user-info {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.current-tile-info img, .other-user-info img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-right: 10px;
+}
+
+.current-tile-details, .other-user-details {
+    flex-grow: 1;
+}
+
+.current-tile-actions, .other-user-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: auto;
+}
+
+.current-tile-actions .btn, .other-user-actions .btn {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.5rem;
+    background-color: #4a4a4a;
+    border: none;
+    color: #ffd700;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.current-tile-actions .btn:hover, .other-user-actions .btn:hover {
+    background-color: #5a5a5a;
+    transform: translateY(-2px);
 }
