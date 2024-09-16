@@ -1,12 +1,46 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
 
-        body {
-            font-family: 'Merriweather', serif;
-            margin: 0;
-            padding: 0;
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-        }
+body {
+    font-family: 'Merriweather', serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+/* ... (keep existing styles) ... */
+
+.filter-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.search-input, .filter-select {
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid #444;
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    font-family: 'Merriweather', serif;
+}
+
+.search-input {
+    flex-grow: 1;
+    min-width: 200px;
+}
+
+.filter-select {
+    min-width: 120px;
+}
+
+.search-input:focus, .filter-select:focus {
+    outline: none;
+    border-color: #bb86fc;
+    box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.3);
+}
+
         .container { padding: 20px; }
         .navigation-container { background-color: #2a2a2a; padding: 10px; text-align: center; margin-bottom: 20px; }
         .btn {

@@ -1,48 +1,31 @@
-function adjustGrid() {
-            const grids = document.querySelectorAll('.card-grid');
-            grids.forEach(grid => {
-                const containerWidth = grid.offsetWidth;
-                const cardWidth = 200; // Minimum card width
-                const columns = Math.floor(containerWidth / cardWidth);
-                grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-            });
-        }
+document.addEventListener('DOMContentLoaded', function() {
+    // Player filtering
+    const playerSearch = document.getElementById('playerSearch');
+    const playerGrid = document.getElementById('playerGrid');
+    const players = Array.from(playerGrid.getElementsByClassName('card'));
 
-        window.addEventListener('load', adjustGrid);
-        window.addEventListener('resize', adjustGrid);
-
-        // Search functionality for players
-        const playerSearch = document.getElementById('playerSearch');
-        const playerGrid = document.getElementById('playerGrid');
-
-        playerSearch.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const players = playerGrid.getElementsByClassName('card');
-
-            Array.from(players).forEach(function(player) {
-                const playerInfo = player.textContent.toLowerCase();
-                if (playerInfo.includes(searchTerm)) {
-                    player.style.display = 'block';
-                } else {
-                    player.style.display = 'none';
-                }
-            });
+    function filterPlayers() {
+        const searchTerm = playerSearch.value.toLowerCase();
+        players.forEach(player => {
+            const playerInfo = player.textContent.toLowerCase();
+            player.style.display = playerInfo.includes(searchTerm) ? '' : 'none';
         });
+    }
 
-        // Search functionality for map items
-        const mapSearch = document.getElementById('mapSearch');
-        const mapGrid = document.getElementById('mapGrid');
+    playerSearch.addEventListener('input', filterPlayers);
 
-        mapSearch.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const mapItems = mapGrid.getElementsByClassName('card');
+    // Map filtering
+    const mapSearch = document.getElementById('mapSearch');
+    const mapGrid = document.getElementById('mapGrid');
+    const mapItems = Array.from(mapGrid.getElementsByClassName('card'));
 
-            Array.from(mapItems).forEach(function(item) {
-                const itemInfo = item.textContent.toLowerCase();
-                if (itemInfo.includes(searchTerm)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
+    function filterMap() {
+        const searchTerm = mapSearch.value.toLowerCase();
+        mapItems.forEach(item => {
+            const itemInfo = item.textContent.toLowerCase();
+            item.style.display = itemInfo.includes(searchTerm) ? '' : 'none';
         });
+    }
+
+    mapSearch.addEventListener('input', filterMap);
+});
