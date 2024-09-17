@@ -36,78 +36,15 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
         round_data = {"round": round_number, "actions": []}
 
         if user_data["hp"] > 0:
-            # Attempt spell cast
-            spell_cast = attempt_spell_cast(user_data, spell_types)
-            if spell_cast:
-                damage_dealt = spell_cast['damage']
-                user_data['mana'] = max(0, user_data['mana'] - spell_cast['mana_cost'])  # Ensure mana doesn't go below 0
-                update_user_data(user=user, updated_values={"mana": user_data["mana"]}, user_data_dict=usersdb)
-                enemy.hp = max(0, enemy.hp - damage_dealt)
-                round_data["actions"].append({
-                    "actor": "player",
-                    "type": "spell",
-                    "damage": damage_dealt,
-                    "message": f"You cast {spell_cast['name']} on the level {enemy.level} {enemy.type} for {damage_dealt} damage. Enemy HP: {enemy.hp}/{enemy.max_hp}. Your mana: {user_data['mana']}"
-                })
-            else:
-                exp_bonus_value = exp_bonus(user_data["exp"])
-                user_dmg = get_weapon_damage(user_data, exp_bonus_value)
+            # Player's turn
+            damage_dealt = handle_player_turn(user_data, user, enemy, round_data, usersdb)
 
-                if user_dmg['damage'] > 0:
-                    if enemy.attempt_evasion():
-                        round_data["actions"].append({
-                            "actor": "enemy",
-                            "type": "evasion",
-                            "message": f"The level {enemy.level} {enemy.type} evaded your attack."
-                        })
-                        damage_dealt = 0
-                    elif enemy.attempt_block():
-                        blocked_damage = int(user_dmg['damage'] * enemy.block_reduction)
-                        damage_dealt = max(0, user_dmg['damage'] - blocked_damage)
-                        round_data["actions"].append({
-                            "actor": "enemy",
-                            "type": "block",
-                            "message": f"The level {enemy.level} {enemy.type} blocked part of your attack. Damage reduced from {user_dmg['damage']} to {damage_dealt}."
-                        })
-                    else:
-                        damage_dealt = user_dmg['damage']
-                else:
-                    weapon = next((item for item in user_data.get("equipped", []) if item.get("slot") == "right_hand"), None)
-                    if weapon:
-                        round_data["actions"].append({
-                            "actor": "player",
-                            "type": "miss",
-                            "damage": 0,
-                            "message": f"Your attack with {weapon['type']} missed the {enemy.type}."
-                        })
-                    else:
-                        round_data["actions"].append({
-                            "actor": "player",
-                            "type": "miss",
-                            "damage": 0,
-                            "message": f"Your unarmed attack missed the {enemy.type}."
-                        })
-
-                if damage_dealt > 0:
-                    enemy.hp = max(0, enemy.hp - damage_dealt)  # Ensure HP doesn't go below 0
-                    round_data["actions"].append({
-                        "actor": "player",
-                        "type": "attack",
-                        "damage": damage_dealt,
-                        "message": f"You {user_dmg['message']} the level {enemy.level} {enemy.type} for {damage_dealt} damage. Enemy HP: {enemy.hp}/{enemy.max_hp}"
-                    })
+            if damage_dealt > 0:
+                enemy.hp = max(0, enemy.hp - damage_dealt)  # Ensure HP doesn't go below 0
 
         if enemy.hp > 0:
-            npc_dmg = enemy.roll_damage()
-            final_damage, absorbed_damage = apply_armor_protection(user_data, npc_dmg["damage"], round_data,
-                                                                   round_number)
-            user_data["hp"] = max(0, user_data["hp"] - final_damage)  # Ensure HP doesn't go below 0
-            round_data["actions"].append({
-                "actor": "enemy",
-                "type": "attack",
-                "damage": final_damage,
-                "message": f"The level {enemy.level} {enemy.type} {npc_dmg['message']} you for {final_damage} damage. Your HP: {user_data['hp']}/{max_total_hp}"
-            })
+            # Enemy's turn
+            handle_enemy_turn(user_data, enemy, round_data, round_number, max_total_hp)
 
         round_data["player_hp"] = user_data["hp"]
         round_data["enemy_hp"] = enemy.hp
@@ -119,33 +56,129 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
             break
 
         if user_data["hp"] <= 0:
-            if death_roll(enemy.crit_chance):
-                battle_data["rounds"].append({
-                    "round": round_number + 1,
-                    "actions": [{
-                        "actor": "system",
-                        "type": "defeat",
-                        "message": f"You have been defeated and died. Your HP: 0/{max_total_hp}"
-                    }],
-                    "player_hp": 0,
-                    "enemy_hp": enemy.hp
-                })
-                user_data["alive"] = False
-                update_user_data(user=user, updated_values={"alive": False, "hp": 0, "mana": user_data["mana"]}, user_data_dict=usersdb)
-            else:
-                battle_data["rounds"].append({
-                    "round": round_number + 1,
-                    "actions": [{
-                        "actor": "system",
-                        "type": "escape",
-                        "message": f"You are critically wounded but managed to escape. Your HP: 1/{max_total_hp}"
-                    }],
-                    "player_hp": 1,
-                    "enemy_hp": enemy.hp
-                })
-                update_user_data(user=user, updated_values={"action_points": user_data["action_points"] - 1, "hp": 1, "mana": user_data["mana"]},
-                                 user_data_dict=usersdb)
+            handle_player_defeat(user_data, user, enemy, usersdb, battle_data, round_number, max_total_hp)
             break
+
+
+def handle_player_turn(user_data: Dict, user: str, enemy: Any, round_data: Dict, usersdb: Dict) -> int:
+    damage_dealt = 0
+    spell_cast = attempt_spell_cast(user_data, spell_types)
+    if spell_cast:
+        damage_dealt = handle_spell_cast(user_data, user, enemy, spell_cast, round_data, usersdb)
+    else:
+        damage_dealt = handle_weapon_attack(user_data, enemy, round_data)
+    return damage_dealt
+
+
+def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, round_data: Dict, usersdb: Dict) -> int:
+    damage_dealt = spell_cast['damage']
+    user_data['mana'] = max(0, user_data['mana'] - spell_cast['mana_cost'])
+    update_user_data(user=user, updated_values={"mana": user_data["mana"]}, user_data_dict=usersdb)
+    round_data["actions"].append({
+        "actor": "player",
+        "type": "spell",
+        "damage": damage_dealt,
+        "message": f"You cast {spell_cast['name']} on the level {enemy.level} {enemy.type} for {damage_dealt} damage. Enemy HP: {enemy.hp}/{enemy.max_hp}. Your mana: {user_data['mana']}"
+    })
+    return damage_dealt
+
+
+def handle_weapon_attack(user_data: Dict, enemy: Any, round_data: Dict) -> int:
+    exp_bonus_value = exp_bonus(user_data["exp"])
+    user_dmg = get_weapon_damage(user_data, exp_bonus_value)
+
+    if user_dmg['damage'] > 0:
+        return process_hit(user_data, enemy, user_dmg, round_data)
+    else:
+        return process_miss(user_data, enemy, round_data)
+
+
+def process_hit(user_data: Dict, enemy: Any, user_dmg: Dict, round_data: Dict) -> int:
+    if enemy.attempt_evasion():
+        round_data["actions"].append({
+            "actor": "enemy",
+            "type": "evasion",
+            "message": f"The level {enemy.level} {enemy.type} evaded your attack."
+        })
+        return 0
+    elif enemy.attempt_block():
+        blocked_damage = int(user_dmg['damage'] * enemy.block_reduction)
+        damage_dealt = max(0, user_dmg['damage'] - blocked_damage)
+        round_data["actions"].append({
+            "actor": "enemy",
+            "type": "block",
+            "message": f"The level {enemy.level} {enemy.type} blocked part of your attack. Damage reduced from {user_dmg['damage']} to {damage_dealt}."
+        })
+    else:
+        damage_dealt = user_dmg['damage']
+
+    round_data["actions"].append({
+        "actor": "player",
+        "type": "attack",
+        "damage": damage_dealt,
+        "message": f"You {user_dmg['message']} the level {enemy.level} {enemy.type} for {damage_dealt} damage. Enemy HP: {enemy.hp}/{enemy.max_hp}"
+    })
+    return damage_dealt
+
+
+def process_miss(user_data: Dict, enemy: Any, round_data: Dict) -> int:
+    weapon = next((item for item in user_data.get("equipped", []) if item.get("slot") == "right_hand"), None)
+    if weapon:
+        message = f"Your attack with {weapon['type']} missed the {enemy.type}."
+    else:
+        message = f"Your unarmed attack missed the {enemy.type}."
+
+    round_data["actions"].append({
+        "actor": "player",
+        "type": "miss",
+        "damage": 0,
+        "message": message
+    })
+    return 0
+
+
+def handle_enemy_turn(user_data: Dict, enemy: Any, round_data: Dict, round_number: int, max_total_hp: int) -> None:
+    npc_dmg = enemy.roll_damage()
+    final_damage, absorbed_damage = apply_armor_protection(user_data, npc_dmg["damage"], round_data, round_number)
+    user_data["hp"] = max(0, user_data["hp"] - final_damage)  # Ensure HP doesn't go below 0
+    round_data["actions"].append({
+        "actor": "enemy",
+        "type": "attack",
+        "damage": final_damage,
+        "message": f"The level {enemy.level} {enemy.type} {npc_dmg['message']} you for {final_damage} damage. Your HP: {user_data['hp']}/{max_total_hp}"
+    })
+
+
+def handle_player_defeat(user_data: Dict, user: str, enemy: Any, usersdb: Dict, battle_data: Dict, round_number: int,
+                         max_total_hp: int) -> None:
+    if death_roll(enemy.crit_chance):
+        battle_data["rounds"].append({
+            "round": round_number + 1,
+            "actions": [{
+                "actor": "system",
+                "type": "defeat",
+                "message": f"You have been defeated and died. Your HP: 0/{max_total_hp}"
+            }],
+            "player_hp": 0,
+            "enemy_hp": enemy.hp
+        })
+        user_data["alive"] = False
+        update_user_data(user=user, updated_values={"alive": False, "hp": 0, "mana": user_data["mana"]},
+                         user_data_dict=usersdb)
+    else:
+        battle_data["rounds"].append({
+            "round": round_number + 1,
+            "actions": [{
+                "actor": "system",
+                "type": "escape",
+                "message": f"You are critically wounded but managed to escape. Your HP: 1/{max_total_hp}"
+            }],
+            "player_hp": 1,
+            "enemy_hp": enemy.hp
+        })
+        update_user_data(user=user, updated_values={"action_points": user_data["action_points"] - 1, "hp": 1,
+                                                    "mana": user_data["mana"]},
+                         user_data_dict=usersdb)
 
 def process_npc_defeat(enemy: Enemy, coords: str, user_data: Dict, user: str, usersdb: Dict, mapdb: Dict,
                        battle_data: Dict, round_number: int) -> Dict:
