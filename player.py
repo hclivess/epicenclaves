@@ -19,8 +19,8 @@ class User:
         self.units = []
         self.spells = []
         self.skills = []
-        self.magic = 1
-        self.martial = 1
+        self.sorcery = 0
+        self.fitness = 0
         self.research = 0
         self.base_hp = 100  # Base HP value
         self.base_mana = 100  # Base mana value

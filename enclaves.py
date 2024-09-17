@@ -58,6 +58,7 @@ from drag import drag_player
 from revive import revive
 from learn import learn_spell
 from log import log_user_action, log_turn_engine_event
+from train_sorcery import train_sorcery
 
 MAX_SIZE = 1000000
 DISTANCE = 15
@@ -737,6 +738,21 @@ class FightHandler(BaseHandler):
                      mapdb[league])
 
 
+class TrainSorceryHandler(BaseHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
+
+        user_data = get_user_data(user, usersdb[league])
+        success, message = train_sorcery(user, user_data, usersdb[league], mapdb[league])
+
+        log_user_action(user, "train_sorcery", f"Success: {success}, Message: {message}")
+
+        response = json.dumps({"success": success, "message": message})
+
+        self.set_header("Content-Type", "application/json")
+        self.write(response)
+
 class ConquerHandler(UserActionHandler):
     def get(self, *args, **kwargs):
         user = tornado.escape.xhtml_escape(self.current_user)
@@ -1129,6 +1145,7 @@ def make_app():
         (r"/learn", LearnHandler),
         (r"/chat", ChatHandler),
         (r"/ws/chat", ChatWebSocketHandler),
+        (r"/train_sorcery", TrainSorceryHandler),
         (r"/assets/(.*)", tornado.web.StaticFileHandler, {"path": "assets"}),
         (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),
         (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": "css"}),

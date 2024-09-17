@@ -59,7 +59,7 @@ def get_weapon_damage(attacker: Dict) -> Dict:
     return {"damage": final_damage, "base_damage": damage, "martial_bonus": martial_bonus, "message": message}
 
 def get_spell_damage(spell_damage: int, caster: Dict) -> Dict:
-    magic_bonus = caster.get("magic", 0)
+    magic_bonus = caster.get("sorcery", 0)
     final_damage = spell_damage + magic_bonus
     return {"damage": final_damage, "base_damage": spell_damage, "magic_bonus": magic_bonus}
 
