@@ -12,6 +12,7 @@ from gnomes import move_gnomes
 
 from scenery import scenery_types
 from enemies import enemy_types
+from log import log_turn_engine_event
 
 entity_types = {**scenery_types, **enemy_types}
 
@@ -44,6 +45,8 @@ class TurnEngine(threading.Thread):
 
     def process_turn(self):
         start_time = time.time()
+        log_turn_engine_event("turn_start", f"Turn {self.turn}")
+
 
         self.turn += 1
 
@@ -61,6 +64,7 @@ class TurnEngine(threading.Thread):
 
             end_time = time.time()
             execution_time = end_time - start_time
+            log_turn_engine_event("turn_end", f"Turn {self.turn}, Execution time: {execution_time:.2f} seconds")
             print(f"Turn {self.turn} execution time: {execution_time:.2f} seconds")
 
     def save_databases(self, league):

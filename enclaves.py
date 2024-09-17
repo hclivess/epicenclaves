@@ -57,6 +57,7 @@ from repair import repair_all_items, repair_item
 from drag import drag_player
 from revive import revive
 from learn import learn_spell
+from log import log_user_action, log_turn_engine_event
 
 MAX_SIZE = 1000000
 DISTANCE = 15
@@ -83,10 +84,7 @@ def get_all_subclasses(cls):
     return set(cls.__subclasses__()).union(
         [s for c in cls.__subclasses__() for s in get_all_subclasses(c)])
 
-
-
 building_types = {cls.__name__.lower(): cls for cls in get_all_subclasses(buildings.Building)}
-
 
 def generate_inventory_descriptions(user_data):
     inventory_descriptions = {}
@@ -106,10 +104,8 @@ def generate_inventory_descriptions(user_data):
                 inventory_descriptions['unknown_item'] = f"An unknown item."
     return inventory_descriptions
 
-
 def get_constructor_params(cls):
     return set(inspect.signature(cls.__init__).parameters.keys()) - {'self'}
-
 
 def get_tile_actions(tile: Any, user: str) -> List[Dict[str, str]]:
     if isinstance(tile, dict):
@@ -178,10 +174,6 @@ class BaseHandler(tornado.web.RequestHandler):
         current_total_mana = calculate_total_mana(current_mana, exp)
         max_total_mana = calculate_total_mana(100, exp)  # Assuming 100 is the base max HP
 
-        #print("user_data", user_data)
-        #print("mapdb", mapdb)
-
-
         self.render(
             "templates/user_panel.html",
             user=user,
@@ -200,25 +192,28 @@ class BaseHandler(tornado.web.RequestHandler):
             pop_limit = calculate_population_limit(user_data)
         )
 
-
 class MainHandler(BaseHandler):
     def get(self):
         if not self.current_user:
             leagues = get_leagues()  # Get the leagues data
             self.render("templates/login.html", leagues=leagues)  # Pass leagues to the template
         else:
-            user = tornado.escape.xhtml_escape(self.current_user)
-            league = self.get_current_league()
-            data = get_user(user, usersdb[league])
-            user_data = data[list(data.keys())[0]]
-            self.render_user_panel(user, user_data, message=f"Welcome back, {user}", league=league)
-
+            try:
+                user = tornado.escape.xhtml_escape(self.current_user)
+                league = self.get_current_league()
+                data = get_user(user, usersdb[league])
+                user_data = data[list(data.keys())[0]]
+                log_user_action(user, "view_main_page")
+                self.render_user_panel(user, user_data, message=f"Welcome back, {user}", league=league)
+            except Exception as e:
+                self.redirect("/logout")
 
 class LogoutHandler(BaseHandler):
     def get(self, data):
+        user = self.current_user.decode()
+        log_user_action(user, "logout")
         self.clear_all_cookies()
         self.redirect("/")
-
 
 class MapHandler(BaseHandler):
     def get(self):
@@ -280,6 +275,8 @@ class MapHandler(BaseHandler):
             "y_pos": y_pos
         }
 
+        log_user_action(user, "view_map", f"Position: ({x_pos}, {y_pos})")
+
         # Check if the request wants JSON
         if self.get_argument("format", None) == "json":
             self.set_header("Content-Type", "application/json")
@@ -287,20 +284,21 @@ class MapHandler(BaseHandler):
         else:
             self.render("templates/map.html", user=user, data=json.dumps(map_data), timestamp=time.time())
 
-
 class ScoreboardHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
+        log_user_action(user, "view_scoreboard")
         self.render("templates/scoreboard.html", mapdb=mapdb[league].copy(), usersdb=usersdb[league].copy(), ensure_ascii=False,
                     user=user)
 
-
 class BestiaryHandler(BaseHandler):
     def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
         enemy_classes = [cls for cls in enemies.__dict__.values()
                          if isinstance(cls, type) and issubclass(cls, enemies.Enemy) and cls != enemies.Enemy]
         enemies_list = [cls(cls.min_level) for cls in enemy_classes]
+        log_user_action(user, "view_bestiary")
         self.render("templates/bestiary.html", enemies=enemies_list)
 
 class UserActionHandler(BaseHandler):
@@ -313,30 +311,29 @@ class UserActionHandler(BaseHandler):
         user_data = get_user_data(user, usersdb[league])  # Refresh user data
         self.render_user_panel(user, user_data, message=message, league=league)
 
-
 class EquipHandler(UserActionHandler):
     def get(self):
         id = self.get_argument("id")
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
+        log_user_action(user, "equip_item", f"Item ID: {id}")
         self.perform_action(user, self._equip_item, league, id)
 
     def _equip_item(self, user, user_data, item_id):
         league = self.get_current_league()
         return equip_item(user, usersdb[league], item_id)
 
-
 class UnequipHandler(UserActionHandler):
     def get(self):
         id = self.get_argument("id")
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
+        log_user_action(user, "unequip_item", f"Item ID: {id}")
         self.perform_action(user, self._unequip_item, league, id)
 
     def _unequip_item(self, user, user_data, item_id):
         league = self.get_current_league()
         return unequip_item(user, usersdb[league], item_id)
-
 
 class RepairHandler(UserActionHandler):
     def get(self):
@@ -345,8 +342,10 @@ class RepairHandler(UserActionHandler):
         item_id = self.get_argument("id", None)
 
         if item_id:
+            log_user_action(user, "repair_item", f"Item ID: {item_id}")
             self.perform_action(user, self._repair_item, league, item_id)
         else:
+            log_user_action(user, "repair_all_items")
             self.perform_action(user, self._repair_all_items, league)
 
     def _repair_item(self, user, user_data, item_id):
@@ -357,45 +356,45 @@ class RepairHandler(UserActionHandler):
         league = self.get_current_league()
         return repair_all_items(user, usersdb[league], mapdb[league])
 
-
 class TrashHandler(UserActionHandler):
     def get(self):
         id = self.get_argument("id")
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
+        log_user_action(user, "trash_item", f"Item ID: {id}")
         self.perform_action(user, self._trash_item, league, id)
 
     def _trash_item(self, user, user_data, item_id):
         league = self.get_current_league()
         return trash_item(usersdb[league], user, item_id)
 
-
 class TrashWeaponsHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
+        log_user_action(user, "trash_weapons")
         self.perform_action(user, self._trash_weapons, league)
 
     def _trash_weapons(self, user, user_data):
         league = self.get_current_league()
         return trash_weapons(usersdb[league], user)
 
-
 class TrashArmorHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
+        log_user_action(user, "trash_armor")
         self.perform_action(user, self._trash_armor, league)
 
     def _trash_armor(self, user, user_data):
         league = self.get_current_league()
         return trash_armor(usersdb[league], user)
 
-
 class TrashAllHandler(UserActionHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
+        log_user_action(user, "trash_all")
         self.perform_action(user, self._trash_all, league)
 
     def _trash_all(self, user, user_data):
@@ -410,6 +409,7 @@ class MoveHandler(BaseHandler):
         league = self.get_current_league()
         user_data = get_user_data(user, usersdb=usersdb[league])
         moved = move(user, entry, MAX_SIZE, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
+        log_user_action(user, "move", f"Direction: {entry}, Result: {moved['message']}")
         user_data = get_user_data(user, usersdb=usersdb[league])  # Refresh user data
 
         if target == "map":
@@ -472,7 +472,6 @@ class MoveHandler(BaseHandler):
             on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[league])
             self.render_user_panel(user, user_data, message=moved["message"], on_tile_map=on_tile_map, on_tile_users=on_tile_users, league=league)
 
-
 class MoveToHandler(BaseHandler):
     def get(self):
         x = math.floor(float(self.get_argument("x")))
@@ -483,6 +482,7 @@ class MoveToHandler(BaseHandler):
         return_to_map = self.get_argument("return_to_map", default="false") == "true"
 
         moved = move_to(user, x, y, MAX_SIZE, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
+        log_user_action(user, "move_to", f"Destination: ({x}, {y}), Result: {moved['message']}")
         user_data = get_user_data(user, usersdb=usersdb[league])  # Refresh user data
 
         if return_to_map:
@@ -490,7 +490,6 @@ class MoveToHandler(BaseHandler):
             x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
             visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb[league], visible_distance)
             visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb[league]), visible_distance)
-
 
             # Filter the data to include only essential information
             filtered_users_data = {}
@@ -560,6 +559,7 @@ class DragHandler(BaseHandler):
             message = f"User {user} not found."
         else:
             message, new_x, new_y = drag_player(target, direction, league, usersdb, mapdb, MAX_SIZE)
+            log_user_action(user, "drag_player", f"Target: {target}, Direction: {direction}, Result: {message}")
             if new_x is not None and new_y is not None:
                 # Move the dragging player to the new position
                 move_to(user, new_x, new_y, MAX_SIZE, user_data, users_dict=usersdb[league], map_dict=mapdb[league])
@@ -626,8 +626,8 @@ class DragHandler(BaseHandler):
             # Refresh on_tile_map and on_tile_users
             on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
             on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[league])
-            self.render_user_panel(user, user_data, message=message, on_tile_map=on_tile_map, on_tile_users=on_tile_users, league=league)
-
+            self.render_user_panel(user, user_data, message=message, on_tile_map=on_tile_map,
+                                   on_tile_users=on_tile_users, league=league)
 
 class ReviveHandler(UserActionHandler):
     def get(self):
@@ -636,6 +636,7 @@ class ReviveHandler(UserActionHandler):
         user_data = get_user_data(user, usersdb[league])
 
         message = revive(user, user_data, league, usersdb)
+        log_user_action(user, "revive", f"Result: {message}")
 
         # Re-fetch user data as it may have changed after revive
         updated_user_data = get_user_data(user, usersdb[league])
@@ -647,7 +648,6 @@ class ReviveHandler(UserActionHandler):
             message=message,
             league=league
         )
-
 
 class RestHandler(UserActionHandler):
     def get(self, *args, **kwargs):
@@ -673,6 +673,7 @@ class RestHandler(UserActionHandler):
     def _rest(self, user, user_data, hours):
         league = self.get_current_league()
         result = attempt_rest(user, user_data, hours, usersdb[league], mapdb[league])
+        log_user_action(user, "rest", f"Hours: {hours}, Result: {result}")
         return result if isinstance(result, str) else result.get("message", "Rest action completed")
 
     def return_json_response(self, message):
@@ -693,13 +694,16 @@ class FightHandler(BaseHandler):
 
         message = get_fight_preconditions(user_data)
         if message:
+            log_user_action(user, "fight_attempt",
+                            f"Target: {target}, Target Name: {target_name}, Result: Precondition failed - {message}")
             if return_to_map:
                 self.return_json({"message": message})
             else:
                 self.render_user_panel(user, user_data, message=message, league=self.get_current_league())
         else:
             fight_result = self._perform_fight(user, user_data, target, target_name, league)
-            print("fight_result", fight_result)
+            log_user_action(user, "fight",
+                            f"Target: {target}, Target Name: {target_name}, Result: {fight_result.get('message', 'Fight completed')}")
             if return_to_map:
                 self.return_json({"message": fight_result.get("message", "Fight completed"),
                                   "battle_data": fight_result["battle_data"]})
@@ -710,19 +714,18 @@ class FightHandler(BaseHandler):
                 else:
                     target_picture = f"img/assets/{target}.png"
 
-
                 self.render("templates/fight.html",
                             battle_data=json.dumps(fight_result["battle_data"]),
                             profile_picture=user_data["img"],
                             target_picture=target_picture,
                             target=target,
-                            timestamp=int(time.time()))  # Add this line
+                            timestamp=int(time.time()))
 
     def _perform_fight(self, user, user_data, target, target_name, league):
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
         on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[league])
-        return fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb[league], mapdb[league])
-
+        return fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb[league],
+                     mapdb[league])
 
 class ConquerHandler(UserActionHandler):
     def get(self, *args, **kwargs):
@@ -749,8 +752,9 @@ class ConquerHandler(UserActionHandler):
     def _attempt_conquer(self, user, user_data, target):
         league = self.get_current_league()
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
-        return attempt_conquer(user, target, on_tile_map, usersdb[league], mapdb[league], user_data)
-
+        result = attempt_conquer(user, target, on_tile_map, usersdb[league], mapdb[league], user_data)
+        log_user_action(user, "conquer", f"Target: {target}, Result: {result}")
+        return result
 
 class MineHandler(UserActionHandler):
     def get(self, *args, **kwargs):
@@ -776,7 +780,9 @@ class MineHandler(UserActionHandler):
 
     def _mine_mountain(self, user, user_data, mine_amount):
         league = self.get_current_league()
-        return mine_mountain(user, mine_amount, user_data, usersdb[league], mapdb[league])
+        result = mine_mountain(user, mine_amount, user_data, usersdb[league], mapdb[league])
+        log_user_action(user, "mine", f"Amount: {mine_amount}, Result: {result}")
+        return result
 
 class FishHandler(UserActionHandler):
     def get(self, *args, **kwargs):
@@ -801,7 +807,9 @@ class FishHandler(UserActionHandler):
 
     def _fish_pond(self, user, user_data):
         league = self.get_current_league()
-        return fish_pond(user, user_data, usersdb[league], mapdb[league])
+        result = fish_pond(user, user_data, usersdb[league], mapdb[league])
+        log_user_action(user, "fish", f"Result: {result}")
+        return result
 
 class ChopHandler(UserActionHandler):
     def get(self, *args, **kwargs):
@@ -827,8 +835,9 @@ class ChopHandler(UserActionHandler):
 
     def _chop_forest(self, user, user_data, chop_amount):
         league = self.get_current_league()
-        return chop_forest(user, chop_amount, user_data, usersdb[league], mapdb[league])
-
+        result = chop_forest(user, chop_amount, user_data, usersdb[league], mapdb[league])
+        log_user_action(user, "chop", f"Amount: {chop_amount}, Result: {result}")
+        return result
 
 class BuildHandler(UserActionHandler):
     def get(self, *args, **kwargs):
@@ -855,8 +864,9 @@ class BuildHandler(UserActionHandler):
 
     def _build(self, user, user_data, entity, name):
         league = self.get_current_league()
-        return build(user, user_data, entity, name, mapdb[league], usersdb[league])
-
+        result = build(user, user_data, entity, name, mapdb[league], usersdb[league])
+        log_user_action(user, "build", f"Entity: {entity}, Name: {name}, Result: {result}")
+        return result
 
 class UpgradeHandler(UserActionHandler):
     def get(self, *args, **kwargs):
@@ -881,8 +891,9 @@ class UpgradeHandler(UserActionHandler):
 
     def _upgrade(self, user, user_data):
         league = self.get_current_league()
-        return upgrade(user, mapdb[league], usersdb[league])
-
+        result = upgrade(user, mapdb[league], usersdb[league])
+        log_user_action(user, "upgrade", f"Result: {result}")
+        return result
 
 class DeployArmyHandler(UserActionHandler):
     def get(self, *args, **kwargs):
@@ -905,24 +916,25 @@ class DeployArmyHandler(UserActionHandler):
             user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message, league=league)
 
-    def perform_deploy_action(self, user, action_func, league, *args, **kwargs):
-        user_data = get_user_data(user, usersdb[league])
-        if user_data is None:
-            return f"User {user} not found."
-        return action_func(user, user_data, *args, **kwargs)
+            def perform_deploy_action(self, user, action_func, league, *args, **kwargs):
+                user_data = get_user_data(user, usersdb[league])
+                if user_data is None:
+                    return f"User {user} not found."
+                return action_func(user, user_data, *args, **kwargs)
 
-    def _deploy_army(self, user, user_data):
-        league = self.get_current_league()
-        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
-        return deploy_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
+            def _deploy_army(self, user, user_data):
+                league = self.get_current_league()
+                on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
+                result = deploy_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
+                log_user_action(user, "deploy_army", f"Result: {result}")
+                return result
 
-    def _remove_army(self, user, user_data):
-        league = self.get_current_league()
-        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
-        return remove_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
-
-
-
+            def _remove_army(self, user, user_data):
+                league = self.get_current_league()
+                on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
+                result = remove_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
+                log_user_action(user, "remove_army", f"Result: {result}")
+                return result
 
 class DemolishHandler(UserActionHandler):
     def get(self, *args, **kwargs):
@@ -947,7 +959,9 @@ class DemolishHandler(UserActionHandler):
 
     def _demolish(self, user, user_data):
         league = self.get_current_league()
-        return demolish(user, user_data, usersdb[league], mapdb[league])
+        result = demolish(user, user_data, usersdb[league], mapdb[league])
+        log_user_action(user, "demolish", f"Result: {result}")
+        return result
 
 class RedirectToHTTPSHandler(tornado.web.RequestHandler):
     def get(self, parameters):
@@ -957,20 +971,23 @@ class LoginHandler(BaseHandler):
     def post(self, data):
         user = self.get_argument("name")[:16]
         if not re.match("^[a-zA-Z0-9]*$", user):
-            self.render("templates/denied.html", message="Username should consist of alphanumericals only!")
+            self.render("templates/denied.html",
+                        message="Username should consist of alphanumericals only!")
             return
 
         password = self.get_argument("password")
         uploaded_file = self.request.files.get("profile_picture", None)
         league = self.get_argument("league")
 
-        message, user_data = login(password, uploaded_file, auth_exists_user, auth_add_user, create_user,
+        message, user_data = login(password, uploaded_file, auth_exists_user, auth_add_user,
+                                   create_user,
                                    save_users_from_memory, save_map_from_memory, auth_login_validate,
                                    usersdb, mapdb, user, league)
 
         if message.startswith("Welcome"):
             self.set_secure_cookie("league", league, expires_days=84)
             self.set_secure_cookie("user", user, expires_days=84)
+            log_user_action(user, "login", f"League: {league}")
             if user_data is not None:
                 self.render_user_panel(user, user_data, message=message, league=league)
             else:
@@ -986,6 +1003,7 @@ class ChatHandler(BaseHandler):
             self.redirect("/")
             return
         chat_history = self.get_chat_history(league)
+        log_user_action(user, "view_chat")
         self.render("templates/chat.html", user=user, league=league, chat_history=chat_history)
 
     def get_chat_history(self, league):
@@ -1009,6 +1027,7 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
         message_data = json.loads(message)  # Parse the received message as JSON
         message_data["user"] = user  # Add the user to the message data
         self.store_chat_message(league, message_data)
+        log_user_action(user, "send_chat_message", f"League: {league}")
         for connection in ChatWebSocketHandler.connections:
             connection.write_message(json.dumps(message_data))
 
@@ -1037,8 +1056,10 @@ class TempleHandler(BaseHandler):
         user_data = get_user_data(user, usersdb[league])
 
         # Create spell instances without converting to dictionaries
-        available_spells = [spell_class(spell_id=i) for i, spell_class in enumerate(spell_types.values())]
+        available_spells = [spell_class(spell_id=i) for i, spell_class in
+                            enumerate(spell_types.values())]
 
+        log_user_action(user, "view_temple")
         self.render(
             "templates/temple.html",
             user=user,
@@ -1054,6 +1075,8 @@ class LearnHandler(BaseHandler):
         spell_type = self.get_argument("spell")
 
         success, message = learn_spell(user, usersdb[league], mapdb[league], spell_type, spell_types)
+        log_user_action(user, "learn_spell",
+                        f"Spell: {spell_type}, Success: {success}, Message: {message}")
         self.write(json.dumps({"success": success, "message": message}))
 
 def make_app():
@@ -1093,9 +1116,7 @@ def make_app():
         (r"/img/(.*)", tornado.web.StaticFileHandler, {"path": "img"}),
         (r"/css/(.*)", tornado.web.StaticFileHandler, {"path": "css"}),
         (r"/js/(.*)", tornado.web.StaticFileHandler, {"path": "js"}),
-
     ])
-
 
 async def main():
     with open("config_enclaves.json") as certlocfile:
@@ -1130,10 +1151,8 @@ async def main():
 
     await shutdown_event.wait()
 
-
 def initialize_map_and_users(league="game"):
     return load_map_to_memory(league), load_users_to_memory(league)
-
 
 if __name__ == "__main__":
     mapdb = {}
@@ -1150,26 +1169,36 @@ if __name__ == "__main__":
         if not db_status["map_exists"]:
             print("Fresh start")
             # First, spawn the biomes
-            spawn(mapdb=mapdb[league], entity_class=scenery.Cavern, probability=1, map_size=1000, max_entities=250,
+            spawn(mapdb=mapdb[league], entity_class=scenery.Cavern, probability=1, map_size=1000,
+                  max_entities=250,
                   herd_probability=0, is_biome_generation=True)
-            spawn(mapdb=mapdb[league], entity_class=scenery.Forest, probability=1, map_size=1000, max_entities=250,
+            spawn(mapdb=mapdb[league], entity_class=scenery.Forest, probability=1, map_size=1000,
+                  max_entities=250,
                   herd_probability=0, is_biome_generation=True)
-            spawn(mapdb=mapdb[league], entity_class=scenery.Pond, probability=1, map_size=1000, max_entities=100,
+            spawn(mapdb=mapdb[league], entity_class=scenery.Pond, probability=1, map_size=1000,
+                  max_entities=100,
                   herd_probability=0, is_biome_generation=True)
-            spawn(mapdb=mapdb[league], entity_class=scenery.Mountain, probability=1, map_size=1000, max_entities=200,
+            spawn(mapdb=mapdb[league], entity_class=scenery.Mountain, probability=1, map_size=1000,
+                  max_entities=200,
                   herd_probability=0, is_biome_generation=True)
-            spawn(mapdb=mapdb[league], entity_class=scenery.Graveyard, probability=1, map_size=1000, max_entities=200,
+            spawn(mapdb=mapdb[league], entity_class=scenery.Graveyard, probability=1, map_size=1000,
+                  max_entities=200,
                   herd_probability=0, is_biome_generation=True)
-            spawn(mapdb=mapdb[league], entity_class=scenery.Desert, probability=1, map_size=1000, max_entities=200,
+            spawn(mapdb=mapdb[league], entity_class=scenery.Desert, probability=1, map_size=1000,
+                  max_entities=200,
                   herd_probability=0, is_biome_generation=True)
-            spawn(mapdb=mapdb[league], entity_class=scenery.Gnomes, probability=1, map_size=1000, max_entities=200,
+            spawn(mapdb=mapdb[league], entity_class=scenery.Gnomes, probability=1, map_size=1000,
+                  max_entities=200,
                   herd_probability=0, is_biome_generation=True)
 
-            spawn(mapdb=mapdb[league], entity_class=enemies.Rat, probability=1, map_size=1000, max_entities=200,
+            spawn(mapdb=mapdb[league], entity_class=enemies.Rat, probability=1, map_size=1000,
+                  max_entities=200,
                   herd_probability=1)
-            spawn(mapdb=mapdb[league], entity_class=enemies.Boar, probability=1, map_size=1000, max_entities=200,
+            spawn(mapdb=mapdb[league], entity_class=enemies.Boar, probability=1, map_size=1000,
+                  max_entities=200,
                   herd_probability=1)
-            spawn(mapdb=mapdb[league], entity_class=enemies.Wolf, probability=1, map_size=1000, max_entities=200,
+            spawn(mapdb=mapdb[league], entity_class=enemies.Wolf, probability=1, map_size=1000,
+                  max_entities=200,
                   herd_probability=1)
 
             # Generate mazes (if you still want to include them)
