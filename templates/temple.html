@@ -47,7 +47,7 @@
         </div>
     </div>
 
-    <div class="card">
+        <div class="card">
         <div class="card-header bg-dark text-warning">
             <h4 class="mb-0">Available Spells</h4>
         </div>
@@ -62,7 +62,11 @@
                                 <div>
                                     <h5 class="spell-name">{{ spell.DISPLAY_NAME }}</h5>
                                     <p class="small mb-2">{{ spell.DESCRIPTION }}</p>
+                                    {% if hasattr(spell, 'DAMAGE') and spell.DAMAGE > 0 %}
                                     <p class="small mb-1">Damage: {{ spell.DAMAGE }}</p>
+                                    {% elif hasattr(spell, 'HEALING') and spell.HEALING > 0 %}
+                                    <p class="small mb-1">Healing: {{ spell.HEALING }}</p>
+                                    {% end %}
                                     <p class="small mb-1">Mana Cost: {{ spell.MANA_COST }}</p>
                                     <p class="small mb-2">Research Cost: {% raw spell.format_cost(spell.COST) %}</p>
                                     <button class="btn btn-sm learn-button" onclick="learnSpell('{{ spell.type }}')" {% if spell.type in user_data['spells'] %}disabled{% end %}>

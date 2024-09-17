@@ -27,7 +27,8 @@ class Spell:
             "cost": self.COST,
             "formatted_cost": self.format_cost(self.COST),
             "image_source": self.IMAGE_SOURCE,
-            "damage": self.DAMAGE,
+            "damage": getattr(self, 'DAMAGE', 0),
+            "healing": getattr(self, 'HEALING', 0),
             "mana_cost": self.MANA_COST
         }
 
@@ -43,6 +44,14 @@ class Fireball(Spell):
     IMAGE_SOURCE = "fireball.png"
     DAMAGE = 50
     MANA_COST = 20
+
+class Heal(Spell):
+    DISPLAY_NAME = "Heal"
+    DESCRIPTION = "Channels healing energy to restore health to a target."
+    COST = {"research": 120}
+    IMAGE_SOURCE = "heal.png"
+    HEALING = 40
+    MANA_COST = 25
 
 spell_types = {
     cls.__name__.lower(): cls for name, cls in globals().items()
