@@ -2,7 +2,6 @@ import random
 import math
 from typing import Dict, Tuple, Optional
 
-
 def attempt_spell_cast(caster: Dict, spell_types: Dict) -> Optional[Dict]:
     if random.random() > 0.1 or not caster.get('spells'):  # 10% chance to cast a spell
         return None
@@ -23,13 +22,46 @@ def attempt_spell_cast(caster: Dict, spell_types: Dict) -> Optional[Dict]:
         'mana_cost': spell.MANA_COST
     }
 
-def exp_bonus(value: int, base: int = 10) -> int:
-    if value <= 0:
-        return 0
-    return int(math.log(value, base))
-
 def death_roll(hit_chance: float) -> bool:
     return random.random() < hit_chance
+
+def get_weapon_damage(attacker: Dict) -> Dict:
+    default_weapon = {
+        "min_damage": 1,
+        "max_damage": 2,
+        "accuracy": 100,
+        "crit_chance": 5,
+        "crit_dmg_pct": 150
+    }
+
+    weapon = next((item for item in attacker.get("equipped", []) if item.get("slot") == "right_hand"),
+                  default_weapon)
+
+    min_damage = weapon.get("min_damage", default_weapon["min_damage"])
+    max_damage = weapon.get("max_damage", default_weapon["max_damage"])
+    accuracy = weapon.get("accuracy", default_weapon["accuracy"])
+    crit_chance = weapon.get("crit_chance", default_weapon["crit_chance"])
+    crit_dmg_pct = weapon.get("crit_dmg_pct", default_weapon["crit_dmg_pct"])
+
+    damage = random.randint(min_damage, max_damage)
+
+    if random.randint(1, 100) > accuracy:
+        return {"damage": 0, "base_damage": 0, "martial_bonus": 0, "message": "miss"}
+
+    if random.randint(1, 100) <= crit_chance:
+        damage = int(damage * (crit_dmg_pct / 100))
+        message = "critical hit"
+    else:
+        message = "hit"
+
+    martial_bonus = attacker.get("martial", 0)
+    final_damage = damage + martial_bonus
+    return {"damage": final_damage, "base_damage": damage, "martial_bonus": martial_bonus, "message": message}
+
+def get_spell_damage(spell_damage: int, caster: Dict) -> Dict:
+    magic_bonus = caster.get("magic", 0)
+    final_damage = spell_damage + magic_bonus
+    return {"damage": final_damage, "base_damage": spell_damage, "magic_bonus": magic_bonus}
 
 def apply_armor_protection(defender: Dict, initial_damage: int, round_data: Dict, round_number: int) -> Tuple[int, int]:
     armor_protection = 0
@@ -101,34 +133,3 @@ def calculate_armor_effectiveness(armor: Dict, damage: int) -> int:
 
     return effective_protection
 
-def get_weapon_damage(attacker: Dict, exp_bonus_value: int) -> Dict:
-    default_weapon = {
-        "min_damage": 1,
-        "max_damage": 2,
-        "accuracy": 100,
-        "crit_chance": 5,
-        "crit_dmg_pct": 150
-    }
-
-    weapon = next((item for item in attacker.get("equipped", []) if item.get("slot") == "right_hand"),
-                  default_weapon)
-
-    min_damage = weapon.get("min_damage", default_weapon["min_damage"])
-    max_damage = weapon.get("max_damage", default_weapon["max_damage"])
-    accuracy = weapon.get("accuracy", default_weapon["accuracy"])
-    crit_chance = weapon.get("crit_chance", default_weapon["crit_chance"])
-    crit_dmg_pct = weapon.get("crit_dmg_pct", default_weapon["crit_dmg_pct"])
-
-    damage = random.randint(min_damage, max_damage)
-
-    if random.randint(1, 100) > accuracy:
-        return {"damage": 0, "base_damage": 0, "exp_bonus": 0, "message": "miss"}
-
-    if random.randint(1, 100) <= crit_chance:
-        damage = int(damage * (crit_dmg_pct / 100))
-        message = "critical hit"
-    else:
-        message = "hit"
-
-    final_damage = damage + exp_bonus_value
-    return {"damage": final_damage, "base_damage": damage, "exp_bonus": exp_bonus_value, "message": message}

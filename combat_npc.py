@@ -4,10 +4,9 @@ from map import remove_from_map
 from backend import update_user_data
 from item_generator import generate_weapon, generate_armor
 from enemies import Enemy, enemy_types
-from combat_utils import exp_bonus, get_weapon_damage, apply_armor_protection, death_roll, attempt_spell_cast
+from combat_utils import get_weapon_damage, get_spell_damage, apply_armor_protection, death_roll, attempt_spell_cast
 from player import calculate_total_hp
 from spells import spell_types
-
 
 def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_data: Dict, user: str, usersdb: Dict,
               mapdb: Dict) -> None:
@@ -37,7 +36,7 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
 
         if user_data["hp"] > 0:
             # Player's turn
-            damage_dealt = handle_player_turn(user_data, user, enemy, round_data, usersdb)
+            damage_dealt = handle_player_turn(user_data, user, enemy, round_data, usersdb, max_total_hp)
 
             if damage_dealt > 0:
                 enemy.hp = max(0, enemy.hp - damage_dealt)  # Ensure HP doesn't go below 0
@@ -59,41 +58,38 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
             handle_player_defeat(user_data, user, enemy, usersdb, battle_data, round_number, max_total_hp)
             break
 
-
-def handle_player_turn(user_data: Dict, user: str, enemy: Any, round_data: Dict, usersdb: Dict) -> int:
+def handle_player_turn(user_data: Dict, user: str, enemy: Any, round_data: Dict, usersdb: Dict, max_total_hp: int) -> int:
     damage_dealt = 0
     spell_cast = attempt_spell_cast(user_data, spell_types)
     if spell_cast:
-        damage_dealt = handle_spell_cast(user_data, user, enemy, spell_cast, round_data, usersdb)
+        damage_dealt = handle_spell_cast(user_data, user, enemy, spell_cast, round_data, usersdb, max_total_hp)
     else:
-        damage_dealt = handle_weapon_attack(user_data, enemy, round_data)
+        damage_dealt = handle_weapon_attack(user_data, enemy, round_data, max_total_hp)
     return damage_dealt
 
-
-def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, round_data: Dict, usersdb: Dict) -> int:
-    damage_dealt = spell_cast['damage']
+def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, round_data: Dict, usersdb: Dict, max_total_hp: int) -> int:
+    spell_damage = get_spell_damage(spell_cast['damage'], user_data)
+    damage_dealt = spell_damage['damage']
     user_data['mana'] = max(0, user_data['mana'] - spell_cast['mana_cost'])
     update_user_data(user=user, updated_values={"mana": user_data["mana"]}, user_data_dict=usersdb)
     round_data["actions"].append({
-        "actor": "player",
-        "type": "spell",
+        "actor": "player","type": "spell",
         "damage": damage_dealt,
-        "message": f"You cast {spell_cast['name']} on the level {enemy.level} {enemy.type} for {damage_dealt} damage. Enemy HP: {enemy.hp}/{enemy.max_hp}. Your mana: {user_data['mana']}"
+        "message": f"You cast {spell_cast['name']} on the level {enemy.level} {enemy.type} for {damage_dealt} damage "
+                   f"(Base: {spell_damage['base_damage']}, Magic bonus: {spell_damage['magic_bonus']}). "
+                   f"Enemy HP: {enemy.hp}/{enemy.max_hp}. Your mana: {user_data['mana']}"
     })
     return damage_dealt
 
-
-def handle_weapon_attack(user_data: Dict, enemy: Any, round_data: Dict) -> int:
-    exp_bonus_value = exp_bonus(user_data["exp"])
-    user_dmg = get_weapon_damage(user_data, exp_bonus_value)
+def handle_weapon_attack(user_data: Dict, enemy: Any, round_data: Dict, max_total_hp: int) -> int:
+    user_dmg = get_weapon_damage(user_data)
 
     if user_dmg['damage'] > 0:
-        return process_hit(user_data, enemy, user_dmg, round_data)
+        return process_hit(user_data, enemy, user_dmg, round_data, max_total_hp)
     else:
         return process_miss(user_data, enemy, round_data)
 
-
-def process_hit(user_data: Dict, enemy: Any, user_dmg: Dict, round_data: Dict) -> int:
+def process_hit(user_data: Dict, enemy: Any, user_dmg: Dict, round_data: Dict, max_total_hp: int) -> int:
     if enemy.attempt_evasion():
         round_data["actions"].append({
             "actor": "enemy",
@@ -116,10 +112,11 @@ def process_hit(user_data: Dict, enemy: Any, user_dmg: Dict, round_data: Dict) -
         "actor": "player",
         "type": "attack",
         "damage": damage_dealt,
-        "message": f"You {user_dmg['message']} the level {enemy.level} {enemy.type} for {damage_dealt} damage. Enemy HP: {enemy.hp}/{enemy.max_hp}"
+        "message": f"You {user_dmg['message']} the level {enemy.level} {enemy.type} for {damage_dealt} damage "
+                   f"(Base: {user_dmg['base_damage']}, Martial bonus: {user_dmg['martial_bonus']}). "
+                   f"Enemy HP: {enemy.hp}/{enemy.max_hp}. Your HP: {user_data['hp']}/{max_total_hp}"
     })
     return damage_dealt
-
 
 def process_miss(user_data: Dict, enemy: Any, round_data: Dict) -> int:
     weapon = next((item for item in user_data.get("equipped", []) if item.get("slot") == "right_hand"), None)
@@ -136,7 +133,6 @@ def process_miss(user_data: Dict, enemy: Any, round_data: Dict) -> int:
     })
     return 0
 
-
 def handle_enemy_turn(user_data: Dict, enemy: Any, round_data: Dict, round_number: int, max_total_hp: int) -> None:
     npc_dmg = enemy.roll_damage()
     final_damage, absorbed_damage = apply_armor_protection(user_data, npc_dmg["damage"], round_data, round_number)
@@ -147,7 +143,6 @@ def handle_enemy_turn(user_data: Dict, enemy: Any, round_data: Dict, round_numbe
         "damage": final_damage,
         "message": f"The level {enemy.level} {enemy.type} {npc_dmg['message']} you for {final_damage} damage. Your HP: {user_data['hp']}/{max_total_hp}"
     })
-
 
 def handle_player_defeat(user_data: Dict, user: str, enemy: Any, usersdb: Dict, battle_data: Dict, round_number: int,
                          max_total_hp: int) -> None:

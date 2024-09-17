@@ -2,7 +2,7 @@ import random
 from typing import Dict, List
 from backend import update_user_data
 from player import calculate_total_hp, has_item_equipped, drop_random_item
-from combat_utils import exp_bonus, get_weapon_damage, apply_armor_protection, attempt_spell_cast
+from combat_utils import get_weapon_damage, get_spell_damage, apply_armor_protection, attempt_spell_cast
 from spells import spell_types
 
 def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> None:
@@ -102,11 +102,13 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
     # Attempt spell cast
     spell_cast = attempt_spell_cast(attacker, spell_types)
     if spell_cast:
-        final_damage = spell_cast['damage']
+        spell_damage = get_spell_damage(spell_cast['damage'], attacker)
+        final_damage = spell_damage['damage']
         mana_spent = spell_cast['mana_cost']
         attacker['mana'] = max(0, attacker['mana'] - mana_spent)  # Ensure mana doesn't go below 0
         defender["hp"] = max(0, defender["hp"] - final_damage)
-        message = f"{attacker_name} cast {spell_cast['name']} on {defender_name} for {final_damage} damage. " \
+        message = f"{attacker_name} cast {spell_cast['name']} on {defender_name} for {final_damage} damage " \
+                  f"(Base: {spell_damage['base_damage']}, Magic bonus: {spell_damage['magic_bonus']}). " \
                   f"{attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}, Mana: {attacker['mana']}. " \
                   f"{defender_name}'s HP: {defender['hp']}/{defender_max_hp}"
         round_data["actions"].append({
@@ -117,15 +119,14 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
         })
         return {'mana_spent': mana_spent}
     else:
-        exp_bonus_value = exp_bonus(attacker["exp"])
-        damage_dict = get_weapon_damage(attacker, exp_bonus_value)
+        damage_dict = get_weapon_damage(attacker)
 
         final_damage, absorbed_damage = apply_armor_protection(defender, damage_dict['damage'], round_data, round_number)
 
         defender["hp"] = max(0, defender["hp"] - final_damage)  # Ensure HP doesn't go below 0
 
         message = (f"{attacker_name} {damage_dict['message']} {defender_name} for {final_damage} damage "
-                   f"(Base: {damage_dict['base_damage']}, Exp bonus: {damage_dict['exp_bonus']}). "
+                   f"(Base: {damage_dict['base_damage']}, Martial bonus: {damage_dict['martial_bonus']}). "
                    f"{attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}, {defender_name}'s HP: {defender['hp']}/{defender_max_hp}")
 
         round_data["actions"].append({
