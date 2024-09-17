@@ -28,7 +28,6 @@ class TurnEngine(threading.Thread):
     def __init__(self, usersdb, mapdb):
         super().__init__()
         self.turn = 0
-        self.round_time = 0
         self.running = True
         self.usersdb = usersdb
         self.mapdb = mapdb
@@ -44,23 +43,21 @@ class TurnEngine(threading.Thread):
         self.running = False
 
     def process_turn(self):
-        if time.time() - self.round_time > 60:
-            start_time = time.time()
+        start_time = time.time()
 
-            self.round_time = time.time()
-            self.turn += 1
+        self.turn += 1
 
-            for league in self.mapdb:
-                self.save_databases(league)
-                self.update_users_data(league)
-                spawn_entities(self.mapdb, league)
-                print("Processing sieges")
-                process_siege_attacks(self.mapdb, self.usersdb, league)
-                print("Processing outposts")
-                process_outpost_attacks(self.mapdb, self.usersdb, league)
-                print("Moving gnomes")
-                move_gnomes(self.mapdb, league)
-                print(f"Current turn of {league}: {self.turn}")
+        for league in self.mapdb:
+            self.save_databases(league)
+            self.update_users_data(league)
+            spawn_entities(self.mapdb, league)
+            print("Processing sieges")
+            process_siege_attacks(self.mapdb, self.usersdb, league)
+            print("Processing outposts")
+            process_outpost_attacks(self.mapdb, self.usersdb, league)
+            print("Moving gnomes")
+            move_gnomes(self.mapdb, league)
+            print(f"Current turn of {league}: {self.turn}")
 
             end_time = time.time()
             execution_time = end_time - start_time
