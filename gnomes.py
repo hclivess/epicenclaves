@@ -30,6 +30,3 @@ def move_gnomes(mapdb, league):
 
     # Update the map with the new gnome positions
     mapdb[league].update(new_positions)
-
-    print(f"Moved gnomes in {league}")
-    print(f"Gnome count: {sum(1 for tile in mapdb[league].values() if tile['type'] == 'gnomes')}")
