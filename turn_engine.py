@@ -111,18 +111,25 @@ class TurnEngine(threading.Thread):
     def calculate_resources(self, user_data, building_counts):
         ingredients = user_data.get("ingredients", {}).copy()
 
+        # Get construction data
+        construction = user_data.get("construction", {})
+
         # Calculate wood production
-        sawmill_levels = sum(sawmill.get("level", 1) for sawmill in user_data.get("sawmills", []))
+        sawmills = [b for b in construction.values() if b.get("type") == "sawmill"]
+        sawmill_levels = sum(sawmill.get("level", 1) for sawmill in sawmills)
         wood_production = min(sawmill_levels, building_counts.get("forest", 0))
         ingredients["wood"] = ingredients.get("wood", 0) + wood_production
 
         # Calculate bismuth production
-        mine_levels = sum(mine.get("level", 1) for mine in user_data.get("mines", []))
+        mines = [b for b in construction.values() if b.get("type") == "mine"]
+        mine_levels = sum(mine.get("level", 1) for mine in mines)
         bismuth_production = min(mine_levels, building_counts.get("mountain", 0))
         ingredients["bismuth"] = ingredients.get("bismuth", 0) + bismuth_production
 
         # Calculate food production
-        ingredients["food"] = ingredients.get("food", 0) + building_counts.get('farm', 0)
+        farms = [b for b in construction.values() if b.get("type") == "farm"]
+        food_production = sum(farm.get("level", 1) for farm in farms)
+        ingredients["food"] = ingredients.get("food", 0) + food_production
 
         return ingredients
 
