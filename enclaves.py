@@ -309,6 +309,8 @@ class UserActionHandler(BaseHandler):
             return
         message = action_func(user, user_data, *args, **kwargs)
         user_data = get_user_data(user, usersdb[league])  # Refresh user data
+        log_user_action(user, "message", message)
+        log_user_action(user, "user_data", user_data)
         self.render_user_panel(user, user_data, message=message, league=league)
 
 class EquipHandler(UserActionHandler):
@@ -683,6 +685,7 @@ class RestHandler(UserActionHandler):
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(response_data))
 
+
 class FightHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
@@ -703,7 +706,13 @@ class FightHandler(BaseHandler):
         else:
             fight_result = self._perform_fight(user, user_data, target, target_name, league)
             log_user_action(user, "fight",
-                            f"Target: {target}, Target Name: {target_name}, Result: {fight_result.get('message', 'Fight completed')}")
+                            f"Target: {target}, Target Name: {target_name}, Result: {fight_result}")
+
+            # Log for the target if it's a player
+            if target.lower() == "player" and target_name:
+                log_user_action(target_name, "attacked",
+                                f"Attacker: {user}, Result: {fight_result.get('message', 'Fight completed')}")
+
             if return_to_map:
                 self.return_json({"message": fight_result.get("message", "Fight completed"),
                                   "battle_data": fight_result["battle_data"]})
@@ -726,6 +735,7 @@ class FightHandler(BaseHandler):
         on_tile_users = get_tile_users(user_data["x_pos"], user_data["y_pos"], user, usersdb[league])
         return fight(target, target_name, on_tile_map, on_tile_users, user_data, user, usersdb[league],
                      mapdb[league])
+
 
 class ConquerHandler(UserActionHandler):
     def get(self, *args, **kwargs):
@@ -754,6 +764,13 @@ class ConquerHandler(UserActionHandler):
         on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
         result = attempt_conquer(user, target, on_tile_map, usersdb[league], mapdb[league], user_data)
         log_user_action(user, "conquer", f"Target: {target}, Result: {result}")
+
+        # Log for the target if it's controlled by a player
+        target_tile = on_tile_map[0][f"{user_data['x_pos']},{user_data['y_pos']}"]
+        if 'control' in target_tile and target_tile['control'] != user:
+            log_user_action(target_tile['control'], "territory_attacked",
+                            f"Attacker: {user}, Target: {target}, Result: {result}")
+
         return result
 
 class MineHandler(UserActionHandler):

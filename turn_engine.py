@@ -45,27 +45,54 @@ class TurnEngine(threading.Thread):
 
     def process_turn(self):
         start_time = time.time()
+        self.turn += 1
         log_turn_engine_event("turn_start", f"Turn {self.turn}")
 
-
-        self.turn += 1
-
         for league in self.mapdb:
+            log_turn_engine_event("league_processing_start", f"League: {league}, Turn: {self.turn}")
+
             self.save_databases(league)
+            log_turn_engine_event("databases_saved", f"League: {league}, Turn: {self.turn}")
+
             self.update_users_data(league)
-            spawn_entities(self.mapdb, league)
+            log_turn_engine_event("users_data_updated", f"League: {league}, Turn: {self.turn}")
+
+            spawned_entities = spawn_entities(self.mapdb, league)
+            log_turn_engine_event("entities_spawned",
+                                  f"League: {league}, Turn: {self.turn}, Entities: {spawned_entities}")
+
             print("Processing sieges")
-            process_siege_attacks(self.mapdb, self.usersdb, league)
+            siege_results = process_siege_attacks(self.mapdb, self.usersdb, league)
+            if siege_results:
+                for result in siege_results:
+                    log_turn_engine_event("siege_processed", f"League: {league}, Turn: {self.turn}, Result: {result}")
+            else:
+                log_turn_engine_event("siege_processed", f"League: {league}, Turn: {self.turn}, No siege results")
+
             print("Processing outposts")
-            process_outpost_attacks(self.mapdb, self.usersdb, league)
+            outpost_results = process_outpost_attacks(self.mapdb, self.usersdb, league)
+            if outpost_results:
+                for result in outpost_results:
+                    log_turn_engine_event("outpost_processed", f"League: {league}, Turn: {self.turn}, Result: {result}")
+            else:
+                log_turn_engine_event("outpost_processed", f"League: {league}, Turn: {self.turn}, No outpost results")
+
             print("Moving gnomes")
-            move_gnomes(self.mapdb, league)
+            gnome_movements = move_gnomes(self.mapdb, league)
+            if gnome_movements:
+                log_turn_engine_event("gnomes_moved",
+                                      f"League: {league}, Turn: {self.turn}, Movements: {gnome_movements}")
+            else:
+                log_turn_engine_event("gnomes_moved", f"League: {league}, Turn: {self.turn}, No gnome movements")
+
             print(f"Current turn of {league}: {self.turn}")
 
-            end_time = time.time()
-            execution_time = end_time - start_time
-            log_turn_engine_event("turn_end", f"Turn {self.turn}, Execution time: {execution_time:.2f} seconds")
-            print(f"Turn {self.turn} execution time: {execution_time:.2f} seconds")
+            log_turn_engine_event("league_processing_end", f"League: {league}, Turn: {self.turn}")
+
+        end_time = time.time()
+        execution_time = end_time - start_time
+        log_turn_engine_event("turn_end", f"Turn {self.turn}, Execution time: {execution_time:.2f} seconds")
+        print(f"Turn {self.turn} execution time: {execution_time:.2f} seconds")
 
     def save_databases(self, league):
         save_map_from_memory(self.mapdb, league=league)
