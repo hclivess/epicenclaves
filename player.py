@@ -19,6 +19,8 @@ class User:
         self.units = []
         self.spells = []
         self.skills = []
+        self.deaths = 0
+        self.homicides = 0
         self.sorcery = 0
         self.fitness = 0
         self.research = 0
