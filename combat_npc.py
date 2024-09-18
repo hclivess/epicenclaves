@@ -58,15 +58,25 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
             handle_player_defeat(user_data, user, enemy, usersdb, battle_data, round_number, max_total_hp)
             break
 
-def handle_player_turn(user_data: Dict, user: str, enemy: Any, round_data: Dict, usersdb: Dict, max_total_hp: int) -> int:
+
+def handle_player_turn(user_data: Dict, user: str, enemy: Any, round_data: Dict, usersdb: Dict,
+                       max_total_hp: int) -> int:
     damage_dealt = 0
+    initial_player_hp = user_data["hp"]
+    initial_enemy_hp = enemy.hp
     spell_cast = attempt_spell_cast(user_data, spell_types)
     if spell_cast:
         damage_dealt = handle_spell_cast(user_data, user, enemy, spell_cast, round_data, usersdb, max_total_hp)
     else:
         damage_dealt = handle_weapon_attack(user_data, enemy, round_data, max_total_hp)
-    return damage_dealt
 
+    round_data["actions"][-1].update({
+        "final_player_hp": user_data["hp"],
+        "final_enemy_hp": enemy.hp,
+        "initial_player_hp": initial_player_hp,
+        "initial_enemy_hp": initial_enemy_hp
+    })
+    return damage_dealt
 
 def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, round_data: Dict, usersdb: Dict,
                       max_total_hp: int) -> int:
@@ -175,12 +185,15 @@ def process_miss(user_data: Dict, enemy: Any, round_data: Dict) -> int:
 
 def handle_enemy_turn(user_data: Dict, enemy: Any, round_data: Dict, round_number: int, max_total_hp: int) -> None:
     npc_dmg = enemy.roll_damage()
+    initial_hp = user_data["hp"]
     final_damage, absorbed_damage = apply_armor_protection(user_data, npc_dmg["damage"], round_data, round_number)
     user_data["hp"] = max(0, user_data["hp"] - final_damage)  # Ensure HP doesn't go below 0
     round_data["actions"].append({
         "actor": "enemy",
         "type": "attack",
         "damage": final_damage,
+        "initial_hp": initial_hp,
+        "final_hp": user_data["hp"],
         "message": f"The level {enemy.level} {enemy.type} {npc_dmg['message']} you for {final_damage} damage. Your HP: {user_data['hp']}/{max_total_hp}"
     })
 

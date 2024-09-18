@@ -120,19 +120,33 @@ async function processAction(action) {
 
     if (action.type === 'attack') {
         if (action.actor === 'player') {
-            currentEnemyHp -= action.damage;
+            currentEnemyHp = action.final_enemy_hp || currentEnemyHp - action.damage;
             showDamagePopUp(action.damage, false);
             if (!isAnimationSkipped) await animateAttack(playerPicture, enemyPicture);
             await animateProfilePicture(enemyPicture, true);
-            updateHealth(currentEnemyHp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
         } else {
-            currentPlayerHp -= action.damage;
+            currentPlayerHp = action.final_hp;
             showDamagePopUp(action.damage, true);
             if (!isAnimationSkipped) await animateAttack(enemyPicture, playerPicture);
             await animateProfilePicture(playerPicture, true);
-            updateHealth(currentPlayerHp, battleData.player.max_hp, playerHealth, playerHpDisplay);
+        }
+    } else if (action.type === 'spell') {
+        if (action.healing_done) {
+            currentPlayerHp = action.final_player_hp || Math.min(currentPlayerHp + action.healing_done, battleData.player.max_hp);
+            showDamagePopUp(action.healing_done, true);
+            await animateProfilePicture(playerPicture, false);
+        }
+        if (action.damage_dealt) {
+            currentEnemyHp = action.final_enemy_hp || currentEnemyHp - action.damage_dealt;
+            showDamagePopUp(action.damage_dealt, false);
+            if (!isAnimationSkipped) await animateAttack(playerPicture, enemyPicture);
+            await animateProfilePicture(enemyPicture, true);
         }
     }
+
+    // Update health displays only once after processing the action
+    updateHealth(currentPlayerHp, battleData.player.max_hp, playerHealth, playerHpDisplay);
+    updateHealth(currentEnemyHp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
 
     if (!isAnimationSkipped) {
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -152,7 +166,7 @@ async function processRound(roundData) {
         }
     }
 
-    // Update health after each round
+    // Update final health values after processing all actions in the round
     currentPlayerHp = roundData.player_hp;
     currentEnemyHp = roundData.enemy_hp;
     updateHealth(currentPlayerHp, battleData.player.max_hp, playerHealth, playerHpDisplay);
