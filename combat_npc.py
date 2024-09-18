@@ -7,6 +7,8 @@ from enemies import Enemy, enemy_types
 from combat_utils import get_weapon_damage, apply_spell_effect, apply_armor_protection, death_roll, attempt_spell_cast
 from player import calculate_total_hp
 from spells import spell_types
+from collections import deque
+
 
 def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_data: Dict, user: str, usersdb: Dict,
               mapdb: Dict) -> None:
@@ -18,6 +20,8 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
         return
 
     enemy = enemy_class(npc_data['level'])
+    if hasattr(enemy, 'spells') and enemy.spells:
+        enemy.spell_queue = deque(enemy.spells)
 
     battle_data["enemy"].update({
         "name": enemy.type,

@@ -1,20 +1,27 @@
 import random
 import math
 from typing import Dict, Tuple, Optional
+from collections import deque
 
 def attempt_spell_cast(caster: Dict, spell_types: Dict) -> Optional[Dict]:
     if random.random() > 0.1 or not caster.get('spells'):  # 10% chance to cast a spell
         return None
 
-    available_spells = [spell for spell in caster['spells'] if
+    if 'spell_queue' not in caster or not isinstance(caster['spell_queue'], deque):
+        caster['spell_queue'] = deque(caster.get('spells', []))
+
+    available_spells = [spell for spell in caster['spell_queue'] if
                         spell_types.get(spell) and spell_types[spell](0).MANA_COST <= caster.get('mana', 0)]
 
     if not available_spells:
         return None
 
-    spell_name = random.choice(available_spells)
+    spell_name = available_spells[0]
     spell_class = spell_types[spell_name]
     spell = spell_class(0)  # The ID doesn't matter here
+
+    # Move the used spell to the end of the queue
+    caster['spell_queue'].rotate(-1)
 
     return {
         'name': spell.DISPLAY_NAME,

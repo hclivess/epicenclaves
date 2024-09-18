@@ -4,11 +4,16 @@ from backend import update_user_data
 from player import calculate_total_hp, has_item_equipped, drop_random_item
 from combat_utils import get_weapon_damage, apply_spell_effect, apply_armor_protection, attempt_spell_cast
 from spells import spell_types
+from collections import deque
 
 def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> None:
     max_base_hp = 100
     user_max_total_hp = calculate_total_hp(max_base_hp, user_data["exp"])
     target_max_total_hp = calculate_total_hp(max_base_hp, target_data["exp"])
+
+    for player_data in [user_data, target_data]:
+        if 'spells' in player_data and player_data['spells']:
+            player_data['spell_queue'] = deque(player_data['spells'])
 
     battle_data["player"].update({
         "name": user,
