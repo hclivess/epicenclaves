@@ -215,7 +215,8 @@ def handle_player_defeat(user_data: Dict, user: str, enemy: Any, usersdb: Dict, 
             "enemy_hp": enemy.hp
         })
         user_data["alive"] = False
-        update_user_data(user=user, updated_values={"alive": False, "hp": 0, "mana": user_data["mana"]},
+        user_data["deaths"] = user_data.get("deaths", 0) + 1
+        update_user_data(user=user, updated_values={"alive": False, "hp": 0, "mana": user_data["mana"], "deaths": user_data["deaths"]},
                          user_data_dict=usersdb)
     else:
         battle_data["rounds"].append({
