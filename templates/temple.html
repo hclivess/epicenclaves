@@ -55,6 +55,7 @@
                         <div>
                             <button class="btn btn-sm btn-outline-primary move-up">↑</button>
                             <button class="btn btn-sm btn-outline-primary move-down">↓</button>
+                            <button class="btn btn-sm btn-outline-success duplicate">+</button>
                             <button class="btn btn-sm btn-outline-danger remove">×</button>
                         </div>
                     </li>
@@ -163,10 +164,13 @@
                     item.parentNode.insertBefore(item, item.previousElementSibling);
                 } else if (e.target.classList.contains('move-down') && item.nextElementSibling) {
                     item.parentNode.insertBefore(item.nextElementSibling, item);
+                } else if (e.target.classList.contains('duplicate')) {
+                    const newItem = item.cloneNode(true);
+                    item.parentNode.insertBefore(newItem, item.nextSibling);
                 } else if (e.target.classList.contains('remove')) {
                     item.remove();
-                    updateSpellQueue();
                 }
+                updateSpellQueue();
             });
 
             addSpellButton.addEventListener('click', function() {
@@ -179,6 +183,7 @@
                         <div>
                             <button class="btn btn-sm btn-outline-primary move-up">↑</button>
                             <button class="btn btn-sm btn-outline-primary move-down">↓</button>
+                            <button class="btn btn-sm btn-outline-success duplicate">+</button>
                             <button class="btn btn-sm btn-outline-danger remove">×</button>
                         </div>
                     `;
