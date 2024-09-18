@@ -56,7 +56,7 @@ from trash import trash_item, trash_armor, trash_all, trash_weapons
 from repair import repair_all_items, repair_item
 from drag import drag_player
 from revive import revive
-from learn import learn_spell
+from temple import learn_spell
 from log import log_user_action, log_turn_engine_event
 from train_sorcery import train_sorcery
 
@@ -1078,6 +1078,10 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
         with open(chat_history_file, "w") as file:
             json.dump(chat_history, file)
 
+
+from temple import get_temple_info, learn_spell, update_spell_queue
+
+
 class TempleHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
@@ -1086,20 +1090,21 @@ class TempleHandler(BaseHandler):
             self.redirect("/")
             return
 
-        user_data = get_user_data(user, usersdb[league])
+        success, message, available_spells = get_temple_info(user, usersdb[league], mapdb[league])
 
-        # Create spell instances without converting to dictionaries
-        available_spells = [spell_class(spell_id=i) for i, spell_class in
-                            enumerate(spell_types.values())]
+        if not success:
+            self.write(message)
+            return
 
         log_user_action(user, "view_temple")
         self.render(
             "templates/temple.html",
             user=user,
             league=league,
-            user_data=user_data,
+            user_data=get_user_data(user, usersdb[league]),
             available_spells=available_spells
         )
+
 
 class LearnHandler(BaseHandler):
     def post(self):
@@ -1107,7 +1112,7 @@ class LearnHandler(BaseHandler):
         league = self.get_current_league()
         spell_type = self.get_argument("spell")
 
-        success, message = learn_spell(user, usersdb[league], mapdb[league], spell_type, spell_types)
+        success, message = learn_spell(user, usersdb[league], mapdb[league], spell_type)
         log_user_action(user, "learn_spell",
                         f"Spell: {spell_type}, Success: {success}, Message: {message}")
         self.write(json.dumps({"success": success, "message": message}))
@@ -1133,18 +1138,12 @@ class UpdateSpellQueueHandler(BaseHandler):
             self.write(json.dumps({"success": False, "message": str(e)}))
             return
 
-        user_data = get_user_data(user, usersdb[league])
-        if user_data is None:
-            self.set_status(404)
-            self.write(json.dumps({"success": False, "message": f"User {user} not found."}))
-            return
+        success, message = update_spell_queue(user, usersdb[league], mapdb[league], spell_queue)
 
-        # Update the user's spell queue
-        user_data['spell_queue'] = spell_queue
-        update_user_data(user, user_data, usersdb[league])
+        if success:
+            log_user_action(user, "update_spell_queue", f"New queue: {spell_queue}")
 
-        log_user_action(user, "update_spell_queue", f"New queue: {spell_queue}")
-        self.write(json.dumps({"success": True, "message": "Spell queue updated successfully"}))
+        self.write(json.dumps({"success": success, "message": message}))
 
 def make_app():
     return tornado.web.Application([

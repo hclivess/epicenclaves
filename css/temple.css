@@ -110,3 +110,70 @@ body {
     font-size: 1rem;
     margin-bottom: 0.5rem;
 }
+
+.list-group-item {
+    background-color: #2a2a2a;
+    border-color: #444;
+    color: #fff;
+}
+
+.btn-outline-primary,
+.btn-outline-success,
+.btn-outline-danger {
+    color: #ffd700;
+    border-color: #ffd700;
+    background-color: transparent;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-success:hover,
+.btn-outline-danger:hover {
+    color: #000;
+    background-color: #ffd700;
+    border-color: #ffd700;
+}
+
+.form-select {
+    background-color: #2a2a2a;
+    color: #fff;
+    border-color: #444;
+}
+
+.form-select:focus {
+    background-color: #3a3a3a;
+    color: #fff;
+    border-color: #ffd700;
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25);
+}
+
+/* Style for the options in the select dropdown */
+.form-select option {
+    background-color: #2a2a2a;
+    color: #fff;
+}
+
+/* Additional styles to ensure consistency */
+#spell-queue .list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+}
+
+#spell-queue .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+}
+
+/* Adjust spacing between buttons */
+#spell-queue .btn-sm + .btn-sm {
+    margin-left: 0.25rem;
+}
+
+/* Style for the spell name in the queue */
+#spell-queue .list-group-item span {
+    font-weight: bold;
+    color: #ffd700;
+}
