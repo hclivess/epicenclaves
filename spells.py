@@ -84,28 +84,6 @@ class Heal(Spell):
             "message": f"Heal restores {actual_healing} health to you!"
         }
 
-class FrostNova(Spell):
-    DISPLAY_NAME = "Frost Nova"
-    DESCRIPTION = "Releases a burst of freezing energy, damaging and slowing nearby enemies."
-    COST = {"research": 150}
-    IMAGE_SOURCE = "frost_nova.png"
-    MANA_COST = 30
-
-    def effect(self, caster: Dict[str, Any], target: Dict[str, Any]) -> Dict[str, Any]:
-        base_damage = 30
-        magic_bonus = caster.get("sorcery", 0)
-        total_damage = base_damage + magic_bonus
-
-        target["hp"] = max(0, target["hp"] - total_damage)
-        target["speed"] = max(1, target.get("speed", 10) - 2)  # Reduce speed by 2, minimum 1
-
-        return {
-            "damage_dealt": total_damage,
-            "speed_reduction": 2,
-            "message": f"Frost Nova hits {target['name']} for {total_damage} damage and reduces their speed!"
-        }
-
-
 spell_types = {
     cls.__name__.lower(): cls for name, cls in globals().items()
     if isinstance(cls, type) and issubclass(cls, Spell) and cls != Spell

@@ -72,37 +72,56 @@ def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, 
                       max_total_hp: int) -> int:
     spell_effect = apply_spell_effect(spell_cast, user_data, enemy.__dict__)
 
+    initial_mana = user_data['mana']
+    initial_hp = user_data['hp']
+    initial_enemy_hp = enemy.hp
+
     user_data['mana'] = max(0, user_data['mana'] - spell_cast['mana_cost'])
 
     damage_dealt = 0
-    # Apply healing to the player if it's a healing spell
+    healing_done = 0
+
     if 'healing_done' in spell_effect:
-        user_data['hp'] = min(max_total_hp, user_data['hp'] + spell_effect['healing_done'])
+        healing_done = spell_effect['healing_done']
+        user_data['hp'] = min(max_total_hp, user_data['hp'] + healing_done)
     elif 'damage_dealt' in spell_effect:
         damage_dealt = spell_effect['damage_dealt']
         enemy.hp = max(0, enemy.hp - damage_dealt)
 
-    update_user_data(user=user, updated_values={"mana": user_data["mana"], "hp": user_data["hp"]},
-                     user_data_dict=usersdb)
+    message = f"You cast {spell_cast['name']}. "
 
-    message = f"You cast {spell_cast['name']}. {spell_effect['message']} "
+    if 'message' in spell_effect:
+        message += spell_effect['message'] + " "
 
-    if 'damage_dealt' in spell_effect:
-        message += f"Enemy {enemy.type} HP: {enemy.hp}/{enemy.max_hp}. "
+    if healing_done > 0:
+        message += f"You healed for {healing_done} HP. "
 
-    message += f"Your HP: {user_data['hp']}/{max_total_hp}. Your mana: {user_data['mana']}"
+    if damage_dealt > 0:
+        message += f"You dealt {damage_dealt} damage to the enemy. "
+
+    message += f"Enemy {enemy.type} HP: {enemy.hp}/{enemy.max_hp}. "
+    message += f"Your HP: {user_data['hp']}/{max_total_hp}. "
+    message += f"Your mana: {user_data['mana']} (-{initial_mana - user_data['mana']})."
 
     round_data["actions"].append({
         "actor": "player",
         "type": "spell",
         "spell_name": spell_cast['name'],
         "effect": spell_effect,
+        "damage_dealt": damage_dealt,
+        "healing_done": healing_done,
+        "mana_used": initial_mana - user_data['mana'],
+        "hp_change": user_data['hp'] - initial_hp,
+        "enemy_hp_change": initial_enemy_hp - enemy.hp,
         "message": message
     })
 
-    # Apply any additional effects (e.g., speed reduction for Frost Nova)
     if 'speed_reduction' in spell_effect:
         enemy.speed = max(1, enemy.speed - spell_effect['speed_reduction'])
+        round_data["actions"][-1]["speed_reduction"] = spell_effect['speed_reduction']
+
+    update_user_data(user=user, updated_values={"mana": user_data["mana"], "hp": user_data["hp"]},
+                     user_data_dict=usersdb)
 
     return damage_dealt
 
