@@ -19,13 +19,8 @@ def check_temple_access(user: str, usersdb: Dict[str, Any], mapdb: Dict[str, Any
     return True, ""
 
 
-def get_temple_info(user: str, usersdb: Dict[str, Any], mapdb: Dict[str, Any]) -> Tuple[bool, str, List[Any]]:
-    access_granted, message = check_temple_access(user, usersdb, mapdb)
-    if not access_granted:
-        return False, message, []
-
-    available_spells = [spell_class(spell_id=i) for i, spell_class in enumerate(spell_types.values())]
-    return True, "Temple access granted", available_spells
+def get_available_spells() -> List[Any]:
+    return [spell_class(spell_id=i) for i, spell_class in enumerate(spell_types.values())]
 
 
 def learn_spell(user: str, usersdb: Dict[str, Any], mapdb: Dict[str, Any], spell_type: str) -> Tuple[bool, str]:
@@ -64,3 +59,22 @@ def update_spell_queue(user: str, usersdb: Dict[str, Any], mapdb: Dict[str, Any]
     user_data['spell_queue'] = spell_queue
     update_user_data(user, user_data, usersdb)
     return True, "Spell queue updated successfully"
+
+
+def train_sorcery(user: str, usersdb: Dict[str, Any], mapdb: Dict[str, Any]) -> Tuple[bool, str]:
+    access_granted, message = check_temple_access(user, usersdb, mapdb)
+    if not access_granted:
+        return False, message
+
+    user_data = get_user_data(user, usersdb)
+
+    # Implement the logic for training sorcery here
+    # This is a placeholder implementation
+    cost = 10  # Example cost
+    if user_data['research'] >= cost:
+        user_data['research'] -= cost
+        user_data['sorcery'] = user_data.get('sorcery', 0) + 1
+        update_user_data(user, user_data, usersdb)
+        return True, "Sorcery training successful"
+    else:
+        return False, "Not enough research points for sorcery training"

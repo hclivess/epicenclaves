@@ -56,9 +56,10 @@ from trash import trash_item, trash_armor, trash_all, trash_weapons
 from repair import repair_all_items, repair_item
 from drag import drag_player
 from revive import revive
-from temple import learn_spell
 from log import log_user_action, log_turn_engine_event
 from train_sorcery import train_sorcery
+from temple import get_available_spells, learn_spell, update_spell_queue, train_sorcery, check_temple_access
+
 
 MAX_SIZE = 1000000
 DISTANCE = 15
@@ -738,21 +739,6 @@ class FightHandler(BaseHandler):
                      mapdb[league])
 
 
-class TrainSorceryHandler(BaseHandler):
-    def get(self):
-        user = tornado.escape.xhtml_escape(self.current_user)
-        league = self.get_current_league()
-
-        user_data = get_user_data(user, usersdb[league])
-        success, message = train_sorcery(user, user_data, usersdb[league], mapdb[league])
-
-        log_user_action(user, "train_sorcery", f"Success: {success}, Message: {message}")
-
-        response = json.dumps({"success": success, "message": message})
-
-        self.set_header("Content-Type", "application/json")
-        self.write(response)
-
 class ConquerHandler(UserActionHandler):
     def get(self, *args, **kwargs):
         user = tornado.escape.xhtml_escape(self.current_user)
@@ -1079,9 +1065,6 @@ class ChatWebSocketHandler(tornado.websocket.WebSocketHandler):
             json.dump(chat_history, file)
 
 
-from temple import get_temple_info, learn_spell, update_spell_queue
-
-
 class TempleHandler(BaseHandler):
     def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
@@ -1090,12 +1073,13 @@ class TempleHandler(BaseHandler):
             self.redirect("/")
             return
 
-        success, message, available_spells = get_temple_info(user, usersdb[league], mapdb[league])
+        access_granted, message = check_temple_access(user, usersdb[league], mapdb[league])
 
-        if not success:
+        if not access_granted:
             self.write(message)
             return
 
+        available_spells = get_available_spells()
         log_user_action(user, "view_temple")
         self.render(
             "templates/temple.html",
@@ -1142,6 +1126,18 @@ class UpdateSpellQueueHandler(BaseHandler):
 
         if success:
             log_user_action(user, "update_spell_queue", f"New queue: {spell_queue}")
+
+        self.write(json.dumps({"success": success, "message": message}))
+
+
+class TrainSorceryHandler(BaseHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
+
+        success, message = train_sorcery(user, usersdb[league], mapdb[league])
+
+        log_user_action(user, "train_sorcery", f"Success: {success}, Message: {message}")
 
         self.write(json.dumps({"success": success, "message": message}))
 
