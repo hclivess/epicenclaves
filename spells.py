@@ -1,4 +1,5 @@
-from typing import Dict, List
+from typing import Dict, List, Callable, Any
+from player import calculate_total_hp
 
 class Spell:
     def __init__(self, spell_id: int):
@@ -15,7 +16,9 @@ class Spell:
             "mana": "img/assets/mana.png",
             "research": "img/assets/research.png"
         }
-        return " ".join(f"<img class='resource-icon' src='{image_map.get(resource, resource)}' width='32' height='32' alt='{resource}'>{amount}" for resource, amount in cost.items())
+        return " ".join(
+            f"<img class='resource-icon' src='{image_map.get(resource, resource)}' width='32' height='32' alt='{resource}'>{amount}"
+            for resource, amount in cost.items())
 
     def to_dict(self):
         return {
@@ -27,8 +30,6 @@ class Spell:
             "cost": self.COST,
             "formatted_cost": self.format_cost(self.COST),
             "image_source": self.IMAGE_SOURCE,
-            "damage": getattr(self, 'DAMAGE', 0),
-            "healing": getattr(self, 'HEALING', 0),
             "mana_cost": self.MANA_COST
         }
 
@@ -37,21 +38,73 @@ class Spell:
             {"name": f"Cast {self.DISPLAY_NAME}", "action": f"/cast?spell={self.type}"},
         ]
 
+    def effect(self, caster: Dict[str, Any], target: Dict[str, Any]) -> Dict[str, Any]:
+        raise NotImplementedError("Subclasses must implement this method")
+
+
 class Fireball(Spell):
     DISPLAY_NAME = "Fireball"
     DESCRIPTION = "Hurls a fiery ball of magic at your enemies, dealing damage."
     COST = {"research": 100}
     IMAGE_SOURCE = "fireball.png"
-    DAMAGE = 50
     MANA_COST = 20
+
+    def effect(self, caster: Dict[str, Any], target: Dict[str, Any]) -> Dict[str, Any]:
+        base_damage = 50
+        magic_bonus = caster.get("sorcery", 0)
+        total_damage = base_damage + magic_bonus
+
+        target["hp"] = max(0, target.get("hp", 0) - total_damage)
+
+        return {
+            "damage_dealt": total_damage,
+            "message": f"Fireball hits the target for {total_damage} damage!"
+        }
+
 
 class Heal(Spell):
     DISPLAY_NAME = "Heal"
-    DESCRIPTION = "Channels healing energy to restore health to a target."
+    DESCRIPTION = "Channels healing energy to restore your own health."
     COST = {"research": 120}
     IMAGE_SOURCE = "heal.png"
-    HEALING = 40
     MANA_COST = 25
+
+    def effect(self, caster: Dict[str, Any], target: Dict[str, Any]) -> Dict[str, Any]:
+        base_healing = 1
+        magic_bonus = caster.get("sorcery", 0)
+        total_healing = base_healing + int(magic_bonus/10)
+
+        max_hp = calculate_total_hp(caster.get("base_hp", 100), caster.get("exp", 0))
+        caster["hp"] = min(max_hp, caster.get("hp", 0) + total_healing)
+
+        actual_healing = min(total_healing, max_hp - caster.get("hp", 0) + total_healing)
+
+        return {
+            "healing_done": actual_healing,
+            "message": f"Heal restores {actual_healing} health to you!"
+        }
+
+class FrostNova(Spell):
+    DISPLAY_NAME = "Frost Nova"
+    DESCRIPTION = "Releases a burst of freezing energy, damaging and slowing nearby enemies."
+    COST = {"research": 150}
+    IMAGE_SOURCE = "frost_nova.png"
+    MANA_COST = 30
+
+    def effect(self, caster: Dict[str, Any], target: Dict[str, Any]) -> Dict[str, Any]:
+        base_damage = 30
+        magic_bonus = caster.get("sorcery", 0)
+        total_damage = base_damage + magic_bonus
+
+        target["hp"] = max(0, target["hp"] - total_damage)
+        target["speed"] = max(1, target.get("speed", 10) - 2)  # Reduce speed by 2, minimum 1
+
+        return {
+            "damage_dealt": total_damage,
+            "speed_reduction": 2,
+            "message": f"Frost Nova hits {target['name']} for {total_damage} damage and reduces their speed!"
+        }
+
 
 spell_types = {
     cls.__name__.lower(): cls for name, cls in globals().items()

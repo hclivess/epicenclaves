@@ -3,7 +3,7 @@ import math
 from typing import Dict, Tuple, Optional
 
 def attempt_spell_cast(caster: Dict, spell_types: Dict) -> Optional[Dict]:
-    if random.random() > 0.1 or not caster.get('spells'):  # 10% chance to cast a spell
+    if random.random() > 1 or not caster.get('spells'):  # 10% chance to cast a spell
         return None
 
     available_spells = [spell for spell in caster['spells'] if
@@ -18,9 +18,15 @@ def attempt_spell_cast(caster: Dict, spell_types: Dict) -> Optional[Dict]:
 
     return {
         'name': spell.DISPLAY_NAME,
-        'damage': spell.DAMAGE,
+        'spell_object': spell,
         'mana_cost': spell.MANA_COST
     }
+
+def apply_spell_effect(spell_cast: Dict, caster: Dict, target: Dict) -> Dict:
+    spell = spell_cast['spell_object']
+    effect_result = spell.effect(caster, target)
+    caster['mana'] -= spell_cast['mana_cost']
+    return effect_result
 
 def death_roll(hit_chance: float) -> bool:
     return random.random() < hit_chance

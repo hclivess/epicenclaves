@@ -4,7 +4,7 @@ from map import remove_from_map
 from backend import update_user_data
 from item_generator import generate_weapon, generate_armor
 from enemies import Enemy, enemy_types
-from combat_utils import get_weapon_damage, get_spell_damage, apply_armor_protection, death_roll, attempt_spell_cast
+from combat_utils import get_weapon_damage, apply_spell_effect, apply_armor_protection, death_roll, attempt_spell_cast
 from player import calculate_total_hp
 from spells import spell_types
 
@@ -67,18 +67,43 @@ def handle_player_turn(user_data: Dict, user: str, enemy: Any, round_data: Dict,
         damage_dealt = handle_weapon_attack(user_data, enemy, round_data, max_total_hp)
     return damage_dealt
 
-def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, round_data: Dict, usersdb: Dict, max_total_hp: int) -> int:
-    spell_damage = get_spell_damage(spell_cast['damage'], user_data)
-    damage_dealt = spell_damage['damage']
+
+def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, round_data: Dict, usersdb: Dict,
+                      max_total_hp: int) -> int:
+    spell_effect = apply_spell_effect(spell_cast, user_data, enemy.__dict__)
+
     user_data['mana'] = max(0, user_data['mana'] - spell_cast['mana_cost'])
-    update_user_data(user=user, updated_values={"mana": user_data["mana"]}, user_data_dict=usersdb)
+
+    damage_dealt = 0
+    # Apply healing to the player if it's a healing spell
+    if 'healing_done' in spell_effect:
+        user_data['hp'] = min(max_total_hp, user_data['hp'] + spell_effect['healing_done'])
+    elif 'damage_dealt' in spell_effect:
+        damage_dealt = spell_effect['damage_dealt']
+        enemy.hp = max(0, enemy.hp - damage_dealt)
+
+    update_user_data(user=user, updated_values={"mana": user_data["mana"], "hp": user_data["hp"]},
+                     user_data_dict=usersdb)
+
+    message = f"You cast {spell_cast['name']}. {spell_effect['message']} "
+
+    if 'damage_dealt' in spell_effect:
+        message += f"Enemy {enemy.type} HP: {enemy.hp}/{enemy.max_hp}. "
+
+    message += f"Your HP: {user_data['hp']}/{max_total_hp}. Your mana: {user_data['mana']}"
+
     round_data["actions"].append({
-        "actor": "player","type": "spell",
-        "damage": damage_dealt,
-        "message": f"You cast {spell_cast['name']} on the level {enemy.level} {enemy.type} for {damage_dealt} damage "
-                   f"(Base: {spell_damage['base_damage']}, Magic bonus: {spell_damage['magic_bonus']}). "
-                   f"Enemy HP: {enemy.hp}/{enemy.max_hp}. Your mana: {user_data['mana']}"
+        "actor": "player",
+        "type": "spell",
+        "spell_name": spell_cast['name'],
+        "effect": spell_effect,
+        "message": message
     })
+
+    # Apply any additional effects (e.g., speed reduction for Frost Nova)
+    if 'speed_reduction' in spell_effect:
+        enemy.speed = max(1, enemy.speed - spell_effect['speed_reduction'])
+
     return damage_dealt
 
 def handle_weapon_attack(user_data: Dict, enemy: Any, round_data: Dict, max_total_hp: int) -> int:

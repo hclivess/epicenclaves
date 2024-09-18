@@ -2,7 +2,7 @@ import random
 from typing import Dict, List
 from backend import update_user_data
 from player import calculate_total_hp, has_item_equipped, drop_random_item
-from combat_utils import get_weapon_damage, get_spell_damage, apply_armor_protection, attempt_spell_cast
+from combat_utils import get_weapon_damage, apply_spell_effect, apply_armor_protection, attempt_spell_cast
 from spells import spell_types
 
 def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> None:
@@ -43,7 +43,6 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
         player_attack(user_data, target_data, user, target_name, round_data, round_number, user_max_total_hp, target_max_total_hp)
 
         if target_data["hp"] <= 0:
-            # Update round data with final HP values
             round_data["player_hp"] = user_data["hp"]
             round_data["enemy_hp"] = target_data["hp"]
             battle_data["rounds"].append(round_data)
@@ -58,7 +57,6 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
         player_attack(target_data, user_data, target_name, user, round_data, round_number, target_max_total_hp, user_max_total_hp)
 
         if user_data["hp"] <= 0:
-            # Update round data with final HP values
             round_data["player_hp"] = user_data["hp"]
             round_data["enemy_hp"] = target_data["hp"]
             battle_data["rounds"].append(round_data)
@@ -94,34 +92,33 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
 
     print(f"Fight ended. Rounds: {len(battle_data['rounds'])}, Player HP: {user_data['hp']}, Enemy HP: {target_data['hp']}")
 
+
 def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_name: str, round_data: Dict,
-                  round_number: int, attacker_max_hp: int, defender_max_hp: int) -> Dict:
+                  round_number: int, attacker_max_hp: int, defender_max_hp: int) -> None:
     if attacker["hp"] <= 0:
-        return {}
+        return
 
     # Attempt spell cast
     spell_cast = attempt_spell_cast(attacker, spell_types)
     if spell_cast:
-        spell_damage = get_spell_damage(spell_cast['damage'], attacker)
-        final_damage = spell_damage['damage']
-        mana_spent = spell_cast['mana_cost']
-        attacker['mana'] = max(0, attacker['mana'] - mana_spent)  # Ensure mana doesn't go below 0
-        defender["hp"] = max(0, defender["hp"] - final_damage)
-        message = f"{attacker_name} cast {spell_cast['name']} on {defender_name} for {final_damage} damage " \
-                  f"(Base: {spell_damage['base_damage']}, Magic bonus: {spell_damage['magic_bonus']}). " \
-                  f"{attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}, Mana: {attacker['mana']}. " \
-                  f"{defender_name}'s HP: {defender['hp']}/{defender_max_hp}"
+        spell_effect = apply_spell_effect(spell_cast, attacker, defender)
+
+        message = f"{attacker_name} cast {spell_cast['name']}. {spell_effect['message']} "
+        message += f"{attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}, Mana: {attacker['mana']}. "
+        message += f"{defender_name}'s HP: {defender['hp']}/{defender_max_hp}"
+
         round_data["actions"].append({
             "actor": "player" if attacker_name == attacker.get('username') else "enemy",
             "type": "spell",
-            "damage": final_damage,
+            "spell_name": spell_cast['name'],
+            "effect": spell_effect,
             "message": message
         })
-        return {'mana_spent': mana_spent}
     else:
         damage_dict = get_weapon_damage(attacker)
 
-        final_damage, absorbed_damage = apply_armor_protection(defender, damage_dict['damage'], round_data, round_number)
+        final_damage, absorbed_damage = apply_armor_protection(defender, damage_dict['damage'], round_data,
+                                                               round_number)
 
         defender["hp"] = max(0, defender["hp"] - final_damage)  # Ensure HP doesn't go below 0
 
@@ -136,7 +133,6 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
             "message": message
         })
 
-    return {}
 
 def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, victor_name: str, death_chance: float,
                           usersdb: Dict, rounds: List[Dict], round_number: int, defeated_max_hp: int) -> None:
