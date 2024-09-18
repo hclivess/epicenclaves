@@ -38,7 +38,7 @@
                 <p>Cost: 5000 EXP</p>
                 <p>Success Rate: 50%</p>
                 <p>Magic Power Gain on Success: +50</p>
-                <button id="train-sorcery" class="btn btn-primary">Train Sorcery</button>
+                <button id="train-sorcery" class="btn btn-sm learn-button" onclick="trainSorcery()">Train Sorcery</button>
             </div>
         </div>
 
@@ -61,7 +61,7 @@
                     </li>
                     {% end %}
                 </ul>
-                <button id="save-spell-queue" class="btn btn-success mt-3">Save Spell Queue</button>
+                <button id="save-spell-queue" class="btn btn-sm learn-button">Save Spell Queue</button>
             </div>
         </div>
 
@@ -87,11 +87,9 @@
                                         {% end %}
                                         <p>Mana Cost: {{ spell.MANA_COST }}</p>
                                         <p>Research Cost: {% raw spell.format_cost(spell.COST) %}</p>
-                                        {% if spell.type in user_data['spells'] %}
-                                        <button class="btn btn-secondary" disabled>Learned</button>
-                                        {% else %}
-                                        <button class="btn btn-primary learn-spell" data-spell="{{ spell.type }}">Learn Spell</button>
-                                        {% end %}
+                                        <button class="btn btn-sm learn-button" onclick="learnSpell('{{ spell.type }}')" {% if spell.type in user_data['spells'] %}disabled{% end %}>
+                                            {% if spell.type in user_data['spells'] %}Learned{% else %}Learn Spell{% end %}
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -103,8 +101,52 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        function learnSpell(spellType) {
+            fetch(`/learn`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `spell=${spellType}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayMessage(data.message, 'success');
+                    location.reload();  // Reload the page to update the spell status
+                } else {
+                    displayMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                displayMessage('An error occurred while learning the spell.', 'error');
+            });
+        }
+
+        function trainSorcery() {
+            fetch(`/train_sorcery`, {
+                method: 'GET',
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayMessage(data.message, data.message.includes("successful") ? 'success' : 'error');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                displayMessage('An error occurred while training sorcery.', 'error');
+            });
+        }
+
+        function displayMessage(message, type) {
+            const infopanel = document.getElementById('infopanel');
+            infopanel.textContent = message;
+            infopanel.classList.remove('text-success', 'text-danger');
+            infopanel.classList.add(`text-${type}`);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const spellQueue = document.getElementById('spell-queue');
             const saveQueueButton = document.getElementById('save-spell-queue');
