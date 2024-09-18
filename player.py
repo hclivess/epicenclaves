@@ -23,7 +23,7 @@ class User:
         self.deaths = 0
         self.homicides = 0
         self.sorcery = 0
-        self.fitness = 0
+        self.physique = 0
         self.research = 0
         self.base_hp = 100  # Base HP value
         self.base_mana = 100  # Base mana value
