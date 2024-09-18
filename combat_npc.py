@@ -116,10 +116,6 @@ def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, 
         "message": message
     })
 
-    if 'speed_reduction' in spell_effect:
-        enemy.speed = max(1, enemy.speed - spell_effect['speed_reduction'])
-        round_data["actions"][-1]["speed_reduction"] = spell_effect['speed_reduction']
-
     update_user_data(user=user, updated_values={"mana": user_data["mana"], "hp": user_data["hp"]},
                      user_data_dict=usersdb)
 

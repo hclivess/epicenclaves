@@ -6,10 +6,6 @@ from combat_utils import get_weapon_damage, apply_spell_effect, apply_armor_prot
 from spells import spell_types
 
 def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> None:
-    print(f"Starting fight_player. Target: {target_name}, User: {user}")
-    print(f"Target data: {target_data}")
-    print(f"User data: {user_data}")
-
     max_base_hp = 100
     user_max_total_hp = calculate_total_hp(max_base_hp, user_data["exp"])
     target_max_total_hp = calculate_total_hp(max_base_hp, target_data["exp"])
@@ -136,8 +132,6 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
 
 def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, victor_name: str, death_chance: float,
                           usersdb: Dict, rounds: List[Dict], round_number: int, defeated_max_hp: int) -> None:
-    print("victor", victor)
-    print("defeated", defeated)
 
     if random.random() < death_chance:
         message = f"{defeated_name} was killed in battle. {defeated_name}'s HP: 0/{defeated_max_hp}"

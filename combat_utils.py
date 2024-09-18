@@ -3,7 +3,7 @@ import math
 from typing import Dict, Tuple, Optional
 
 def attempt_spell_cast(caster: Dict, spell_types: Dict) -> Optional[Dict]:
-    if random.random() > 1 or not caster.get('spells'):  # 10% chance to cast a spell
+    if random.random() > 0.1 or not caster.get('spells'):  # 10% chance to cast a spell
         return None
 
     available_spells = [spell for spell in caster['spells'] if
