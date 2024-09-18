@@ -137,10 +137,13 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
 
 def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, victor_name: str, death_chance: float,
                           usersdb: Dict, rounds: List[Dict], round_number: int, defeated_max_hp: int) -> None:
-
     if random.random() < death_chance:
         message = f"{defeated_name} was killed in battle. {defeated_name}'s HP: 0/{defeated_max_hp}"
-        new_data = {"alive": False, "hp": 0, "action_points": 0}
+        new_data = {"alive": False, "hp": 0, "action_points": 0, "deaths": defeated.get("deaths", 0) + 1}
+
+        # Update victor's homicides
+        victor["homicides"] = victor.get("homicides", 0) + 1
+        update_user_data(victor_name, {"homicides": victor["homicides"]}, usersdb)
 
         # Item drop mechanic - only happens when player dies
         if random.random() < 0.3:  # 30% chance to drop an item
@@ -148,7 +151,8 @@ def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, vict
             if dropped_item:
                 # Remove the item from the defeated player's inventory
                 if slot == "unequipped":
-                    defeated["unequipped"] = [item for item in defeated["unequipped"] if item["id"] != dropped_item["id"]]
+                    defeated["unequipped"] = [item for item in defeated["unequipped"] if
+                                              item["id"] != dropped_item["id"]]
                 else:
                     defeated["equipped"] = [item for item in defeated["equipped"] if item["id"] != dropped_item["id"]]
 
