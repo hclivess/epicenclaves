@@ -18,6 +18,7 @@ class User:
         self.score = 0
         self.units = []
         self.spells = []
+        self.spell_queue = []
         self.skills = []
         self.deaths = 0
         self.homicides = 0
@@ -83,6 +84,7 @@ class User:
             "units": self.units,
             "skills": self.skills,
             "spells": self.spells,
+            "spell_queue": self.spell_queue,
             "research": self.research,
             "hp": self.get_total_hp(),
             "mana": self.get_total_mana(),

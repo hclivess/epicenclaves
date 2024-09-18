@@ -1112,6 +1112,40 @@ class LearnHandler(BaseHandler):
                         f"Spell: {spell_type}, Success: {success}, Message: {message}")
         self.write(json.dumps({"success": success, "message": message}))
 
+
+class UpdateSpellQueueHandler(BaseHandler):
+    def post(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
+
+        if not user:
+            self.set_status(401)
+            self.write(json.dumps({"success": False, "message": "User not authenticated"}))
+            return
+
+        try:
+            data = json.loads(self.request.body)
+            spell_queue = data.get('spell_queue')
+            if spell_queue is None:
+                raise ValueError("Missing 'spell_queue' in request body")
+        except (json.JSONDecodeError, ValueError) as e:
+            self.set_status(400)
+            self.write(json.dumps({"success": False, "message": str(e)}))
+            return
+
+        user_data = get_user_data(user, usersdb[league])
+        if user_data is None:
+            self.set_status(404)
+            self.write(json.dumps({"success": False, "message": f"User {user} not found."}))
+            return
+
+        # Update the user's spell queue
+        user_data['spell_queue'] = spell_queue
+        update_user_data(user, user_data, usersdb[league])
+
+        log_user_action(user, "update_spell_queue", f"New queue: {spell_queue}")
+        self.write(json.dumps({"success": True, "message": "Spell queue updated successfully"}))
+
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
@@ -1142,6 +1176,7 @@ def make_app():
         (r"/deploy(.*)", DeployArmyHandler),
         (r"/bestiary", BestiaryHandler),
         (r"/temple", TempleHandler),
+        (r"/update_spell_queue", UpdateSpellQueueHandler),
         (r"/learn", LearnHandler),
         (r"/chat", ChatHandler),
         (r"/ws/chat", ChatWebSocketHandler),

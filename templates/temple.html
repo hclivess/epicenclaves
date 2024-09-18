@@ -49,18 +49,28 @@
             <div class="card-body">
                 <h5>Current Spell Queue</h5>
                 <ul id="spell-queue" class="list-group mb-3">
-                    {% for spell in user_data['spells'] %}
+                    {% for spell in user_data.get('spell_queue', user_data.get('spells', [])) %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         {{ spell }}
                         <div>
                             <button class="btn btn-sm btn-outline-primary move-up">↑</button>
                             <button class="btn btn-sm btn-outline-primary move-down">↓</button>
-                            <button class="btn btn-sm btn-outline-success duplicate">+</button>
                             <button class="btn btn-sm btn-outline-danger remove">×</button>
                         </div>
                     </li>
                     {% end %}
                 </ul>
+                <div class="mb-3">
+                    <select id="spell-select" class="form-select">
+                        <option value="">Select a spell to add</option>
+                        {% for spell in user_data.get('spells', []) %}
+                            {% if spell not in user_data.get('spell_queue', []) %}
+                                <option value="{{ spell }}">{{ spell }}</option>
+                            {% end %}
+                        {% end %}
+                    </select>
+                    <button id="add-spell" class="btn btn-sm learn-button">Add Spell to Queue</button>
+                </div>
                 <button id="save-spell-queue" class="btn btn-sm learn-button">Save Spell Queue</button>
             </div>
         </div>
@@ -106,16 +116,13 @@
         function learnSpell(spellType) {
             fetch(`/learn`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `spell=${spellType}`
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    displayMessage(data.message, 'success');
-                    location.reload();  // Reload the page to update the spell status
+                    location.reload();
                 } else {
                     displayMessage(data.message, 'error');
                 }
@@ -127,64 +134,83 @@
         }
 
         function trainSorcery() {
-            fetch(`/train_sorcery`, {
-                method: 'GET',
-            })
-            .then(response => response.json())
-            .then(data => {
-                displayMessage(data.message, data.message.includes("successful") ? 'success' : 'error');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                displayMessage('An error occurred while training sorcery.', 'error');
-            });
+            fetch(`/train_sorcery`)
+                .then(response => response.json())
+                .then(data => {
+                    displayMessage(data.message, data.success ? 'success' : 'error');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    displayMessage('An error occurred while training sorcery.', 'error');
+                });
         }
 
         function displayMessage(message, type) {
             const infopanel = document.getElementById('infopanel');
             infopanel.textContent = message;
-            infopanel.classList.remove('text-success', 'text-danger');
-            infopanel.classList.add(`text-${type}`);
+            infopanel.className = `alert alert-${type === 'success' ? 'success' : 'danger'} mb-4`;
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             const spellQueue = document.getElementById('spell-queue');
+            const spellSelect = document.getElementById('spell-select');
+            const addSpellButton = document.getElementById('add-spell');
             const saveQueueButton = document.getElementById('save-spell-queue');
 
-            // Handle move up/down, duplicate, and remove
             spellQueue.addEventListener('click', function(e) {
                 const item = e.target.closest('li');
                 if (e.target.classList.contains('move-up') && item.previousElementSibling) {
                     item.parentNode.insertBefore(item, item.previousElementSibling);
                 } else if (e.target.classList.contains('move-down') && item.nextElementSibling) {
                     item.parentNode.insertBefore(item.nextElementSibling, item);
-                } else if (e.target.classList.contains('duplicate')) {
-                    const newItem = item.cloneNode(true);
-                    item.parentNode.insertBefore(newItem, item.nextSibling);
                 } else if (e.target.classList.contains('remove')) {
                     item.remove();
+                    updateSpellQueue();
                 }
             });
 
-            // Save the updated spell queue
-            saveQueueButton.addEventListener('click', function() {
-                const spells = Array.from(spellQueue.children).map(li => li.textContent.trim());
+            addSpellButton.addEventListener('click', function() {
+                const selectedSpell = spellSelect.value;
+                if (selectedSpell) {
+                    const newItem = document.createElement('li');
+                    newItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    newItem.innerHTML = `
+                        ${selectedSpell}
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary move-up">↑</button>
+                            <button class="btn btn-sm btn-outline-primary move-down">↓</button>
+                            <button class="btn btn-sm btn-outline-danger remove">×</button>
+                        </div>
+                    `;
+                    spellQueue.appendChild(newItem);
+                    spellSelect.remove(spellSelect.selectedIndex);
+                    spellSelect.value = '';
+                    updateSpellQueue();
+                }
+            });
+
+            saveQueueButton.addEventListener('click', updateSpellQueue);
+
+            function updateSpellQueue() {
+                const spells = Array.from(spellQueue.children).map(li => li.firstChild.textContent.trim());
                 fetch('/update_spell_queue', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ spell_queue: spells }),
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Spell queue updated successfully!');
+                        window.location.reload();
                     } else {
-                        alert('Failed to update spell queue. Please try again.');
+                        displayMessage(data.message || 'Failed to update spell queue. Please try again.', 'error');
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    displayMessage('An error occurred while updating the spell queue.', 'error');
                 });
-            });
+            }
         });
     </script>
 </body>
