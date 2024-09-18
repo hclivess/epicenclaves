@@ -2,7 +2,8 @@ from backend import update_user_data
 from map import occupied_by, owned_by, get_user_data
 from spells import spell_types
 from typing import Dict, Any, List, Tuple
-
+import random
+from player import User, calculate_total_hp, calculate_total_mana
 
 def check_temple_access(user: str, usersdb: Dict[str, Any], mapdb: Dict[str, Any]) -> Tuple[bool, str]:
     user_data = get_user_data(user, usersdb)
@@ -61,20 +62,29 @@ def update_spell_queue(user: str, usersdb: Dict[str, Any], mapdb: Dict[str, Any]
     return True, "Spell queue updated successfully"
 
 
-def train_sorcery(user: str, usersdb: Dict[str, Any], mapdb: Dict[str, Any]) -> Tuple[bool, str]:
-    access_granted, message = check_temple_access(user, usersdb, mapdb)
-    if not access_granted:
-        return False, message
+def train_sorcery(user, user_data, usersdb):
+    exp_cost = 5000
+    magic_gain = 50
+    failure_chance = 0.5
 
-    user_data = get_user_data(user, usersdb)
+    if user_data['exp'] < exp_cost:
+        return False, f"You need {exp_cost} exp to train sorcery. You only have {user_data['exp']} exp."
 
-    # Implement the logic for training sorcery here
-    # This is a placeholder implementation
-    cost = 10  # Example cost
-    if user_data['research'] >= cost:
-        user_data['research'] -= cost
-        user_data['sorcery'] = user_data.get('sorcery', 0) + 1
-        update_user_data(user, user_data, usersdb)
-        return True, "Sorcery training successful"
-    else:
-        return False, "Not enough research points for sorcery training"
+    player = User(user_data['username'], user_data['x_pos'], user_data['y_pos'])  # Create a User object for base_hp
+
+    if random.random() < failure_chance:
+        user_data['exp'] -= exp_cost
+        # Update HP and mana after subtracting exp
+        user_data['hp'] = calculate_total_hp(player.base_hp, user_data['exp'])
+        user_data['mana'] = calculate_total_mana(player.base_mana, user_data['exp'])
+        usersdb[user].update(user_data)
+        return False, f"Your sorcery training failed. You lost {exp_cost} exp."
+
+    user_data['exp'] -= exp_cost
+    user_data['sorcery'] = user_data.get('sorcery', 0) + magic_gain
+    # Update HP and mana after subtracting exp
+    user_data['hp'] = calculate_total_hp(player.base_hp, user_data['exp'])
+    user_data['mana'] = calculate_total_mana(player.base_mana, user_data['exp'])
+
+    usersdb[user].update(user_data)
+    return True, f"Your sorcery training was successful! You gained {magic_gain} magic power."
