@@ -12,8 +12,6 @@ from collections import deque
 
 def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_data: Dict, user: str, usersdb: Dict,
               mapdb: Dict) -> None:
-    damage_dealt = 0
-
     enemy_class = enemy_types.get(npc_data['type'].lower())
     if enemy_class is None:
         battle_data["rounds"].append({"round": 0, "message": f"Unknown enemy type: {npc_data['type']}"})
@@ -23,6 +21,16 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
     if hasattr(enemy, 'spells') and enemy.spells:
         enemy.spell_queue = deque(enemy.spells)
 
+    max_base_hp = 100
+    max_total_hp = calculate_total_hp(max_base_hp, user_data["exp"])
+
+    # Initialize battle data with correct HP values
+    battle_data["player"].update({
+        "name": user,
+        "max_hp": max_total_hp,
+        "current_hp": user_data["hp"]
+    })
+
     battle_data["enemy"].update({
         "name": enemy.type,
         "max_hp": enemy.max_hp,
@@ -30,8 +38,15 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
         "level": enemy.level
     })
 
-    max_base_hp = 100
-    max_total_hp = calculate_total_hp(max_base_hp, user_data["exp"])
+    # Add initial round data
+    initial_round = {
+        "round": 0,
+        "message": f"Battle starts! {user} (HP: {user_data['hp']}/{max_total_hp}) vs Level {enemy.level} {enemy.type} (HP: {enemy.hp}/{enemy.max_hp})",
+        "player_hp": user_data["hp"],
+        "enemy_hp": enemy.hp,
+        "actions": []
+    }
+    battle_data["rounds"].append(initial_round)
 
     round_number = 0
     while enemy.hp > 0 and user_data["alive"]:
@@ -40,10 +55,7 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
 
         if user_data["hp"] > 0:
             # Player's turn
-            damage_dealt = handle_player_turn(user_data, user, enemy, round_data, usersdb, max_total_hp)
-
-            if damage_dealt > 0:
-                enemy.hp = max(0, enemy.hp - damage_dealt)  # Ensure HP doesn't go below 0
+            handle_player_turn(user_data, user, enemy, round_data, usersdb, max_total_hp)
 
         if enemy.hp > 0:
             # Enemy's turn
@@ -62,6 +74,9 @@ def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_dat
             handle_player_defeat(user_data, user, enemy, usersdb, battle_data, round_number, max_total_hp)
             break
 
+    # Update final battle stats
+    battle_data["player"]["current_hp"] = user_data["hp"]
+    battle_data["enemy"]["current_hp"] = enemy.hp
 
 def handle_player_turn(user_data: Dict, user: str, enemy: Any, round_data: Dict, usersdb: Dict,
                        max_total_hp: int) -> int:
@@ -73,6 +88,8 @@ def handle_player_turn(user_data: Dict, user: str, enemy: Any, round_data: Dict,
         damage_dealt = handle_spell_cast(user_data, user, enemy, spell_cast, round_data, usersdb, max_total_hp)
     else:
         damage_dealt = handle_weapon_attack(user_data, enemy, round_data, max_total_hp)
+
+    enemy.hp = max(0, enemy.hp - damage_dealt)  # Update enemy HP here
 
     round_data["actions"][-1].update({
         "final_player_hp": user_data["hp"],
@@ -189,17 +206,21 @@ def process_miss(user_data: Dict, enemy: Any, round_data: Dict) -> int:
 
 def handle_enemy_turn(user_data: Dict, enemy: Any, round_data: Dict, round_number: int, max_total_hp: int) -> None:
     npc_dmg = enemy.roll_damage()
-    initial_hp = user_data["hp"]
+    initial_player_hp = user_data["hp"]
+    initial_enemy_hp = enemy.hp
     final_damage, absorbed_damage = apply_armor_protection(user_data, npc_dmg["damage"], round_data, round_number)
     user_data["hp"] = max(0, user_data["hp"] - final_damage)  # Ensure HP doesn't go below 0
     round_data["actions"].append({
         "actor": "enemy",
         "type": "attack",
         "damage": final_damage,
-        "initial_hp": initial_hp,
-        "final_hp": user_data["hp"],
+        "initial_player_hp": initial_player_hp,
+        "final_player_hp": user_data["hp"],
+        "initial_enemy_hp": initial_enemy_hp,
+        "final_enemy_hp": enemy.hp,
         "message": f"The level {enemy.level} {enemy.type} {npc_dmg['message']} you for {final_damage} damage. Your HP: {user_data['hp']}/{max_total_hp}"
     })
+
 
 def handle_player_defeat(user_data: Dict, user: str, enemy: Any, usersdb: Dict, battle_data: Dict, round_number: int,
                          max_total_hp: int) -> None:
