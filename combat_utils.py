@@ -3,31 +3,42 @@ import math
 from typing import Dict, Tuple, Optional
 from collections import deque
 
+
 def attempt_spell_cast(caster: Dict, spell_types: Dict) -> Optional[Dict]:
-    if random.random() > 0.1 or not caster.get('spells'):  # 10% chance to cast a spell
+    if random.random() > 1 or not caster.get('spells'):  # 10% chance to cast a spell
         return None
 
-    if 'spell_queue' not in caster or not isinstance(caster['spell_queue'], deque):
-        caster['spell_queue'] = deque(caster.get('spells', []))
+    if 'spell_queue' not in caster or not caster['spell_queue']:
+        caster['spell_queue'] = list(caster.get('spells', []))
 
-    available_spells = [spell for spell in caster['spell_queue'] if
-                        spell_types.get(spell) and spell_types[spell](0).MANA_COST <= caster.get('mana', 0)]
+    # Convert to deque if it's a list
+    spell_queue = deque(caster['spell_queue']) if isinstance(caster['spell_queue'], list) else caster['spell_queue']
 
-    if not available_spells:
-        return None
+    for _ in range(len(spell_queue)):
+        spell_name = spell_queue[0]
+        if spell_types.get(spell_name) and spell_types[spell_name](0).MANA_COST <= caster.get('mana', 0):
+            spell_class = spell_types[spell_name]
+            spell = spell_class(0)
 
-    spell_name = available_spells[0]
-    spell_class = spell_types[spell_name]
-    spell = spell_class(0)  # The ID doesn't matter here
+            # Rotate the queue
+            spell_queue.append(spell_queue.popleft())
 
-    # Move the used spell to the end of the queue
-    caster['spell_queue'].rotate(-1)
+            # Update the caster's spell_queue
+            caster['spell_queue'] = list(spell_queue)
 
-    return {
-        'name': spell.DISPLAY_NAME,
-        'spell_object': spell,
-        'mana_cost': spell.MANA_COST
-    }
+            return {
+                'name': spell.DISPLAY_NAME,
+                'spell_object': spell,
+                'mana_cost': spell.MANA_COST
+            }
+        else:
+            # Move unavailable spell to the end and continue checking
+            spell_queue.append(spell_queue.popleft())
+
+    # Update the caster's spell_queue even if no spell was cast
+    caster['spell_queue'] = list(spell_queue)
+
+    return None
 
 def apply_spell_effect(spell_cast: Dict, caster: Dict, target: Dict) -> Dict:
     spell = spell_cast['spell_object']
