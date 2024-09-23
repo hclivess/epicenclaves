@@ -15,6 +15,7 @@ def revive(user, user_data, league, usersdb):
         update_user_data(user=user, updated_values={
             "alive": True,
             "hp": 100,
+            "mana": 0,
             "action_points": new_ap,
             "exp": new_exp
         }, user_data_dict=usersdb[league])
