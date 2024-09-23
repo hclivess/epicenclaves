@@ -89,6 +89,8 @@ def handle_player_turn(user_data: Dict, user: str, enemy: Any, round_data: Dict,
     else:
         damage_dealt = handle_weapon_attack(user_data, enemy, round_data, max_total_hp)
 
+    enemy.hp = max(0, enemy.hp - damage_dealt)
+
     round_data["actions"][-1].update({
         "final_player_hp": user_data["hp"],
         "final_enemy_hp": enemy.hp,
@@ -119,7 +121,6 @@ def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, 
         user_data['hp'] = min(max_total_hp, user_data['hp'] + healing_done)
     elif 'damage_dealt' in spell_effect:
         damage_dealt = spell_effect['damage_dealt']
-        enemy.hp = max(0, enemy.hp - damage_dealt)
 
     # Add additional information to the message
     message += f" Enemy {enemy.type} HP: {enemy.hp}/{enemy.max_hp}. "
