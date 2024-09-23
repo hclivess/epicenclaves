@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Chat</title>
     <link rel="stylesheet" href="/css/chat.css">
@@ -13,14 +13,21 @@
         <div class="navigation-submenu">
             <a href="/" class="btn btn-secondary">Back</a>
         </div>
+
         <h1>Chat</h1>
+
         <div id="messages">
             {% for message in chat_history %}
-                <p><strong>{{ message['user'] }}:</strong> {{ message['text'] }}</p>
+            <p><strong>{{ message['user'] }}:</strong> {{ message['text'] }}</p>
             {% end %}
         </div>
-        <input type="text" id="message-input" placeholder="Type your message...">
-        <button id="send-button">Send</button>
+
+        <div class="input-container">
+            <input type="text" id="message-input" placeholder="Type your message...">
+            <button id="send-button">Send</button>
+        </div>
     </div>
+
+    <script src="chat.js"></script>
 </body>
 </html>
