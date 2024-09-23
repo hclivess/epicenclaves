@@ -99,13 +99,14 @@ def handle_player_turn(user_data: Dict, user: str, enemy: Any, round_data: Dict,
     })
     return damage_dealt
 
+
 def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, round_data: Dict, usersdb: Dict,
                       max_total_hp: int) -> int:
+    initial_enemy_hp = enemy.hp
     spell_effect = apply_spell_effect(spell_cast, user_data, enemy.__dict__)
 
     initial_mana = user_data['mana']
     initial_hp = user_data['hp']
-    initial_enemy_hp = enemy.hp
 
     user_data['mana'] = max(0, user_data['mana'] - spell_cast['mana_cost'])
 
@@ -117,25 +118,28 @@ def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, 
         user_data['hp'] = min(max_total_hp, user_data['hp'] + healing_done)
     elif 'damage_info' in spell_effect:
         damage_info = spell_effect['damage_info']
-        damage_dealt = damage_info['damage']
-        enemy.hp = max(0, enemy.hp - damage_dealt)
+        base_damage = damage_info['base_damage']
+        magic_bonus = damage_info['magic_bonus']
+        total_calculated_damage = damage_info['damage']
 
-    message = f"You cast {spell_cast['name']}. "
+        # Apply the damage
+        enemy.hp = max(0, enemy.hp - total_calculated_damage)
 
-    if 'message' in spell_effect:
-        message += spell_effect['message'] + " "
+        # Calculate the actual damage dealt
+        actual_damage_dealt = initial_enemy_hp - enemy.hp
 
-    if healing_done > 0:
-        message += f"You healed for {healing_done} HP. "
+        message = f"You cast {spell_cast['name']}. "
+        message += f"{spell_cast['name']} hits the target for {base_damage} damage! "
+        message += f"You dealt {actual_damage_dealt} damage to the enemy. "
+        message += f"(Base: {base_damage}, Magic bonus: {magic_bonus}, "
+        message += f"Calculated total: {total_calculated_damage}, Actual: {actual_damage_dealt}) "
+        message += f"Enemy {enemy.type} HP: {enemy.hp}/{enemy.max_hp}. "
+        message += f"Your HP: {user_data['hp']}/{max_total_hp}. "
+        message += f"Your mana: {user_data['mana']} (-{initial_mana - user_data['mana']})."
 
-    if damage_dealt > 0:
-        message += f"You dealt {damage_dealt} damage to the enemy. "
-        if 'damage_info' in spell_effect:
-            message += f"(Base: {damage_info['base_damage']}, Magic bonus: {damage_info['magic_bonus']}) "
-
-    message += f"Enemy {enemy.type} HP: {enemy.hp}/{enemy.max_hp}. "
-    message += f"Your HP: {user_data['hp']}/{max_total_hp}. "
-    message += f"Your mana: {user_data['mana']} (-{initial_mana - user_data['mana']})."
+        damage_dealt = actual_damage_dealt
+    else:
+        message = f"You cast {spell_cast['name']}, but it had no effect."
 
     round_data["actions"].append({
         "actor": "player",
