@@ -5,7 +5,7 @@ from collections import deque
 
 
 def attempt_spell_cast(caster: Dict, spell_types: Dict) -> Optional[Dict]:
-    if random.random() > 0.1 or not caster.get('spells'):  # 10% chance to cast a spell
+    if random.random() > 1 or not caster.get('spells'):  # 10% chance to cast a spell
         return None
 
     if 'spell_queue' not in caster or not caster['spell_queue']:
