@@ -11,12 +11,20 @@ body {
     font-size: 0.9rem;
 }
 
+.sticky-top-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #f8f9fa;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 .container {
     background-color: rgba(20, 20, 20, 0.8);
     border-radius: 15px;
-    padding: 20px;
     margin-top: 20px;
-    margin-bottom: 20px;
 }
 
 .card {
@@ -108,8 +116,6 @@ body {
 .navigation-submenu {
     background-color: rgba(40, 40, 40, 0.9);
     padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 10px;
     font-family: 'Merriweather', serif;
 }
 
@@ -207,6 +213,7 @@ body {
     color: #c0c0c0;
     background-color: rgba(0, 123, 255, 0.1);
     border-color: #007bff;
+    margin-top: 60px;
 }
 
 .card-title {
