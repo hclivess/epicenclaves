@@ -40,10 +40,17 @@ def attempt_spell_cast(caster: Dict, spell_types: Dict) -> Optional[Dict]:
 
     return None
 
+
 def apply_spell_effect(spell_cast: Dict, caster: Dict, target: Dict) -> Dict:
     spell = spell_cast['spell_object']
     effect_result = spell.effect(caster, target)
     caster['mana'] -= spell_cast['mana_cost']
+
+    if 'damage_dealt' in effect_result:
+        spell_damage = effect_result['damage_dealt']
+        damage_info = get_spell_damage(spell_damage, caster)
+        effect_result['damage_info'] = damage_info
+
     return effect_result
 
 def death_roll(hit_chance: float) -> bool:

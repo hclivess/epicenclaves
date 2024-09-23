@@ -115,8 +115,9 @@ def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, 
     if 'healing_done' in spell_effect:
         healing_done = spell_effect['healing_done']
         user_data['hp'] = min(max_total_hp, user_data['hp'] + healing_done)
-    elif 'damage_dealt' in spell_effect:
-        damage_dealt = spell_effect['damage_dealt']
+    elif 'damage_info' in spell_effect:
+        damage_info = spell_effect['damage_info']
+        damage_dealt = damage_info['damage']
         enemy.hp = max(0, enemy.hp - damage_dealt)
 
     message = f"You cast {spell_cast['name']}. "
@@ -129,6 +130,8 @@ def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, 
 
     if damage_dealt > 0:
         message += f"You dealt {damage_dealt} damage to the enemy. "
+        if 'damage_info' in spell_effect:
+            message += f"(Base: {damage_info['base_damage']}, Magic bonus: {damage_info['magic_bonus']}) "
 
     message += f"Enemy {enemy.type} HP: {enemy.hp}/{enemy.max_hp}. "
     message += f"Your HP: {user_data['hp']}/{max_total_hp}. "
