@@ -24,14 +24,12 @@ body {
 .container {
     background-color: rgba(20, 20, 20, 0.8);
     border-radius: 15px;
-    margin-top: 20px;
 }
 
 .card {
     background-color: rgba(40, 40, 40, 0.9);
     border: none;
     border-radius: 10px;
-    margin-bottom: 20px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     transition: transform 0.3s ease;
 }
