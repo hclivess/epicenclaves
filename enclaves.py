@@ -343,13 +343,27 @@ class RepairHandler(UserActionHandler):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         item_id = self.get_argument("id", None)
+        return_to_map = self.get_argument("return_to_map", default="false") == "true"
 
         if item_id:
             log_user_action(user, "repair_item", f"Item ID: {item_id}")
-            self.perform_action(user, self._repair_item, league, item_id)
+            message = self.perform_action(user, self._repair_item, league, item_id)
         else:
             log_user_action(user, "repair_all_items")
-            self.perform_action(user, self._repair_all_items, league)
+            message = self.perform_action(user, self._repair_all_items, league)
+
+        if return_to_map:
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps({"message": message}))
+        else:
+            user_data = get_user_data(user, usersdb[league])
+            self.render_user_panel(user, user_data, message=message, league=league)
+
+    def perform_action(self, user, action_func, league, *args):
+        user_data = get_user_data(user, usersdb[league])
+        if user_data is None:
+            return f"User {user} not found."
+        return action_func(user, user_data, *args)
 
     def _repair_item(self, user, user_data, item_id):
         league = self.get_current_league()
