@@ -11,20 +11,49 @@
       <script type="text/javascript" src="js/user_panel.js"></script>
    </head>
    <body>
-      <div class="sticky-top-panel">
-         <div class="navigation-submenu text-center">
-            <a href="/" class="btn btn-secondary">🔄 Refresh</a>
-            <a href="/scoreboard" class="btn btn-secondary">🏆 Scores</a>
-            <a href="/bestiary" class="btn btn-secondary">📚 Bestiary</a>
-            <a href="/chat" class="btn btn-secondary">💬 Chat</a>
-            <a href="/map" class="btn btn-secondary">🗺️ Map</a>
-            <a href="#equipped" class="btn btn-secondary">🔽 Equipped</a>
-            <a href="#stash" class="btn btn-secondary">🔽 Stash</a>
-            <a href="#build" class="btn btn-secondary">🔽 Build</a>
-            <a href="#travel" class="btn btn-secondary">🔽 Travel</a>
-            <a href="/logout" class="btn btn-danger">🌙 Logout</a>
-         </div>
-      </div>
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">User Panel</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="/"><i class="bi bi-arrow-clockwise"></i> Refresh</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/scoreboard"><i class="bi bi-trophy"></i> Scores</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/bestiary"><i class="bi bi-book"></i> Bestiary</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/chat"><i class="bi bi-chat-dots"></i> Chat</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/map"><i class="bi bi-map"></i> Map</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-gear"></i> Actions
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="#equipped">Equipped</a></li>
+            <li><a class="dropdown-item" href="#stash">Stash</a></li>
+            <li><a class="dropdown-item" href="#build">Build</a></li>
+            <li><a class="dropdown-item" href="#travel">Travel</a></li>
+          </ul>
+        </li>
+      </ul>
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link text-danger" href="/logout"><i class="bi bi-moon"></i> Logout</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
       <div class="container">
          <div class="alert alert-info">
             System message: {{message}}
