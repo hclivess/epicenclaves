@@ -10,19 +10,33 @@
     <script type="text/javascript" src="js/scoreboard.js"></script>
 </head>
 <body>
-    <div class="container mt-4">
-        <div class="row justify-content-center">
-            <div class="col-auto">
-                <div class="navigation-submenu text-center">
-                    <a href="/" class="btn btn-secondary">👤 User Panel</a>
-                    <a href="/map" class="btn btn-secondary">🗺️ Map</a>
-                    <a href="/bestiary" class="btn btn-secondary">📚 Bestiary</a>
-                    <a href="/chat" class="btn btn-secondary">💬 Chat</a>
-                    <a href="/logout" class="btn btn-danger">🌙 Logout</a>
-                </div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Scores</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">User Panel</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/bestiary">Bestiary</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/chat">Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/map">Map</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="/logout">Logout</a>
+                    </li>
+                </ul>
             </div>
         </div>
-    </div>
+    </nav>
 
     <div class="container">
         <section class="section">
