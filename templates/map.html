@@ -38,11 +38,11 @@
                         <a class="nav-link text-danger" href="/logout">Logout</a>
                     </li>
                 </ul>
-                <form class="d-flex" id="goto-form" onsubmit="handleGoTo(event)">
-                    <input class="form-control me-2" type="number" id="goto-x" placeholder="X" required>
-                    <input class="form-control me-2" type="number" id="goto-y" placeholder="Y" required>
-                    <button class="btn btn-outline-light" type="submit">Travel</button>
-                </form>
+            <form class="goto-form" id="goto-form" onsubmit="handleGoTo(event)">
+                <input type="number" id="goto-x" placeholder="X" required>
+                <input type="number" id="goto-y" placeholder="Y" required>
+                <button type="submit">Go</button>
+            </form>
             </div>
         </div>
     </nav>

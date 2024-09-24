@@ -8,17 +8,6 @@ body {
     background-position: center;
     background-attachment: fixed;
     color: #ffffff;
-    font-size: 0.9rem;
-}
-
-.sticky-top-panel {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background-color: #f8f9fa;
-    z-index: 1000;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .container {
@@ -111,12 +100,6 @@ body {
     color: #ffffff;
 }
 
-.navigation-submenu {
-    background-color: rgba(40, 40, 40, 0.9);
-    padding: 10px;
-    font-family: 'Merriweather', serif;
-}
-
 .tile-actions, .user-actions {
     display: flex;
     flex-wrap: wrap;
@@ -203,7 +186,6 @@ body {
 
 .btn-sm {
     padding: 0.25rem 0.5rem;
-    font-size: 0.8rem;
     border-radius: 0.2rem;
 }
 
@@ -211,20 +193,11 @@ body {
     color: #c0c0c0;
     background-color: rgba(0, 123, 255, 0.1);
     border-color: #007bff;
-    margin-top: 60px;
+    margin-top: 15px;
 }
 
 .card-title {
     color: #ffd700;
-    font-size: 1rem;
-}
-
-h4 {
-    font-size: 1.1rem;
-}
-
-h5 {
-    font-size: 1rem;
 }
 
 /* Ensure text wraps correctly around images in item cards */
@@ -310,7 +283,6 @@ h5 {
 }
 
 .current-tile-actions .btn, .acquired-tile-actions .btn {
-    font-size: 0.8rem;
     padding: 0.2rem 0.5rem;
     background-color: #4a4a4a;
     border: none;
