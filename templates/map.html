@@ -15,37 +15,37 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Map</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="buildPalisade(); return false;">Build Palisade</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">User Panel</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/scoreboard">Scores</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/chat">Chat</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-danger" href="/logout">Logout</a>
-                    </li>
-                </ul>
-            <form class="goto-form" id="goto-form" onsubmit="handleGoTo(event)">
-                <input type="number" id="goto-x" placeholder="X" required>
-                <input type="number" id="goto-y" placeholder="Y" required>
-                <button type="submit">Go</button>
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Map</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarContent">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link build-palisade" href="#" onclick="buildPalisade(); return false;">Build Palisade</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/">User Panel</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/scoreboard">Scores</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/chat">Chat</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="/logout">Logout</a>
+                </li>
+            </ul>
+            <form class="goto-form d-flex" id="goto-form" onsubmit="handleGoTo(event)">
+                <input class="form-control me-2" type="number" id="goto-x" placeholder="X" required>
+                <input class="form-control me-2" type="number" id="goto-y" placeholder="Y" required>
+                <button class="btn btn-outline-light" type="submit">Go</button>
             </form>
-            </div>
         </div>
-    </nav>
+    </div>
+</nav>
 
 
     <div id="message-display"></div>

@@ -231,6 +231,15 @@ body {
         text-align: center;
         line-height: 1.2;
     }
+
+    .build-palisade {
+    color: #4CAF50; /* This is a green color, you can change it to any color you prefer */
+    }
+
+    .build-palisade:hover {
+        color: #45a049; /* This is a slightly darker green for the hover state */
+    }
+
     .exclamation-mark {
         position: absolute;
         top: -15px;
