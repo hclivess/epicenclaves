@@ -91,7 +91,7 @@ def get_weapon_damage(attacker: Dict) -> Dict:
 
 def get_spell_damage(spell_damage: int, caster: Dict) -> Dict:
     magic_bonus = caster.get("sorcery", 0)
-    final_damage = spell_damage + magic_bonus
+    final_damage = spell_damage
     return {"damage": final_damage, "base_damage": spell_damage, "magic_bonus": magic_bonus}
 
 def apply_armor_protection(defender: Dict, initial_damage: int, round_data: Dict, round_number: int) -> Tuple[int, int]:
