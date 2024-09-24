@@ -42,8 +42,18 @@ input[type="checkbox"], input[type="radio"], input[type="file"] {
     cursor: url('../img/assets/custom_cursor_pointer.png'), auto;
 }
 
-/* Ensure text selection still shows the text cursor */
+/* Text selection styles */
 ::selection {
+    background-color: #b3d4fc; /* Light blue background */
+    color: #000; /* Black text color */
+    text-shadow: none; /* Remove any text shadow */
+    cursor: text;
+}
+
+::-moz-selection {
+    background-color: #b3d4fc; /* Light blue background */
+    color: #000; /* Black text color */
+    text-shadow: none; /* Remove any text shadow */
     cursor: text;
 }
 
