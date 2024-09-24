@@ -8,7 +8,6 @@ body, html {
     background-position: center;
     background-attachment: fixed;
     color: #e0e0e0;
-    margin: 0;
     padding: 0;
     height: 100%;
     overflow: hidden;
@@ -17,10 +16,11 @@ body, html {
 .chat-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 95vh;
     padding: 20px;
     background-color: rgba(20, 20, 20, 0.8);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 10px;
 }
 
 h1 {
