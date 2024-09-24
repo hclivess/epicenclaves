@@ -174,10 +174,10 @@ class Sling(Weapon):
     DESCRIPTION = "A simple ranged weapon with low damage but extremely high critical potential."
     BASE_DAMAGE = (1, 4)
     RANGE = "ranged"
-    MIN_ACCURACY = 20
-    MAX_ACCURACY = 40
-    MIN_CRIT_DMG = 150
-    MAX_CRIT_DMG = 250
+    MIN_ACCURACY = 40
+    MAX_ACCURACY = 80
+    MIN_CRIT_DMG = 300
+    MAX_CRIT_DMG = 600
     MIN_CRIT_CHANCE = 14
     MAX_CRIT_CHANCE = 24
 
