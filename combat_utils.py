@@ -1,5 +1,6 @@
 import random
-from typing import Dict, List, Optional
+import math
+from typing import Dict, Tuple, Optional
 from collections import deque
 
 
@@ -10,6 +11,7 @@ def attempt_spell_cast(caster: Dict, spell_types: Dict) -> Optional[Dict]:
     if 'spell_queue' not in caster or not caster['spell_queue']:
         caster['spell_queue'] = list(caster.get('spells', []))
 
+    # Convert to deque if it's a list
     spell_queue = deque(caster['spell_queue']) if isinstance(caster['spell_queue'], list) else caster['spell_queue']
 
     for _ in range(len(spell_queue)):
@@ -17,17 +19,25 @@ def attempt_spell_cast(caster: Dict, spell_types: Dict) -> Optional[Dict]:
         if spell_types.get(spell_name) and spell_types[spell_name](0).MANA_COST <= caster.get('mana', 0):
             spell_class = spell_types[spell_name]
             spell = spell_class(0)
+
+            # Rotate the queue
             spell_queue.append(spell_queue.popleft())
+
+            # Update the caster's spell_queue
             caster['spell_queue'] = list(spell_queue)
+
             return {
                 'name': spell.DISPLAY_NAME,
                 'spell_object': spell,
                 'mana_cost': spell.MANA_COST
             }
         else:
+            # Move unavailable spell to the end and continue checking
             spell_queue.append(spell_queue.popleft())
 
+    # Update the caster's spell_queue even if no spell was cast
     caster['spell_queue'] = list(spell_queue)
+
     return None
 
 
@@ -43,12 +53,8 @@ def apply_spell_effect(spell_cast: Dict, caster: Dict, target: Dict) -> Dict:
 
     return effect_result
 
-
-def get_spell_damage(spell_damage: int, caster: Dict) -> Dict:
-    magic_bonus = caster.get("sorcery", 0)
-    final_damage = spell_damage
-    return {"damage": final_damage, "base_damage": spell_damage, "magic_bonus": magic_bonus}
-
+def death_roll(hit_chance: float) -> bool:
+    return random.random() < hit_chance
 
 def get_weapon_damage(attacker: Dict) -> Dict:
     default_weapon = {
@@ -83,8 +89,12 @@ def get_weapon_damage(attacker: Dict) -> Dict:
     final_damage = damage + martial_bonus
     return {"damage": final_damage, "base_damage": damage, "martial_bonus": martial_bonus, "message": message}
 
+def get_spell_damage(spell_damage: int, caster: Dict) -> Dict:
+    magic_bonus = caster.get("sorcery", 0)
+    final_damage = spell_damage
+    return {"damage": final_damage, "base_damage": spell_damage, "magic_bonus": magic_bonus}
 
-def apply_armor_protection(defender: Dict, initial_damage: int, round_data: Dict) -> int:
+def apply_armor_protection(defender: Dict, initial_damage: int, round_data: Dict, round_number: int) -> Tuple[int, int]:
     armor_protection = 0
     defender_name = defender.get('username', 'Unknown')
 
@@ -113,7 +123,7 @@ def apply_armor_protection(defender: Dict, initial_damage: int, round_data: Dict
                 )
             })
 
-            durability_loss = max(1, int(initial_damage / 10))
+            durability_loss = math.ceil(initial_damage / 10)
             selected_armor["durability"] = max(0, selected_armor["durability"] - durability_loss)
 
             if selected_armor["durability"] <= 0:
@@ -138,8 +148,8 @@ def apply_armor_protection(defender: Dict, initial_damage: int, round_data: Dict
             "message": f"{defender_name} has no armor equipped!"
         })
 
-    return final_damage
-
+    absorbed_damage = initial_damage - final_damage
+    return final_damage, absorbed_damage
 
 def calculate_armor_effectiveness(armor: Dict, damage: int) -> int:
     base_protection = armor.get("protection", 0)
@@ -153,112 +163,3 @@ def calculate_armor_effectiveness(armor: Dict, damage: int) -> int:
     effective_protection = int(round(damage_reduction * durability_factor))
 
     return effective_protection
-
-
-def player_turn(player: Dict, enemy: Dict, spell_types: Dict) -> Dict:
-    spell_cast = attempt_spell_cast(player, spell_types)
-
-    if spell_cast:
-        effect = apply_spell_effect(spell_cast, player, enemy)
-        return {
-            "actor": "player",
-            "type": "spell",
-            "spell_name": spell_cast["name"],
-            "effect": effect,
-            "damage_dealt": effect.get("damage_dealt", 0),
-            "healing_done": effect.get("healing_done", 0),
-            "mana_used": spell_cast["mana_cost"]
-        }
-    else:
-        weapon_damage = get_weapon_damage(player)
-        return {
-            "actor": "player",
-            "type": "attack",
-            "damage_dealt": weapon_damage["damage"],
-            "message": f"{weapon_damage['message'].capitalize()}! Dealt {weapon_damage['damage']} damage."
-        }
-
-
-def enemy_turn(enemy: Dict, player: Dict) -> Dict:
-    weapon_damage = get_weapon_damage(enemy)
-    return {
-        "actor": "enemy",
-        "type": "attack",
-        "damage_dealt": weapon_damage["damage"],
-        "message": f"Enemy {weapon_damage['message']}! Dealt {weapon_damage['damage']} damage."
-    }
-
-
-def process_combat_round(player: Dict, enemy: Dict, round_number: int, spell_types: Dict) -> Dict:
-    round_data = {
-        "round": round_number,
-        "actions": [],
-        "player_hp": player["hp"],
-        "enemy_hp": enemy["hp"]
-    }
-
-    # Player's turn
-    player_action = player_turn(player, enemy, spell_types)
-    round_data["actions"].append(player_action)
-
-    # Apply damage to enemy and check for defeat
-    initial_damage = player_action.get("damage_dealt", 0)
-    final_damage = apply_armor_protection(enemy, initial_damage, round_data)
-    enemy["hp"] = max(0, enemy["hp"] - final_damage)
-    round_data["enemy_hp"] = enemy["hp"]
-
-    if enemy["hp"] <= 0:
-        round_data["actions"].append({
-            "actor": "system",
-            "type": "defeat",
-            "message": f"The level {enemy['level']} {enemy['name']} is defeated"
-        })
-        return round_data
-
-    # Enemy's turn
-    enemy_action = enemy_turn(enemy, player)
-    round_data["actions"].append(enemy_action)
-
-    # Apply damage to player
-    initial_damage = enemy_action.get("damage_dealt", 0)
-    final_damage = apply_armor_protection(player, initial_damage, round_data)
-    player["hp"] = max(0, player["hp"] - final_damage)
-    round_data["player_hp"] = player["hp"]
-
-    return round_data
-
-
-def combat_loop(player: Dict, enemy: Dict, spell_types: Dict) -> List[Dict]:
-    rounds = []
-    round_number = 0
-
-    # Initial round to show starting HP
-    rounds.append({
-        "round": round_number,
-        "message": f"Battle starts! {player['name']} (HP: {player['hp']}/{player['max_hp']}) vs Level {enemy['level']} {enemy['name']} (HP: {enemy['hp']}/{enemy['max_hp']})",
-        "player_hp": player["hp"],
-        "enemy_hp": enemy["hp"],
-        "actions": []
-    })
-
-    while player["hp"] > 0 and enemy["hp"] > 0:
-        round_number += 1
-        round_data = process_combat_round(player, enemy, round_number, spell_types)
-        rounds.append(round_data)
-
-        if enemy["hp"] <= 0 or player["hp"] <= 0:
-            break
-
-    return rounds
-
-
-def start_combat(player: Dict, enemy: Dict, spell_types: Dict) -> Dict:
-    combat_rounds = combat_loop(player, enemy, spell_types)
-    return {
-        "battle_data": {
-            "player": {"name": player["name"], "max_hp": player["max_hp"], "current_hp": player["hp"]},
-            "enemy": {"name": enemy["name"], "max_hp": enemy["max_hp"], "current_hp": enemy["hp"],
-                      "level": enemy["level"]},
-            "rounds": combat_rounds
-        }
-    }

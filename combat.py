@@ -38,11 +38,17 @@ def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users:
             coords = get_coords(target_data)
             npc_data = target_data[coords]
             print(f"Fighting NPC: {target}")
-
             fight_npc(battle_data, npc_data, coords, user_data, user, usersdb, mapdb)
 
     if not battle_data["rounds"]:
         battle_data["rounds"].append({"round": 0, "message": f"No valid target found: {target}"})
+
+    # Update final battle stats
+    battle_data["player"]["current_hp"] = user_data["hp"]
+    if target.lower() == "player" and target_data:
+        battle_data["enemy"]["current_hp"] = target_user_data["hp"]
+    elif target_data:
+        battle_data["enemy"]["current_hp"] = npc_data.get("hp", 0)
 
     print("Final battle_data", battle_data)
     return {"battle_data": battle_data}
