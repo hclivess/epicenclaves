@@ -101,30 +101,26 @@ def handle_player_turn(user_data: Dict, user: str, enemy: Any, round_data: Dict,
 def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, round_data: Dict, usersdb: Dict,
                       max_total_hp: int) -> int:
     initial_enemy_hp = enemy.hp
-    spell_effect = apply_spell_effect(spell_cast, user_data, enemy.__dict__)
-
+    initial_player_hp = user_data['hp']
     initial_mana = user_data['mana']
-    initial_hp = user_data['hp']
 
+    # Apply the spell effect
+    spell_effect = spell_cast['spell_object'].effect(user_data, enemy.__dict__)
+
+    # Update mana
     user_data['mana'] = max(0, user_data['mana'] - spell_cast['mana_cost'])
 
-    damage_dealt = 0
-    healing_done = 0
+    # Determine what happened based on the spell effect
+    damage_dealt = spell_effect.get('damage_dealt', 0)
+    healing_done = spell_effect.get('healing_done', 0)
 
-    # Use the message from the spell effect
-    message = spell_effect.get('message', f"You cast {spell_cast['name']}, but it had no effect.")
-
-    if 'healing_done' in spell_effect:
-        healing_done = spell_effect['healing_done']
-        user_data['hp'] = min(max_total_hp, user_data['hp'] + healing_done)
-    elif 'damage_dealt' in spell_effect:
-        damage_dealt = spell_effect['damage_dealt']
-
-    # Add additional information to the message
+    # Create the action message
+    message = spell_effect.get('message', f"You cast {spell_cast['name']}")
     message += f" Enemy {enemy.type} HP: {enemy.hp}/{enemy.max_hp}. "
     message += f"Your HP: {user_data['hp']}/{max_total_hp}. "
     message += f"Your mana: {user_data['mana']} (-{initial_mana - user_data['mana']})."
 
+    # Log the action
     round_data["actions"].append({
         "actor": "player",
         "type": "spell",
@@ -133,11 +129,12 @@ def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, 
         "damage_dealt": damage_dealt,
         "healing_done": healing_done,
         "mana_used": initial_mana - user_data['mana'],
-        "hp_change": user_data['hp'] - initial_hp,
+        "hp_change": user_data['hp'] - initial_player_hp,
         "enemy_hp_change": initial_enemy_hp - enemy.hp,
         "message": message
     })
 
+    # Update user data in the database
     update_user_data(user=user, updated_values={"mana": user_data["mana"], "hp": user_data["hp"]},
                      user_data_dict=usersdb)
 
