@@ -9,7 +9,6 @@ from player import calculate_total_hp
 from spells import spell_types
 from collections import deque
 
-
 def fight_npc(battle_data: Dict, npc_data: Dict[str, Any], coords: str, user_data: Dict, user: str, usersdb: Dict,
               mapdb: Dict) -> None:
     enemy_class = enemy_types.get(npc_data['type'].lower())
@@ -98,7 +97,6 @@ def handle_player_turn(user_data: Dict, user: str, enemy: Any, round_data: Dict,
         "initial_enemy_hp": initial_enemy_hp
     })
     return damage_dealt
-
 
 def handle_spell_cast(user_data: Dict, user: str, enemy: Any, spell_cast: Dict, round_data: Dict, usersdb: Dict,
                       max_total_hp: int) -> int:
@@ -213,7 +211,6 @@ def handle_enemy_turn(user_data: Dict, enemy: Any, round_data: Dict, round_numbe
         "final_enemy_hp": enemy.hp,
         "message": f"The level {enemy.level} {enemy.type} {npc_dmg['message']} you for {final_damage} damage. Your HP: {user_data['hp']}/{max_total_hp}"
     })
-
 
 def handle_player_defeat(user_data: Dict, user: str, enemy: Any, usersdb: Dict, battle_data: Dict, round_number: int,
                          max_total_hp: int) -> None:

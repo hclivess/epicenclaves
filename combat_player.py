@@ -2,7 +2,7 @@ import random
 from typing import Dict, List
 from backend import update_user_data
 from player import calculate_total_hp, has_item_equipped, drop_random_item
-from combat_utils import get_weapon_damage, apply_spell_effect, apply_armor_protection, attempt_spell_cast
+from combat_utils import get_weapon_damage, apply_spell_effect, apply_armor_protection, attempt_spell_cast, death_roll
 from spells import spell_types
 from collections import deque
 
@@ -99,10 +99,19 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
     if attacker["hp"] <= 0:
         return
 
+    initial_attacker_hp = attacker["hp"]
+    initial_defender_hp = defender["hp"]
+
     # Attempt spell cast
     spell_cast = attempt_spell_cast(attacker, spell_types)
     if spell_cast:
         spell_effect = apply_spell_effect(spell_cast, attacker, defender)
+
+        damage_dealt = spell_effect.get('damage_dealt', 0)
+        healing_done = spell_effect.get('healing_done', 0)
+
+        defender["hp"] = max(0, defender["hp"] - damage_dealt)
+        attacker["hp"] = min(attacker_max_hp, attacker["hp"] + healing_done)
 
         message = f"{attacker_name} cast {spell_cast['name']}. {spell_effect['message']} "
         message += f"{attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}, Mana: {attacker['mana']}. "
@@ -113,13 +122,21 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
             "type": "spell",
             "spell_name": spell_cast['name'],
             "effect": spell_effect,
-            "message": message
+            "damage_dealt": damage_dealt,
+            "healing_done": healing_done,
+            "mana_used": spell_cast['mana_cost'],
+            "hp_change": attacker["hp"] - initial_attacker_hp,
+            "enemy_hp_change": initial_defender_hp - defender["hp"],
+            "message": message,
+            "final_attacker_hp": attacker["hp"],
+            "final_defender_hp": defender["hp"],
+            "initial_attacker_hp": initial_attacker_hp,
+            "initial_defender_hp": initial_defender_hp
         })
     else:
         damage_dict = get_weapon_damage(attacker)
 
-        final_damage, absorbed_damage = apply_armor_protection(defender, damage_dict['damage'], round_data,
-                                                               round_number)
+        final_damage, absorbed_damage = apply_armor_protection(defender, damage_dict['damage'], round_data, round_number)
 
         defender["hp"] = max(0, defender["hp"] - final_damage)  # Ensure HP doesn't go below 0
 
@@ -131,13 +148,17 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
             "actor": "player" if attacker_name == attacker.get('username') else "enemy",
             "type": "attack",
             "damage": final_damage,
-            "message": message
+            "message": message,
+            "final_attacker_hp": attacker["hp"],
+            "final_defender_hp": defender["hp"],
+            "initial_attacker_hp": initial_attacker_hp,
+            "initial_defender_hp": initial_defender_hp
         })
 
 
 def process_player_defeat(defeated: Dict, defeated_name: str, victor: Dict, victor_name: str, death_chance: float,
                           usersdb: Dict, rounds: List[Dict], round_number: int, defeated_max_hp: int) -> None:
-    if random.random() < death_chance:
+    if death_roll(death_chance):
         message = f"{defeated_name} was killed in battle. {defeated_name}'s HP: 0/{defeated_max_hp}"
         new_data = {"alive": False, "hp": 0, "action_points": 0, "deaths": defeated.get("deaths", 0) + 1}
 
