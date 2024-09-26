@@ -1,6 +1,9 @@
 import random
 from typing import Dict, List, Any
 
+def calculate_npc_hp(base_hp: int, level: int) -> int:
+    return int(base_hp * (1 + 0.20 * (level - 1)))  # 20% increase per level
+
 class Enemy:
     type = "enemy"
     base_hp = 100
@@ -36,8 +39,9 @@ class Enemy:
         self.block = self.calculate_block()
 
     def calculate_npc_hp(self):
-        return int(self.base_hp * (1 + 0.20 * (self.level - 1)))  # 20% increase per level
+        return calculate_npc_hp(self.base_hp, self.level)
 
+    # The rest of the methods remain the same
     def calculate_damage(self):
         scaling_factor = 1 + 0.1 * (self.level - 1)  # 10% increase per level
         min_damage = int(self.base_min_damage * scaling_factor)
@@ -100,7 +104,6 @@ class Enemy:
             "type": self.type,
             "level": self.level,
         }
-
 class Skeleton(Enemy):
     type = "skeleton"
     base_hp = 50

@@ -1,5 +1,7 @@
 from typing import Dict, List, Callable, Any
 from player import calculate_total_hp, calculate_total_mana
+from enemies import calculate_npc_hp  # Import the function from enemies.py
+
 
 
 class Spell:
@@ -108,6 +110,9 @@ class ManaSwap(Spell):
         }
 
 
+
+
+
 class LifeSwap(Spell):
     DISPLAY_NAME = "Life Swap"
     DESCRIPTION = "Exchanges your current HP with your opponent's."
@@ -119,8 +124,16 @@ class LifeSwap(Spell):
         caster_hp = caster.get("hp", 0)
         target_hp = target.get("hp", 0)
 
+        # Check if the target is an NPC (enemy)
+        if "username" not in target:
+            target_max_hp = calculate_npc_hp(target.get("base_hp", 100), target.get("level", 1))
+        else:
+            target_max_hp = calculate_total_hp(target.get("base_hp", 100), target.get("exp", 0))
+
         caster_max_hp = calculate_total_hp(caster.get("base_hp", 100), caster.get("exp", 0))
-        target_max_hp = calculate_total_hp(target.get("base_hp", 100), target.get("exp", 0))
+
+        print("!!!")
+        print(caster_max_hp, target_max_hp)
 
         caster["hp"] = min(target_hp, caster_max_hp)
         target["hp"] = min(caster_hp, target_max_hp)
@@ -128,8 +141,6 @@ class LifeSwap(Spell):
         return {
             "message": f"You swap HP with your opponent! Your new HP: {caster['hp']}, Opponent's new HP: {target['hp']}"
         }
-
-
 class ConjureMana(Spell):
     DISPLAY_NAME = "Conjure Mana"
     DESCRIPTION = "Magically creates additional mana for the caster."
