@@ -1,5 +1,6 @@
 from typing import Dict, List, Callable, Any
-from player import calculate_total_hp
+from player import calculate_total_hp, calculate_total_mana
+
 
 class Spell:
     def __init__(self, spell_id: int):
@@ -72,17 +73,86 @@ class Heal(Spell):
     def effect(self, caster: Dict[str, Any], target: Dict[str, Any]) -> Dict[str, Any]:
         base_healing = 1
         magic_bonus = caster.get("sorcery", 0)
-        total_healing = base_healing + int(magic_bonus/10)
+        total_healing = base_healing + int(magic_bonus / 10)
 
         max_hp = calculate_total_hp(caster.get("base_hp", 100), caster.get("exp", 0))
-        caster["hp"] = min(max_hp, caster.get("hp", 0) + total_healing)
+        old_hp = caster.get("hp", 0)
+        caster["hp"] = min(max_hp, old_hp + total_healing)
 
-        actual_healing = min(total_healing, max_hp - caster.get("hp", 0) + total_healing)
+        actual_healing = caster["hp"] - old_hp
 
         return {
             "healing_done": actual_healing,
             "message": f"Heal restores {actual_healing} health to you!"
         }
+
+
+class ManaSwap(Spell):
+    DISPLAY_NAME = "Mana Swap"
+    DESCRIPTION = "Switches your current mana with your current HP."
+    COST = {"research": 150}
+    IMAGE_SOURCE = "manaswap.png"
+    MANA_COST = 0
+
+    def effect(self, caster: Dict[str, Any], target: Dict[str, Any]) -> Dict[str, Any]:
+        current_hp = caster.get("hp", 0)
+        current_mana = caster.get("mana", 0)
+        max_hp = calculate_total_hp(caster.get("base_hp", 100), caster.get("exp", 0))
+        max_mana = calculate_total_mana(100, caster.get("exp", 0))
+
+        caster["hp"] = min(current_mana, max_hp)
+        caster["mana"] = min(current_hp, max_mana)
+
+        return {
+            "message": f"You swap your HP and mana! New HP: {caster['hp']}, New Mana: {caster['mana']}"
+        }
+
+
+class LifeSwap(Spell):
+    DISPLAY_NAME = "Life Swap"
+    DESCRIPTION = "Exchanges your current HP with your opponent's."
+    COST = {"research": 200}
+    IMAGE_SOURCE = "lifeswap.png"
+    MANA_COST = 50
+
+    def effect(self, caster: Dict[str, Any], target: Dict[str, Any]) -> Dict[str, Any]:
+        caster_hp = caster.get("hp", 0)
+        target_hp = target.get("hp", 0)
+
+        caster_max_hp = calculate_total_hp(caster.get("base_hp", 100), caster.get("exp", 0))
+        target_max_hp = calculate_total_hp(target.get("base_hp", 100), target.get("exp", 0))
+
+        caster["hp"] = min(target_hp, caster_max_hp)
+        target["hp"] = min(caster_hp, target_max_hp)
+
+        return {
+            "message": f"You swap HP with your opponent! Your new HP: {caster['hp']}, Opponent's new HP: {target['hp']}"
+        }
+
+
+class ConjureMana(Spell):
+    DISPLAY_NAME = "Conjure Mana"
+    DESCRIPTION = "Magically creates additional mana for the caster."
+    COST = {"research": 180}
+    IMAGE_SOURCE = "conjuremana.png"
+    MANA_COST = 0
+
+    def effect(self, caster: Dict[str, Any], target: Dict[str, Any]) -> Dict[str, Any]:
+        base_mana = 30
+        magic_bonus = caster.get("sorcery", 0)
+        total_mana_gained = base_mana + int(magic_bonus / 5)
+
+        max_mana = calculate_total_mana(100, caster.get("exp", 0))
+        old_mana = caster.get("mana", 0)
+        caster["mana"] = min(max_mana, old_mana + total_mana_gained)
+
+        actual_mana_gained = caster["mana"] - old_mana
+
+        return {
+            "mana_gained": actual_mana_gained,
+            "message": f"You conjure {actual_mana_gained} mana! Your new mana total: {caster['mana']}"
+        }
+
 
 spell_types = {
     cls.__name__.lower(): cls for name, cls in globals().items()
