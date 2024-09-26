@@ -4,6 +4,24 @@ from typing import Dict, List, Any
 def calculate_npc_hp(base_hp: int, level: int) -> int:
     return int(base_hp * (1 + 0.20 * (level - 1)))  # 20% increase per level
 
+def calculate_damage(base_min_damage: int, base_max_damage: int, level: int) -> Tuple[int, int]:
+    scaling_factor = 1 + 0.1 * (level - 1)  # 10% increase per level
+    min_damage = int(base_min_damage * scaling_factor)
+    max_damage = int(base_max_damage * scaling_factor)
+    return min_damage, max_damage
+
+def calculate_armor(base_armor: int, level: int) -> int:
+    return base_armor + int(0.5 * (level - 1))  # 0.5 armor increase per level
+
+def calculate_experience(experience_value: int, level: int) -> int:
+    return int(experience_value * (1 + 0.05 * (level - 1)))  # 5% increase per level
+
+def calculate_evasion(evasion_chance: float, level: int) -> float:
+    return evasion_chance + (0.002 * (level - 1))  # 0.2% increase per level
+
+def calculate_block(block_chance: float, level: int) -> float:
+    return block_chance + (0.002 * (level - 1))  # 0.2% increase per level
+
 class Enemy:
     type = "enemy"
     base_hp = 100
@@ -29,36 +47,14 @@ class Enemy:
 
     def __init__(self, level: int):
         self.level = max(self.min_level, min(level, self.max_level))
-        self.max_hp = self.calculate_npc_hp()
+        self.max_hp = calculate_npc_hp(self.base_hp, self.level)
         self.hp = self.max_hp
-        self.min_damage, self.max_damage = self.calculate_damage()
-        self.armor = self.calculate_armor()
+        self.min_damage, self.max_damage = calculate_damage(self.base_min_damage, self.base_max_damage, self.level)
+        self.armor = calculate_armor(self.base_armor, self.level)
         self.alive = True
-        self.experience = self.calculate_experience()
-        self.evasion = self.calculate_evasion()
-        self.block = self.calculate_block()
-
-    def calculate_npc_hp(self):
-        return calculate_npc_hp(self.base_hp, self.level)
-
-    # The rest of the methods remain the same
-    def calculate_damage(self):
-        scaling_factor = 1 + 0.1 * (self.level - 1)  # 10% increase per level
-        min_damage = int(self.base_min_damage * scaling_factor)
-        max_damage = int(self.base_max_damage * scaling_factor)
-        return min_damage, max_damage
-
-    def calculate_armor(self):
-        return self.base_armor + int(0.5 * (self.level - 1))  # 0.5 armor increase per level
-
-    def calculate_experience(self):
-        return int(self.experience_value * (1 + 0.05 * (self.level - 1)))  # 5% increase per level
-
-    def calculate_evasion(self):
-        return self.evasion_chance + (0.002 * (self.level - 1))  # 0.2% increase per level
-
-    def calculate_block(self):
-        return self.block_chance + (0.002 * (self.level - 1))  # 0.2% increase per level
+        self.experience = calculate_experience(self.experience_value, self.level)
+        self.evasion = calculate_evasion(self.evasion_chance, self.level)
+        self.block = calculate_block(self.block_chance, self.level)
 
     def roll_damage(self):
         damage = random.randint(self.min_damage, self.max_damage)
