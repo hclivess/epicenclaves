@@ -942,31 +942,82 @@ class DeployArmyHandler(UserActionHandler):
             message = "No action specified."
 
         if return_to_map:
+            user_data = get_user_data(user, usersdb[league])
+            visible_distance = DISTANCE
+            x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
+            visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb[league], visible_distance)
+            visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb[league]), visible_distance)
+
+            filtered_users_data = {}
+            for username, user_info in visible_users_data.items():
+                essential_keys = ["x_pos", "y_pos", "type", "img", "exp", "hp", "armor"]
+                filtered_users_data[username] = {key: user_info[key] for key in essential_keys if key in user_info}
+
+            filtered_map_data = {}
+            for coord, entity in visible_map_data.items():
+                filtered_entity = {"type": entity["type"]}
+                if "level" in entity:
+                    filtered_entity["level"] = entity["level"]
+                if "control" in entity:
+                    filtered_entity["control"] = entity["control"]
+                if "army" in entity:
+                    filtered_entity["army"] = entity["army"]
+                if "hp" in entity:
+                    filtered_entity["hp"] = entity["hp"]
+                filtered_map_data[coord] = filtered_entity
+
+            tile_actions = {}
+            for coord, entity in filtered_map_data.items():
+                tile_actions[coord] = get_tile_actions(entity, user)
+
+            for username, user_info in filtered_users_data.items():
+                if username != user:
+                    coord = f"{user_info['x_pos']},{user_info['y_pos']}"
+                    if user_info.get('hp', 0) > 0:
+                        tile_actions[coord] = [{
+                            "name": "challenge",
+                            "action": f"/fight?target=player&name={username}"
+                        }]
+                    else:
+                        tile_actions[coord] = [{
+                            "name": "drag",
+                            "action": f"/drag?target={username}"
+                        }]
+
+            map_data = {
+                "users": filtered_users_data,
+                "construction": filtered_map_data,
+                "actions": tile_actions,
+                "x_pos": x_pos,
+                "y_pos": y_pos,
+                "message": message
+            }
+
             self.set_header("Content-Type", "application/json")
-            self.write(json.dumps({"message": message}))
+            self.write(json.dumps(map_data))
         else:
             user_data = get_user_data(user, usersdb[league])
             self.render_user_panel(user, user_data, message=message, league=league)
 
-            def perform_deploy_action(self, user, action_func, league, *args, **kwargs):
-                user_data = get_user_data(user, usersdb[league])
-                if user_data is None:
-                    return f"User {user} not found."
-                return action_func(user, user_data, *args, **kwargs)
+    def perform_deploy_action(self, user, action_func, league, *args, **kwargs):
+        user_data = get_user_data(user, usersdb[league])
+        if user_data is None:
+            return f"User {user} not found."
+        return action_func(user, user_data, *args, **kwargs)
 
-            def _deploy_army(self, user, user_data):
-                league = self.get_current_league()
-                on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
-                result = deploy_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
-                log_user_action(user, "deploy_army", f"Result: {result}")
-                return result
+    def _deploy_army(self, user, user_data):
+        league = self.get_current_league()
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
+        result = deploy_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
+        log_user_action(user, "deploy_army", f"Result: {result}")
+        return result
 
-            def _remove_army(self, user, user_data):
-                league = self.get_current_league()
-                on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
-                result = remove_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
-                log_user_action(user, "remove_army", f"Result: {result}")
-                return result
+    def _remove_army(self, user, user_data):
+        league = self.get_current_league()
+        on_tile_map = get_tile_map(user_data["x_pos"], user_data["y_pos"], mapdb[league])
+        result = remove_army(user, on_tile_map, usersdb[league], mapdb[league], user_data)
+        log_user_action(user, "remove_army", f"Result: {result}")
+        return result
 
 class DemolishHandler(UserActionHandler):
     def get(self, *args, **kwargs):

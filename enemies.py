@@ -1,5 +1,5 @@
 import random
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Tuple
 
 def calculate_npc_hp(base_hp: int, level: int) -> int:
     return int(base_hp * (1 + 0.20 * (level - 1)))  # 20% increase per level
