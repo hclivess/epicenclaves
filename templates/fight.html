@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,8 +12,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
     <title>Epic Enclaves - Battle</title>
     <style>
-
-
         .player {
             left: 20%;
             background-image: url('{{profile_picture}}');
@@ -24,15 +21,8 @@
             right: 20%;
             background-image: url('{{target_picture}}');
         }
-
-
-
-
-
-
     </style>
 </head>
-
 <body class="bg-light">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
@@ -64,22 +54,25 @@
         </div>
     </div>
 </nav>
-
-    <div class="container">
+        <div class="container">
         <div class="row">
             <div class="col-lg-8 mx-auto">
                 <div class="card border-0 shadow-lg">
                     <div class="card-body">
                         <div class="battle-arena">
                             <div class="fighter player">
-                                <div class="hp-display" id="playerHpDisplay"></div>
+                                <div id="playerHpDisplay" class="hp-display"></div>
                                 <div class="health-bar">
                                     <div id="playerHealth" class="health"></div>
+                                </div>
+                                <div id="playerManaDisplay" class="mana-display"></div>
+                                <div class="mana-bar">
+                                    <div id="playerMana" class="mana"></div>
                                 </div>
                                 <div class="pop-up-container player-pop-up"></div>
                             </div>
                             <div class="fighter enemy">
-                                <div class="hp-display" id="enemyHpDisplay"></div>
+                                <div id="enemyHpDisplay" class="hp-display"></div>
                                 <div class="health-bar">
                                     <div id="enemyHealth" class="health"></div>
                                 </div>
@@ -87,12 +80,10 @@
                             </div>
                         </div>
                         <div class="text-center mb-3">
-                            <button id="skipAnimation" class="btn btn-secondary">⏩</button>
+                            <button id="skipAnimation" class="btn btn-secondary">Skip Animation</button>
                         </div>
                         <div class="battle-log-container">
-                            <ul id="battleLog" class="list-group list-group-flush">
-                                <!-- Battle messages will be dynamically added here -->
-                            </ul>
+                            <ul id="battleLog"></ul>
                         </div>
                     </div>
                 </div>
@@ -100,10 +91,10 @@
         </div>
     </div>
 
+
     <script>
         const battleData = {% raw battle_data %};
     </script>
     <script src="../js/fight.js?v={{ timestamp }}"></script>
 </body>
-
 </html>

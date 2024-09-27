@@ -4,6 +4,8 @@ const playerHealth = document.getElementById('playerHealth');
 const enemyHealth = document.getElementById('enemyHealth');
 const playerHpDisplay = document.getElementById('playerHpDisplay');
 const enemyHpDisplay = document.getElementById('enemyHpDisplay');
+const playerMana = document.getElementById('playerMana');
+const playerManaDisplay = document.getElementById('playerManaDisplay');
 const skipButton = document.getElementById('skipAnimation');
 const playerPicture = document.querySelector('.player');
 const enemyPicture = document.querySelector('.enemy');
@@ -12,14 +14,21 @@ let currentRoundIndex = 0;
 let isAnimationSkipped = false;
 let isBattleOver = false;
 
-// New variables to track current HP
+// Variables to track current HP and Mana
 let currentPlayerHp;
 let currentEnemyHp;
+let currentPlayerMana;
 
-function updateHealth(health, maxHealth, healthElement, hpDisplayElement) {
+function updateHealthAndMana(health, maxHealth, mana, maxMana, healthElement, hpDisplayElement, manaElement, manaDisplayElement) {
     const healthPercentage = Math.max(0, Math.min((health / maxHealth) * 100, 100));
     healthElement.style.width = `${healthPercentage}%`;
     hpDisplayElement.textContent = `${Math.max(0, health)} / ${maxHealth} HP`;
+
+    if (manaElement && manaDisplayElement) {
+        const manaPercentage = Math.max(0, Math.min((mana / maxMana) * 100, 100));
+        manaElement.style.width = `${manaPercentage}%`;
+        manaDisplayElement.textContent = `${Math.max(0, mana)} / ${maxMana} Mana`;
+    }
 }
 
 function showDamagePopUp(damage, isPlayer) {
@@ -131,6 +140,9 @@ async function processAction(action) {
             await animateProfilePicture(playerPicture, true);
         }
     } else if (action.type === 'spell') {
+        if (action.mana_used) {
+            currentPlayerMana -= action.mana_used;
+        }
         if (action.healing_done) {
             currentPlayerHp = action.final_player_hp !== undefined ? action.final_player_hp : Math.min(currentPlayerHp + action.healing_done, battleData.player.max_hp);
             showDamagePopUp(action.healing_done, true);
@@ -144,8 +156,13 @@ async function processAction(action) {
         }
     }
 
-    updateHealth(currentPlayerHp, battleData.player.max_hp, playerHealth, playerHpDisplay);
-    updateHealth(currentEnemyHp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
+    updateHealthAndMana(
+        currentPlayerHp, battleData.player.max_hp,
+        currentPlayerMana, battleData.player.max_mana,
+        playerHealth, playerHpDisplay,
+        playerMana, playerManaDisplay
+    );
+    updateHealthAndMana(currentEnemyHp, battleData.enemy.max_hp, null, null, enemyHealth, enemyHpDisplay);
 
     if (!isAnimationSkipped) {
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -155,37 +172,43 @@ async function processAction(action) {
 }
 
 async function processRound(roundData) {
-    // Add the round message
     addLogMessage(roundData.message, 'round-message');
 
-    // Process actions if they exist
     if (roundData.actions && roundData.actions.length > 0) {
         for (const action of roundData.actions) {
             await processAction(action);
         }
     }
 
-    // Update final health values after processing all actions in the round
     currentPlayerHp = roundData.player_hp;
     currentEnemyHp = roundData.enemy_hp;
-    updateHealth(currentPlayerHp, battleData.player.max_hp, playerHealth, playerHpDisplay);
-    updateHealth(currentEnemyHp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
+    currentPlayerMana = roundData.player_mana;
+    updateHealthAndMana(
+        currentPlayerHp, battleData.player.max_hp,
+        currentPlayerMana, battleData.player.max_mana,
+        playerHealth, playerHpDisplay,
+        playerMana, playerManaDisplay
+    );
+    updateHealthAndMana(currentEnemyHp, battleData.enemy.max_hp, null, null, enemyHealth, enemyHpDisplay);
 }
 
 async function startBattle() {
-    console.log("Starting battle with data:", battleData);  // Debug log
+    console.log("Starting battle with data:", battleData);
 
-    // Initialize current HP with the starting values
     currentPlayerHp = battleData.player.current_hp;
     currentEnemyHp = battleData.enemy.current_hp;
+    currentPlayerMana = battleData.player.current_mana;
 
-    // Update initial health displays
-    updateHealth(currentPlayerHp, battleData.player.max_hp, playerHealth, playerHpDisplay);
-    updateHealth(currentEnemyHp, battleData.enemy.max_hp, enemyHealth, enemyHpDisplay);
+    updateHealthAndMana(
+        currentPlayerHp, battleData.player.max_hp,
+        currentPlayerMana, battleData.player.max_mana,
+        playerHealth, playerHpDisplay,
+        playerMana, playerManaDisplay
+    );
+    updateHealthAndMana(currentEnemyHp, battleData.enemy.max_hp, null, null, enemyHealth, enemyHpDisplay);
 
-    // Process all rounds
     for (let i = 0; i < battleData.rounds.length; i++) {
-        console.log(`Processing round ${i}`);  // Debug log
+        console.log(`Processing round ${i}`);
         await processRound(battleData.rounds[i]);
         if (isAnimationSkipped) {
             await new Promise(resolve => setTimeout(resolve, 50));
@@ -194,12 +217,12 @@ async function startBattle() {
         }
     }
 
-    console.log("Battle ended");  // Debug log
+    console.log("Battle ended");
     skipButton.disabled = true;
 }
 
 window.onload = function () {
-    console.log("Window loaded, starting battle");  // Debug log
+    console.log("Window loaded, starting battle");
     startBattle();
     skipButton.addEventListener('click', skipAnimation);
 };
