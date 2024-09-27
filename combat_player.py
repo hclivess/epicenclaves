@@ -1,15 +1,18 @@
 import random
 from typing import Dict, List
 from backend import update_user_data
-from player import calculate_total_hp, has_item_equipped, drop_random_item
+from player import calculate_total_hp, calculate_total_mana, has_item_equipped, drop_random_item
 from combat_utils import get_weapon_damage, apply_spell_effect, apply_armor_protection, attempt_spell_cast, death_roll
 from spells import spell_types
 from collections import deque
 
 def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_data: Dict, user: str, usersdb: Dict) -> None:
     max_base_hp = 100
+    max_base_mana = 100  # Add this line
     user_max_total_hp = calculate_total_hp(max_base_hp, user_data["exp"])
+    user_max_total_mana = calculate_total_mana(max_base_mana, user_data["exp"])  # Add this line
     target_max_total_hp = calculate_total_hp(max_base_hp, target_data["exp"])
+    target_max_total_mana = calculate_total_mana(max_base_mana, target_data["exp"])  # Add this line
 
     for player_data in [user_data, target_data]:
         if 'spells' in player_data and player_data['spells']:
@@ -18,20 +21,26 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
     battle_data["player"].update({
         "name": user,
         "max_hp": user_max_total_hp,
-        "current_hp": user_data["hp"]
+        "current_hp": user_data["hp"],
+        "max_mana": user_max_total_mana,  # Add this line
+        "current_mana": user_data["mana"]  # Add this line
     })
 
     battle_data["enemy"].update({
         "name": target_name,
         "max_hp": target_max_total_hp,
-        "current_hp": target_data["hp"]
+        "current_hp": target_data["hp"],
+        "max_mana": target_max_total_mana,  # Add this line
+        "current_mana": target_data["mana"]  # Add this line
     })
 
     battle_data["rounds"].append({
         "round": 0,
         "player_hp": user_data["hp"],
+        "player_mana": user_data["mana"],  # Add this line
         "enemy_hp": target_data["hp"],
-        "message": f"You challenged {target_name}. Your HP: {user_data['hp']}/{user_max_total_hp}, {target_name}'s HP: {target_data['hp']}/{target_max_total_hp}",
+        "enemy_mana": target_data["mana"],  # Add this line
+        "message": f"You challenged {target_name}. Your HP: {user_data['hp']}/{user_max_total_hp}, Mana: {user_data['mana']}/{user_max_total_mana}. {target_name}'s HP: {target_data['hp']}/{target_max_total_hp}, Mana: {target_data['mana']}/{target_max_total_mana}",
         "actions": []
     })
 
@@ -41,11 +50,13 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
         round_data = {"round": round_number, "actions": []}
 
         # Player attacks target
-        player_attack(user_data, target_data, user, target_name, round_data, round_number, user_max_total_hp, target_max_total_hp)
+        player_attack(user_data, target_data, user, target_name, round_data, round_number, user_max_total_hp, target_max_total_hp, user_max_total_mana, target_max_total_mana)
 
         if target_data["hp"] <= 0:
             round_data["player_hp"] = user_data["hp"]
+            round_data["player_mana"] = user_data["mana"]  # Add this line
             round_data["enemy_hp"] = target_data["hp"]
+            round_data["enemy_mana"] = target_data["mana"]  # Add this line
             battle_data["rounds"].append(round_data)
 
             experience = user_data["exp"] + 10 + target_data["exp"] // 10
@@ -55,11 +66,13 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
             break
 
         # Target attacks player
-        player_attack(target_data, user_data, target_name, user, round_data, round_number, target_max_total_hp, user_max_total_hp)
+        player_attack(target_data, user_data, target_name, user, round_data, round_number, target_max_total_hp, user_max_total_hp, target_max_total_mana, user_max_total_mana)
 
         if user_data["hp"] <= 0:
             round_data["player_hp"] = user_data["hp"]
+            round_data["player_mana"] = user_data["mana"]  # Add this line
             round_data["enemy_hp"] = target_data["hp"]
+            round_data["enemy_mana"] = target_data["mana"]  # Add this line
             battle_data["rounds"].append(round_data)
 
             experience = target_data["exp"] + 10 + user_data["exp"] // 10
@@ -69,11 +82,13 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
             break
 
         round_data["player_hp"] = user_data["hp"]
+        round_data["player_mana"] = user_data["mana"]  # Add this line
         round_data["enemy_hp"] = target_data["hp"]
+        round_data["enemy_mana"] = target_data["mana"]  # Add this line
         round_data["actions"].append({
             "actor": "system",
             "type": "round_end",
-            "message": f"Round {round_number} complete. Your HP: {user_data['hp']}/{user_max_total_hp}, {target_name}'s HP: {target_data['hp']}/{target_max_total_hp}"
+            "message": f"Round {round_number} complete. Your HP: {user_data['hp']}/{user_max_total_hp}, Mana: {user_data['mana']}/{user_max_total_mana}. {target_name}'s HP: {target_data['hp']}/{target_max_total_hp}, Mana: {target_data['mana']}/{target_max_total_mana}"
         })
         battle_data["rounds"].append(round_data)
 
@@ -81,26 +96,32 @@ def fight_player(battle_data: Dict, target_data: Dict, target_name: str, user_da
             battle_data["rounds"].append({
                 "round": round_number + 1,
                 "player_hp": user_data["hp"],
+                "player_mana": user_data["mana"],  # Add this line
                 "enemy_hp": target_data["hp"],
-                "message": f"{target_name} has fled seeing they stand no chance against you! Your HP: {user_data['hp']}/{user_max_total_hp}, {target_name}'s HP: {target_data['hp']}/{target_max_total_hp}",
+                "enemy_mana": target_data["mana"],  # Add this line
+                "message": f"{target_name} has fled seeing they stand no chance against you! Your HP: {user_data['hp']}/{user_max_total_hp}, Mana: {user_data['mana']}/{user_max_total_mana}. {target_name}'s HP: {target_data['hp']}/{target_max_total_hp}, Mana: {target_data['mana']}/{target_max_total_mana}",
                 "actions": []
             })
             break
 
     # Update final battle stats
     battle_data["player"]["current_hp"] = user_data["hp"]
+    battle_data["player"]["current_mana"] = user_data["mana"]  # Add this line
     battle_data["enemy"]["current_hp"] = target_data["hp"]
+    battle_data["enemy"]["current_mana"] = target_data["mana"]  # Add this line
 
-    print(f"Fight ended. Rounds: {len(battle_data['rounds'])}, Player HP: {user_data['hp']}, Enemy HP: {target_data['hp']}")
+    print(f"Fight ended. Rounds: {len(battle_data['rounds'])}, Player HP: {user_data['hp']}, Player Mana: {user_data['mana']}, Enemy HP: {target_data['hp']}, Enemy Mana: {target_data['mana']}")
 
 
 def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_name: str, round_data: Dict,
-                  round_number: int, attacker_max_hp: int, defender_max_hp: int) -> None:
+                  round_number: int, attacker_max_hp: int, defender_max_hp: int, attacker_max_mana: int, defender_max_mana: int) -> None:
     if attacker["hp"] <= 0:
         return
 
     initial_attacker_hp = attacker["hp"]
+    initial_attacker_mana = attacker["mana"]  # Add this line
     initial_defender_hp = defender["hp"]
+    initial_defender_mana = defender["mana"]  # Add this line
 
     # Attempt spell cast
     spell_cast = attempt_spell_cast(attacker, spell_types)
@@ -114,8 +135,8 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
         attacker["hp"] = min(attacker_max_hp, attacker["hp"] + healing_done)
 
         message = f"{attacker_name} cast {spell_cast['name']}. {spell_effect['message']} "
-        message += f"{attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}, Mana: {attacker['mana']}. "
-        message += f"{defender_name}'s HP: {defender['hp']}/{defender_max_hp}"
+        message += f"{attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}, Mana: {attacker['mana']}/{attacker_max_mana}. "
+        message += f"{defender_name}'s HP: {defender['hp']}/{defender_max_hp}, Mana: {defender['mana']}/{defender_max_mana}"
 
         round_data["actions"].append({
             "actor": "player" if attacker_name == attacker.get('username') else "enemy",
@@ -126,12 +147,18 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
             "healing_done": healing_done,
             "mana_used": spell_cast['mana_cost'],
             "hp_change": attacker["hp"] - initial_attacker_hp,
+            "mana_change": attacker["mana"] - initial_attacker_mana,  # Add this line
             "enemy_hp_change": initial_defender_hp - defender["hp"],
+            "enemy_mana_change": initial_defender_mana - defender["mana"],  # Add this line
             "message": message,
             "final_attacker_hp": attacker["hp"],
+            "final_attacker_mana": attacker["mana"],  # Add this line
             "final_defender_hp": defender["hp"],
+            "final_defender_mana": defender["mana"],  # Add this line
             "initial_attacker_hp": initial_attacker_hp,
-            "initial_defender_hp": initial_defender_hp
+            "initial_attacker_mana": initial_attacker_mana,  # Add this line
+            "initial_defender_hp": initial_defender_hp,
+            "initial_defender_mana": initial_defender_mana  # Add this line
         })
     else:
         damage_dict = get_weapon_damage(attacker)
@@ -142,7 +169,8 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
 
         message = (f"{attacker_name} {damage_dict['message']} {defender_name} for {final_damage} damage "
                    f"(Base: {damage_dict['base_damage']}, Martial bonus: {damage_dict['martial_bonus']}). "
-                   f"{attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}, {defender_name}'s HP: {defender['hp']}/{defender_max_hp}")
+                   f"{attacker_name}'s HP: {attacker['hp']}/{attacker_max_hp}, Mana: {attacker['mana']}/{attacker_max_mana}. "
+                   f"{defender_name}'s HP: {defender['hp']}/{defender_max_hp}, Mana: {defender['mana']}/{defender_max_mana}")
 
         round_data["actions"].append({
             "actor": "player" if attacker_name == attacker.get('username') else "enemy",
@@ -150,9 +178,13 @@ def player_attack(attacker: Dict, defender: Dict, attacker_name: str, defender_n
             "damage": final_damage,
             "message": message,
             "final_attacker_hp": attacker["hp"],
+            "final_attacker_mana": attacker["mana"],  # Add this line
             "final_defender_hp": defender["hp"],
+            "final_defender_mana": defender["mana"],  # Add this line
             "initial_attacker_hp": initial_attacker_hp,
-            "initial_defender_hp": initial_defender_hp
+            "initial_attacker_mana": initial_attacker_mana,  # Add this line
+            "initial_defender_hp": initial_defender_hp,
+            "initial_defender_mana": initial_defender_mana  # Add this line
         })
 
 
