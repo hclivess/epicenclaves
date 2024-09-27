@@ -146,8 +146,8 @@ class Boar(Enemy):
     max_entities = 500
     max_entities_total = 1500
     herd_probability = 0.7
-    min_level = 3
-    max_level = 18
+    min_level = 5
+    max_level = 20
     experience_value = 10
     block_chance = 0.1
     block_reduction = 0.3
@@ -214,7 +214,7 @@ class Specter(Enemy):
     max_entities_total = 1000
     herd_probability = 0.3
     min_level = 20
-    max_level = 50
+    max_level = 65
     experience_value = 40
     evasion_chance = 0.25
     biome="cavern"
@@ -278,7 +278,7 @@ class Bandit(Enemy):
     max_entities_total = 1000
     herd_probability = 0.4
     min_level = 10
-    max_level = 35
+    max_level = 55
     experience_value = 25
     evasion_chance = 0.1
     block_chance = 0.1
@@ -306,7 +306,7 @@ class Troll(Enemy):
     max_entities_total = 1000
     herd_probability = 0.2
     min_level = 25
-    max_level = 60
+    max_level = 80
     experience_value = 70
     regeneration_rate = 5
     block_chance = 0.2
@@ -332,7 +332,7 @@ class Harpy(Enemy):
     max_entities_total = 1000
     herd_probability = 0.5
     min_level = 15
-    max_level = 45
+    max_level = 110
     experience_value = 35
     evasion_chance = 0.2
     biome = "mountain"
@@ -359,7 +359,7 @@ class Orc(Enemy):
     max_entities_total = 1000
     herd_probability = 0.4
     min_level = 20
-    max_level = 50
+    max_level = 200
     experience_value = 50
     block_chance = 0.15
     block_reduction = 0.35
@@ -380,7 +380,7 @@ class Spider(Enemy):
     max_entities_total = 1000
     herd_probability = 0.6
     min_level = 12
-    max_level = 40
+    max_level = 60
     experience_value = 30
     poison_chance = 0.15
     poison_duration = 3
