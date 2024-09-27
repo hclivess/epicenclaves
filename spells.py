@@ -57,7 +57,7 @@ class Fireball(Spell):
         magic_bonus = caster.get("sorcery", 0)
         total_damage = base_damage + magic_bonus
 
-        target["hp"] = max(0, target.get("hp", 0) - total_damage)
+        #target["hp"] = max(0, target.get("hp", 0) - total_damage)
 
         return {
             "damage_dealt": total_damage,
