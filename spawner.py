@@ -128,28 +128,31 @@ def improved_spawn(mapdb: Dict[str, Any], entity_class, **kwargs):
 
 
 def spawn_all_entities(mapdb: Dict[str, Any]):
-    # Dynamically import scenery and enemies modules
-    scenery = importlib.import_module('scenery')
-    enemies = importlib.import_module('enemies')
+    from enemies import enemy_types
 
-    # Get scenery_types and enemy_types
-    scenery_types = getattr(scenery, 'scenery_types', {})
-    enemy_types = getattr(enemies, 'enemy_types', {})
-
-    # Spawn scenery
-    for entity_class in scenery_types.values():
-        improved_spawn(mapdb, entity_class, is_biome_generation=True)
-
-    # Spawn enemies
     for entity_class in enemy_types.values():
-        improved_spawn(mapdb, entity_class)
+        # Get spawn parameters for this entity type
+        probability = getattr(entity_class, 'spawn_probability', 0.5)
+        max_entities = getattr(entity_class, 'max_entities', 100)
 
-    print(f"Total entities generated: {len(mapdb)}")
+        # Only attempt to spawn if random check passes
+        if random.random() < probability:
+            improved_spawn(
+                mapdb=mapdb,
+                entity_class=entity_class,
+                max_entities=max_entities,
+                probability=probability,
+                # Include other relevant parameters here
+                herd_probability=getattr(entity_class, 'herd_probability', 0.5),
+                herd_size=getattr(entity_class, 'herd_size', 10),
+                herd_radius=getattr(entity_class, 'herd_radius', 5),
+            )
+
+    print(f"Total entities in mapdb: {len(mapdb)}")
     entity_counts = count_entities_of_type(mapdb)
     print("Entity type counts:")
     for entity_type, count in entity_counts.items():
         print(f"  {entity_type}: {count}")
-
 
 def count_entities_of_type(mapdb: Dict[str, Any]) -> Dict[str, int]:
     counts = defaultdict(int)
@@ -163,7 +166,7 @@ def count_entities_of_type(mapdb: Dict[str, Any]) -> Dict[str, int]:
 if __name__ == "__main__":
     test_mapdb = {}
     # Assume scenery_types and enemy_types are imported or defined
-    spawn_all_entities(test_mapdb, scenery_types, enemy_types)
+    spawn_all_entities(test_mapdb)
     print(f"Total entities generated: {len(test_mapdb)}")
     entity_counts = count_entities_of_type(test_mapdb)
     print("Entity type counts:")
