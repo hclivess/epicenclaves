@@ -127,12 +127,28 @@ def improved_spawn(mapdb: Dict[str, Any], entity_class, **kwargs):
     return total_spawned
 
 
-def spawn_all_entities(mapdb: Dict[str, Any], scenery_types: Dict[str, type], enemy_types: Dict[str, type]):
+def spawn_all_entities(mapdb: Dict[str, Any]):
+    # Dynamically import scenery and enemies modules
+    scenery = importlib.import_module('scenery')
+    enemies = importlib.import_module('enemies')
+
+    # Get scenery_types and enemy_types
+    scenery_types = getattr(scenery, 'scenery_types', {})
+    enemy_types = getattr(enemies, 'enemy_types', {})
+
+    # Spawn scenery
     for entity_class in scenery_types.values():
         improved_spawn(mapdb, entity_class, is_biome_generation=True)
 
+    # Spawn enemies
     for entity_class in enemy_types.values():
         improved_spawn(mapdb, entity_class)
+
+    print(f"Total entities generated: {len(mapdb)}")
+    entity_counts = count_entities_of_type(mapdb)
+    print("Entity type counts:")
+    for entity_type, count in entity_counts.items():
+        print(f"  {entity_type}: {count}")
 
 
 def count_entities_of_type(mapdb: Dict[str, Any]) -> Dict[str, int]:
