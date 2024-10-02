@@ -8,7 +8,7 @@ from item_generator import generate_weapon, generate_armor
 from enemies import Enemy, enemy_types
 from combat_utils import death_roll, apply_armor_protection, calculate_armor_effectiveness, get_weapon_damage
 from combat_npc import fight_npc, process_npc_defeat
-from combat_player import fight_player, player_attack, process_player_defeat
+from combat_player import fight_player, process_player_defeat
 
 def fight(target: str, target_name: str, on_tile_map: List[Dict], on_tile_users: List[Dict], user_data: Dict, user: str,
           usersdb: Dict, mapdb: Dict) -> Dict:
