@@ -128,9 +128,13 @@ def improved_spawn(mapdb: Dict[str, Any], entity_class, **kwargs):
 
 
 def spawn_all_entities(mapdb: Dict[str, Any]):
-    from enemies import enemy_types
+    from enemies import enemy_types, Enemy
 
-    for entity_class in enemy_types.values():
+    for entity_name, entity_class in enemy_types.items():
+        # Skip the base Enemy class
+        if entity_class is Enemy:
+            continue
+
         # Get spawn parameters for this entity type
         probability = getattr(entity_class, 'spawn_probability', 0.5)
         max_entities = getattr(entity_class, 'max_entities', 100)
