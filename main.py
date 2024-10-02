@@ -45,7 +45,7 @@ from map import (get_tile_map, get_tile_users, get_user_data, strip_usersdb,
 from rest import attempt_rest
 from move import move, move_to
 from build import build
-from spawner import spawn
+from spawner import improved_spawn as spawn
 from auth import (auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db)
 from sqlite import init_databases, load_users_to_memory, save_users_from_memory, save_map_from_memory, \
     load_map_to_memory, users_db
@@ -1298,35 +1298,35 @@ if __name__ == "__main__":
             print("Fresh start")
             # First, spawn the biomes
             spawn(mapdb=mapdb[league], entity_class=scenery.Cavern, probability=1, map_size=1000,
-                  max_entities=250,
+                  max_entities=500,
                   herd_probability=0, is_biome_generation=True)
             spawn(mapdb=mapdb[league], entity_class=scenery.Forest, probability=1, map_size=1000,
-                  max_entities=250,
+                  max_entities=500,
                   herd_probability=0, is_biome_generation=True)
             spawn(mapdb=mapdb[league], entity_class=scenery.Pond, probability=1, map_size=1000,
-                  max_entities=100,
+                  max_entities=500,
                   herd_probability=0, is_biome_generation=True)
             spawn(mapdb=mapdb[league], entity_class=scenery.Mountain, probability=1, map_size=1000,
-                  max_entities=200,
+                  max_entities=500,
                   herd_probability=0, is_biome_generation=True)
             spawn(mapdb=mapdb[league], entity_class=scenery.Graveyard, probability=1, map_size=1000,
-                  max_entities=200,
+                  max_entities=500,
                   herd_probability=0, is_biome_generation=True)
             spawn(mapdb=mapdb[league], entity_class=scenery.Desert, probability=1, map_size=1000,
-                  max_entities=200,
+                  max_entities=500,
                   herd_probability=0, is_biome_generation=True)
             spawn(mapdb=mapdb[league], entity_class=scenery.Gnomes, probability=1, map_size=1000,
-                  max_entities=200,
+                  max_entities=500,
                   herd_probability=0, is_biome_generation=True)
 
             spawn(mapdb=mapdb[league], entity_class=enemies.Rat, probability=1, map_size=1000,
-                  max_entities=200,
+                  max_entities=2000,
                   herd_probability=1)
             spawn(mapdb=mapdb[league], entity_class=enemies.Boar, probability=1, map_size=1000,
-                  max_entities=200,
+                  max_entities=2000,
                   herd_probability=1)
             spawn(mapdb=mapdb[league], entity_class=enemies.Wolf, probability=1, map_size=1000,
-                  max_entities=200,
+                  max_entities=2000,
                   herd_probability=1)
 
             # Generate mazes (if you still want to include them)
