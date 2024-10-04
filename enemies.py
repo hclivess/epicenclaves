@@ -278,7 +278,7 @@ class Bandit(Enemy):
     max_entities_total = 1000
     herd_probability = 0.4
     min_level = 10
-    max_level = 55
+    max_level = 75
     experience_value = 25
     evasion_chance = 0.1
     block_chance = 0.1
