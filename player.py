@@ -28,7 +28,7 @@ class User:
         self.base_hp = 100  # Base HP value
         self.base_mana = 100  # Base mana value
         self.armor = 0
-        self.action_points = 500
+        self.action_points = 5000
         self.army_deployed = 0
         self.army_free = 0
         self.peasants = 0

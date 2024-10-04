@@ -269,7 +269,8 @@
                         <a href="/trash_all" class="btn btn-danger btn-sm">Trash All (Except Tools)</a>
                      </div>
                      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                        {% for item in file["unequipped"] %}
+                        {% set sorted_items = sorted(file["unequipped"], key=lambda x: x.get("level", 0), reverse=True) %}
+                        {% for item in sorted_items %}
                         {% if item.get("type") != "empty" %}
                         <div class="col">
                            <div class="card h-100">
