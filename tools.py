@@ -22,13 +22,15 @@ class Tool:
             "accuracy": self.accuracy,
             "description": getattr(self, 'DESCRIPTION', 'A useful tool.'),
             "slot": self.slot,
-            "id": self.id
+            "id": self.id,
+            "display_name": self.DISPLAY_NAME
         }
 
 class Hatchet(Tool):
     SLOT = "right_hand"
     BASE_DAMAGE = (1, 3)  # Minimum and maximum base damage
     DESCRIPTION = "A small, versatile axe for chopping wood and other materials."
+    DISPLAY_NAME = "Hatchet"
 
     def __init__(self, min_level, max_level, tool_id, level=None):
         super().__init__(min_level, max_level, tool_id, level)
@@ -67,6 +69,7 @@ class Pickaxe(Tool):
     SLOT = "right_hand"
     BASE_DAMAGE = (1, 3)  # Minimum and maximum base damage
     DESCRIPTION = "A small, versatile pickaxe for mining ores."
+    DISPLAY_NAME = "Pickaxe"
 
     def __init__(self, min_level, max_level, tool_id, level=None):
         super().__init__(min_level, max_level, tool_id, level)

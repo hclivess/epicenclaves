@@ -45,7 +45,6 @@ class Weapon:
         if self.RANGE == "ranged":
             self.crit_chance = min(self.crit_chance * 2, 100)
 
-
     def to_dict(self):
         return {
             "type": self.type,
@@ -58,7 +57,8 @@ class Weapon:
             "accuracy": self.accuracy,
             "crit_dmg_pct": self.crit_dmg_pct,
             "crit_chance": self.crit_chance,
-            "slot": self.slot
+            "slot": self.slot,
+            "display_name": self.DISPLAY_NAME
         }
 
 class Sword(Weapon):
@@ -72,6 +72,7 @@ class Sword(Weapon):
     MAX_CRIT_DMG = 130
     MIN_CRIT_CHANCE = 3
     MAX_CRIT_CHANCE = 6
+    DISPLAY_NAME = "Sword"
 
 class Bow(Weapon):
     SLOT = "right_hand"
@@ -84,6 +85,7 @@ class Bow(Weapon):
     MAX_CRIT_DMG = 150
     MIN_CRIT_CHANCE = 10
     MAX_CRIT_CHANCE = 16
+    DISPLAY_NAME = "Bow"
 
 class Spear(Weapon):
     SLOT = "right_hand"
@@ -96,6 +98,7 @@ class Spear(Weapon):
     MAX_CRIT_DMG = 110
     MIN_CRIT_CHANCE = 2
     MAX_CRIT_CHANCE = 4
+    DISPLAY_NAME = "Spear"
 
 class Dagger(Weapon):
     SLOT = "right_hand"
@@ -108,6 +111,7 @@ class Dagger(Weapon):
     MAX_CRIT_DMG = 200
     MIN_CRIT_CHANCE = 8
     MAX_CRIT_CHANCE = 13
+    DISPLAY_NAME = "Dagger"
 
 class Mace(Weapon):
     SLOT = "right_hand"
@@ -120,6 +124,7 @@ class Mace(Weapon):
     MAX_CRIT_DMG = 160
     MIN_CRIT_CHANCE = 2
     MAX_CRIT_CHANCE = 5
+    DISPLAY_NAME = "Mace"
 
 class Axe(Weapon):
     SLOT = "right_hand"
@@ -132,6 +137,7 @@ class Axe(Weapon):
     MAX_CRIT_DMG = 180
     MIN_CRIT_CHANCE = 3
     MAX_CRIT_CHANCE = 7
+    DISPLAY_NAME = "Axe"
 
 class Crossbow(Weapon):
     SLOT = "right_hand"
@@ -144,6 +150,7 @@ class Crossbow(Weapon):
     MAX_CRIT_DMG = 170
     MIN_CRIT_CHANCE = 8
     MAX_CRIT_CHANCE = 14
+    DISPLAY_NAME = "Crossbow"
 
 class Rapier(Weapon):
     SLOT = "right_hand"
@@ -156,6 +163,7 @@ class Rapier(Weapon):
     MAX_CRIT_DMG = 140
     MIN_CRIT_CHANCE = 6
     MAX_CRIT_CHANCE = 10
+    DISPLAY_NAME = "Rapier"
 
 class WarHammer(Weapon):
     SLOT = "right_hand"
@@ -168,6 +176,7 @@ class WarHammer(Weapon):
     MAX_CRIT_DMG = 220
     MIN_CRIT_CHANCE = 2
     MAX_CRIT_CHANCE = 4
+    DISPLAY_NAME = "War Hammer"
 
 class Sling(Weapon):
     SLOT = "right_hand"
@@ -180,6 +189,7 @@ class Sling(Weapon):
     MAX_CRIT_DMG = 600
     MIN_CRIT_CHANCE = 14
     MAX_CRIT_CHANCE = 24
+    DISPLAY_NAME = "Sling"
 
 class Katana(Weapon):
     SLOT = "right_hand"
@@ -192,6 +202,7 @@ class Katana(Weapon):
     MAX_CRIT_DMG = 190
     MIN_CRIT_CHANCE = 5
     MAX_CRIT_CHANCE = 9
+    DISPLAY_NAME = "Katana"
 
 class ThrowingKnives(Weapon):
     SLOT = "right_hand"
@@ -204,6 +215,7 @@ class ThrowingKnives(Weapon):
     MAX_CRIT_DMG = 210
     MIN_CRIT_CHANCE = 16
     MAX_CRIT_CHANCE = 28
+    DISPLAY_NAME = "Throwing Knives"
 
 class Halberd(Weapon):
     SLOT = "right_hand"
@@ -216,6 +228,7 @@ class Halberd(Weapon):
     MAX_CRIT_DMG = 155
     MIN_CRIT_CHANCE = 3
     MAX_CRIT_CHANCE = 6
+    DISPLAY_NAME = "Halberd"
 
 class Scythe(Weapon):
     SLOT = "right_hand"
@@ -228,6 +241,7 @@ class Scythe(Weapon):
     MAX_CRIT_DMG = 200
     MIN_CRIT_CHANCE = 4
     MAX_CRIT_CHANCE = 8
+    DISPLAY_NAME = "Scythe"
 
 class Chakram(Weapon):
     SLOT = "right_hand"
@@ -240,3 +254,4 @@ class Chakram(Weapon):
     MAX_CRIT_DMG = 150
     MIN_CRIT_CHANCE = 8
     MAX_CRIT_CHANCE = 16
+    DISPLAY_NAME = "Chakram"

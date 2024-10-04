@@ -31,7 +31,7 @@ class Armor:
             self.protection = int(self.protection * exceptional_boost)
 
         # Calculate durability and efficiency (unchanged)
-        level_factor = level_factor = (self.level - self.min_level) / max(1, (self.max_level - self.min_level))
+        level_factor = (self.level - self.min_level) / max(1, (self.max_level - self.min_level))
 
         min_durability = 30
         max_durability = 50 * self.max_level
@@ -52,30 +52,36 @@ class Armor:
             "efficiency": self.efficiency,
             "role": self.role,
             "id": self.id,
-            "level": self.level
+            "level": self.level,
+            "display_name": self.DISPLAY_NAME
         }
 
 class Helmet(Armor):
     DESCRIPTION = "Protective headgear that reduces damage taken to the head."
     SLOT = "head"
     BASE_PROTECTION = 2
+    DISPLAY_NAME = "Helmet"
 
 class Chestplate(Armor):
     DESCRIPTION = "Armor that covers the torso and provides substantial protection."
     SLOT = "body"
     BASE_PROTECTION = 3
+    DISPLAY_NAME = "Chestplate"
 
 class Gauntlets(Armor):
     DESCRIPTION = "Armored gloves that protect the hands and forearms."
     SLOT = "arms"
     BASE_PROTECTION = 1
+    DISPLAY_NAME = "Gauntlets"
 
 class Leggings(Armor):
     DESCRIPTION = "Armor that covers the legs, providing mobility and protection."
     SLOT = "legs"
     BASE_PROTECTION = 2
+    DISPLAY_NAME = "Leggings"
 
 class Boots(Armor):
     DESCRIPTION = "Sturdy footwear that protects the feet and enhances movement."
     SLOT = "feet"
     BASE_PROTECTION = 1
+    DISPLAY_NAME = "Boots"
