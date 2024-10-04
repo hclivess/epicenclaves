@@ -381,6 +381,12 @@ function performAction(actionUrl) {
         return;
     }
 
+        // Check if the action is a /temple redirect
+    if (actionUrl.includes('/alchemist')) {
+        window.location.href = actionUrl;
+        return;
+    }
+
     fetch(actionUrl)
         .then(response => response.json())
         .then(data => {

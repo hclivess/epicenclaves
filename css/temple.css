@@ -8,7 +8,6 @@ body {
     background-position: center;
     background-attachment: fixed;
     color: #ffffff;
-    font-size: 0.9rem;
 }
 
 .container {
@@ -32,7 +31,6 @@ body {
     color: #ffd700;
     border-bottom: 2px solid #ffd700;
     font-weight: bold;
-    font-size: 1rem;
 }
 
 .card-body {
@@ -96,7 +94,6 @@ body {
 
 .card-title {
     color: #ffd700;
-    font-size: 1rem;
 }
 
 .spell-icon {
@@ -107,7 +104,6 @@ body {
 }
 
 .spell-name {
-    font-size: 1rem;
     margin-bottom: 0.5rem;
 }
 
