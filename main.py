@@ -58,8 +58,9 @@ from drag import drag_player
 from revive import revive
 from log import log_user_action, log_turn_engine_event
 from temple import get_available_spells, learn_spell, update_spell_queue, train_sorcery, check_temple_access
-from alchemist import get_available_potions, craft_potion, use_potion, check_alchemist_access
-
+from alchemist import craft_potion, use_potion
+from alchemist import get_available_potions, check_alchemist_access, get_user_potions
+from potions import potion_types
 
 MAX_SIZE = 1000000
 DISTANCE = 15
@@ -233,15 +234,17 @@ class AlchemistHandler(BaseHandler):
             return
 
         available_potions = get_available_potions()
+        user_potions = get_user_potions(user, usersdb[league])
         log_user_action(user, "view_alchemist")
         self.render(
             "templates/alchemist.html",
             user=user,
             league=league,
             user_data=get_user_data(user, usersdb[league]),
-            available_potions=available_potions
+            available_potions=available_potions,
+            user_potions=user_potions,
+            potion_types=potion_types
         )
-
 class CraftPotionHandler(BaseHandler):
     def post(self):
         user = tornado.escape.xhtml_escape(self.current_user)
