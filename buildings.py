@@ -198,6 +198,23 @@ class Blacksmith(Building):
         actions.append({"name": "repair all gear", "action": "/repair?type=all"})
         return actions
 
+class Alchemist(Building):
+    DISPLAY_NAME = "Alchemist"
+    DESCRIPTION = "Allows crafting of potions using gathered ingredients."
+    COST = {"ingredients": {"wood": 200, "bismuth": 100}}
+    IMAGE_SOURCE = "alchemist.png"
+    UPGRADE_COSTS = {
+        2: {"ingredients": {"wood": 300, "bismuth": 150}},
+        3: {"ingredients": {"wood": 450, "bismuth": 225}},
+        4: {"ingredients": {"wood": 675, "bismuth": 337}},
+        5: {"ingredients": {"wood": 1012, "bismuth": 506}}
+    }
+
+    def get_actions(self, user: str) -> List[Dict[str, str]]:
+        actions = super().get_actions(user)
+        actions.append({"name": "enter", "action": "/alchemist"})
+        return actions
+
 class Temple(Building):
     DISPLAY_NAME = "Temple"
     DESCRIPTION = "Allows you to study various types of magic."

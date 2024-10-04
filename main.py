@@ -58,6 +58,7 @@ from drag import drag_player
 from revive import revive
 from log import log_user_action, log_turn_engine_event
 from temple import get_available_spells, learn_spell, update_spell_queue, train_sorcery, check_temple_access
+from alchemist import get_available_potions, craft_potion, use_potion, check_alchemist_access
 
 
 MAX_SIZE = 1000000
@@ -215,6 +216,54 @@ class LogoutHandler(BaseHandler):
         log_user_action(user, "logout")
         self.clear_all_cookies()
         self.redirect("/")
+
+
+class AlchemistHandler(BaseHandler):
+    def get(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
+        if not user:
+            self.redirect("/")
+            return
+
+        access_granted, message = check_alchemist_access(user, usersdb[league], mapdb[league])
+
+        if not access_granted:
+            self.write(message)
+            return
+
+        available_potions = get_available_potions()
+        log_user_action(user, "view_alchemist")
+        self.render(
+            "templates/alchemist.html",
+            user=user,
+            league=league,
+            user_data=get_user_data(user, usersdb[league]),
+            available_potions=available_potions
+        )
+
+class CraftPotionHandler(BaseHandler):
+    def post(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
+        potion_name = self.get_argument("potion")
+
+        success, message = craft_potion(user, usersdb[league], mapdb[league], potion_name)
+        log_user_action(user, "craft_potion",
+                        f"Potion: {potion_name}, Success: {success}, Message: {message}")
+        self.write(json.dumps({"success": success, "message": message}))
+
+class UsePotionHandler(BaseHandler):
+    def post(self):
+        user = tornado.escape.xhtml_escape(self.current_user)
+        league = self.get_current_league()
+        potion_name = self.get_argument("potion")
+
+        success, message = use_potion(user, usersdb[league], potion_name)
+        log_user_action(user, "use_potion",
+                        f"Potion: {potion_name}, Success: {success}, Message: {message}")
+        self.write(json.dumps({"success": success, "message": message}))
+
 
 class MapHandler(BaseHandler):
     def get(self):
@@ -1237,6 +1286,9 @@ def make_app():
         (r"/temple", TempleHandler),
         (r"/update_spell_queue", UpdateSpellQueueHandler),
         (r"/learn", LearnHandler),
+        (r"/alchemist", AlchemistHandler),
+        (r"/craft_potion", CraftPotionHandler),
+        (r"/use_potion", UsePotionHandler),
         (r"/chat", ChatHandler),
         (r"/ws/chat", ChatWebSocketHandler),
         (r"/train_sorcery", TrainSorceryHandler),
