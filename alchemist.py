@@ -18,12 +18,7 @@ def check_alchemist_access(user: str, usersdb: Dict[str, Any], mapdb: Dict[str, 
     return True, ""
 
 def get_available_potions() -> List[Dict[str, Any]]:
-    available_potions = []
-    for potion_name, potion_class in potion_types.items():
-        potion_dict = potion_class(0).to_dict()
-        potion_dict['name'] = potion_name  # Add the 'name' key
-        available_potions.append(potion_dict)
-    return available_potions
+    return [potion_class.to_dict() for potion_class in potion_types.values()]
 
 def craft_potion(user: str, usersdb: Dict[str, Any], mapdb: Dict[str, Any], potion_name: str) -> Tuple[bool, str]:
     access_granted, message = check_alchemist_access(user, usersdb, mapdb)
@@ -35,21 +30,21 @@ def craft_potion(user: str, usersdb: Dict[str, Any], mapdb: Dict[str, Any], poti
     if potion_name not in potion_types:
         return False, "Invalid potion recipe"
 
-    potion = potion_types[potion_name](0)  # Create an instance of the potion
+    potion_class = potion_types[potion_name]
 
     # Check if user has the required ingredients
-    for ingredient, amount in potion.INGREDIENTS.items():
+    for ingredient, amount in potion_class.INGREDIENTS.items():
         if user_data.get(ingredient, 0) < amount:
             return False, f"Not enough {ingredient}. You need {amount}."
 
     # Deduct ingredients and add potion to inventory
-    for ingredient, amount in potion.INGREDIENTS.items():
+    for ingredient, amount in potion_class.INGREDIENTS.items():
         user_data[ingredient] = user_data.get(ingredient, 0) - amount
 
     user_data[potion_name] = user_data.get(potion_name, 0) + 1
 
     update_user_data(user, user_data, usersdb)
-    return True, f"Successfully crafted {potion.DISPLAY_NAME}"
+    return True, f"Successfully crafted {potion_class.DISPLAY_NAME}"
 
 def use_potion(user: str, usersdb: Dict[str, Any], potion_name: str) -> Tuple[bool, str]:
     user_data = get_user_data(user, usersdb)
@@ -60,8 +55,8 @@ def use_potion(user: str, usersdb: Dict[str, Any], potion_name: str) -> Tuple[bo
     if potion_name not in potion_types:
         return False, "Invalid potion"
 
-    potion = potion_types[potion_name](0)  # Create an instance of the potion
-    effect_result = potion.effect(user_data)
+    potion_class = potion_types[potion_name]
+    effect_result = potion_class.effect(user_data)
 
     user_data[potion_name] -= 1
     update_user_data(user, user_data, usersdb)

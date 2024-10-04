@@ -34,9 +34,28 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/chat">Chat</a>
                 </li>
+
+
+                 <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="potionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Potions
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="potionDropdown">
+                        {% for potion_name, quantity in user_potions.items() %}
+                            {% if quantity > 0 %}
+                                <li><a class="dropdown-item" href="#" onclick="usePotion('{{ potion_name }}'); return false;">{{ potion_types[potion_name].DISPLAY_NAME }} ({{ quantity }})</a></li>
+                            {% end %}
+                        {% end %}
+                    </ul>
+                </li>
+
+
+
                 <li class="nav-item">
                     <a class="nav-link text-danger" href="/logout">Logout</a>
                 </li>
+
+
             </ul>
             <form class="goto-form d-flex" id="goto-form" onsubmit="handleGoTo(event)">
                 <input class="form-control me-2" type="number" id="goto-x" placeholder="X" required>
@@ -61,6 +80,38 @@
         const currentUser = '{{ user }}';
     </script>
     <script src="js/map.js?v={{timestamp}}"></script>
+    <script>
+function usePotion(potionName) {
+    setUserInteracting(true);
+    fetch(`/use_potion?potion=${potionName}&return_to_map=true`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.message) {
+            displayMessage(data.message);
+        }
+        Object.assign(jsonData, data);
+        updateMap(jsonData);
+        checkPlayerPosition();
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        displayMessage('An error occurred while using the potion.');
+    })
+    .finally(() => {
+        setUserInteracting(false);
+    });
+}
+    </script>
 
 </body>
 </html>

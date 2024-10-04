@@ -1,66 +1,64 @@
-import math
-import tornado.websocket
 import asyncio
+import inspect
 import json
+import math
+import os
 import os.path
+import re
 import signal
 import sys
+import time
 import webbrowser
-import os
-import re
-import inspect
+from typing import List, Dict, Any
+
+import tornado.escape
 import tornado.ioloop
 import tornado.web
-import tornado.escape
-import time
+import tornado.websocket
 
-from buildings import Building
 import buildings
-from player import User, calculate_total_hp, calculate_total_mana
-
-import scenery
 import enemies
-from scenery import Scenery, scenery_types
-from enemies import Enemy, enemy_types
-
-from spells import spell_types
-from fish import fish_pond
-from demolish import demolish
-from leagues import load_leagues
-from weapons import Weapon
-from armor import Armor
-from tools import Tool
-from chop import chop_forest
-from mine import mine_mountain
-from conquer import attempt_conquer
-from deploy_army import deploy_army, remove_army
-from equip import equip_item, unequip_item
-from combat import fight, get_fight_preconditions
-from login import login, get_leagues
-from typing import List, Dict, Any
-from turn_engine import TurnEngine
-from backend import get_user, update_user_data
-from map import (get_tile_map, get_tile_users, get_user_data, strip_usersdb,
-                 get_map_data_limit, get_users_data_limit)
-from rest import attempt_rest
-from move import move, move_to
-from build import build
-from spawner import improved_spawn as spawn
-from auth import (auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db)
-from sqlite import init_databases, load_users_to_memory, save_users_from_memory, save_map_from_memory, \
-    load_map_to_memory, users_db
-from player import create_user, calculate_population_limit
-from maze_generator import generate_multiple_mazes
-from upgrade import upgrade
-from trash import trash_item, trash_armor, trash_all, trash_weapons
-from repair import repair_all_items, repair_item
-from drag import drag_player
-from revive import revive
-from log import log_user_action, log_turn_engine_event
-from temple import get_available_spells, learn_spell, update_spell_queue, train_sorcery, check_temple_access
+import scenery
 from alchemist import craft_potion, use_potion
 from alchemist import get_available_potions, check_alchemist_access, get_user_potions
+from armor import Armor
+from auth import (auth_cookie_get, auth_login_validate, auth_add_user, auth_exists_user, auth_check_users_db)
+from backend import get_user
+from build import build
+from buildings import Building
+from chop import chop_forest
+from combat import fight, get_fight_preconditions
+from conquer import attempt_conquer
+from demolish import demolish
+from deploy_army import deploy_army, remove_army
+from drag import drag_player
+from enemies import enemy_types
+from equip import equip_item, unequip_item
+from fish import fish_pond
+from leagues import load_leagues
+from log import log_user_action
+from login import login, get_leagues
+from map import (get_tile_map, get_tile_users, get_user_data, strip_usersdb,
+                 get_map_data_limit, get_users_data_limit)
+from maze_generator import generate_multiple_mazes
+from mine import mine_mountain
+from move import move, move_to
+from player import User, calculate_total_hp, calculate_total_mana
+from player import create_user, calculate_population_limit
 from potions import potion_types
+from repair import repair_all_items, repair_item
+from rest import attempt_rest
+from revive import revive
+from scenery import scenery_types
+from spawner import improved_spawn as spawn
+from sqlite import init_databases, load_users_to_memory, save_users_from_memory, save_map_from_memory, \
+    load_map_to_memory
+from temple import get_available_spells, learn_spell, update_spell_queue, train_sorcery, check_temple_access
+from tools import Tool
+from trash import trash_item, trash_armor, trash_all, trash_weapons
+from turn_engine import TurnEngine
+from upgrade import upgrade
+from weapons import Weapon
 
 MAX_SIZE = 1000000
 DISTANCE = 15
@@ -257,15 +255,35 @@ class CraftPotionHandler(BaseHandler):
         self.write(json.dumps({"success": success, "message": message}))
 
 class UsePotionHandler(BaseHandler):
-    def post(self):
+    def get(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         potion_name = self.get_argument("potion")
+        return_to_map = self.get_argument("return_to_map", "false") == "true"
 
         success, message = use_potion(user, usersdb[league], potion_name)
-        log_user_action(user, "use_potion",
-                        f"Potion: {potion_name}, Success: {success}, Message: {message}")
-        self.write(json.dumps({"success": success, "message": message}))
+        log_user_action(user, "use_potion", f"Potion: {potion_name}, Success: {success}, Message: {message}")
+
+        if return_to_map:
+            user_data = get_user_data(user, usersdb[league])
+            visible_distance = DISTANCE
+            x_pos, y_pos = user_data["x_pos"], user_data["y_pos"]
+            visible_map_data = get_map_data_limit(x_pos, y_pos, mapdb[league], visible_distance)
+            visible_users_data = get_users_data_limit(x_pos, y_pos, strip_usersdb(usersdb[league]), visible_distance)
+
+            map_data = {
+                "users": visible_users_data,
+                "construction": visible_map_data,
+                "x_pos": x_pos,
+                "y_pos": y_pos,
+                "message": message
+            }
+
+            self.write(json.dumps(map_data))
+        else:
+            self.write(json.dumps({"success": success, "message": message}))
+
+
 
 
 class MapHandler(BaseHandler):
@@ -330,12 +348,20 @@ class MapHandler(BaseHandler):
 
         log_user_action(user, "view_map", f"Position: ({x_pos}, {y_pos})")
 
+        # Get user potions
+        user_potions = get_user_potions(user, usersdb[league])
+
         # Check if the request wants JSON
         if self.get_argument("format", None) == "json":
             self.set_header("Content-Type", "application/json")
             self.write(json.dumps(map_data))
         else:
-            self.render("templates/map.html", user=user, data=json.dumps(map_data), timestamp=time.time())
+            self.render("templates/map.html",
+                        user=user,
+                        data=json.dumps(map_data),
+                        timestamp=time.time(),
+                        user_potions=user_potions,
+                        potion_types=potion_types)
 
 class ScoreboardHandler(BaseHandler):
     def get(self):
