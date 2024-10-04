@@ -140,7 +140,7 @@ class Boar(Enemy):
     base_max_damage = 4
     crit_chance = 0.1
     crit_damage = 1.5
-    drop_chance = 0.2
+    drop_chance = 0.6
     regular_drop = {"food": 1}
     probability = 0.1
     max_entities = 500
@@ -163,7 +163,7 @@ class Wolf(Enemy):
     base_max_damage = 7
     crit_chance = 0.25
     crit_damage = 1.8
-    drop_chance = 0.3
+    drop_chance = 0.6
     regular_drop = {"wolf pelt": 1}
     probability = 0.2
     max_entities = 500
@@ -401,7 +401,7 @@ class Rat(Enemy):
     base_max_damage = 2
     crit_chance = 0.05
     crit_damage = 1.3
-    drop_chance = 0.2
+    drop_chance = 0.8
     regular_drop = {"rat tail": 1}
     probability = 0.24
     max_entities = 1000
