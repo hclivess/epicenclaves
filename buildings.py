@@ -169,11 +169,11 @@ class ArcheryRange(Building):
         ])
         return actions
 """
-class Laboratory(Building):
-    DISPLAY_NAME = "Laboratory"
+class Academy(Building):
+    DISPLAY_NAME = "Academy"
     DESCRIPTION = "Turns peasants into researchers, generating research points."
     COST = {"ingredients": {"wood": 250, "bismuth": 125}}
-    IMAGE_SOURCE = "laboratory.png"
+    IMAGE_SOURCE = "academy.png"
     UPGRADE_COSTS = {
         2: {"ingredients": {"wood": 375, "bismuth": 187}},
         3: {"ingredients": {"wood": 562, "bismuth": 280}},

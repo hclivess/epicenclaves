@@ -11,7 +11,7 @@ Structures:
 - Barracks (Increase population → Soldiers)
 - Farm (Increase population → Food)
 - Mine (Increase population → Bismuth)
-- Laboratory (Research???)
+- Academy (Research???)
 - Sawmill (Convert wood to resources)
 - Smelter (Process bismuth)
 - Hospital

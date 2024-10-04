@@ -108,7 +108,7 @@ class TurnEngine(threading.Thread):
         building_counts = count_buildings(user_data)
 
         updated_values = {
-            "research": max(0, user_data.get("research", 0) + building_counts.get('laboratory', 0)),
+            "research": max(0, user_data.get("research", 0) + building_counts.get('academy', 0)),
             "action_points": user_data.get("action_points", 0) + 10,
             "age": user_data.get("age", 0) + 1
         }

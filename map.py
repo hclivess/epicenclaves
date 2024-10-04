@@ -221,7 +221,7 @@ def spawn_entities(mapdb, league):
 
 def count_buildings(user_data):
     counts = {'sawmill': 0, 'forest': 0, 'barracks': 0, 'farm': 0, 'house': 0, 'mine': 0, 'mountain': 0,
-              'laboratory': 0}
+              'academy': 0}
 
     for building_data in user_data.get("construction", {}).values():
         building_type = building_data['type']
