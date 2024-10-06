@@ -358,7 +358,9 @@ function moveToPosition(x, y, callback) {
     });
 }
 
-function handleGoTo() {
+function handleGo() {
+    console.log("handleGo function called");
+
     const x = parseInt(document.getElementById('goto-x').value);
     const y = parseInt(document.getElementById('goto-y').value);
     if (!isNaN(x) && !isNaN(y)) {
@@ -582,6 +584,69 @@ document.addEventListener('keydown', function(event) {
         movePlayer(direction, steps);
     }
 });
+
+    function usePotion(potionName) {
+        fetch('/use_potion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `potion=${potionName}`
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            showMessage(data.message, data.success);
+            console.log('Potion use result:', data);  // For debugging
+
+            if (data.success) {
+                updatePotionCount(potionName);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('An error occurred while using the potion.', false);
+        });
+    }
+
+    function updatePotionCount(potionName) {
+        const potionItem = document.querySelector(`.dropdown-item[data-potion="${potionName}"]`);
+        if (potionItem) {
+            const countSpan = potionItem.querySelector('.potion-count');
+            if (countSpan) {
+                let count = parseInt(countSpan.textContent);
+                count--;
+                if (count > 0) {
+                    countSpan.textContent = count;
+                } else {
+                    // Remove the potion from the dropdown if count reaches 0
+                    potionItem.parentElement.remove();
+                }
+            }
+        }
+
+        // Check if there are no more potions left
+        const potionDropdown = document.getElementById('potionDropdown');
+        if (potionDropdown.nextElementSibling.children.length === 0) {
+            potionDropdown.innerHTML = 'No Potions';
+            potionDropdown.classList.add('disabled');
+        }
+    }
+
+    function showMessage(message, isSuccess) {
+        const messageDisplay = document.getElementById('message-display');
+        messageDisplay.textContent = message;
+        messageDisplay.className = 'alert ' + (isSuccess ? 'alert-success' : 'alert-danger');
+        messageDisplay.style.display = 'block';
+
+        setTimeout(() => {
+            messageDisplay.style.display = 'none';
+        }, 3000);
+    }
 
 // Set up periodic refresh
 const refreshInterval = 60000; // 60 seconds

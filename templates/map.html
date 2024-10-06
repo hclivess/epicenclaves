@@ -65,11 +65,11 @@
 
 
             </ul>
-            <form class="goto-form d-flex" id="goto-form" onsubmit="handleGoTo(event)">
-                <input class="form-control me-2" type="number" id="goto-x" placeholder="X" required>
-                <input class="form-control me-2" type="number" id="goto-y" placeholder="Y" required>
-                <button class="btn btn-outline-light" type="submit">Go</button>
-            </form>
+            <div class="goto-form">
+              <input type="number" id="goto-x" placeholder="X" min="1" max="1000">
+              <input type="number" id="goto-y" placeholder="Y" min="1" max="1000">
+              <button onclick="handleGo(); return false;">Go</button>
+            </div>
         </div>
     </div>
 </nav>
@@ -89,94 +89,6 @@
     </script>
     <script src="js/map.js?v={{timestamp}}"></script>
 
-    <script>
-
-    function usePotion(potionName) {
-        fetch('/use_potion', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `potion=${potionName}`
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            showMessage(data.message, data.success);
-            console.log('Potion use result:', data);  // For debugging
-
-            if (data.success) {
-                updatePotionCount(potionName);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showMessage('An error occurred while using the potion.', false);
-        });
-    }
-
-    function updatePotionCount(potionName) {
-        const potionItem = document.querySelector(`.dropdown-item[data-potion="${potionName}"]`);
-        if (potionItem) {
-            const countSpan = potionItem.querySelector('.potion-count');
-            if (countSpan) {
-                let count = parseInt(countSpan.textContent);
-                count--;
-                if (count > 0) {
-                    countSpan.textContent = count;
-                } else {
-                    // Remove the potion from the dropdown if count reaches 0
-                    potionItem.parentElement.remove();
-                }
-            }
-        }
-
-        // Check if there are no more potions left
-        const potionDropdown = document.getElementById('potionDropdown');
-        if (potionDropdown.nextElementSibling.children.length === 0) {
-            potionDropdown.innerHTML = 'No Potions';
-            potionDropdown.classList.add('disabled');
-        }
-    }
-
-    function showMessage(message, isSuccess) {
-        const messageDisplay = document.getElementById('message-display');
-        messageDisplay.textContent = message;
-        messageDisplay.className = 'alert ' + (isSuccess ? 'alert-success' : 'alert-danger');
-        messageDisplay.style.display = 'block';
-
-        setTimeout(() => {
-            messageDisplay.style.display = 'none';
-        }, 3000);
-    }
-
-    // Function to handle the "Go To" form submission
-    function handleGoTo(event) {
-        event.preventDefault();
-        const x = document.getElementById('goto-x').value;
-        const y = document.getElementById('goto-y').value;
-        // Call your existing move_to function or implement the logic here
-        console.log(`Moving to coordinates: (${x}, ${y})`);
-        // You should implement the actual movement logic here
-    }
-
-    function buildPalisade() {
-        // Implement your palisade building logic here
-        console.log('Building palisade');
-        // You should implement the actual palisade building logic here
-    }
-
-    // Add any other existing functions from your current map.js file here
-
-    // Event listener for the "Go To" form
-    document.getElementById('goto-form').addEventListener('submit', handleGoTo);
-
-    // You might want to add more event listeners or initialization code here
-</script>
 
 
 </body>
