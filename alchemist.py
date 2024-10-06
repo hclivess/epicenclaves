@@ -34,7 +34,7 @@ def craft_potion(user: str, usersdb: Dict[str, Any], mapdb: Dict[str, Any], poti
 
     # Check if user has the required ingredients
     for ingredient, amount in potion_class.INGREDIENTS.items():
-        if user_data.get(ingredient, 0) < amount:
+        if user_data.get("ingredients", {}).get(ingredient, 0) < amount:
             return False, f"Not enough {ingredient}. You need {amount}."
 
     # Deduct ingredients and add potion to inventory
