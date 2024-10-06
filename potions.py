@@ -49,36 +49,38 @@ class Potion:
 
 class HealthPotion(Potion):
     DISPLAY_NAME = "Health Potion"
-    DESCRIPTION = "Restores a portion of your health."
+    DESCRIPTION = "Restores 30% of your total health."
     INGREDIENTS = {"rat tail": 2, "food": 5}
     IMAGE_SOURCE = "health_potion.png"
 
     @classmethod
     def effect(cls, user: Dict[str, Any]) -> Dict[str, Any]:
-        healing = 50  # You can adjust this value
         max_hp = calculate_total_hp(user.get("base_hp", 100), user.get("exp", 0))
+        healing = int(max_hp * 0.3)  # 30% of total HP
         old_hp = user.get("hp", 0)
         user["hp"] = min(old_hp + healing, max_hp)
         actual_healing = user["hp"] - old_hp
         return {
-            "message": f"You used a Health Potion and restored {actual_healing} HP.",
+            "message": f"You used a Health Potion and restored {actual_healing} HP (30% of your total HP).",
             "healing": actual_healing
         }
 
 class ManaPotion(Potion):
     DISPLAY_NAME = "Mana Potion"
-    DESCRIPTION = "Restores a portion of your mana."
+    DESCRIPTION = "Restores 30% of your total mana."
     INGREDIENTS = {"ectoplasm": 1, "food": 5}
     IMAGE_SOURCE = "mana_potion.png"
 
     @classmethod
     def effect(cls, user: Dict[str, Any]) -> Dict[str, Any]:
-        mana_restore = 30  # You can adjust this value
         max_mana = calculate_total_mana(user.get("base_mana", 100), user.get("exp", 0))
-        user["mana"] = min(user.get("mana", 0) + mana_restore, max_mana)
+        mana_restore = int(max_mana * 0.3)  # 30% of total mana
+        old_mana = user.get("mana", 0)
+        user["mana"] = min(old_mana + mana_restore, max_mana)
+        actual_mana_restored = user["mana"] - old_mana
         return {
-            "message": f"You used a Mana Potion and restored {mana_restore} Mana.",
-            "mana_restored": mana_restore
+            "message": f"You used a Mana Potion and restored {actual_mana_restored} Mana (30% of your total Mana).",
+            "mana_restored": actual_mana_restored
         }
 
 potion_types = {

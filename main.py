@@ -255,7 +255,7 @@ class CraftPotionHandler(BaseHandler):
         self.write(json.dumps({"success": success, "message": message}))
 
 class UsePotionHandler(BaseHandler):
-    def get(self):
+    def post(self):
         user = tornado.escape.xhtml_escape(self.current_user)
         league = self.get_current_league()
         potion_name = self.get_argument("potion")
@@ -276,7 +276,8 @@ class UsePotionHandler(BaseHandler):
                 "construction": visible_map_data,
                 "x_pos": x_pos,
                 "y_pos": y_pos,
-                "message": message
+                "message": message,
+                "success": success
             }
 
             self.write(json.dumps(map_data))

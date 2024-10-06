@@ -396,28 +396,38 @@ body {
     }
 #message-display {
     position: fixed;
-    left: 0;
-    right: 0;
-    color: #ffd700;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 80px; /* Position it below the navbar */
+    color: #ffffff;
     font-weight: bold;
     padding: 15px;
     background-color: rgba(0, 0, 0, 0.8);
     text-align: center;
     white-space: normal;
     overflow: hidden;
-    z-index: 2001;
+    z-index: 2002; /* Ensure it's above other elements */
     font-size: 18px;
-    max-width: none;
-    width: 100%;
+    max-width: 80%;
+    width: auto;
+    border-radius: 10px;
     box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
     transition: opacity 0.3s ease, visibility 0.3s ease;
-    opacity: 0;
-    visibility: hidden;
 }
 
-#message-display:not(:empty) {
-    opacity: 1;
-    visibility: visible;
+#message-display.alert-success {
+    background-color: rgba(76, 175, 80, 0.9);
+    color: #ffffff;
+}
+
+#message-display.alert-danger {
+    background-color: rgba(220, 53, 69, 0.9);
+    color: #ffffff;
+}
+
+#message-display:empty {
+    opacity: 0;
+    visibility: hidden;
 }
 
 
