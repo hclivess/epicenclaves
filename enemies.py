@@ -427,7 +427,7 @@ class Minotaur(Enemy):
     max_entities = 50
     max_entities_total = 1000
     herd_probability = 0.1
-    min_level = 35
+    min_level = 25
     max_level = 80
     experience_value = 100
     block_chance = 0.25
@@ -461,7 +461,7 @@ class Wraith(Enemy):
     max_entities = 120
     max_entities_total = 1000
     herd_probability = 0.3
-    min_level = 30
+    min_level = 25
     max_level = 70
     experience_value = 75
     phase_chance = 0.3
@@ -489,7 +489,7 @@ class Dragon(Enemy):
     max_entities = 50
     max_entities_total = 250
     herd_probability = 0
-    min_level = 60
+    min_level = 100
     max_level = 1000
     experience_value = 500
     block_chance = 0.3
@@ -526,7 +526,7 @@ class Lizarian(Enemy):
     max_entities = 75
     max_entities_total = 300
     herd_probability = 0.1
-    min_level = 55
+    min_level = 35
     max_level = 750
     experience_value = 300
     evasion_chance = 0.15
@@ -565,7 +565,7 @@ class Golem(Enemy):
     max_entities = 60
     max_entities_total = 250
     herd_probability = 0.05
-    min_level = 65
+    min_level = 45
     max_level = 400
     experience_value = 400
     block_chance = 0.4
@@ -615,8 +615,8 @@ class Zombie(Enemy):
     max_entities = 100
     max_entities_total = 400
     herd_probability = 0.4
-    min_level = 50
-    max_level = 120
+    min_level = 20
+    max_level = 240
     experience_value = 250
     block_chance = 0.1
     block_reduction = 0.3
@@ -657,7 +657,7 @@ class Basilisk(Enemy):
     max_entities = 80
     max_entities_total = 300
     herd_probability = 0.1
-    min_level = 40
+    min_level = 30
     max_level = 90
     experience_value = 150
     petrify_chance = 0.2
@@ -686,7 +686,7 @@ class Djinn(Enemy):
     max_entities = 60
     max_entities_total = 200
     herd_probability = 0.05
-    min_level = 50
+    min_level = 40
     max_level = 100
     experience_value = 200
     wish_chance = 0.25
