@@ -39,7 +39,9 @@ def craft_potion(user: str, usersdb: Dict[str, Any], mapdb: Dict[str, Any], poti
 
     # Deduct ingredients and add potion to inventory
     for ingredient, amount in potion_class.INGREDIENTS.items():
-        user_data[ingredient] = user_data.get(ingredient, 0) - amount
+        current_amount = user_data.get("ingredients", {}).get(ingredient, 0)
+        new_amount = max(current_amount - amount, 0)
+        user_data.setdefault("ingredients", {})[ingredient] = new_amount
 
     user_data[potion_name] = user_data.get(potion_name, 0) + 1
 
