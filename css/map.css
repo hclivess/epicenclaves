@@ -406,7 +406,7 @@ body {
     text-align: center;
     white-space: normal;
     overflow: hidden;
-    z-index: 2002; /* Ensure it's above other elements */
+    z-index: 1050; /* Ensure it's above other elements */
     font-size: 18px;
     max-width: 80%;
     width: auto;
