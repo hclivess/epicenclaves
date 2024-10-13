@@ -1336,13 +1336,13 @@ async def main():
 
     ssl_options = {"certfile": certfile, "keyfile": keyfile} if os.path.exists(certfile) else None
 
-    app_redirect = tornado.web.Application([(r"/(.*)", RedirectToHTTPSHandler)])
+    #app_redirect = tornado.web.Application([(r"/(.*)", RedirectToHTTPSHandler)])
 
     app = make_app()
     app.settings["cookie_secret"] = auth_cookie_get()
 
     app.listen(443, ssl_options=ssl_options)
-    app_redirect.listen(80)
+    #app_redirect.listen(80)
 
     auth_check_users_db()
     webbrowser.open(f"http://127.0.0.1:443")
