@@ -16,7 +16,7 @@ def id_generator(length=10):
 
 def generate_weapon(min_level=1, max_level=20, weapon_type=None):
     print(f"Generating weapon: min_level={min_level}, max_level={max_level}")
-    level = calculate_level(min_level, max_level)
+    level = calculate_level(min_level, max_level, bias=1)
     weapon_classes = [cls for cls in weapons.__dict__.values() if
                       isinstance(cls, type) and issubclass(cls, weapons.Weapon) and cls != weapons.Weapon]
 
